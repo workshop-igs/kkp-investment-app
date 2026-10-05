@@ -140,18 +140,21 @@ const LandingPage = () => {
           <div className="relative lg:col-span-6">
             <div className="overflow-hidden rounded-2xl ring-1 ring-white/20 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.65)]">
               <img
-                src="/beranda/peta-ntb.webp"
-                alt="Peta Spasial menampilkan zona pola ruang laut dan izin KKPRL di Nusa Tenggara Barat"
+                src="/beranda/pelabuhan-tambakrejo.webp"
+                alt="Perahu nelayan berlabuh di Pelabuhan Perikanan Tambakrejo, Blitar"
                 width="1200"
-                height="882"
+                height="900"
                 className="block h-auto w-full"
               />
             </div>
+            <p className="mt-3 text-right text-xs text-white/50">
+              Pelabuhan Perikanan Tambakrejo, Blitar. Foto: DKP Provinsi Jawa Timur
+            </p>
             <KartuMelayang
-              ikon={Layers}
+              ikon={FileCheck2}
               warna="bg-kkp-100 text-kkp-700"
-              judul="Pola ruang laut dan KKPRL"
-              isi="Nusa Tenggara Barat"
+              judul={`${angka(ringkas?.kkprl_aktif)} izin KKPRL berlaku`}
+              isi="Di seluruh perairan Indonesia"
               className="-left-6 top-8"
             />
             <KartuMelayang
@@ -159,7 +162,7 @@ const LandingPage = () => {
               warna="bg-emerald-50 text-emerald-600"
               judul="Kesesuaian ruang"
               isi="Diperiksa terhadap RTRW Provinsi"
-              className="-bottom-7 right-6"
+              className="bottom-12 right-6"
             />
           </div>
         </div>
@@ -254,14 +257,15 @@ const LandingPage = () => {
           <div className="lg:col-span-7">
             <div className="overflow-hidden rounded-2xl ring-1 ring-slate-900/10 shadow-[0_30px_70px_-30px_rgba(0,34,66,0.45)]">
               <img
-                src="/beranda/peta-spasial.webp"
-                alt="Tampilan Peta Spasial dengan legenda pola ruang laut dan pin izin KKPRL"
+                src="/beranda/pelabuhan-tambakrejo-udara.webp"
+                alt="Foto udara Pelabuhan Perikanan Tambakrejo, Blitar, dengan pemecah gelombang dan kolam pelabuhan"
                 width="1400"
-                height="805"
+                height="933"
                 loading="lazy"
                 className="block h-auto w-full"
               />
             </div>
+            <p className="mt-3 text-xs text-slate-500">Foto udara Pelabuhan Perikanan Tambakrejo, Blitar. Foto: DKP Provinsi Jawa Timur</p>
           </div>
         </div>
       </section>
