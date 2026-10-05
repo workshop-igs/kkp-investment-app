@@ -115,10 +115,11 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
             gayaTitik={LAYER_LOKAL[id].titik}
             ikon={LAYER_LOKAL[id].ikon}
             warnaIkon={LAYER_LOKAL[id].warnaIkon}
+            zoomPin={LAYER_LOKAL[id].zoomPin}
             onStatus={(st) => catatStatus(id, st)}
             onEachFeature={(feature, layer) => {
               const p = feature?.properties || {};
-              layer.bindPopup(LAYER_LOKAL[id].popup(p));
+              layer.bindPopup(() => LAYER_LOKAL[id].popup(p));
               const judul = p.nama || p.pemohon;
               if (judul) layer.bindTooltip(judul, { sticky: true, className: 'map-tooltip' });
             }}

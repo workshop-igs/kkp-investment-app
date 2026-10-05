@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import { MapContainer, TileLayer, GeoJSON, ScaleControl, useMap } from 'react-leaflet';
 import { useSearchParams } from 'react-router-dom';
@@ -51,6 +51,8 @@ const PROFIL_PETA_DASAR = { topo: 'terang', street: 'terang', satellite: 'gelap'
 const PANE_HALO = 'batas-halo';
 
 const PANE_PROVINSI = 'batas-provinsi';
+
+const ZOOM_BATAS_DETAIL = 9;
 
 const LEBAR_HALO = 2;
 const TEBAL_BATAS = { diam: 1.8, aktif: 3.2 };
@@ -111,6 +113,17 @@ const PaneBatas = ({ onSiap }) => {
   return null;
 };
 
+const PemantauZoom = ({ ambang, onUbah }) => {
+  const map = useMap();
+  useEffect(() => {
+    const cek = () => onUbah(map.getZoom() >= ambang);
+    cek();
+    map.on('zoomend', cek);
+    return () => map.off('zoomend', cek);
+  }, [map, ambang, onUbah]);
+  return null;
+};
+
 const MouseTracker = ({ onMouseMove }) => {
   const map = useMap();
   useEffect(() => {
@@ -137,7 +150,10 @@ const PetaInteraktif = ({
   const [vertexCount, setVertexCount] = useState(0);
   const [hasPolygon, setHasPolygon] = useState(false);
   
-  const [provinsiGeo, setProvinsiGeo] = useState(null);
+  const [provinsiRingkas, setProvinsiRingkas] = useState(null);
+  const [provinsiDetail, setProvinsiDetail] = useState(null);
+  const [zoomDekat, setZoomDekat] = useState(false);
+  const provinsiGeo = zoomDekat && provinsiDetail ? provinsiDetail : provinsiRingkas;
   const [provinsiTerpilih, setProvinsiTerpilih] = useState(null);
   const [error, setError] = useState(null);
   const [layerVisibility, setLayerVisibility] = useState({});
@@ -249,11 +265,28 @@ const PetaInteraktif = ({
 
   useEffect(() => {
     let batal = false;
-    api.get('/inti/provinsi/peta/')
-      .then(({ data }) => { if (!batal) setProvinsiGeo(data); })
+    api.get('/inti/provinsi/peta/', { params: { ringkas: 1 } })
+      .then(({ data }) => { if (!batal) setProvinsiRingkas(data); })
       .catch(err => console.error('Gagal memuat batas provinsi', err));
     return () => { batal = true; };
   }, []);
+
+  const perluDetail = zoomDekat && !provinsiDetail;
+  useEffect(() => {
+    if (!perluDetail) return undefined;
+    let batal = false;
+    api.get('/inti/provinsi/peta/')
+      .then(({ data }) => { if (!batal) setProvinsiDetail(data); })
+      .catch(err => console.error('Gagal memuat batas provinsi', err));
+    return () => { batal = true; };
+  }, [perluDetail]);
+
+  const kodeTerpilih = provinsiTerpilih?.properties?.kode_bps;
+  const haloGeo = useMemo(() => {
+    const fitur = kodeTerpilih && provinsiGeo?.features.find((f) => f.properties?.kode_bps === kodeTerpilih);
+    return fitur ? { type: 'FeatureCollection', features: [fitur] } : null;
+  }, [provinsiGeo, kodeTerpilih]);
+  const versiBatas = provinsiGeo === provinsiDetail ? 'detail' : 'ringkas';
 
   useEffect(() => {
     if (!mapLayers.length) return;
@@ -336,10 +369,11 @@ const PetaInteraktif = ({
                 gayaTitik={LAYER_LOKAL[id].titik}
                 ikon={LAYER_LOKAL[id].ikon}
                 warnaIkon={LAYER_LOKAL[id].warnaIkon}
+                zoomPin={LAYER_LOKAL[id].zoomPin}
                 onStatus={(st) => catatStatus(id, st)}
                 onEachFeature={(feature, layer) => {
                   const p = feature?.properties || {};
-                  layer.bindPopup(LAYER_LOKAL[id].popup(p));
+                  layer.bindPopup(() => LAYER_LOKAL[id].popup(p));
                   const judul = p.nama || p.pemohon;
                   if (judul) layer.bindTooltip(judul, { sticky: true, className: 'map-tooltip' });
                   layer.on('popupopen', (e) => {
@@ -355,11 +389,13 @@ const PetaInteraktif = ({
               />
             ))}
 
-          {provinsiGeo && kanvasBatas && (
+          <PemantauZoom ambang={ZOOM_BATAS_DETAIL} onUbah={setZoomDekat} />
+
+          {haloGeo && kanvasBatas && (
             <GeoJSON
-              key={`layer-provinsi-halo-${basemap}`}
+              key={`layer-provinsi-halo-${basemap}-${kodeTerpilih}-${versiBatas}`}
               ref={refHaloProvinsi}
-              data={provinsiGeo}
+              data={haloGeo}
               pane={PANE_HALO}
               renderer={kanvasBatas.halo}
               interactive={false}
@@ -368,7 +404,7 @@ const PetaInteraktif = ({
           )}
           {provinsiGeo && kanvasBatas && (
             <GeoJSON
-              key="layer-provinsi"
+              key={`layer-provinsi-${versiBatas}`}
               ref={refProvinsi}
               data={provinsiGeo}
               pane={PANE_PROVINSI}

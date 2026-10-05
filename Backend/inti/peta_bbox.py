@@ -162,7 +162,7 @@ class PetaBBoxMixin:
 
         qs = qs.annotate(geojson_teks=AsGeoJSON(ekspresi, precision=6))
 
-        kolom = ['geojson_teks', *self.PETA_KOLOM]
+        kolom = ['id', 'geojson_teks', *self.PETA_KOLOM]
         if self.SERTAKAN_TITIK:
             kolom.append('titik_wakil')
 
@@ -191,6 +191,7 @@ class PetaBBoxMixin:
             fitur.append(
                 {
                     'type': 'Feature',
+                    'id': baris['id'],
                     'geometry': geometri,
                     'properties': properti,
                 }
