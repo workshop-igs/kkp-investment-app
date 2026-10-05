@@ -172,7 +172,7 @@ const OverlayMemuat = () => {
         )}
         <div className="relative mx-auto h-20 w-20">
           <div
-            className={`absolute inset-0 rounded-full ${tampil ? 'animate-spin [animation-duration:1.1s] motion-reduce:animate-none' : ''}`}
+            className={`absolute inset-0 rounded-full ${tampil ? 'animate-spin [animation-duration:1.1s]' : ''}`}
             style={{
               background: 'conic-gradient(from 0deg, rgba(64,191,219,0) 0 30%, #40BFDB 65%, #0056A5 100%)',
               WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px))',
@@ -188,7 +188,7 @@ const OverlayMemuat = () => {
         <div className="mt-5 h-1 overflow-hidden rounded-full bg-kkp-100">
           <div
             className={`h-full w-2/5 rounded-full bg-gradient-to-r from-kkp-700 to-kkp-toska ${
-              tampil ? 'animate-[geser-muat_1.3s_ease-in-out_infinite] motion-reduce:animate-none' : ''
+              tampil ? 'animate-[geser-muat_1.3s_ease-in-out_infinite]' : ''
             }`}
           />
         </div>
