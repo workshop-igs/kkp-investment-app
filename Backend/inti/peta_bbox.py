@@ -68,6 +68,9 @@ class PetaBBoxMixin:
     ]
     BATAS_FITUR = 1500
 
+    LEBAR_JAUH = 12.0
+    BATAS_JAUH = 300
+
     SERTAKAN_TITIK = False
 
     throttle_scope = 'peta'
@@ -145,6 +148,8 @@ class PetaBBoxMixin:
         kotak.srid = 4326
         qs = qs.filter(geometry__intersects=kotak)
         toleransi, batas = self._skala(abs(maxx - minx))
+        if self.BATAS_JAUH and abs(maxx - minx) >= self.LEBAR_JAUH:
+            batas = min(batas, self.BATAS_JAUH)
 
         if provinsi:
             batas = self.BATAS_FITUR
