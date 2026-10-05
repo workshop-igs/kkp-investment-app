@@ -143,7 +143,7 @@ const PetaInteraktif = ({
   mapLayers = [],
   fokus,
 }) => {
-  const [basemap, setBasemap] = useState('topo');
+  const [basemap, setBasemap] = useState('satellite');
   
   const drawerRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -200,7 +200,7 @@ const PetaInteraktif = ({
   const refProvinsi = useRef(null);
   const refHaloProvinsi = useRef(null);
   const refTerpilih = useRef(null);
-  const refProfil = useRef(profilBatas('topo'));
+  const refProfil = useRef(profilBatas('satellite'));
 
   const profil = profilBatas(basemap);
   refTerpilih.current = provinsiTerpilih;
