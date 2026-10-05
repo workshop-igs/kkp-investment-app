@@ -11,6 +11,7 @@ import {
 import { KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI, garisKelasKelayakan } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { buatIkon } from './ikonPeta';
+import { api } from '../../api/klien';
 
 const ISTILAH = {
   KKPRL_AR: 'Kesesuaian Ruang Laut — Wilayah',
@@ -118,6 +119,57 @@ const LegendaJSON = ({ data }) => (
     ))}
   </div>
 );
+
+let janjiOseanografi = null;
+const ambilOseanografi = () => {
+  janjiOseanografi ||= api.get('/analitik/oseanografi/').then(({ data }) => data).catch((e) => {
+    janjiOseanografi = null;
+    throw e;
+  });
+  return janjiOseanografi;
+};
+
+const angkaLegenda = (v) => Number(v).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+
+const LegendaGradasi = ({ kode, keterangan }) => {
+  const [info, setInfo] = useState(undefined);
+  useEffect(() => {
+    let batal = false;
+    ambilOseanografi()
+      .then((d) => { if (!batal) setInfo(d.parameter[kode] || null); })
+      .catch(() => { if (!batal) setInfo(null); });
+    return () => { batal = true; };
+  }, [kode]);
+
+  if (info === undefined) {
+    return (
+      <p className="flex items-center gap-2 text-[12px] text-slate-400">
+        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Memuat legenda…
+      </p>
+    );
+  }
+  if (info === null) return <p className="text-[12px] text-slate-500">Data lapisan ini belum tersedia di server.</p>;
+
+  const posisi = info.skala.map(([v]) => (info.log ? Math.log10(v) : v));
+  const awal = posisi[0];
+  const rentang = posisi[posisi.length - 1] - awal;
+  const gradien = info.skala.map(([, w], i) => `${w} ${(((posisi[i] - awal) / rentang) * 100).toFixed(1)}%`).join(', ');
+  const tengah = info.log ? 10 ** (awal + rentang / 2) : info.skala[0][0] + rentang / 2;
+  return (
+    <div className="space-y-2">
+      <div className="h-2.5 rounded-sm border border-black/10" style={{ background: `linear-gradient(to right, ${gradien})` }} />
+      <div className="flex justify-between text-[11px] text-slate-600 tabular-nums">
+        <span>{angkaLegenda(info.skala[0][0])}</span>
+        <span>{angkaLegenda(tengah)}</span>
+        <span>{angkaLegenda(info.skala[info.skala.length - 1][0])} {info.satuan}</span>
+      </div>
+      <p className="text-[11px] text-slate-500 leading-snug pt-2 border-t border-slate-100">
+        {keterangan}
+        {info.periode && ` Periode data: ${info.periode}.`}
+      </p>
+    </div>
+  );
+};
 
 const LegendaJenis = ({ keterangan }) => (
   <div className="space-y-2">
@@ -374,6 +426,8 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
                 <LegendaKelayakan />
               ) : daftarLokal[id].legenda === 'rtrl' ? (
                 <LegendaUnsurRtrl />
+              ) : daftarLokal[id].legenda === 'gradasi' ? (
+                <LegendaGradasi kode={daftarLokal[id].citra} keterangan={daftarLokal[id].keteranganLegenda} />
               ) : (
                 <div className="flex items-start gap-2">
                   <span
@@ -417,7 +471,11 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
             {aktifLokal.length > 0 && aktif.length > 0
               ? 'Simbol lapisan lokal disusun sendiri; sisanya dari GeoServer Portal Satu Data KKP.'
               : aktifLokal.length > 0
-                ? 'Data Portal Satu Data KKP, disimpan dan disimbolkan di server sendiri.'
+                ? `Data ${
+                  aktifLokal.every((id) => daftarLokal[id].citra)
+                    ? 'NOAA (lewat ERDDAP)'
+                    : aktifLokal.some((id) => daftarLokal[id].citra) ? 'Portal Satu Data KKP dan NOAA' : 'Portal Satu Data KKP'
+                }, disimpan dan disimbolkan di server sendiri.`
                 : 'Simbol bersumber dari GeoServer Portal Satu Data KKP.'}
           </p>
         </div>

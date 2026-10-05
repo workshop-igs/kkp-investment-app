@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
-import { MapContainer, TileLayer, GeoJSON, ScaleControl, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, ImageOverlay, ScaleControl, useMap } from 'react-leaflet';
 import { useSearchParams } from 'react-router-dom';
 import { Crosshair } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
@@ -12,7 +12,7 @@ import PanelDetailProvinsi from './PanelDetailProvinsi';
 import LegendaPeta from './LegendaPeta';
 import LapisanVektorBBox from './LapisanVektorBBox';
 import TurPeta from './TurPeta';
-import { LAYER_LOKAL, LAYER_WMS, WMS_KKP } from './katalogLapisan';
+import { BATAS_OSEANOGRAFI, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
 
 import { api } from '../../api/klien';
 
@@ -355,7 +355,20 @@ const PetaInteraktif = ({
           <KunciLapisanSaatMenggambar menggambar={isDrawing} />
 
           {activeDataLayers
-            .filter((id) => LAYER_LOKAL[id])
+            .filter((id) => LAYER_LOKAL[id]?.citra)
+            .map((id) => (
+              <ImageOverlay
+                key={`citra-${id}`}
+                url={urlCitraOseanografi(LAYER_LOKAL[id].citra)}
+                bounds={BATAS_OSEANOGRAFI}
+                pane="tilePane"
+                zIndex={2}
+                opacity={0.8}
+              />
+            ))}
+
+          {activeDataLayers
+            .filter((id) => LAYER_LOKAL[id]?.url)
             .map((id) => (
               <LapisanVektorBBox
                 key={`lokal-${id}`}

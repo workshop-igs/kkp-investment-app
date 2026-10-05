@@ -7,6 +7,7 @@ from django.utils import timezone
 
 from analitik.models import KetentuanRuang, SkorKelayakanZona
 from analitik.services.konstanta import LABEL_SUMBER_ZONASI, PRIORITAS_SUMBER_ZONASI
+from analitik.services.oseanografi import statistik as statistik_oseanografi
 from inti.models import KabupatenKota, SektorInvestasi
 from inventarisasi.models import RegulasiTataRuang, ZonasiRuangLaut
 from penarikan_data.models import ProduksiPerikananBPS
@@ -188,6 +189,37 @@ def _luas_jenis(provinsi):
     }
 
 
+PARAMETER_OSEANOGRAFI_LOKASI = ('KEDALAMAN', 'SUHU', 'GELOMBANG', 'KLOROFIL')
+PARAMETER_OSEANOGRAFI_PROVINSI = ('SUHU', 'ANOMALI_SUHU', 'KLOROFIL', 'GELOMBANG')
+JARAK_PERAIRAN_DERAJAT = 0.2
+PENYEDERHANAAN_PANTAI_DERAJAT = 0.02
+
+
+def _oseanografi(geom, parameter):
+    hasil = {}
+    for kode, s in statistik_oseanografi(geom, parameter).items():
+        if s.get('rata2') is None:
+            continue
+        arah = -1 if kode == 'KEDALAMAN' else 1
+        hasil[kode] = {
+            'rata2': round(arah * s['rata2'], 2),
+            'min': round(min(arah * s['min'], arah * s['max']), 2),
+            'max': round(max(arah * s['min'], arah * s['max']), 2),
+            'satuan': s['satuan'],
+            'periode': s['periode'],
+            'sumber': s['sumber'],
+        }
+    return hasil
+
+
+def _oseanografi_provinsi(provinsi):
+    geom = provinsi.geometry_tampilan or provinsi.geometry
+    if not geom:
+        return {}
+    perairan = geom.simplify(PENYEDERHANAAN_PANTAI_DERAJAT).buffer(JARAK_PERAIRAN_DERAJAT)
+    return _oseanografi(perairan, PARAMETER_OSEANOGRAFI_PROVINSI)
+
+
 def _rinci_jenis(c, provinsi, sektor, tol, luas):
     from ketenagakerjaan.proyeksi import _matriks
 
@@ -210,6 +242,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         )
         x, y = c.fetchone()
         unggul, batas = _catatan_lokasi(s)
+        zona_geom = ZonasiRuangLaut.objects.only('geometry').get(pk=s['zona_id']).geometry
         lokasi.append({
             'nama': s['zona__nama_zona'],
             'sub_zona_label': LABEL_SUB_ZONA.get(s['zona__sub_zona'], s['zona__sub_zona']),
@@ -221,6 +254,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
             'keunggulan': unggul,
             'pembatas': batas,
             'titik': [round(x, 5), round(y, 5)],
+            'oseanografi': {k: v['rata2'] for k, v in _oseanografi(zona_geom, PARAMETER_OSEANOGRAFI_LOKASI).items()},
         })
 
     kelas_zona = dict(skor.order_by('-zona__luas_ha').values_list('zona_id', 'kelas')[:BATAS_ZONA_PETA_SEKTOR])
@@ -352,6 +386,7 @@ def profil_provinsi(provinsi, sektor=None):
         'wilayah': wilayah,
         'jenis_dipilih': sektor and {'kode': sektor.kode, 'nama': sektor.nama},
         'zona': zona,
+        'oseanografi': _oseanografi_provinsi(provinsi),
         'komoditas': komoditas,
         'jenis_lain': [{'kode': s.kode, 'nama': s.nama, **luas[s.kode]} for s in jenis_lain],
         'bab': [{'kode': b['kode'], 'nama': b['nama'], 'sektor': b['sektor'],

@@ -66,6 +66,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
         from django.core.cache import cache
         from django.db.models import Max
 
+        from analitik.models import RasterOseanografi
         from analitik.services.profil_investasi import profil_provinsi
         from inventarisasi.models import RegulasiTataRuang
         from penarikan_data.models import ProduksiPerikananBPS
@@ -81,6 +82,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
             for t in (
                 ProduksiPerikananBPS.objects.aggregate(t=Max('diperbarui_pada'))['t'],
                 RegulasiTataRuang.objects.aggregate(t=Max('ditarik_pada'))['t'],
+                RasterOseanografi.objects.aggregate(t=Max('ditarik_pada'))['t'],
             )
         )
         kunci = f'profil-provinsi:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi}'
