@@ -100,6 +100,7 @@ class KKPRLViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         (0.5, 0.0, 2500),
     ]
     BATAS_FITUR = 2500
+    BATAS_JAUH = None
 
     queryset = KKPRL.objects.select_related('provinsi', 'sektor').all()
     serializer_class = KKPRLSerializer
