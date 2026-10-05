@@ -322,8 +322,9 @@ export const LAYER_LOKAL = {
     keteranganLegenda:
       'Izin kesesuaian kegiatan pemanfaatan ruang laut yang telah terbit, diwarnai menurut jenis investasi. '
       + 'Jenis investasi ditetapkan dari teks kegiatan pada izin. '
-      + 'Ditandai penanda saat peta masih jauh — luas rata-ratanya hanya 50 ha '
-      + 'sehingga bentuk aslinya baru tergambar setelah diperbesar.',
+      + 'Ditandai titik saat peta masih jauh dan penanda ikon mulai tingkat provinsi — '
+      + 'luas rata-ratanya hanya 50 ha sehingga bentuk aslinya baru tergambar setelah diperbesar.',
+    zoomPin: 8,
     pilihan: {
       param: 'sektor',
       label: 'Tampilkan jenis investasi',
