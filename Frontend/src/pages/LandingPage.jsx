@@ -1,395 +1,345 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  Anchor, Briefcase, Check, CheckCircle2, Construction, Database, Factory, FileCheck2, FileText, Fish,
+  FlaskConical, Gem, Layers, Map, MapPinned, Palmtree, Shell, ShieldCheck, Sprout, Zap,
+} from 'lucide-react';
 import { api } from '../api/klien';
+import { useAuth } from '../context/KonteksAuth';
 import { warnaJenisInvestasi } from '../utils/simbologiPeta';
 import { formatNumber } from '../utils/pemformat';
-import { SECTORS } from '../utils/konstanta';
 
-const BATAS = { barat: 94, timur: 142, utara: 7, selatan: -12 };
-const LEBAR = 1200;
-const SKALA = LEBAR / (BATAS.timur - BATAS.barat);
-const merc = (lat) => (Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) * 180) / Math.PI;
-const TINGGI = (merc(BATAS.utara) - merc(BATAS.selatan)) * SKALA;
-const keX = (lon) => (lon - BATAS.barat) * SKALA;
-const keY = (lat) => (merc(BATAS.utara) - merc(lat)) * SKALA;
-const TEPI = 46;
-const PITA = 5;
-const TINTA = '#002242';
+const IKON_JENIS = {
+  PERIKANAN_TANGKAP: Fish,
+  PERIKANAN_BUDIDAYA: Shell,
+  PENGOLAHAN_HASIL_LAUT: Factory,
+  PARIWISATA_BAHARI: Palmtree,
+  JASA_MARITIM: Anchor,
+  INFRASTRUKTUR_LAUT: Construction,
+  ENERGI_KELAUTAN: Zap,
+  GARAM: Gem,
+  BIOTEKNOLOGI_KELAUTAN: FlaskConical,
+  KONSERVASI_PESISIR: Sprout,
+};
 
-const GARIS_BUJUR = [95, 100, 105, 110, 115, 120, 125, 130, 135, 140];
-const GARIS_LINTANG = [5, 0, -5, -10];
-const labelLintang = (lat) => (lat === 0 ? '0°' : `${Math.abs(lat)}°${lat > 0 ? 'LU' : 'LS'}`);
+const KEMAMPUAN = ['Cek kesesuaian ruang', 'Hitung NPV dan IRR', 'Pantau pipeline proyek'];
 
-const NAMA_LAUT = [
-  [100.6, -8.7, 'Samudra Hindia'],
-  [110.6, -5.0, 'Laut Jawa'],
-  [121.4, -7.4, 'Laut Flores'],
-  [127.6, -6.2, 'Laut Banda'],
-  [135.8, -10.4, 'Laut Arafura'],
-  [121.2, 3.9, 'Laut Sulawesi'],
-  [134.5, 3.0, 'Samudra Pasifik'],
-  [108.6, 6.1, 'Laut Natuna Utara'],
-  [101.4, 4.2, 'Selat Malaka', -42],
-];
-
-const NAMA_JENIS = { ...Object.fromEntries(SECTORS.map((s) => [s.id, s.label])), LAINNYA: 'Kegiatan lain' };
-
-const ALUR = [
-  ['Tentukan area', 'Gambar poligon di Peta Spasial, atau unggah Shapefile (.zip), GeoJSON, atau KML.'],
-  ['Periksa kesesuaian ruang', 'Area dicocokkan dengan RTRW Provinsi, Rencana Zonasi KAW, atau RTRWN, serta dengan KKPRL yang sudah terbit.'],
-  ['Hitung kelayakan', 'NPV, IRR, ROI, dan risiko lokasi untuk jenis investasi yang dipilih.'],
-  ['Simpan dan laporkan', 'Simpan sebagai proyek di pipeline, lalu unduh laporan analisisnya dalam PDF.'],
-];
-
-const SUMBER = [
-  ['Portal Satu Data KKP', 'KKPRL yang sudah terbit, pola ruang laut, kawasan konservasi, dan sebaran mangrove.'],
-  ['JDIH BPK', 'Peraturan daerah RTRW dan rencana zonasi yang menjadi dasar hukum tiap zona.'],
-  ['Sidako KKP', 'Terumbu karang, padang lamun, dan wilayah kelola masyarakat hukum adat.'],
-  ['BNPB InaRISK', 'Indeks bahaya dan risiko tsunami, banjir, serta gelombang ekstrem dan abrasi.'],
-  ['BPS', 'Produksi dan nilai perikanan per komoditas, serta data ketenagakerjaan.'],
-  ['NOAA ERDDAP', 'Kedalaman laut, suhu permukaan laut, klorofil-a, dan tinggi gelombang.'],
-];
+const SUMBER = ['Portal Satu Data KKP', 'RTRW Provinsi', 'Sidako KKP', 'BNPB InaRISK', 'BPS', 'NOAA'];
 
 const angka = (n) => (n === undefined || n === null ? '—' : formatNumber(n, 0));
 
-const jalurDarat = (fc) => {
-  const bagian = [];
-  const cincin = (koordinat) => {
-    const titik = [];
-    let akhir = null;
-    koordinat.forEach(([lon, lat]) => {
-      const x = keX(lon);
-      const y = keY(lat);
-      if (akhir && Math.abs(x - akhir[0]) < 0.5 && Math.abs(y - akhir[1]) < 0.5) return;
-      akhir = [x, y];
-      titik.push(`${x.toFixed(1)} ${y.toFixed(1)}`);
-    });
-    if (titik.length >= 3) bagian.push(`M${titik.join('L')}Z`);
-  };
-  (fc?.features || []).forEach(({ geometry: g }) => {
-    const poligon = g?.type === 'Polygon' ? [g.coordinates] : g?.type === 'MultiPolygon' ? g.coordinates : [];
-    poligon.forEach((p) => p.forEach(cincin));
-  });
-  return bagian.join('');
-};
+const GarisKontur = ({ className }) => (
+  <svg viewBox="0 0 800 800" fill="none" stroke="currentColor" strokeWidth="1.2" className={className} aria-hidden="true">
+    {[380, 330, 280, 232, 186, 142, 100, 62].map((r, i) => (
+      <ellipse key={r} cx="400" cy="400" rx={r} ry={r * (0.78 + (i % 3) * 0.05)} transform={`rotate(${-18 + i * 7} 400 400)`} />
+    ))}
+  </svg>
+);
 
-const PitaKkp = ({ className = 'h-1.5' }) => (
-  <div className={`flex ${className}`} aria-hidden="true">
+const PitaKkp = () => (
+  <div className="flex h-1.5" aria-hidden="true">
     <span className="w-[20%] bg-kkp-hijau" />
     <span className="w-[38%] bg-kkp-toska" />
     <span className="flex-1 bg-[#1B6A8A]" />
   </div>
 );
 
-const BingkaiKoordinat = () => (
-  <g>
-    {Array.from({ length: BATAS.timur - BATAS.barat }, (_, i) => {
-      const lon = BATAS.barat + i;
-      const isi = i % 2 ? '#ffffff' : TINTA;
-      return [-PITA, TINGGI].map((y) => (
-        <rect key={`${lon}-${y}`} x={keX(lon)} y={y} width={SKALA} height={PITA} fill={isi} />
-      ));
-    })}
-    {Array.from({ length: BATAS.utara - BATAS.selatan }, (_, i) => {
-      const lat = BATAS.selatan + i;
-      const isi = i % 2 ? '#ffffff' : TINTA;
-      return [-PITA, LEBAR].map((x) => (
-        <rect key={`${lat}-${x}`} x={x} y={keY(lat + 1)} width={PITA} height={keY(lat) - keY(lat + 1)} fill={isi} />
-      ));
-    })}
-    <rect x={-PITA} y={-PITA} width={LEBAR + 2 * PITA} height={TINGGI + 2 * PITA} fill="none" stroke={TINTA} strokeWidth="0.9" />
-    <rect x="0" y="0" width={LEBAR} height={TINGGI} fill="none" stroke={TINTA} strokeWidth="0.6" />
-    <g className="max-sm:hidden" fill={TINTA} fontSize="10.5" fontWeight="500" style={{ fontVariantNumeric: 'tabular-nums' }}>
-      {GARIS_BUJUR.map((lon) => (
-        <g key={lon} textAnchor="middle">
-          <text x={keX(lon)} y={-PITA - 6}>{lon}°BT</text>
-          <text x={keX(lon)} y={TINGGI + PITA + 15}>{lon}°BT</text>
-        </g>
-      ))}
-      {GARIS_LINTANG.map((lat) => (
-        <g key={lat} dominantBaseline="middle">
-          <text x={-PITA - 5} y={keY(lat)} textAnchor="end">{labelLintang(lat)}</text>
-          <text x={LEBAR + PITA + 5} y={keY(lat)}>{labelLintang(lat)}</text>
-        </g>
-      ))}
-    </g>
-  </g>
+const Poin = ({ children }) => (
+  <li className="flex items-start gap-3 text-[15px] leading-relaxed text-slate-700">
+    <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-kkp-100 text-kkp-700">
+      <Check className="h-3.5 w-3.5" strokeWidth={3} />
+    </span>
+    {children}
+  </li>
 );
 
-const SkalaDanArah = () => {
-  const per250 = (250 / (111.32 * Math.cos((5 * Math.PI) / 180))) * SKALA;
-  const x0 = keX(95.6);
-  const y0 = keY(-11.1);
-  const xu = keX(140.6);
-  const yu = keY(5.4);
-  return (
-    <g className="max-sm:hidden" fill={TINTA} fontSize="10" fontWeight="500">
-      <rect x={x0} y={y0} width={per250} height="4" fill={TINTA} />
-      <rect x={x0 + per250} y={y0} width={per250} height="4" fill="#ffffff" stroke={TINTA} strokeWidth="0.8" />
-      <rect x={x0} y={y0} width={per250 * 2} height="4" fill="none" stroke={TINTA} strokeWidth="0.8" />
-      <text x={x0} y={y0 - 5} textAnchor="middle">0</text>
-      <text x={x0 + per250} y={y0 - 5} textAnchor="middle">250</text>
-      <text x={x0 + per250 * 2} y={y0 - 5} textAnchor="middle">500 km</text>
-      <path d={`M${xu} ${yu - 16} L${xu + 6} ${yu + 4} L${xu} ${yu} L${xu - 6} ${yu + 4} Z`} fill={TINTA} />
-      <text x={xu} y={yu + 16} textAnchor="middle" fontWeight="700">U</text>
-    </g>
-  );
-};
+const TombolUtama = ({ to, children }) => (
+  <Link
+    to={to}
+    className="inline-flex items-center rounded-full bg-kkp-700 px-6 py-3 text-sm font-bold text-white transition-colors hover:bg-kkp-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-700"
+  >
+    {children}
+  </Link>
+);
 
-const LembarPeta = ({ darat, titik, sorot, jumlah }) => {
-  const perJenis = useMemo(() => {
-    const kelompok = {};
-    titik.forEach(([lon, lat, kode]) => {
-      if (lon < BATAS.barat || lon > BATAS.timur || lat < BATAS.selatan || lat > BATAS.utara) return;
-      (kelompok[kode] ||= []).push([keX(lon), keY(lat)]);
-    });
-    return Object.entries(kelompok);
-  }, [titik]);
-
-  return (
-    <svg
-      viewBox={`${-TEPI} ${-TEPI} ${LEBAR + 2 * TEPI} ${TINGGI + 2 * TEPI}`}
-      className="block h-auto w-full"
-      role="img"
-      aria-label={`Peta Indonesia dengan ${angka(jumlah)} titik izin KKPRL yang berlaku, diwarnai menurut jenis investasi`}
-    >
-      <rect x="0" y="0" width={LEBAR} height={TINGGI} fill="#DCE9F3" />
-      <g stroke="#0056A5" strokeOpacity="0.14" strokeWidth="0.6">
-        {GARIS_BUJUR.map((lon) => <line key={lon} x1={keX(lon)} x2={keX(lon)} y1="0" y2={TINGGI} />)}
-        {GARIS_LINTANG.map((lat) => <line key={lat} x1="0" x2={LEBAR} y1={keY(lat)} y2={keY(lat)} />)}
-      </g>
-      <path d={darat} fill="#ffffff" fillRule="evenodd" stroke="#9FB4C7" strokeWidth="0.5" strokeLinejoin="round" />
-      <g className="max-sm:hidden" fill="#3B6E9C" fontSize="11" fontStyle="italic" fontWeight="600" letterSpacing="2.4" textAnchor="middle">
-        {NAMA_LAUT.map(([lon, lat, nama, putar]) => (
-          <text key={nama} x={keX(lon)} y={keY(lat)} transform={putar ? `rotate(${putar} ${keX(lon)} ${keY(lat)})` : undefined}>
-            {nama.toUpperCase()}
-          </text>
-        ))}
-      </g>
-      {perJenis.map(([kode, daftar]) => (
-        <g
-          key={kode}
-          fill={warnaJenisInvestasi(kode)}
-          stroke="#ffffff"
-          strokeWidth="0.7"
-          opacity={sorot && sorot !== kode ? 0.12 : 1}
-          className="transition-opacity duration-200"
-        >
-          {daftar.map(([x, y], i) => (
-            <circle
-              key={i}
-              cx={x.toFixed(1)}
-              cy={y.toFixed(1)}
-              r="2.6"
-              className="motion-safe:animate-[muncul-titik_0.6s_ease-out_both]"
-              style={{ animationDelay: `${Math.round((x / LEBAR) * 1100)}ms` }}
-            />
-          ))}
-        </g>
-      ))}
-      <SkalaDanArah />
-      <BingkaiKoordinat />
-    </svg>
-  );
-};
+const KartuMelayang = ({ ikon: Ikon, warna, judul, isi, className }) => (
+  <div className={`absolute hidden items-center gap-3 rounded-xl bg-white px-4 py-3 text-left shadow-[0_18px_40px_-12px_rgba(0,20,45,0.45)] sm:flex ${className}`}>
+    <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${warna}`}>
+      <Ikon className="h-[18px] w-[18px]" />
+    </span>
+    <span>
+      <span className="block text-sm font-bold text-kkp-900">{judul}</span>
+      <span className="block text-xs text-slate-500">{isi}</span>
+    </span>
+  </div>
+);
 
 const LandingPage = () => {
+  const { isAuthenticated } = useAuth();
   const [ringkas, setRingkas] = useState(null);
-  const [darat, setDarat] = useState('');
-  const [sorot, setSorot] = useState(null);
 
   useEffect(() => {
     api.get('/inti/ringkasan-publik/').then(({ data }) => setRingkas(data)).catch(() => setRingkas({}));
-    api
-      .get('/inti/provinsi/peta/', { params: { ringkas: 1 } })
-      .then(({ data }) => setDarat(jalurDarat(data)))
-      .catch(() => setDarat(''));
   }, []);
 
-  const titik = useMemo(() => ringkas?.kkprl_titik || [], [ringkas]);
-  const legenda = useMemo(() => {
-    const izin = {};
-    titik.forEach(([, , kode]) => { izin[kode] = (izin[kode] || 0) + 1; });
-    const zona = Object.fromEntries((ringkas?.peluang_per_jenis || []).map((p) => [p.kode, p.zona]));
-    return [...new Set([...Object.keys(izin), ...Object.keys(zona)])]
-      .map((kode) => ({ kode, nama: NAMA_JENIS[kode] || kode, izin: izin[kode] || 0, zona: zona[kode] }))
-      .sort((a, b) => (a.kode === 'LAINNYA') - (b.kode === 'LAINNYA') || b.izin - a.izin || (b.zona || 0) - (a.zona || 0));
-  }, [titik, ringkas]);
+  const peluang = ringkas?.peluang_per_jenis || [];
+  const maksPeluang = Math.max(1, ...peluang.map((p) => p.zona));
 
-  const tanpaGeometri = ringkas?.kkprl_aktif !== undefined ? ringkas.kkprl_aktif - titik.length : 0;
+  const statistik = [
+    { ikon: Briefcase, nilai: angka(ringkas?.proyek), label: 'Proyek investasi terpantau', catatan: 'Dari LOI sampai operasional' },
+    {
+      ikon: FileCheck2,
+      nilai: angka(ringkas?.kkprl_aktif),
+      label: 'Izin KKPRL berlaku',
+      catatan: ringkas?.kkprl_luas_ha !== undefined ? `${angka(ringkas.kkprl_luas_ha)} ha ruang laut` : 'Ruang laut yang sudah berizin',
+    },
+    { ikon: MapPinned, nilai: angka(ringkas?.zona_peluang_tinggi), label: 'Zona laut berpeluang tinggi', catatan: 'Untuk minimal satu jenis investasi' },
+    { ikon: Layers, nilai: ringkas ? angka(peluang.length) : '—', label: 'Jenis investasi dinilai', catatan: 'Skor kelayakan untuk setiap zona' },
+  ];
 
   return (
-    <div className="h-full overflow-y-auto bg-[#EEF3F7] pt-[72px] text-kkp-900">
-      <section className="px-4 pt-10 sm:px-6 lg:px-8 lg:pt-14">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-12 lg:items-end">
-          <div className="lg:col-span-8">
-            <h1 className="max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-[-0.02em] sm:text-5xl lg:text-[3.6rem]">
-              Ruang laut Indonesia, dinilai untuk investasi.
+    <div className="h-full overflow-y-auto bg-white pt-[72px] text-slate-800">
+      <section className="relative overflow-hidden bg-[linear-gradient(135deg,#001a33_0%,#002242_38%,#004584_76%,#0056a5_100%)] text-white">
+        <GarisKontur className="pointer-events-none absolute -right-48 -top-56 h-[880px] w-[880px] text-white/[0.07]" />
+        <GarisKontur className="pointer-events-none absolute -bottom-72 -left-64 h-[640px] w-[640px] text-white/[0.05]" />
+        <div className="pointer-events-none absolute right-[12%] top-[28%] h-80 w-80 rounded-full bg-kkp-toska/25 blur-3xl" aria-hidden="true" />
+
+        <div className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-40 pt-14 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:px-8 lg:pb-44 lg:pt-20">
+          <div className="lg:col-span-6">
+            <h1 className="text-4xl font-extrabold leading-[1.06] tracking-[-0.02em] sm:text-5xl xl:text-[3.5rem]">
+              Platform Manajemen Investasi Ruang Laut
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-relaxed text-slate-600">
-              Platform kerja KKP untuk memeriksa apakah sebuah lokasi sesuai dengan rencana tata ruang laut,
-              apakah sudah dipegang KKPRL lain, dan apakah layak secara finansial.
+            <p className="mt-6 max-w-xl text-lg leading-relaxed text-white/75">
+              Alat kerja KKP untuk menilai kelayakan ruang laut bagi investasi: kesesuaian lokasi dengan rencana
+              tata ruang laut, tumpang tindih dengan KKPRL yang sudah terbit, dan kelayakan finansialnya.
             </p>
-          </div>
-          <div className="lg:col-span-4">
-            <div className="flex flex-wrap gap-3">
+            <div className="mt-9 flex flex-wrap gap-3">
               <Link
                 to="/peta"
-                className="inline-flex items-center rounded-md bg-kkp-700 px-5 py-3 text-sm font-bold text-white transition-colors hover:bg-kkp-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-700"
+                className="inline-flex items-center rounded-full bg-white px-6 py-3.5 text-sm font-bold text-kkp-800 shadow-lg shadow-black/20 transition-colors hover:bg-kkp-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Buka Peta Spasial
               </Link>
               <Link
                 to="/profil-investasi"
-                className="inline-flex items-center rounded-md border border-kkp-900/20 bg-white px-5 py-3 text-sm font-bold text-kkp-900 transition-colors hover:border-kkp-700 hover:text-kkp-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-700"
+                className="inline-flex items-center rounded-full border border-white/35 px-6 py-3.5 text-sm font-bold text-white transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
-                Unduh profil investasi provinsi
+                Profil Investasi
               </Link>
             </div>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-slate-500">
-              Peta dan profil investasi dapat dibuka tanpa masuk. Analisis area dan pipeline proyek
-              memerlukan akun KKP.
-            </p>
+            <ul className="mt-10 flex flex-wrap gap-x-7 gap-y-3 text-sm text-white/80">
+              {KEMAMPUAN.map((k) => (
+                <li key={k} className="flex items-center gap-2">
+                  <CheckCircle2 className="h-4 w-4 text-kkp-toska" />
+                  {k}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="relative lg:col-span-6">
+            <div className="overflow-hidden rounded-2xl ring-1 ring-white/20 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.65)]">
+              <img
+                src="/beranda/hero-peta.webp"
+                alt="Peta Spasial menampilkan zona pola ruang laut dan izin KKPRL di Nusa Tenggara Barat"
+                width="1200"
+                height="882"
+                className="block h-auto w-full"
+              />
+            </div>
+            <KartuMelayang
+              ikon={Layers}
+              warna="bg-kkp-100 text-kkp-700"
+              judul="Pola ruang laut dan KKPRL"
+              isi="Nusa Tenggara Barat"
+              className="-left-6 top-8"
+            />
+            <KartuMelayang
+              ikon={ShieldCheck}
+              warna="bg-emerald-50 text-emerald-600"
+              judul="Kesesuaian ruang"
+              isi="Diperiksa terhadap RTRW Provinsi"
+              className="-bottom-7 right-6"
+            />
           </div>
         </div>
       </section>
 
-      <section className="px-4 pt-10 sm:px-6 lg:px-8">
-        <figure className="mx-auto max-w-7xl overflow-hidden rounded bg-white shadow-[0_1px_2px_rgba(0,34,66,0.06),0_18px_40px_-24px_rgba(0,34,66,0.35)] ring-1 ring-kkp-900/10">
-          <PitaKkp className="h-1" />
-          <figcaption className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 px-5 pt-5 sm:px-8">
-            <span>
-              <span className="block text-lg font-bold">Izin KKPRL yang berlaku</span>
-              <span className="block text-sm text-slate-500">Satu titik untuk satu izin, diwarnai menurut jenis investasinya.</span>
-            </span>
-            <Link to="/peta" className="text-sm font-semibold text-kkp-700 underline-offset-4 hover:underline">
-              Buka di Peta Spasial
-            </Link>
-          </figcaption>
-
-          <div className="px-2 pb-2 pt-3 sm:px-5">
-            <LembarPeta darat={darat} titik={titik} sorot={sorot} jumlah={titik.length} />
-          </div>
-
-          <div className="grid gap-8 border-t border-kkp-900/10 px-5 py-6 sm:px-8 lg:grid-cols-12">
-            <div className="lg:col-span-8">
-              <h2 className="text-sm font-bold">Jenis investasi</h2>
-              <p className="mt-0.5 text-sm text-slate-500">Arahkan untuk menyorot di peta, klik untuk membuka profil investasinya.</p>
-              <ul className="mt-4 grid gap-x-6 gap-y-1 sm:grid-cols-2 xl:grid-cols-3">
-                {legenda.map(({ kode, nama, izin, zona }) => {
-                  const isi = (
-                    <>
-                      <span
-                        className="mt-1 h-3 w-3 shrink-0 rounded-full ring-2 ring-white"
-                        style={{ backgroundColor: warnaJenisInvestasi(kode), boxShadow: `0 0 0 3px ${warnaJenisInvestasi(kode)}33` }}
-                      />
-                      <span className="min-w-0">
-                        <span className="block text-sm font-semibold leading-snug">{nama}</span>
-                        <span className="block text-xs leading-relaxed text-slate-500" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {angka(izin)} izin KKPRL
-                          {zona !== undefined && <><br />{angka(zona)} zona berpeluang tinggi</>}
-                        </span>
-                      </span>
-                    </>
-                  );
-                  const kelas = `flex items-start gap-3 rounded px-2 py-2 transition-colors ${sorot === kode ? 'bg-kkp-100' : ''}`;
-                  const sorotan = {
-                    onMouseEnter: () => setSorot(kode),
-                    onMouseLeave: () => setSorot(null),
-                    onFocus: () => setSorot(kode),
-                    onBlur: () => setSorot(null),
-                  };
-                  return (
-                    <li key={kode}>
-                      {kode === 'LAINNYA' ? (
-                        <span tabIndex={0} className={`${kelas} outline-none focus-visible:ring-2 focus-visible:ring-kkp-700`} {...sorotan}>{isi}</span>
-                      ) : (
-                        <Link
-                          to={`/profil-investasi?jenis=${kode}`}
-                          className={`${kelas} hover:bg-kkp-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-kkp-700`}
-                          {...sorotan}
-                        >
-                          {isi}
-                        </Link>
-                      )}
-                    </li>
-                  );
-                })}
-              </ul>
+      <section className="relative z-10 -mt-24 px-4 sm:px-6 lg:px-8">
+        <dl className="mx-auto grid max-w-7xl grid-cols-2 overflow-hidden rounded-2xl bg-white shadow-[0_24px_60px_-28px_rgba(0,34,66,0.4)] ring-1 ring-slate-900/5 lg:grid-cols-4">
+          {statistik.map(({ ikon: Ikon, nilai, label, catatan }, i) => (
+            <div
+              key={label}
+              className={`px-5 py-7 sm:px-8 ${i % 2 ? 'border-l border-slate-100' : ''} ${i >= 2 ? 'border-t border-slate-100 lg:border-t-0' : ''} ${i === 2 ? 'lg:border-l' : ''}`}
+            >
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-kkp-100 text-kkp-700">
+                <Ikon className="h-5 w-5" />
+              </span>
+              <dd className="mt-4 text-3xl font-extrabold tracking-tight text-kkp-900 tabular-nums">{nilai}</dd>
+              <dt className="mt-1 text-sm font-semibold text-slate-700">{label}</dt>
+              <dd className="mt-0.5 text-xs text-slate-500">{catatan}</dd>
             </div>
-
-            <div className="lg:col-span-4 lg:border-l lg:border-kkp-900/10 lg:pl-8">
-              <h2 className="text-sm font-bold">Keterangan</h2>
-              <dl className="mt-4 space-y-4 text-sm leading-relaxed text-slate-600" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                <div>
-                  <dt className="font-bold text-kkp-900">{angka(ringkas?.kkprl_aktif)} izin KKPRL berlaku</dt>
-                  <dd>
-                    Seluas {angka(ringkas?.kkprl_luas_ha)} ha.
-                    {tanpaGeometri > 0 && ` ${angka(tanpaGeometri)} izin belum bergeometri sehingga tidak tergambar.`}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-bold text-kkp-900">{angka(ringkas?.zona_peluang_tinggi)} zona laut berpeluang tinggi</dt>
-                  <dd>Untuk minimal satu jenis investasi, dari skor kesesuaian tata ruang, sumber daya, akses, sosial ekonomi, dan risiko.</dd>
-                </div>
-                <div>
-                  <dt className="font-bold text-kkp-900">{angka(ringkas?.proyek)} proyek investasi</dt>
-                  <dd>Dipantau di pipeline dari LOI sampai operasional.</dd>
-                </div>
-              </dl>
-              <p className="mt-5 text-xs leading-relaxed text-slate-400">Sumber: Portal Satu Data KKP. Proyeksi Mercator.</p>
-            </div>
-          </div>
-        </figure>
+          ))}
+        </dl>
       </section>
 
-      <section className="px-4 pt-16 sm:px-6 lg:px-8 lg:pt-20">
+      <section id="peluang" className="scroll-mt-24 px-4 pt-20 sm:px-6 lg:px-8 lg:pt-24">
         <div className="mx-auto max-w-7xl">
-          <div className="flex flex-wrap items-end justify-between gap-4">
-            <h2 className="max-w-xl text-3xl font-extrabold tracking-[-0.015em]">Dari satu area sampai laporan kelayakan</h2>
-            <Link to="/peta" className="text-sm font-semibold text-kkp-700 underline-offset-4 hover:underline">
-              Mulai di Peta Spasial
+          <div className="flex flex-wrap items-end justify-between gap-6">
+            <div className="max-w-2xl">
+              <h2 className="text-3xl font-extrabold tracking-[-0.015em] text-kkp-900 sm:text-4xl">
+                Zona berpeluang tinggi per jenis investasi
+              </h2>
+              <p className="mt-4 leading-relaxed text-slate-600">
+                Setiap zona laut diberi skor untuk tiap jenis investasi dari kesesuaian tata ruang, potensi sumber
+                daya, aksesibilitas, kondisi sosial ekonomi, dan risikonya. Pilih satu jenis untuk membuka profil
+                investasinya per provinsi.
+              </p>
+            </div>
+            <Link to="/peta?lapisan=potensi" className="text-sm font-bold text-kkp-700 underline-offset-4 hover:underline">
+              Lihat sebarannya di peta
             </Link>
           </div>
-          <ol className="mt-10 grid gap-8 md:grid-cols-4 md:gap-6">
-            {ALUR.map(([judul, isi], i) => (
-              <li key={judul} className="relative flex gap-4 md:block">
-                {i < ALUR.length - 1 && (
-                  <span
-                    aria-hidden="true"
-                    className="absolute -bottom-8 left-[15px] top-8 border-l border-dashed border-kkp-900/30 md:-right-6 md:bottom-auto md:left-8 md:top-[15px] md:border-l-0 md:border-t"
-                  />
-                )}
-                <span className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-[1.5px] border-kkp-900 bg-[#EEF3F7] text-sm font-bold">
-                  {i + 1}
-                </span>
-                <span className="block md:mt-5">
-                  <span className="block font-bold">{judul}</span>
-                  <span className="mt-1 block max-w-xs text-sm leading-relaxed text-slate-600">{isi}</span>
-                </span>
+
+          <div className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-5">
+            {peluang.map(({ kode, nama, zona }) => {
+              const Ikon = IKON_JENIS[kode] || Layers;
+              const warna = warnaJenisInvestasi(kode);
+              return (
+                <Link
+                  key={kode}
+                  to={`/profil-investasi?jenis=${kode}`}
+                  className="group flex flex-col rounded-2xl bg-white p-4 ring-1 sm:p-5 ring-slate-200 transition-shadow hover:shadow-[0_18px_40px_-20px_rgba(0,34,66,0.35)] hover:ring-slate-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-kkp-700"
+                >
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl" style={{ backgroundColor: `${warna}1a`, color: warna }}>
+                    <Ikon className="h-5 w-5" />
+                  </span>
+                  <span className="mt-4 min-h-[2.5rem] text-sm font-bold leading-snug text-kkp-900">{nama}</span>
+                  <span className="mt-3 text-2xl font-extrabold text-kkp-900 tabular-nums">{angka(zona)}</span>
+                  <span className="text-xs text-slate-500">zona berpeluang tinggi</span>
+                  <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-slate-100">
+                    <span className="block h-full rounded-full" style={{ width: `${(zona / maksPeluang) * 100}%`, backgroundColor: warna }} />
+                  </span>
+                  <span className="mt-4 text-xs font-bold text-kkp-700 group-hover:underline">Pilih provinsi</span>
+                </Link>
+              );
+            })}
+            {ringkas && peluang.length === 0 && <p className="text-sm text-slate-500">Skor zona belum dihitung.</p>}
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 pt-24 sm:px-6 lg:px-8 lg:pt-32">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="lg:col-span-5">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-kkp-700 text-white">
+              <Map className="h-5 w-5" />
+            </span>
+            <h2 className="mt-6 text-3xl font-extrabold tracking-[-0.015em] text-kkp-900 sm:text-4xl">
+              Seluruh data ruang laut dalam satu peta
+            </h2>
+            <p className="mt-5 leading-relaxed text-slate-600">
+              KKPRL yang sudah terbit tampil langsung per jenis investasi. Layer lain dapat dinyalakan sesuai
+              kebutuhan, dan setiap zona dapat diklik untuk melihat ketentuannya atau dijadikan area analisis.
+            </p>
+            <ul className="mt-6 space-y-3">
+              <Poin>Pola ruang laut dari RTRW Provinsi, Rencana Zonasi KAW, dan RTRWN</Poin>
+              <Poin>Infrastruktur pendukung, ekosistem, dan risiko bencana pesisir</Poin>
+              <Poin>Skor kelayakan zona untuk setiap jenis investasi</Poin>
+            </ul>
+            <div className="mt-8">
+              <TombolUtama to="/peta">Buka Peta Spasial</TombolUtama>
+            </div>
+          </div>
+          <div className="lg:col-span-7">
+            <div className="overflow-hidden rounded-2xl ring-1 ring-slate-900/10 shadow-[0_30px_70px_-30px_rgba(0,34,66,0.45)]">
+              <img
+                src="/beranda/fitur-peta.webp"
+                alt="Tampilan Peta Spasial dengan legenda pola ruang laut dan pin izin KKPRL"
+                width="1400"
+                height="805"
+                loading="lazy"
+                className="block h-auto w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 pt-24 sm:px-6 lg:px-8 lg:pt-32">
+        <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-12 lg:gap-16">
+          <div className="relative pb-10 pr-8 sm:pb-14 sm:pr-14 lg:col-span-7">
+            <img
+              src="/beranda/fitur-profil-zona.webp"
+              alt=""
+              width="1100"
+              height="618"
+              loading="lazy"
+              className="absolute bottom-0 right-0 w-[88%] rounded-xl ring-1 ring-slate-900/10 shadow-[0_24px_50px_-28px_rgba(0,34,66,0.45)]"
+            />
+            <img
+              src="/beranda/fitur-profil-sampul.webp"
+              alt="Sampul dan halaman zona dari PDF profil investasi Provinsi Nusa Tenggara Barat"
+              width="1100"
+              height="618"
+              loading="lazy"
+              className="relative w-[88%] rounded-xl ring-1 ring-slate-900/10 shadow-[0_30px_70px_-30px_rgba(0,34,66,0.55)]"
+            />
+          </div>
+          <div className="lg:col-span-5 lg:order-first">
+            <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-kkp-700 text-white">
+              <FileText className="h-5 w-5" />
+            </span>
+            <h2 className="mt-6 text-3xl font-extrabold tracking-[-0.015em] text-kkp-900 sm:text-4xl">
+              Profil investasi setiap provinsi
+            </h2>
+            <p className="mt-5 leading-relaxed text-slate-600">
+              Setiap provinsi punya profil investasi berisi ringkasan potensi, tata ruang dan perizinan,
+              komoditas unggulan, lokasi yang paling sesuai, serta kondisi sosial dan pasar kerjanya.
+            </p>
+            <ul className="mt-6 space-y-3">
+              <Poin>Profil lengkap provinsi untuk seluruh jenis investasi</Poin>
+              <Poin>Profil provinsi untuk satu jenis investasi tertentu</Poin>
+              <Poin>Disusun otomatis dari data publik dan siap diunduh dalam PDF</Poin>
+            </ul>
+            <div className="mt-8">
+              <TombolUtama to="/profil-investasi">Buka Profil Investasi</TombolUtama>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-4 pt-24 sm:px-6 lg:px-8 lg:pt-28">
+        <div className="mx-auto max-w-7xl border-y border-slate-200 py-10">
+          <p className="text-center text-sm font-semibold text-slate-500">Bersumber dari data resmi</p>
+          <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+            {SUMBER.map((s) => (
+              <li key={s} className="flex items-center gap-2 text-base font-bold text-slate-400">
+                <Database className="h-4 w-4" />
+                {s}
               </li>
             ))}
-          </ol>
+          </ul>
         </div>
       </section>
 
-      <section className="px-4 pb-20 pt-16 sm:px-6 lg:px-8 lg:pt-20">
-        <div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <h2 className="text-3xl font-extrabold tracking-[-0.015em]">Data yang dipakai</h2>
-            <p className="mt-3 max-w-sm text-sm leading-relaxed text-slate-600">
-              Lapisan peta ditarik dari sumber resmi lalu disimpan di basis data aplikasi, sehingga peta tetap
-              tampil meski situs sumbernya sedang tidak bisa dihubungi.
+      <section className="px-4 py-20 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-7xl overflow-hidden rounded-3xl bg-[linear-gradient(135deg,#002242_0%,#004584_60%,#0056a5_100%)] px-6 py-16 text-center text-white sm:px-10">
+          <GarisKontur className="pointer-events-none absolute -right-40 -top-64 h-[700px] w-[700px] text-white/[0.08]" />
+          <div className="relative mx-auto max-w-2xl">
+            <h2 className="text-3xl font-extrabold tracking-[-0.015em] sm:text-4xl">Mulai dari satu titik di peta.</h2>
+            <p className="mt-4 text-white/75">
+              Hasil kesesuaian ruang keluar dalam hitungan detik, lengkap dengan sumber aturannya.
             </p>
+            <div className="mt-8 flex justify-center">
+              <Link
+                to={isAuthenticated ? '/peta' : '/login'}
+                className="inline-flex items-center rounded-full bg-white px-6 py-3.5 text-sm font-bold text-kkp-800 shadow-lg shadow-black/20 transition-colors hover:bg-kkp-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+              >
+                {isAuthenticated ? 'Mulai Analisis Lokasi' : 'Masuk ke Aplikasi'}
+              </Link>
+            </div>
           </div>
-          <dl className="grid gap-x-10 sm:grid-cols-2 lg:col-span-8">
-            {SUMBER.map(([nama, isi]) => (
-              <div key={nama} className="border-t border-kkp-900/15 py-4">
-                <dt className="font-bold">{nama}</dt>
-                <dd className="mt-1 text-sm leading-relaxed text-slate-600">{isi}</dd>
-              </div>
-            ))}
-          </dl>
         </div>
       </section>
 
