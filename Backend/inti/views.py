@@ -496,11 +496,19 @@ def ringkasan_publik(request):
         return Response(tersimpan)
 
     kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'))
+    titik_kkprl = (
+        KKPRL.objects.filter(status='AKTIF')
+        .annotate(titik=PointOnSurface('geometry'))
+        .values_list('titik', 'sektor__kode')
+    )
     tinggi = skor_sesuai().filter(kelas='TINGGI')
     muatan = {
         'proyek': ProyekInvestasi.objects.count(),
         'kkprl_aktif': kkprl['jumlah'] or 0,
         'kkprl_luas_ha': round(float(kkprl['luas'] or 0)),
+        'kkprl_titik': [
+            [round(t.x, 3), round(t.y, 3), kode or 'LAINNYA'] for t, kode in titik_kkprl if t
+        ],
         'zona_peluang_tinggi': tinggi.values('zona_id').distinct().count(),
         'peluang_per_jenis': list(
             tinggi.values(kode=F('sektor__kode'), nama=F('sektor__nama'))
