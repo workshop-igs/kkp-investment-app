@@ -140,7 +140,7 @@ const LandingPage = () => {
           <div className="relative lg:col-span-6">
             <div className="overflow-hidden rounded-2xl ring-1 ring-white/20 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.65)]">
               <img
-                src="/beranda/hero-peta.webp"
+                src="/beranda/peta-ntb.webp"
                 alt="Peta Spasial menampilkan zona pola ruang laut dan izin KKPRL di Nusa Tenggara Barat"
                 width="1200"
                 height="882"
@@ -254,7 +254,7 @@ const LandingPage = () => {
           <div className="lg:col-span-7">
             <div className="overflow-hidden rounded-2xl ring-1 ring-slate-900/10 shadow-[0_30px_70px_-30px_rgba(0,34,66,0.45)]">
               <img
-                src="/beranda/fitur-peta.webp"
+                src="/beranda/peta-spasial.webp"
                 alt="Tampilan Peta Spasial dengan legenda pola ruang laut dan pin izin KKPRL"
                 width="1400"
                 height="805"
