@@ -4,6 +4,7 @@ import { formatRupiah, formatNumber, formatRibuan, hanyaDigit } from '../../util
 import { api, useSektorAktif } from '../../api/klien';
 import { useAuth } from '../../context/KonteksAuth';
 import KartuScreening from '../laporan/KartuScreening';
+import { mulaiMemuat } from '../OverlayMemuat';
 
 const InputAngka = ({ nilai, onUbah, className, ...sisa }) => {
   const ref = useRef(null);
@@ -93,12 +94,14 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
     sektorRef.current = kode;
     setScreening(null);
     setMemeriksa(true);
+    const selesai = mulaiMemuat('Memeriksa kesesuaian ruang');
     try {
       const { data } = await api.post('/analitik/screening/', { geometry, sektor: kode });
       if (data.sektor === sektorRef.current) setScreening(data);
     } catch (err) {
       alert(err.response?.data?.detail || 'Screening kesesuaian ruang gagal dijalankan.');
     } finally {
+      selesai();
       setMemeriksa(false);
     }
   };
