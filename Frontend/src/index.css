@@ -254,11 +254,6 @@ body {
   animation: fade-in 0.35s ease-out forwards;
 }
 
-@keyframes muncul-titik {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
 @keyframes geser-muat {
   from { transform: translateX(-100%); }
   to   { transform: translateX(250%); }
