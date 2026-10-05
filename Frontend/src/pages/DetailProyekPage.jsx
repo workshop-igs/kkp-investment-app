@@ -44,6 +44,7 @@ import {
 import { keLatLng } from '../utils/koordinat';
 import { angkaRingkas as nf, rupiahRingkas } from '../utils/pemformat';
 import { unduhPdfLaporan } from '../utils/pdfLaporan';
+import { mulaiMemuat } from '../components/OverlayMemuat';
 
 const PALET = ['#0056A5', '#3d81c0', '#7aa9d6', '#a9c6e5', '#cfdff0', '#8fa3b8'];
 
@@ -332,6 +333,7 @@ const DetailProyekPage = () => {
 
   const eksporPdf = async () => {
     setMembuatPdf(true);
+    const selesai = mulaiMemuat('Menyusun PDF laporan proyek');
     try {
       let dataBps = bps.data;
       if (!dataBps && kodeBps) {
@@ -356,6 +358,7 @@ const DetailProyekPage = () => {
     } catch (e) {
       alert(`Gagal menyusun PDF: ${e.message}`);
     } finally {
+      selesai();
       setMembuatPdf(false);
     }
   };
