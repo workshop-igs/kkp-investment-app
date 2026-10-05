@@ -12,15 +12,6 @@ SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-dev-only-change-in-
 DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-if DEBUG:
-    import socket
-
-    try:
-        _nama_mesin = socket.gethostname()
-        ALLOWED_HOSTS += [_nama_mesin, *socket.gethostbyname_ex(_nama_mesin)[2]]
-    except OSError:
-        pass
-
 try:
     site_packages = BASE_DIR / 'venv_django' / 'Lib' / 'site-packages'
     gdal_dll = glob.glob(str(site_packages / 'fiona.libs' / 'gdal*.dll'))[0]
