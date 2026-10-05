@@ -18,6 +18,7 @@ from analitik.services.konstanta import (
     SUMBER_LAMUN,
     SUMBER_MANGROVE_GMW,
 )
+from analitik.services.oseanografi import statistik as statistik_oseanografi
 from inti.models import KabupatenKota, Provinsi
 from inventarisasi.klasifikasi import jenis_unsur
 from inventarisasi.models import (
@@ -619,19 +620,29 @@ def _desimal(v, d=1) -> str:
 
 
 KETERANGAN_OSEANOGRAFI = {
+    'SUHU': lambda v: (
+        'perairan sangat hangat; perhatikan toleransi suhu biota budidaya' if v >= 30.5
+        else 'perairan hangat tropis' if v >= 27 else 'perairan relatif sejuk, kemungkinan ada upwelling'
+    ),
+    'ANOMALI_SUHU': lambda v: (
+        'lebih hangat dari biasanya; waspadai stres panas pada karang dan biota budidaya' if v >= 1
+        else 'sedikit lebih hangat dari biasanya' if v >= 0.5
+        else 'lebih dingin dari biasanya' if v <= -0.5 else 'mendekati kondisi rata-rata jangka panjang'
+    ),
     'KLOROFIL': lambda v: (
         'perairan subur (eutrofik)' if v >= 1 else 'kesuburan sedang (mesotrofik)' if v >= 0.2
         else 'perairan kurang subur (oligotrofik)'
     ),
     'GELOMBANG': lambda v: (
-        'gelombang tinggi' if v >= 2.5 else 'gelombang agak tinggi' if v >= 1.25
-        else 'gelombang sedang' if v >= 0.5 else 'perairan tenang'
+        'gelombang tinggi; bangunan dan sarana budidaya perlu dirancang tahan gelombang' if v >= 2.5
+        else 'gelombang agak tinggi' if v >= 1.25 else 'gelombang sedang' if v >= 0.5 else 'perairan tenang'
     ),
 }
 
 
 LABEL_OSEANOGRAFI = {
     'SUHU': 'Suhu permukaan laut',
+    'ANOMALI_SUHU': 'Anomali suhu permukaan laut',
     'KLOROFIL': 'Klorofil-a',
     'GELOMBANG': 'Tinggi gelombang signifikan',
 }
@@ -643,47 +654,8 @@ def _rentang(bawah, atas, d, satuan):
     return f'{_desimal(bawah, d)} - {_desimal(atas, d)} {satuan}'
 
 
-def _statistik_oseanografi(geom, parameter):
-    from django.db import connection
-
-    sql = """
-        SELECT o.parameter, o.satuan, o.periode, o.sumber, ST_NumBands(o.rast),
-               (ST_SummaryStats(c.r, 1, true)).count, (ST_SummaryStats(c.r, 1, true)).sum,
-               (ST_SummaryStats(c.r, 1, true)).min, (ST_SummaryStats(c.r, 1, true)).max,
-               (ST_SummaryStats(c.r, LEAST(2, ST_NumBands(o.rast)), true)).min,
-               (ST_SummaryStats(c.r, ST_NumBands(o.rast), true)).max,
-               ST_Value(o.rast, 1, t.titik), ST_Value(o.rast, LEAST(2, ST_NumBands(o.rast)), t.titik),
-               ST_Value(o.rast, ST_NumBands(o.rast), t.titik)
-        FROM analitik_raster_oseanografi o
-        CROSS JOIN (SELECT ST_GeomFromEWKT(%s) AS g, ST_PointOnSurface(ST_GeomFromEWKT(%s)) AS titik) t
-        CROSS JOIN LATERAL (SELECT ST_Clip(o.rast, t.g, true) AS r) c
-        WHERE o.cakupan && t.g AND o.parameter = ANY(%s)
-    """
-    hasil = {}
-    with connection.cursor() as c:
-        c.execute(sql, [geom.ewkt, geom.ewkt, list(parameter)])
-        for kode, satuan, periode, sumber, pita, n, jml, mn, mx, mn_waktu, mx_waktu, t1, t_mn, t_mx in c.fetchall():
-            h = hasil.setdefault(kode, {'satuan': satuan, 'periode': periode, 'sumber': sumber, 'pita': pita,
-                                        'n': 0, 'jumlah': 0.0, 'min': [], 'max': [], 'titik': None})
-            if n:
-                h['n'] += n
-                h['jumlah'] += jml
-                h['min'].append(mn if pita == 1 else mn_waktu)
-                h['max'].append(mx if pita == 1 else mx_waktu)
-            elif t1 is not None:
-                h['titik'] = (t1, t_mn, t_mx)
-    for h in hasil.values():
-        if h['n']:
-            h['rata2'], h['min'], h['max'] = h['jumlah'] / h['n'], min(h['min']), max(h['max'])
-        elif h['titik']:
-            h['rata2'], h['min'], h['max'] = h['titik'] if h['pita'] > 1 else (h['titik'][0],) * 3
-        else:
-            h['rata2'] = None
-    return hasil
-
-
 def _batimetri(geom):
-    k = _statistik_oseanografi(geom, ['KEDALAMAN']).get('KEDALAMAN') or {}
+    k = statistik_oseanografi(geom, ['KEDALAMAN']).get('KEDALAMAN') or {}
     if k.get('rata2') is None:
         return None
     terdekat = _provinsi_terdekat(geom, 1)
@@ -700,16 +672,17 @@ def _batimetri(geom):
 
 
 def bagian_oseanografi(geom) -> Dict[str, Any]:
-    stat = _statistik_oseanografi(geom, LABEL_OSEANOGRAFI)
+    stat = statistik_oseanografi(geom, LABEL_OSEANOGRAFI)
     baris = []
     for kode, label in LABEL_OSEANOGRAFI.items():
         s = stat.get(kode) or {}
         if s.get('rata2') is None:
             continue
-        d = 2 if kode == 'KLOROFIL' else 1
+        d = 2 if kode in ('KLOROFIL', 'ANOMALI_SUHU') else 1
         tafsir = KETERANGAN_OSEANOGRAFI.get(kode, lambda v: '')(s['rata2'])
         baris.append({'sel': [
-            label, f"{_desimal(s['rata2'], d)} {s['satuan']}", _rentang(s['min'], s['max'], d, s['satuan']),
+            label, f"{'+' if kode == 'ANOMALI_SUHU' and s['rata2'] > 0 else ''}{_desimal(s['rata2'], d)} {s['satuan']}",
+            _rentang(s['min'], s['max'], d, s['satuan']),
             '; '.join(filter(None, [tafsir, f"rentang antarwaktu, {s['periode']}" if s['periode'] else ''])),
         ], 'sumber': s['sumber']})
 
@@ -732,7 +705,7 @@ def bagian_oseanografi(geom) -> Dict[str, Any]:
             ringkas=ringkas,
             catatan_kosong=(
                 'Data oseanografi belum tersedia untuk area ini. Jalankan manage.py tarik_oseanografi '
-                'untuk menarik suhu permukaan, klorofil-a, dan gelombang dari NOAA.'
+                'untuk menarik suhu permukaan, anomali suhu, klorofil-a, dan gelombang dari NOAA.'
             ),
         ),
         'kolom': ['Parameter', 'Rata-rata', 'Rentang', 'Keterangan'],

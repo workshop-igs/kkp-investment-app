@@ -43,6 +43,16 @@ const KATEGORI = [
     ],
   },
   {
+    judul: 'Oseanografi',
+    layer: [
+      { id: 'osea_suhu', nama: 'Suhu Permukaan Laut', warna: '#f46d43' },
+      { id: 'osea_anomali', nama: 'Anomali Suhu Permukaan Laut', warna: '#b2182b' },
+      { id: 'osea_klorofil', nama: 'Klorofil-a', warna: '#21918c' },
+      { id: 'osea_gelombang', nama: 'Tinggi Gelombang Signifikan', warna: '#4575b4' },
+      { id: 'osea_kedalaman', nama: 'Kedalaman Laut', warna: '#0369a1' },
+    ],
+  },
+  {
     judul: 'Analisis Investasi',
     layer: [
       { id: 'skor_zona', nama: 'Skor Kelayakan per Zona', warna: '#eab308' },

@@ -9,11 +9,13 @@ import numpy as np
 from django.contrib.gis.gdal import GDALRaster
 from django.contrib.gis.geos import Polygon
 from django.core.management.base import BaseCommand
+from django.db import transaction
 
 from analitik.models import RasterOseanografi
 from analitik.services.konstanta import BULAN
 
 ERDDAP = 'https://upwell.pfeg.noaa.gov/erddap/griddap'
+COASTWATCH = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap'
 BATAS = (94.0, -11.0, 142.0, 7.0)
 KOSONG = -9999.0
 
@@ -35,9 +37,15 @@ PARAMETER = {
         'sumber': 'NOAA ETOPO1 (1 menit busur, rilis 2009) via ERDDAP',
     },
     'SUHU': {
-        'dataset': 'ncdcOisst21Agg_LonPM180', 'variabel': 'sst', 'satuan': '°C', 'waktu': '[last-360:15:last]',
-        'tambahan': '[(0.0)]', 'resolusi': 0.25,
-        'sumber': 'NOAA OISST v2.1 harian (0,25°), 25 sampel selama 12 bulan terakhir',
+        'server': COASTWATCH, 'dataset': 'NOAA_DHW_monthly', 'variabel': 'sea_surface_temperature', 'satuan': '°C',
+        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True,
+        'sumber': 'NOAA Coral Reef Watch bulanan (dataset yang ditayangkan Sidako KKP), 12 bulan terakhir, grid 0,1°',
+    },
+    'ANOMALI_SUHU': {
+        'server': COASTWATCH, 'dataset': 'NOAA_DHW_monthly', 'variabel': 'sea_surface_temperature_anomaly', 'satuan': '°C',
+        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True,
+        'sumber': 'NOAA Coral Reef Watch bulanan (dataset yang ditayangkan Sidako KKP), selisih dari rata-rata jangka panjang, '
+                  '12 bulan terakhir, grid 0,1°',
     },
     'KLOROFIL': {
         'dataset': 'erdMH1chlamday', 'variabel': 'chlorophyll', 'satuan': 'mg/m³', 'waktu': '[last-11:1:last]',
@@ -116,7 +124,8 @@ def _raster(sel, resolusi, pita, kosong_bila=None):
 
 
 class Command(BaseCommand):
-    help = 'Tarik kondisi oseanografi (kedalaman, suhu permukaan, klorofil-a, gelombang) dari NOAA ERDDAP ke raster lokal.'
+    help = ('Tarik kondisi oseanografi (kedalaman, suhu permukaan dan anomalinya, klorofil-a, gelombang) dari NOAA '
+            'ERDDAP ke raster lokal.')
 
     def add_arguments(self, parser):
         parser.add_argument('--parameter', choices=list(PARAMETER), action='append',
@@ -158,12 +167,16 @@ class Command(BaseCommand):
         langkah = p.get('langkah', 1)
         x0, y0, x1, y1 = BATAS
         teks = None
-        for lat in (f'[({y0}):{langkah}:({y1})]', f'[({y1}):{langkah}:({y0})]'):
-            url = f"{ERDDAP}/{p['dataset']}.csv?{p['variabel']}{waktu}{p.get('tambahan', '')}{lat}[({x0}):{langkah}:({x1})]"
+        urutan = [f'[({y0}):{langkah}:({y1})]', f'[({y1}):{langkah}:({y0})]']
+        for lat in reversed(urutan) if p.get('lintang_turun') else urutan:
+            url = (f"{p.get('server', ERDDAP)}/{p['dataset']}.csv?{p['variabel']}{waktu}{p.get('tambahan', '')}{lat}"
+                   f"[({x0}):{langkah}:({x1})]")
             teks = _unduh(url)
             if teks:
                 break
         sel, periode = _grid(teks, p['variabel'])
         rast, cakupan = _raster(sel, p['resolusi'] * langkah, [np.mean, np.min, np.max])
-        self._simpan(kode, p, rast, cakupan, periode)
+        with transaction.atomic():
+            RasterOseanografi.objects.filter(parameter=kode).delete()
+            self._simpan(kode, p, rast, cakupan, periode)
         return 1
