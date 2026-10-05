@@ -1,0 +1,255 @@
+import { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import { useMap } from 'react-leaflet';
+import L from 'leaflet';
+
+const POLYGON_COLORS = {
+  LAYAK:       { color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.20, weight: 2.5 },
+  PERINGATAN:  { color: '#f59e0b', fillColor: '#f59e0b', fillOpacity: 0.20, weight: 2.5 },
+  TIDAK_LAYAK: { color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.20, weight: 2.5 },
+  DEFAULT:     { color: '#2dd4bf', fillColor: '#2dd4bf', fillOpacity: 0.12, weight: 2, dashArray: '6,4' },
+};
+
+export const MapOverlayLayers = ({ layers, visibility }) => {
+  const map = useMap();
+  const layerRefs = useRef({});
+
+  useEffect(() => {
+    Object.values(layerRefs.current).forEach(l => { try { map.removeLayer(l) } catch (_) {} });
+    layerRefs.current = {};
+
+    if (!layers?.length) return;
+
+    layers.forEach(layer => {
+      if (!layer.features) return;
+      const fc = typeof layer.features === 'string' ? JSON.parse(layer.features) : layer.features;
+      if (!fc?.features?.length && fc?.type !== 'FeatureCollection') return;
+
+      const geoLayer = L.geoJSON(fc, {
+        style: (feature) => ({
+          color:       feature?.properties?.stroke  || layer.color,
+          fillColor:   feature?.properties?.fill    || layer.color,
+          fillOpacity: feature?.properties?.fillOpacity ?? layer.opacity ?? 0.35,
+          weight:      1.5,
+          opacity:     0.85,
+        }),
+        pointToLayer: (_feature, latlng) =>
+          L.circleMarker(latlng, {
+            radius:      8,
+            fillColor:   layer.color,
+            color:       '#ffffff',
+            weight:      2,
+            opacity:     1,
+            fillOpacity: 0.95,
+          }),
+        onEachFeature: (feature, featureLayer) => {
+          const p = feature?.properties || {};
+          const tip = p.tooltip || p.layer_label || layer.label;
+          if (tip) featureLayer.bindTooltip(tip, { sticky: true, className: 'map-tooltip' });
+          if (feature?.geometry?.type === 'Point' && p.point_label) {
+            featureLayer.bindTooltip(p.point_label, {
+              permanent: true, direction: 'top', className: 'elevation-label',
+            });
+          }
+        },
+      });
+
+      layerRefs.current[layer.id] = geoLayer;
+      if (visibility[layer.id] !== false) geoLayer.addTo(map);
+    });
+
+    return () => {
+      Object.values(layerRefs.current).forEach(l => { try { map.removeLayer(l) } catch (_) {} });
+      layerRefs.current = {};
+    };
+  }, [layers, map]);
+
+  useEffect(() => {
+    if (!layers?.length) return;
+    layers.forEach(layer => {
+      const gl = layerRefs.current[layer.id];
+      if (!gl) return;
+      if (visibility[layer.id] === false) {
+        if (map.hasLayer(gl)) map.removeLayer(gl);
+      } else {
+        if (!map.hasLayer(gl)) gl.addTo(map);
+      }
+    });
+  }, [visibility, layers, map]);
+
+  return null;
+};
+
+export const DrawingLayer = forwardRef(function DrawingLayer(
+  { onPolygonCompleted, onVertexCountChange },
+  ref
+) {
+  const map = useMap();
+  const isActiveRef        = useRef(false);
+  const verticesRef        = useRef([]);
+  const vtxMarkersRef      = useRef([]);
+  const previewLineRef     = useRef(null);
+  const closingLineRef     = useRef(null);
+  const guideLineRef       = useRef(null);
+  const completedPolyRef   = useRef(null);
+
+  const PANE_GAMBAR = 'alat-gambar';
+  if (!map.getPane(PANE_GAMBAR)) {
+    map.createPane(PANE_GAMBAR).style.zIndex = 450;
+  }
+  const opsiPane = { pane: PANE_GAMBAR };
+
+  const notify = (n) => onVertexCountChange(n);
+  const removeLayer = (r) => { if (r.current) { map.removeLayer(r.current); r.current = null; } };
+
+  const rebuildLines = () => {
+    const verts = verticesRef.current;
+    removeLayer(previewLineRef);
+    removeLayer(closingLineRef);
+    if (verts.length > 1)
+      previewLineRef.current = L.polyline(verts, { ...opsiPane, interactive: false, color: '#2dd4bf', weight: 2.5, dashArray: '8,4', opacity: 0.9 }).addTo(map);
+    if (verts.length >= 3)
+      closingLineRef.current = L.polyline([verts[verts.length - 1], verts[0]], { ...opsiPane, interactive: false, color: '#2dd4bf', weight: 1.5, dashArray: '4,4', opacity: 0.35 }).addTo(map);
+  };
+
+  const cleanupPreview = () => {
+    vtxMarkersRef.current.forEach(m => map.removeLayer(m));
+    vtxMarkersRef.current = [];
+    removeLayer(previewLineRef);
+    removeLayer(closingLineRef);
+    removeLayer(guideLineRef);
+    verticesRef.current = [];
+    notify(0);
+  };
+
+  const startDrawing = () => {
+    cleanupPreview();
+    if (completedPolyRef.current) { map.removeLayer(completedPolyRef.current); completedPolyRef.current = null; }
+    isActiveRef.current = true;
+    map.getContainer().style.cursor = 'crosshair';
+    map.doubleClickZoom.disable();
+  };
+
+  const finish = () => {
+    if (verticesRef.current.length < 3) return;
+    const verts = [...verticesRef.current];
+    cleanupPreview();
+    isActiveRef.current = false;
+    map.getContainer().style.cursor = '';
+    map.doubleClickZoom.enable();
+    if (completedPolyRef.current) map.removeLayer(completedPolyRef.current);
+    const poly = L.polygon(verts, { ...POLYGON_COLORS.DEFAULT }).addTo(map);
+    completedPolyRef.current = poly;
+    onPolygonCompleted(poly.toGeoJSON().geometry, poly);
+  };
+
+  const undo = () => {
+    if (verticesRef.current.length === 0) return;
+    verticesRef.current.pop();
+    const m = vtxMarkersRef.current.pop();
+    if (m) map.removeLayer(m);
+    if (vtxMarkersRef.current.length > 0) {
+      vtxMarkersRef.current[0].setStyle({ fillColor: verticesRef.current.length >= 3 ? '#2dd4bf' : '#ffffff' });
+    }
+    rebuildLines();
+    notify(verticesRef.current.length);
+  };
+
+  const cancel = () => {
+    cleanupPreview();
+    isActiveRef.current = false;
+    map.getContainer().style.cursor = '';
+    map.doubleClickZoom.enable();
+    onPolygonCompleted(null, null);
+  };
+
+  const removePolygon = () => {
+    if (completedPolyRef.current) { map.removeLayer(completedPolyRef.current); completedPolyRef.current = null; }
+  };
+
+  const updatePolygonColor = (feasibility) => {
+    if (!completedPolyRef.current) return;
+    completedPolyRef.current.setStyle(POLYGON_COLORS[feasibility] || POLYGON_COLORS.DEFAULT);
+  };
+
+  const loadGeometry = (geometry) => {
+    cleanupPreview();
+    isActiveRef.current = false;
+    map.getContainer().style.cursor = '';
+    map.doubleClickZoom.enable();
+    if (completedPolyRef.current) { map.removeLayer(completedPolyRef.current); completedPolyRef.current = null; }
+
+    const geoLayer = L.geoJSON(geometry, {
+      style: POLYGON_COLORS.DEFAULT
+    }).addTo(map);
+    
+    completedPolyRef.current = geoLayer;
+    map.fitBounds(geoLayer.getBounds(), { padding: [50, 50] });
+    
+    onPolygonCompleted(geometry, geoLayer);
+  };
+
+  const sorotPoligon = () => {
+    const poly = completedPolyRef.current;
+    if (!poly) return;
+    map.flyToBounds(poly.getBounds(), { padding: [60, 60], duration: 0.8 });
+  };
+
+  useImperativeHandle(ref, () => ({
+    startDrawing, finish, undo, cancel, removePolygon, updatePolygonColor,
+    loadGeometry, sorotPoligon,
+  }));
+
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (!isActiveRef.current) return;
+      const verts = verticesRef.current;
+      verts.push(e.latlng);
+      const isFirst = verts.length === 1;
+      const m = L.circleMarker(e.latlng, {
+        ...opsiPane,
+        radius: isFirst ? 7 : 5, color: '#ffffff',
+        fillColor: (isFirst && verts.length >= 3) ? '#2dd4bf' : '#ffffff',
+        fillOpacity: 1, weight: 2,
+      }).addTo(map);
+      if (isFirst) {
+        m.on('click', (ev) => { L.DomEvent.stop(ev); if (verticesRef.current.length >= 3) finish(); });
+      }
+      vtxMarkersRef.current.push(m);
+      if (verts.length === 3 && vtxMarkersRef.current[0])
+        vtxMarkersRef.current[0].setStyle({ fillColor: '#2dd4bf' });
+      rebuildLines();
+      notify(verts.length);
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isActiveRef.current || verticesRef.current.length === 0) return;
+      removeLayer(guideLineRef);
+      const last = verticesRef.current[verticesRef.current.length - 1];
+      guideLineRef.current = L.polyline([last, e.latlng], { ...opsiPane, interactive: false, color: '#2dd4bf', weight: 1.5, dashArray: '4,6', opacity: 0.5 }).addTo(map);
+    };
+
+    const handleDblClick = (e) => { L.DomEvent.stopPropagation(e); };
+
+    const handleKeyDown = (e) => {
+      if (!isActiveRef.current) return;
+      if (e.key === 'Enter')                              finish();
+      else if (e.key === 'Escape')                        cancel();
+      else if (e.key === 'Backspace' || e.key === 'Delete') undo();
+    };
+
+    map.on('click', handleClick);
+    map.on('mousemove', handleMouseMove);
+    map.on('dblclick', handleDblClick);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      map.off('click', handleClick);
+      map.off('mousemove', handleMouseMove);
+      map.off('dblclick', handleDblClick);
+      document.removeEventListener('keydown', handleKeyDown);
+      cleanupPreview();
+    };
+  }, [map]);
+
+  return null;
+});
