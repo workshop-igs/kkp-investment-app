@@ -10,7 +10,7 @@ from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 
 from .models import KabupatenKota, Provinsi, SektorInvestasi, SumberData
-from .peta_bbox import jawaban_peta
+from .peta_bbox import Simplify, jawaban_peta
 from .serializers import (
     KabupatenKotaSerializer,
     ProvinsiListSerializer,
@@ -22,6 +22,8 @@ from .serializers import (
 logger = logging.getLogger('inti')
 
 CACHE_PROVINSI_DETIK = 3600
+
+TOLERANSI_RINGKAS = 0.005
 
 
 class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
@@ -51,8 +53,12 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
         throttle_classes=[ScopedRateThrottle],
     )
     def peta(self, request):
+        ringkas = request.query_params.get('ringkas') == '1'
         return jawaban_peta(
-            request, 'provinsi:peta', self._bangun_peta, CACHE_PROVINSI_DETIK
+            request,
+            'provinsi:peta:ringkas' if ringkas else 'provinsi:peta',
+            lambda: self._bangun_peta(ringkas),
+            CACHE_PROVINSI_DETIK,
         )
 
     @action(detail=True, methods=['get'], url_path='profil-investasi', permission_classes=[permissions.AllowAny])
@@ -84,7 +90,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
             cache.set(kunci, profil, 6 * 3600)
         return Response(profil)
 
-    def _bangun_peta(self):
+    def _bangun_peta(self, ringkas=False):
         import json as _json
 
         from django.db.models import Count, Sum
@@ -145,10 +151,13 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
             elif r['kategori'] in TENAGA:
                 d['tenaga_listrik'] += r['jumlah']
 
+        geometri = Coalesce('geometry_tampilan', 'geometry')
+        if ringkas:
+            geometri = Simplify(geometri, TOLERANSI_RINGKAS, False)
         qs = (
             Provinsi.objects.exclude(geometry=None)
             .order_by('kode_bps')
-            .annotate(geo=AsGeoJSON(Coalesce('geometry_tampilan', 'geometry'), precision=6))
+            .annotate(geo=AsGeoJSON(geometri, precision=4 if ringkas else 6))
         )
 
         fitur = []
