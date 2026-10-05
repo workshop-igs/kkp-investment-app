@@ -5,6 +5,7 @@ import { formatRupiah, formatNumber } from '../utils/pemformat';
 import { SECTORS } from '../utils/konstanta';
 import { unduhPdfPipeline } from '../utils/pdfPipeline';
 import { api } from '../api/klien';
+import { mulaiMemuat } from '../components/OverlayMemuat';
 
 const STATUS_BADGES = {
   'LOI': { label: 'Letter of Intent', style: 'bg-blue-500/10 border-blue-500/30 text-blue-400' },
@@ -35,6 +36,7 @@ const PipelinePage = () => {
 
   const eksporLaporan = async () => {
     setMenyusunLaporan(true);
+    const selesai = mulaiMemuat('Menyusun laporan pipeline investasi');
     try {
       const { data } = await api.get('/inti/dashboard/');
       const bagian = [];
@@ -55,6 +57,7 @@ const PipelinePage = () => {
     } catch (err) {
       setNotification({ type: 'error', message: 'Gagal menyusun laporan pipeline.' });
     } finally {
+      selesai();
       setMenyusunLaporan(false);
     }
   };

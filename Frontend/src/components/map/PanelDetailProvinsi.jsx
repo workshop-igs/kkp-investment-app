@@ -7,6 +7,7 @@ import { useSektorAktif } from '../../api/klien';
 import { SECTORS } from '../../utils/konstanta';
 import { formatNumber, rupiahMiliar } from '../../utils/pemformat';
 import { unduhProfil } from '../../utils/pdfProfilInvestasi';
+import { mulaiMemuat } from '../OverlayMemuat';
 
 const Baris = ({ icon: Icon, label, nilai, satuan, warna = 'text-slate-900' }) => (
   <div className="flex items-center justify-between gap-3 py-2 border-b border-slate-100 last:border-0">
@@ -38,11 +39,13 @@ const useUnduhProfil = () => {
   const [mengunduh, setMengunduh] = useState(null);
   const unduh = async (kunci, susun) => {
     setMengunduh(kunci);
+    const selesai = mulaiMemuat('Menyusun PDF profil investasi');
     try {
       await susun();
     } catch (e) {
       alert(`Profil investasi gagal disusun: ${e.response?.data?.detail || e.message}`);
     } finally {
+      selesai();
       setMengunduh(null);
     }
   };

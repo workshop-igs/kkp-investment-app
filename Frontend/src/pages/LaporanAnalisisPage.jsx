@@ -44,6 +44,7 @@ import {
 import { angkaRingkas as nf, rupiahRingkas } from '../utils/pemformat';
 import { unduhPdfLaporan } from '../utils/pdfLaporan';
 import { SECTORS } from '../utils/konstanta';
+import { mulaiMemuat } from '../components/OverlayMemuat';
 
 const CATATAN_SCREENING =
   'Acuan berjenjang: RTRW Provinsi, lalu Rencana Zonasi KAW, lalu RTRWN. Ketentuan pemanfaatan per jenis investasi dikelola administrator.';
@@ -180,6 +181,7 @@ const LaporanAnalisisPage = () => {
 
   const eksporPdf = async () => {
     setMembuatPdf(true);
+    const selesai = mulaiMemuat('Menyusun PDF laporan analisis');
     try {
       let dataBps = bps.data;
       if (!dataBps && kodeBps) {
@@ -206,6 +208,7 @@ const LaporanAnalisisPage = () => {
     } catch (e) {
       alert(`Gagal menyusun PDF: ${e.message}`);
     } finally {
+      selesai();
       setMembuatPdf(false);
     }
   };

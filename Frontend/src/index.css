@@ -254,6 +254,11 @@ body {
   animation: fade-in 0.35s ease-out forwards;
 }
 
+@keyframes geser-muat {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(250%); }
+}
+
 .leaflet-container.mode-ukur {
   cursor: crosshair !important;
 }

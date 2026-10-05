@@ -3,6 +3,7 @@ import HeaderPeta from './components/layout/HeaderPeta';
 import { PenyediaAuth } from './context/KonteksAuth';
 import BatasGalat from './components/BatasGalat';
 import RuteTerlindung from './components/RuteTerlindung';
+import OverlayMemuat from './components/OverlayMemuat';
 
 import LandingPage from './pages/LandingPage';
 import AnalisisPage from './pages/AnalisisPage';
@@ -78,6 +79,7 @@ function App() {
     <Router>
       <PenyediaAuth>
         <AppLayout />
+        <OverlayMemuat />
       </PenyediaAuth>
     </Router>
   );

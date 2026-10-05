@@ -3,6 +3,7 @@ import { useState } from 'react';
 import PetaInteraktif from '../components/map/PetaInteraktif';
 import PanelAnalisis from '../components/layout/PanelAnalisis';
 import { jalankanAnalisisKelayakan } from '../api/klien';
+import { mulaiMemuat } from '../components/OverlayMemuat';
 
 const AnalisisPage = () => {
   const [result, setResult] = useState(null);
@@ -28,6 +29,7 @@ const AnalisisPage = () => {
   const handleAnalyze = async (sektor, financialParams) => {
     if (!geometry) return null;
     setLoading(true);
+    const selesai = mulaiMemuat('Menganalisis kelayakan lokasi');
     try {
       const data = await jalankanAnalisisKelayakan(geometry, sektor, financialParams);
       setResult(data);
@@ -38,6 +40,7 @@ const AnalisisPage = () => {
       alert(pesan || "Terjadi kesalahan saat memproses analisis.");
       return null;
     } finally {
+      selesai();
       setLoading(false);
     }
   };
