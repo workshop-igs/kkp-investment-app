@@ -5,13 +5,15 @@ from .views import (
     AnalisisKelayakanViewSet,
     BahayaBencanaView,
     LaporanSpasialView,
-    SebaranTenagaKerjaView,
     PetaRisikoViewSet,
     RunAnalysisView,
     ScreeningRuangView,
+    SebaranTenagaKerjaView,
     SkorZonaViewSet,
     StatistikBPSView,
     ZonaRisikoBencanaViewSet,
+    oseanografi_keterangan,
+    oseanografi_peta,
 )
 
 router = DefaultRouter()
@@ -27,5 +29,7 @@ urlpatterns = [
     path('sebaran-tenaga-kerja/', SebaranTenagaKerjaView.as_view(), name='sebaran-tenaga-kerja'),
     path('statistik-bps/', StatistikBPSView.as_view(), name='statistik-bps'),
     path('bahaya-bencana/', BahayaBencanaView.as_view(), name='bahaya-bencana'),
+    path('oseanografi/', oseanografi_keterangan, name='oseanografi'),
+    path('oseanografi/<str:kode>.png', oseanografi_peta, name='oseanografi-peta'),
     path('', include(router.urls)),
 ]

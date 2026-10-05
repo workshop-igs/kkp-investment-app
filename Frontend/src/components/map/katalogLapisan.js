@@ -3,6 +3,7 @@ import { warnaKelasRisiko } from '../../utils/simbologiPeta';
 import { garisKelasKelayakan, warnaKelasKelayakan } from '../../utils/simbologiPeta';
 import { KATEGORI_ZONA, URUTAN_KATEGORI, gayaKawasan, kategoriZona, warnaJenisInvestasi, warnaZona } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
+import { API_V1_URL } from '../../api/alamat';
 
 const catatanAdat = (sumberSosial) => {
   if (!sumberSosial || sumberSosial === 'NETRAL' || sumberSosial.includes('adat')) return '';
@@ -24,6 +25,28 @@ const aman = (nilai) =>
         .replace(/'/g, '&#39;');
 
 export const WMS_KKP = 'https://portaldata.kkp.go.id/gis/wms';
+
+export const BATAS_OSEANOGRAFI = [[-11, 94], [7, 142]];
+
+export const urlCitraOseanografi = (kode) => `${API_V1_URL}/analitik/oseanografi/${kode}.png`;
+
+const OSEANOGRAFI = [
+  ['osea_suhu', 'SUHU', 'Suhu Permukaan Laut',
+    'Rata-rata suhu permukaan laut 12 bulan terakhir dari NOAA Coral Reef Watch, dataset yang juga '
+      + 'ditayangkan Sidako KKP. Perairan yang terlalu hangat perlu diperhatikan untuk budidaya.'],
+  ['osea_anomali', 'ANOMALI_SUHU', 'Anomali Suhu Permukaan Laut',
+    'Selisih suhu permukaan laut terhadap rata-rata jangka panjangnya (NOAA Coral Reef Watch, juga '
+      + 'ditayangkan Sidako KKP), dirata-rata 12 bulan terakhir. Anomali positif yang tinggi menandai '
+      + 'stres panas bagi terumbu karang dan biota budidaya.'],
+  ['osea_klorofil', 'KLOROFIL', 'Klorofil-a',
+    'Klorofil-a dari satelit NASA MODIS-Aqua sebagai petunjuk kesuburan perairan; nilainya tinggi di '
+      + 'perairan dekat muara dan pesisir.'],
+  ['osea_gelombang', 'GELOMBANG', 'Tinggi Gelombang Signifikan',
+    'Rata-rata tinggi gelombang signifikan 12 bulan terakhir dari model NOAA WaveWatch III (resolusi '
+      + '0,5°), penentu desain bangunan laut dan sarana budidaya.'],
+  ['osea_kedalaman', 'KEDALAMAN', 'Kedalaman Laut',
+    'Kedalaman laut dari batimetri NOAA ETOPO1 (resolusi 1 menit busur).'],
+];
 
 export const LAYER_WMS = {};
 
@@ -80,6 +103,9 @@ const LAPISAN_INFRASTRUKTUR = Object.fromEntries(
 );
 
 export const LAYER_LOKAL = {
+  ...Object.fromEntries(
+    OSEANOGRAFI.map(([id, citra, label, keteranganLegenda]) => [id, { citra, label, legenda: 'gradasi', keteranganLegenda }])
+  ),
   ...Object.fromEntries(
     [
       ['risiko_tsunami', 'TSUNAMI', 'Risiko Tsunami', 'RISIKO', ''],

@@ -357,6 +357,7 @@ class RasterOseanografi(models.Model):
     PARAMETER_CHOICES = [
         ('KEDALAMAN', 'Kedalaman laut'),
         ('SUHU', 'Suhu permukaan laut'),
+        ('ANOMALI_SUHU', 'Anomali suhu permukaan laut'),
         ('KLOROFIL', 'Klorofil-a'),
         ('GELOMBANG', 'Tinggi gelombang signifikan'),
     ]

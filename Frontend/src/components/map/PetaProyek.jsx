@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
-import { MapContainer, Polygon, ScaleControl, TileLayer, useMap } from 'react-leaflet';
+import { ImageOverlay, MapContainer, Polygon, ScaleControl, TileLayer, useMap } from 'react-leaflet';
 import { Crosshair } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import KontrolPeta from './KontrolPeta';
 import LapisanVektorBBox from './LapisanVektorBBox';
 import LegendaPeta from './LegendaPeta';
-import { LAYER_LOKAL, LAYER_WMS, WMS_KKP } from './katalogLapisan';
+import { BATAS_OSEANOGRAFI, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
 
 const PenyesuaiUkuran = () => {
   const map = useMap();
@@ -102,7 +102,20 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
       <TileLayer url={basemapUrl[basemap]} maxZoom={19} maxNativeZoom={18} />
 
       {lapisanAktif
-        .filter((id) => LAYER_LOKAL[id])
+        .filter((id) => LAYER_LOKAL[id]?.citra)
+        .map((id) => (
+          <ImageOverlay
+            key={`citra-${id}`}
+            url={urlCitraOseanografi(LAYER_LOKAL[id].citra)}
+            bounds={BATAS_OSEANOGRAFI}
+            pane="tilePane"
+            zIndex={2}
+            opacity={0.8}
+          />
+        ))}
+
+      {lapisanAktif
+        .filter((id) => LAYER_LOKAL[id]?.url)
         .map((id) => (
           <LapisanVektorBBox
             key={`lokal-${id}`}

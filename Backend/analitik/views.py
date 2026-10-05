@@ -6,6 +6,7 @@ from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import cache
 from django.db import transaction
 from django.db.models import F
+from django.http import Http404, HttpResponse, JsonResponse
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
@@ -30,6 +31,7 @@ from .models import (
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
+from .services.oseanografi import PALET, gambar_peta, keterangan_peta
 from .services.screening_ruang import screening_ruang
 from .services.skor_spasial import ambil_skor_spasial
 
@@ -551,3 +553,16 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
             'wilayah_adat': r['_adat'],
             'sumber_sosial': r['_sumber_sosial'],
         }
+
+
+def oseanografi_keterangan(request):
+    return JsonResponse(keterangan_peta())
+
+
+def oseanografi_peta(request, kode):
+    isi = gambar_peta(kode) if kode in PALET else None
+    if isi is None:
+        raise Http404('Lapisan oseanografi tidak tersedia.')
+    resp = HttpResponse(isi, content_type='image/png')
+    resp['Cache-Control'] = 'public, max-age=3600'
+    return resp

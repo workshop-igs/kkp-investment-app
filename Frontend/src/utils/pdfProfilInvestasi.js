@@ -3,7 +3,7 @@ import { flushSync } from 'react-dom';
 import { createRoot } from 'react-dom/client';
 import { jsPDF } from 'jspdf';
 import {
-  BarChart3, Briefcase, Fish, Landmark, Layers, Lightbulb, ListChecks, MapPin, ScanSearch, TrendingUp, Users, Wallet,
+  BarChart3, Briefcase, Fish, Landmark, Layers, Lightbulb, ListChecks, MapPin, ScanSearch, TrendingUp, Users, Wallet, Waves,
 } from 'lucide-react';
 import { api } from '../api/klien';
 import { bersih, logoPdf, pasangFontPdf, siapkanAsetPdf } from './pdfLaporan';
@@ -45,6 +45,7 @@ const SAMPUL = { x: 166, y: 16, w: 117, h: 122, lebar: 1130, tinggi: 1180 };
 const IKON = {
   zona: Layers, hukum: Landmark, komoditas: Fish, kajian: BarChart3, lokasi: MapPin, pasar: TrendingUp,
   finansial: Wallet, sosial: Users, keahlian: Briefcase, kesimpulan: Lightbulb, isi: ListChecks, cari: ScanSearch,
+  laut: Waves,
 };
 let IKON_PNG = {};
 
@@ -713,6 +714,33 @@ function gambaranUmum(dek, o, bab) {
   dek.sumber('Ringkasan ini merangkum halaman-halaman berikut; sumber setiap angka dicantumkan di kaki halaman masing-masing.');
 }
 
+const OSEANOGRAFI_PDF = [
+  ['SUHU', 'suhu permukaan laut', 1],
+  ['ANOMALI_SUHU', 'anomali suhu permukaan', 2],
+  ['KLOROFIL', 'klorofil-a', 2],
+  ['GELOMBANG', 'tinggi gelombang signifikan', 2],
+];
+const WARNA_LAUT = [14, 116, 144];
+
+function kartuOseanografi(dek, os, x, y, lebar, tinggi) {
+  const yy = dek.kartu(x, y, lebar, tinggi, { judul: 'Kondisi oseanografi perairan', ikon: 'laut', aksen: '#0E7490' });
+  const ada = OSEANOGRAFI_PDF.filter(([k]) => os?.[k]);
+  if (!ada.length) {
+    dek.teks(x + 5, yy - 1, lebar - 10, 'Data oseanografi untuk perairan provinsi ini belum tersedia.', { ukuran: 6.6, maks: 2 });
+    return;
+  }
+  const kolom = (lebar - 10) / 2;
+  ada.forEach(([k, label, d], i) => {
+    const v = os[k];
+    const xx = x + 5 + (i % 2) * kolom;
+    const y0 = yy - 1 + Math.floor(i / 2) * 7.6;
+    dek.gaya(8.6, C.navy, true);
+    dek.doc.text(bersih(`${k === 'ANOMALI_SUHU' && v.rata2 > 0 ? '+' : ''}${angka(v.rata2, d)} ${v.satuan}`), xx, y0);
+    dek.gaya(5.8, C.abu);
+    dek.doc.text(label, xx, y0 + 2.9);
+  });
+}
+
 function zonaRuang(dek, o, citra) {
   const z = o.zona;
   const jenis = o.jenis_dipilih;
@@ -745,7 +773,10 @@ function zonaRuang(dek, o, citra) {
   }
 
   const yt = y + 38;
-  yy = dek.kartu(x, yt, lebar, tinggiPeta + 6 - 38, { judul: 'Luas per zona', ikon: 'zona' });
+  const tinggiLaut = 27;
+  const tinggiLuas = tinggiPeta + 6 - 38 - tinggiLaut - 4;
+  kartuOseanografi(dek, o.oseanografi, x, yt + tinggiLuas + 4, lebar, tinggiLaut);
+  yy = dek.kartu(x, yt, lebar, tinggiLuas, { judul: 'Luas per zona', ikon: 'zona' });
   if (!z.baris.length) {
     dek.tanda(x + 5, yy, lebar - 10, jenis
       ? `Belum ada zona pola ruang laut yang sesuai untuk ${jenis.nama.toLowerCase()} di provinsi ini.`
@@ -753,7 +784,7 @@ function zonaRuang(dek, o, citra) {
     return;
   }
   const maks = Math.max(...z.baris.map((b) => b.persen));
-  z.baris.slice(0, 7).forEach((b) => {
+  z.baris.slice(0, 4).forEach((b) => {
     const warna = warnaZona(b.sub_zona);
     dek.doc.setFillColor(...rgb(warna));
     dek.doc.roundedRect(x + 5, yy - 2.6, 3, 3, 0.8, 0.8, 'F');
@@ -770,8 +801,8 @@ function zonaRuang(dek, o, citra) {
     yy += 8.4;
   });
   dek.gaya(6.2, C.abu);
-  dek.doc.text(`Total ${angka(z.total_ha)} ha · ${z.peta.length} zona terluas di peta`.replace('·', '|'), x + 5, yt + tinggiPeta + 6 - 38 - 3.4);
-  dek.sumber(`Sumber: pola ruang laut ${z.sumber_label}; dasar hukum: JDIH BPK (peraturan.bpk.go.id); ${ATRIBUSI_CITRA}.`);
+  dek.doc.text(`Total ${angka(z.total_ha)} ha · ${z.peta.length} zona terluas di peta`.replace('·', '|'), x + 5, yt + tinggiLuas - 3.4);
+  dek.sumber(`Sumber: pola ruang laut ${z.sumber_label}; dasar hukum: JDIH BPK (peraturan.bpk.go.id); oseanografi perairan ±22 km dari pantai: NOAA Coral Reef Watch (juga ditayangkan Sidako KKP), MODIS-Aqua, WaveWatch III via NOAA ERDDAP; ${ATRIBUSI_CITRA}.`);
 }
 
 function komoditasUnggulan(dek, o, bab) {
@@ -958,19 +989,33 @@ function lokasiSesuai(dek, o, b, i, citra) {
     dek.pil(x + lebar - 5 - lebarPil, yy, teksKelas, campur(warnaKelas, 0.16), gelap(warnaKelas, 0.8), 5.6);
     dek.gaya(6.4, C.abu);
     d.text(bersih(`${l.kabupaten || '-'}  |  ${angka(l.luas_ha, 1)} ha  |  skor ${angka(l.skor, 2)}`), x + 11.6, yy + 3.6);
+    let yb = yy + 3.6;
+    const laut = l.oseanografi || {};
+    const teksLaut = [
+      laut.KEDALAMAN != null && `kedalaman ${angka(laut.KEDALAMAN)} m`,
+      laut.SUHU != null && `suhu ${angka(laut.SUHU, 1)} °C`,
+      laut.GELOMBANG != null && `gelombang ${angka(laut.GELOMBANG, 1)} m`,
+      laut.KLOROFIL != null && `klorofil ${angka(laut.KLOROFIL, 2)} mg/m³`,
+    ].filter(Boolean).join('  |  ');
+    if (teksLaut) {
+      yb += 2.9;
+      dek.gaya(5.9, WARNA_LAUT);
+      d.text(d.splitTextToSize(bersih(teksLaut), lebar - 18)[0], x + 11.6, yb);
+    }
     const catatan = [...l.keunggulan.slice(0, 1).map((t) => ['+', t]), ...l.pembatas.slice(0, 1).map((t) => ['-', t])];
-    catatan.forEach(([tanda, t], c) => {
+    catatan.forEach(([tanda, t]) => {
+      yb += 2.9;
       dek.gaya(6, tanda === '+' ? gelap(C.tinggi, 0.8) : [185, 28, 28]);
-      d.text(d.splitTextToSize(bersih(`${tanda === '+' ? '+' : '!'} ${t}`), lebar - 18)[0], x + 11.6, yy + 7.1 + c * 3.2);
+      d.text(d.splitTextToSize(bersih(`${tanda === '+' ? '+' : '!'} ${t}`), lebar - 18)[0], x + 11.6, yb);
     });
-    yy += 10.6 + catatan.length * 3.2;
+    yy = yb + 5.6;
     if (n < j.lokasi.length - 1) {
       d.setDrawColor(...C.garis);
       d.setLineWidth(0.15);
       d.line(x + 5, yy - 3.4, x + lebar - 5, yy - 3.4);
     }
   });
-  dek.sumber(`Sumber: analisis kesesuaian & kelayakan zona aplikasi (tata ruang KKP, KKPRL, infrastruktur, ekosistem, InaRISK, sosial ekonomi BPS)${b.komoditas ? `; kesesuaian dinilai pada tingkat jenis ${j.nama.toLowerCase()}, belum syarat biofisik khusus ${b.nama.toLowerCase()}` : ''}; ${ATRIBUSI_CITRA}.`);
+  dek.sumber(`Sumber: analisis kelayakan zona aplikasi (tata ruang KKP, KKPRL, infrastruktur, ekosistem, InaRISK, BPS); oseanografi NOAA${b.komoditas ? `; kesesuaian dinilai pada tingkat jenis ${j.nama.toLowerCase()}, belum syarat biofisik khusus ${b.nama.toLowerCase()}` : ''}; ${ATRIBUSI_CITRA}.`);
 }
 
 function finansialPasar(dek, o, b, i) {

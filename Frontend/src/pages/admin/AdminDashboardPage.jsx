@@ -78,7 +78,7 @@ const PEMBARUAN = [
   ['tarik_pola_ruang_wfs, tarik_rzwp3k_wfs', 'Pola ruang RTRW/PKKPRL dan RZWP-3-K'],
   ['tarik_ekosistem_wfs', 'Mangrove Portal Satu Data KKP'],
   ['tarik_ekosistem_sidako', 'Terumbu karang dan padang lamun 2025 dari Sidako Ekosistem KKP'],
-  ['tarik_oseanografi', 'Kedalaman laut, suhu permukaan, klorofil-a, dan gelombang dari NOAA'],
+  ['tarik_oseanografi', 'Kedalaman laut, suhu permukaan dan anomalinya (NOAA Coral Reef Watch, juga ditayangkan Sidako KKP), klorofil-a, dan gelombang dari NOAA'],
   ['tarik_risiko_bencana', 'Indeks risiko bencana pesisir BNPB InaRISK'],
   ['tarik_statistik_bps', 'Pengangguran BPS per provinsi dan per kabupaten/kota'],
   ['hitung_skor_zona', 'Menghitung ulang skor kelayakan zona setelah data di atas diperbarui'],
