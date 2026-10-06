@@ -283,7 +283,7 @@ const ENTRI_TETAP = [
 
 const lapisanHasil = (h) => {
   if (h.sumber === 'kkprl') return 'kkprl';
-  if (h.sumber === 'zonasi') return 'polaruang';
+  if (h.sumber === 'zonasi') return h.kode === 'KAW' ? 'polaruang_kaw' : 'polaruang';
   const kunci = { infrastruktur: 'kategori', unsur: 'kelompok' }[h.sumber];
   return kunci ? Object.keys(LAYER_LOKAL).find((id) => LAYER_LOKAL[id].params?.[kunci] === h.kode) : undefined;
 };
@@ -579,7 +579,7 @@ const LandingPage = () => {
               <div className="col-span-2">
                 <IlustrasiArea />
               </div>
-              <KartuKecil to="/peta?lapisan=polaruang,kkprl" judul="Peta Spasial" isi="Tata ruang dan izin" ikon={Map} />
+              <KartuKecil to="/peta?lapisan=polaruang,polaruang_kaw,kkprl" judul="Peta Spasial" isi="Tata ruang dan izin" ikon={Map} />
               <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
               <Link
                 to="/peta?lapisan=potensi"
