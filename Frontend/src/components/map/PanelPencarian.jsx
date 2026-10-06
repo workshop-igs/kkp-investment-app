@@ -5,10 +5,9 @@ import { api } from '../../api/klien';
 const JEDA_KETIK = 300;
 const MIN_HURUF = 2;
 
-const PanelPencarian = ({ onTuju }) => {
-  const [kata, setKata] = useState('');
+export const usePencarian = (kata) => {
   const [hasil, setHasil] = useState([]);
-  const [status, setStatus] = useState({ memuat: false, galat: null, sudahCari: false });
+  const [status, setStatus] = useState({ memuat: false, galat: null, sudahCari: false, untuk: '' });
   const pembatal = useRef(null);
   const timer = useRef(null);
 
@@ -19,7 +18,7 @@ const PanelPencarian = ({ onTuju }) => {
     if (q.length < MIN_HURUF) {
       if (pembatal.current) pembatal.current.abort();
       setHasil([]);
-      setStatus({ memuat: false, galat: null, sudahCari: false });
+      setStatus({ memuat: false, galat: null, sudahCari: false, untuk: '' });
       return undefined;
     }
 
@@ -27,13 +26,13 @@ const PanelPencarian = ({ onTuju }) => {
       if (pembatal.current) pembatal.current.abort();
       const kontrol = new AbortController();
       pembatal.current = kontrol;
-      setStatus({ memuat: true, galat: null, sudahCari: true });
+      setStatus({ memuat: true, galat: null, sudahCari: true, untuk: '' });
 
       api
         .get('/inti/cari/', { params: { q }, signal: kontrol.signal })
         .then(({ data }) => {
           setHasil(data?.hasil || []);
-          setStatus({ memuat: false, galat: null, sudahCari: true });
+          setStatus({ memuat: false, galat: null, sudahCari: true, untuk: q });
         })
         .catch((err) => {
           if (err.code === 'ERR_CANCELED' || err.name === 'CanceledError') return;
@@ -42,6 +41,7 @@ const PanelPencarian = ({ onTuju }) => {
           setStatus({
             memuat: false,
             sudahCari: true,
+            untuk: q,
             galat:
               kode === 429
                 ? 'Terlalu banyak permintaan — tunggu sebentar'
@@ -58,6 +58,13 @@ const PanelPencarian = ({ onTuju }) => {
   }, [kata]);
 
   useEffect(() => () => pembatal.current?.abort(), []);
+
+  return { hasil, status };
+};
+
+const PanelPencarian = ({ onTuju }) => {
+  const [kata, setKata] = useState('');
+  const { hasil, status } = usePencarian(kata);
 
   const kelompok = useMemo(() => {
     const peta = new Map();
@@ -131,7 +138,7 @@ const PanelPencarian = ({ onTuju }) => {
           {!status.sudahCari && (
             <p className="px-4 py-5 text-[11.5px] text-slate-400 leading-relaxed">
               Ketik minimal {MIN_HURUF} huruf. Pencarian mencakup provinsi, pelabuhan,
-              kawasan industri, jaringan listrik, izin KKPRL, dan unsur ruang laut.
+              kawasan industri, jaringan listrik, izin KKPRL, zona tata ruang, dan unsur ruang laut.
             </p>
           )}
 
