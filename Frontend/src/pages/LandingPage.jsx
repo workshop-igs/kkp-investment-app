@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Anchor, ArrowRight, ArrowUpRight, Briefcase, Check, Clock3, Construction, Download, Factory, FileStack, FileText, FlaskConical,
+  Anchor, ArrowRight, ArrowUpRight, Briefcase, Check, Eye, KeyRound, Clock3, Construction, Download, Factory, FileStack, FileText, FlaskConical,
   Fish, Gem, Layers, Map, MapPin, Palmtree, Shell, SquareDashedMousePointer, Sprout, Upload, Waves, Zap,
 } from 'lucide-react';
 import { api } from '../api/klien';
@@ -94,6 +94,19 @@ const CONTOH_JENIS = [
 ];
 
 const BAGIAN_LAPORAN = ['Tata ruang dan perizinan', 'Transportasi dan infrastruktur', 'Oseanografi', 'Risiko lingkungan dan sosial', 'Kelayakan investasi'];
+
+const AKSES = [
+  {
+    ikon: Eye,
+    judul: 'Tanpa masuk',
+    isi: ['Peta Spasial dan seluruh layer data', 'Profil investasi provinsi dalam PDF', 'Cetak tampilan peta dalam PDF'],
+  },
+  {
+    ikon: KeyRound,
+    judul: 'Dengan akun',
+    isi: ['Analisis kelayakan wilayah dan laporannya', 'Pipeline investasi dari LOI sampai operasional', 'Dashboard pemantauan'],
+  },
+];
 
 const SUDUT_AREA = [[70, 62], [212, 42], [238, 138], [104, 158]];
 
@@ -488,71 +501,85 @@ const LandingPage = () => {
       </section>
 
       <section className="px-4 pb-24 sm:px-6 lg:px-8">
-        <div className="relative mx-auto grid max-w-7xl items-center gap-10 overflow-hidden rounded-3xl bg-kkp-toska px-6 py-14 sm:px-12 lg:grid-cols-2 lg:gap-16 lg:px-16 lg:py-20">
-          <div
-            className="pointer-events-none absolute inset-0 bg-[radial-gradient(#002242_1.4px,transparent_1.7px)] [background-size:12px_12px] opacity-30 [mask-image:radial-gradient(ellipse_at_bottom_left,#000_0%,transparent_60%)]"
-            aria-hidden="true"
-          />
-          <div className="relative">
-            <Label nada="putih">Mulai sekarang</Label>
-            <h2 className="mt-6 text-balance text-4xl font-extrabold leading-[1.04] tracking-[-0.035em] text-kkp-900 sm:text-5xl xl:text-6xl">
-              Siap menilai lokasi investasi berikutnya?
-            </h2>
-          </div>
-          <div className="relative">
-            <figure>
-              <img
-                src="/beranda/pelabuhan-tambakrejo-udara.webp"
-                alt="Foto udara Pelabuhan Perikanan Tambakrejo, Blitar, dengan pemecah gelombang dan kolam pelabuhan"
-                width="1400"
-                height="933"
-                loading="lazy"
-                className="aspect-[16/9] w-full rounded-xl border-2 border-kkp-900 object-cover"
-              />
-              <figcaption className="mt-2 text-[11px] text-kkp-900/70">Pelabuhan Perikanan Tambakrejo, Blitar. Foto: DKP Provinsi Jawa Timur</figcaption>
-            </figure>
-            <p className="mt-5 max-w-md text-[15px] leading-relaxed text-kkp-900">
-              Hasil kesesuaian ruang keluar dalam hitungan detik, lengkap dengan sumber aturannya.
-            </p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <TombolUtama to={isAuthenticated ? '/peta' : '/login'}>
-                {isAuthenticated ? 'Mulai Analisis Lokasi' : 'Masuk ke Aplikasi'}
-              </TombolUtama>
-              <TombolKedua to="/profil-investasi">Buka Profil Investasi</TombolKedua>
+        <div className="mx-auto max-w-7xl rounded-2xl border border-slate-200 bg-[#F6F8FB]">
+          <div className="grid gap-10 px-6 py-12 sm:px-10 lg:grid-cols-12 lg:items-center lg:gap-12 lg:px-14 lg:py-16">
+            <div className="lg:col-span-5">
+              <Label>Akses aplikasi</Label>
+              <h2 className="mt-6 text-balance text-3xl font-extrabold leading-[1.1] tracking-[-0.03em] text-kkp-900 sm:text-4xl">
+                Digunakan oleh unit kerja di lingkungan Kementerian Kelautan dan Perikanan.
+              </h2>
+              <p className="mt-5 max-w-lg leading-relaxed text-slate-600">
+                Peta spasial dan profil investasi dapat dibuka tanpa masuk. Analisis kelayakan wilayah, pipeline
+                investasi, dan dashboard memerlukan akun yang terdaftar.
+              </p>
+              <div className="mt-8 flex flex-wrap gap-3">
+                {isAuthenticated ? (
+                  <>
+                    <TombolUtama to="/dashboard">Buka Dashboard</TombolUtama>
+                    <TombolKedua to="/pipeline">Pipeline Investasi</TombolKedua>
+                  </>
+                ) : (
+                  <>
+                    <TombolUtama to="/login">Masuk</TombolUtama>
+                    <TombolKedua to="/register">Daftar Akun</TombolKedua>
+                  </>
+                )}
+              </div>
             </div>
+            <ul className="grid items-start gap-4 sm:grid-cols-2 lg:col-span-7">
+              {AKSES.map(({ ikon: Ikon, judul, isi }) => (
+                <li key={judul} className="group rounded-2xl border border-slate-200 bg-white p-6">
+                  <span className="flex items-center gap-3">
+                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D3F0F8] text-kkp-900">
+                      <Ikon className={`h-5 w-5 ${GERAK_IKON}`} strokeWidth={1.8} aria-hidden="true" />
+                    </span>
+                    <span className="text-lg font-bold text-kkp-900">{judul}</span>
+                  </span>
+                  <ul className="mt-5 space-y-3">
+                    {isi.map((t) => (
+                      <li key={t} className="flex items-start gap-2.5 text-[15px] leading-snug text-slate-700">
+                        <Check className={`mt-0.5 h-4 w-4 shrink-0 text-kkp-700 ${GERAK_KECIL}`} strokeWidth={2.6} aria-hidden="true" />
+                        {t}
+                      </li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
 
-      <footer className="overflow-hidden bg-kkp-900 text-white">
+      <footer className="bg-kkp-900 text-white">
         <PitaKkp />
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-8 border-b border-white/15 py-10 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex items-center gap-3">
-              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white">
-                <img src="/logo-kkp.png" alt="Logo KKP" className="h-9 w-9 object-contain" />
+        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:grid-cols-2 sm:px-6 lg:grid-cols-12 lg:px-8">
+          <div className="flex items-start gap-4 sm:col-span-2 lg:col-span-6">
+            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-white">
+              <img src="/logo-kkp.png" alt="Logo Kementerian Kelautan dan Perikanan" className="h-12 w-12 object-contain" />
+            </span>
+            <span>
+              <span className="block text-base font-bold">Kementerian Kelautan dan Perikanan</span>
+              <span className="block text-sm text-white/70">Republik Indonesia</span>
+              <span className="mt-3 block max-w-sm text-sm leading-relaxed text-white/60">
+                Platform Manajemen Investasi Ruang Laut
               </span>
-              <span>
-                <span className="block text-sm font-bold">Kementerian Kelautan dan Perikanan</span>
-                <span className="block text-xs text-white/60">Platform Manajemen Investasi Ruang Laut</span>
-              </span>
-            </div>
-            <nav aria-label="Tautan kaki">
-              <ul className="flex flex-wrap gap-x-8 gap-y-2 text-[15px]">
-                {[['Beranda', '/'], ['Peta Spasial', '/peta'], ['Profil Investasi', '/profil-investasi']].map(([label, ke]) => (
-                  <li key={ke}><Link to={ke} className="text-white/85 hover:text-white">{label}</Link></li>
-                ))}
-              </ul>
-            </nav>
-            <p className="text-sm text-white/70">Jl. Medan Merdeka Timur No. 16, Jakarta Pusat</p>
+            </span>
           </div>
-          <p
-            aria-hidden="true"
-            className="select-none whitespace-nowrap pb-8 pt-10 text-[clamp(3rem,16.8vw,15.25rem)] font-extrabold leading-[0.9] tracking-[-0.05em] text-[#BFE9F4]"
-          >
-            Ruang Laut
-          </p>
-          <p className="pb-6 text-xs text-white/50">
+          <nav aria-label="Tautan kaki" className="lg:col-span-3">
+            <p className="text-sm font-semibold text-white/60">Menu</p>
+            <ul className="mt-3 space-y-2 text-sm">
+              {[['Beranda', '/'], ['Peta Spasial', '/peta'], ['Profil Investasi', '/profil-investasi']].map(([label, ke]) => (
+                <li key={ke}><Link to={ke} className="text-white/85 hover:text-white">{label}</Link></li>
+              ))}
+            </ul>
+          </nav>
+          <div className="lg:col-span-3">
+            <p className="text-sm font-semibold text-white/60">Alamat</p>
+            <p className="mt-3 text-sm leading-relaxed text-white/85">Jl. Medan Merdeka Timur No. 16, Jakarta Pusat</p>
+          </div>
+        </div>
+        <div className="border-t border-white/10">
+          <p className="mx-auto max-w-7xl px-4 py-5 text-xs text-white/55 sm:px-6 lg:px-8">
             © {new Date().getFullYear()} Kementerian Kelautan dan Perikanan Republik Indonesia
           </p>
         </div>
