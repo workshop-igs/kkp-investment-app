@@ -1,11 +1,24 @@
+import math
+
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon, Polygon
+
+JARI_JARI_MERCATOR = 6378137.0
+
+
+def _ke_derajat(x, y):
+    if abs(x) <= 180 and abs(y) <= 90:
+        return [x, y]
+    return [
+        math.degrees(x / JARI_JARI_MERCATOR),
+        math.degrees(2 * math.atan(math.exp(y / JARI_JARI_MERCATOR)) - math.pi / 2),
+    ]
 
 
 def buang_z(koordinat):
     if not isinstance(koordinat, list):
         return koordinat
     if koordinat and isinstance(koordinat[0], (int, float)):
-        return koordinat[:2]
+        return _ke_derajat(*koordinat[:2])
     return [buang_z(k) for k in koordinat]
 
 
