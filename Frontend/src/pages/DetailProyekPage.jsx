@@ -85,13 +85,9 @@ const PENGANTAR = {
   transportasi: 'Kedekatan area proyek dengan alur pelayaran, unsur ruang laut, dan infrastruktur pendukung.',
   kelayakan: 'Hasil penilaian kelayakan dan proyeksi arus kas yang tersimpan bersama proyek ini.',
   sosial: 'Perkiraan serapan tenaga kerja proyek dan konteks pasar kerja wilayah dari BPS.',
-  pipeline: 'Posisi proyek dalam tahapan pipeline, realisasi terhadap rencana, dan riwayat perubahan status.',
+  pipeline: 'Posisi proyek dalam tahapan pipeline dan riwayat perubahan status.',
   risiko: PENJELASAN_RISIKO.tema,
 };
-
-const GAYA_ISIAN =
-  'w-full mt-1 text-[13px] border border-slate-300 rounded p-2 focus:outline-none '
-  + 'focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700';
 
 const tanggal = (t) => (t ? new Date(t).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '—');
 
@@ -117,8 +113,6 @@ const DetailProyekPage = () => {
     [bps.data]
   );
 
-  const [formRealisasi, setFormRealisasi] = useState(null);
-  const [menyimpanRealisasi, setMenyimpanRealisasi] = useState(false);
 
   const [modalStatus, setModalStatus] = useState(false);
   const [modalHapus, setModalHapus] = useState(false);
@@ -212,44 +206,6 @@ const DetailProyekPage = () => {
       });
     return () => kontrol.abort();
   }, [tema, kunciBps]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const bukaSuntingRealisasi = () => {
-    setFormRealisasi({
-      tanggal_mulai: proyek.tanggal_mulai || '',
-      tanggal_target_selesai: proyek.tanggal_target_selesai || '',
-      progress_pct: proyek.progress_pct ?? 0,
-      nilai_realisasi_miliar: proyek.nilai_realisasi_miliar ?? 0,
-      realisasi_tenaga_kerja: proyek.realisasi_tenaga_kerja ?? 0,
-    });
-  };
-
-  const simpanRealisasi = async (e) => {
-    if (e) e.preventDefault();
-    const f = formRealisasi;
-
-    if (f.tanggal_mulai && f.tanggal_target_selesai
-        && f.tanggal_target_selesai < f.tanggal_mulai) {
-      alert('Target selesai tidak boleh lebih awal daripada tanggal mulai.');
-      return;
-    }
-
-    setMenyimpanRealisasi(true);
-    try {
-      const { data } = await api.patch(`/pipeline/proyek/${id}/`, {
-        tanggal_mulai: f.tanggal_mulai || null,
-        tanggal_target_selesai: f.tanggal_target_selesai || null,
-        progress_pct: Number(f.progress_pct) || 0,
-        nilai_realisasi_miliar: Number(f.nilai_realisasi_miliar) || 0,
-        realisasi_tenaga_kerja: Math.round(Number(f.realisasi_tenaga_kerja) || 0),
-      });
-      setProyek(data);
-      setFormRealisasi(null);
-    } catch (err) {
-      alert(`Gagal menyimpan: ${err.response?.data?.detail || err.message}`);
-    } finally {
-      setMenyimpanRealisasi(false);
-    }
-  };
 
   const bukaModalStatus = () => {
     setTahapDipilih(proyek?.status || 'LOI');
@@ -652,8 +608,6 @@ const DetailProyekPage = () => {
                       ['Investor', proyek.investor || '—'],
                       ['Provinsi', proyek.provinsi_nama || '—'],
                       ['Lokasi', proyek.lokasi_detail || '—'],
-                      ['Mulai', tanggal(proyek.tanggal_mulai)],
-                      ['Target selesai', tanggal(proyek.tanggal_target_selesai)],
                     ]}
                   />
                 </div>
@@ -930,7 +884,7 @@ const DetailProyekPage = () => {
                         penyelenggara dan skema sertifikasinya.
                       </p>
                       <TabelRingkas
-                        kolom={['Kompetensi', 'Bulan']}
+                        kolom={['Kompetensi']}
                         baris={analisis.kerja.pelatihan.map((p) => [
                           <div key={p.keahlian}>
                             <div>{p.keahlian}</div>
@@ -938,7 +892,6 @@ const DetailProyekPage = () => {
                               {[p.lembaga, p.skema].filter(Boolean).join(' · ')}
                             </div>
                           </div>,
-                          p.durasi_bulan,
                         ])}
                       />
                     </div>
@@ -1036,148 +989,6 @@ const DetailProyekPage = () => {
                 >
                   Perbarui Status Proyek
                 </button>
-              </KartuLaporan>
-
-              <KartuLaporan
-                judul="Jadwal & Realisasi terhadap Rencana"
-                catatan="Jadwal dan realisasi diisi manual oleh pengelola pipeline, bukan dihitung dari data spasial."
-              >
-                {formRealisasi ? (
-                  <form onSubmit={simpanRealisasi} className="space-y-3 print:hidden">
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="block">
-                        <span className="text-[11.5px] text-slate-500">Tanggal mulai</span>
-                        <input
-                          type="date"
-                          value={formRealisasi.tanggal_mulai}
-                          onChange={(e) =>
-                            setFormRealisasi((f) => ({ ...f, tanggal_mulai: e.target.value }))}
-                          className={GAYA_ISIAN}
-                        />
-                      </label>
-                      <label className="block">
-                        <span className="text-[11.5px] text-slate-500">Target selesai</span>
-                        <input
-                          type="date"
-                          value={formRealisasi.tanggal_target_selesai}
-                          min={formRealisasi.tanggal_mulai || undefined}
-                          onChange={(e) =>
-                            setFormRealisasi((f) => ({
-                              ...f, tanggal_target_selesai: e.target.value,
-                            }))}
-                          className={GAYA_ISIAN}
-                        />
-                      </label>
-                    </div>
-                    <label className="block">
-                      <span className="text-[11.5px] text-slate-500">
-                        Realisasi investasi (miliar Rp) — rencana{' '}
-                        {nf(proyek.nilai_investasi_miliar, 1)}
-                      </span>
-                      <input
-                        type="number"
-                        min="0"
-                        step="0.1"
-                        value={formRealisasi.nilai_realisasi_miliar}
-                        onChange={(e) =>
-                          setFormRealisasi((f) => ({
-                            ...f, nilai_realisasi_miliar: e.target.value,
-                          }))}
-                        className={GAYA_ISIAN}
-                      />
-                    </label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <label className="block">
-                        <span className="text-[11.5px] text-slate-500">Progres (%)</span>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          step="1"
-                          value={formRealisasi.progress_pct}
-                          onChange={(e) =>
-                            setFormRealisasi((f) => ({ ...f, progress_pct: e.target.value }))}
-                          className={GAYA_ISIAN}
-                        />
-                      </label>
-                      <label className="block">
-                        <span className="text-[11.5px] text-slate-500">
-                          TK terserap — proyeksi {nf(proyek.proyeksi_tenaga_kerja)}
-                        </span>
-                        <input
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={formRealisasi.realisasi_tenaga_kerja}
-                          onChange={(e) =>
-                            setFormRealisasi((f) => ({
-                              ...f, realisasi_tenaga_kerja: e.target.value,
-                            }))}
-                          className={GAYA_ISIAN}
-                        />
-                      </label>
-                    </div>
-                    <div className="flex gap-2 pt-1">
-                      <button
-                        type="submit"
-                        disabled={menyimpanRealisasi}
-                        className="flex-1 px-3 py-2 rounded bg-kkp-700 text-white text-[13px] font-semibold hover:bg-kkp-800 disabled:opacity-60"
-                      >
-                        {menyimpanRealisasi ? 'Menyimpan…' : 'Simpan'}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setFormRealisasi(null)}
-                        disabled={menyimpanRealisasi}
-                        className="px-3 py-2 rounded border border-slate-300 text-[13px] font-semibold text-slate-600 hover:bg-slate-50 disabled:opacity-60"
-                      >
-                        Batal
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <>
-                    <AngkaBesar
-                      item={[
-                        { nilai: `${nf(proyek.progress_pct)}%`, satuan: 'Progres' },
-                        { nilai: `Rp ${rupiahRingkas((proyek.nilai_realisasi_miliar || 0) * 1e9)}`, satuan: 'Realisasi' },
-                        { nilai: nf(proyek.realisasi_tenaga_kerja), satuan: 'TK terserap' },
-                      ]}
-                    />
-                    <div className="mt-2">
-                      <TabelRingkas
-                        kolom={['Ukuran', 'Rencana', 'Realisasi']}
-                        baris={[
-                          [
-                            'Nilai investasi',
-                            `Rp ${rupiahRingkas((proyek.nilai_investasi_miliar || 0) * 1e9)}`,
-                            `Rp ${rupiahRingkas((proyek.nilai_realisasi_miliar || 0) * 1e9)}`,
-                          ],
-                          [
-                            'Tenaga kerja',
-                            nf(proyek.proyeksi_tenaga_kerja),
-                            nf(proyek.realisasi_tenaga_kerja),
-                          ],
-                        ]}
-                      />
-                    </div>
-                    <div className="mt-2">
-                      <TabelRingkas
-                        kolom={['Jadwal', 'Tanggal']}
-                        baris={[
-                          ['Mulai', tanggal(proyek.tanggal_mulai)],
-                          ['Target selesai', tanggal(proyek.tanggal_target_selesai)],
-                        ]}
-                      />
-                    </div>
-                    <button
-                      onClick={bukaSuntingRealisasi}
-                      className="w-full mt-3 px-3 py-2 rounded border border-kkp-700 text-kkp-700 text-[13px] font-semibold hover:bg-kkp-100 print:hidden"
-                    >
-                      Sunting Jadwal & Realisasi
-                    </button>
-                  </>
-                )}
               </KartuLaporan>
 
               {proyek.riwayat_status?.length > 0 && (

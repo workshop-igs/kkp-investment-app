@@ -774,7 +774,7 @@ const LaporanAnalisisPage = () => {
                       penyelenggara dan skema sertifikasinya.
                     </p>
                     <TabelRingkas
-                      kolom={['Kompetensi', 'Bulan']}
+                      kolom={['Kompetensi']}
                       baris={kerja.kebutuhan_pelatihan.map((p) => [
                         <div key={p.keahlian}>
                           <div>{p.keahlian}</div>
@@ -782,7 +782,6 @@ const LaporanAnalisisPage = () => {
                             {[p.lembaga, p.skema].filter(Boolean).join(' · ')}
                           </div>
                         </div>,
-                        p.durasi_bulan,
                       ])}
                     />
                   </div>

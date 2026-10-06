@@ -47,7 +47,7 @@ const KartuLaporan = ({ judul, pengantar, catatan, keterangan, children }) => {
 export const AngkaBesar = ({ item }) => (
   <div
     className={`grid gap-2 py-2 ${
-      item.length === 1 ? 'grid-cols-1' : 'grid-cols-2 min-[420px]:grid-cols-3'
+      item.length === 1 ? 'grid-cols-1' : item.length === 2 ? 'grid-cols-2' : 'grid-cols-2 min-[420px]:grid-cols-3'
     }`}
   >
     {item.map((a) => (
