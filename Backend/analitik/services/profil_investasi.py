@@ -2,7 +2,7 @@ import json
 from datetime import date
 
 from django.db import connection
-from django.db.models import Count, Q, Sum
+from django.db.models import Case, Count, IntegerField, Q, Sum, When
 from django.utils import timezone
 
 from analitik.models import KetentuanRuang, SkorKelayakanZona
@@ -224,16 +224,20 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
     from ketenagakerjaan.proyeksi import _matriks
 
     status = {}
+    utama = set()
     for k in KetentuanRuang.objects.filter(Q(provinsi__isnull=True) | Q(provinsi=provinsi), sektor=sektor):
         if k.provinsi_id or k.sub_zona not in status:
             status[k.sub_zona] = k.status
+        if not k.provinsi_id and k.status == 'DIIZINKAN':
+            utama.add(k.sub_zona)
 
     skor = skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG'])
     lokasi = []
-    for s in skor.order_by('-kelas', '-zona__luas_ha', '-skor_total').values(
+    kandidat = skor.annotate(utama=Case(When(zona__sub_zona__in=utama, then=1), default=0, output_field=IntegerField()))
+    for s in kandidat.order_by('-utama', '-kelas', '-zona__luas_ha', '-skor_total').values(
         'zona_id', 'zona__nama_zona', 'zona__sub_zona', 'zona__luas_ha', 'skor_total', 'kelas', 'jarak_infra_km',
         'potensi_sda', 'aksesibilitas', 'risiko_bencana', 'sensitivitas_ekosistem', 'ekosistem_rincian',
-        'risiko_sosial', 'wilayah_adat', 'jumlah_kkprl',
+        'risiko_sosial', 'wilayah_adat', 'jumlah_kkprl', 'utama',
     )[:JUMLAH_LOKASI_PRIORITAS]:
         c.execute(
             'SELECT ST_X(p), ST_Y(p) FROM (SELECT ST_PointOnSurface(geometry) p '
@@ -246,6 +250,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         lokasi.append({
             'nama': s['zona__nama_zona'],
             'sub_zona_label': LABEL_SUB_ZONA.get(s['zona__sub_zona'], s['zona__sub_zona']),
+            'peruntukan_utama': bool(s['utama']),
             'kabupaten': _kabupaten_terdekat(c, provinsi.id, x, y),
             'luas_ha': s['zona__luas_ha'] or 0,
             'skor': round(s['skor_total'], 3),
