@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api, ambilDaftar } from '../../api/klien';
 import { Edit2, Check, X, MapPin } from 'lucide-react';
+import { rupiahMiliar } from '../../utils/pemformat';
 
 
 const STATUS_OPTIONS = ['LOI', 'FS', 'DEV', 'OP'];
@@ -61,8 +62,8 @@ const AdminPipelinePage = () => {
               <tr>
                 <th className="px-6 py-4">Proyek & Sektor</th>
                 <th className="px-6 py-4">Investor</th>
-                <th className="px-6 py-4">Rencana (M)</th>
-                <th className="px-6 py-4">Realisasi (M)</th>
+                <th className="px-6 py-4">Rencana</th>
+                <th className="px-6 py-4">Realisasi</th>
                 <th className="px-6 py-4">Status</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
@@ -80,7 +81,7 @@ const AdminPipelinePage = () => {
                       <MapPin className="w-3 h-3" /> {p.provinsi_nama}
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-mono">Rp {p.nilai_investasi_miliar}</td>
+                  <td className="px-6 py-4 font-mono">{rupiahMiliar(p.nilai_investasi_miliar)}</td>
                   
                   <td className="px-6 py-4">
                     {editingId === p.id ? (
@@ -92,9 +93,10 @@ const AdminPipelinePage = () => {
                           onChange={(e) => setEditForm({...editForm, nilai_realisasi_miliar: e.target.value})}
                           className="w-20 px-2 py-1 border rounded text-sm"
                         />
+                        <span className="text-slate-400">miliar</span>
                       </div>
                     ) : (
-                      <span className="font-mono font-medium text-teal-600">Rp {p.nilai_realisasi_miliar}</span>
+                      <span className="font-mono font-medium text-teal-600">{rupiahMiliar(p.nilai_realisasi_miliar)}</span>
                     )}
                   </td>
 
