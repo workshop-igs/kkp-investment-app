@@ -1272,7 +1272,7 @@ const DetailProyekPage = () => {
       <div className="hidden lg:block flex-1 relative bg-slate-100 print:hidden">
         <PetaProyek posisi={posisi} tampilkanPerkakas={panelTerlipat} />
 
-        <TombolLipatPanel terlipat={panelTerlipat} onUbah={setPanelTerlipat} labelTampil="Tampilkan Analisa Investasi" />
+        <TombolLipatPanel terlipat={panelTerlipat} onUbah={setPanelTerlipat} />
       </div>
 
       {modalStatus && (
