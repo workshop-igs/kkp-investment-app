@@ -97,24 +97,15 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
 
         from django.db.models import Count, Sum
 
+        from analitik.services.profil_investasi import komoditas_unggulan_semua
         from inventarisasi.models import (
             KKPRL,
             InfrastrukturPendukung,
             SumberDayaAlam,
             ZonasiRuangLaut,
         )
-        from pipeline.models import ProyekInvestasi
 
-        proyek = {
-            r['provinsi_id']: r
-            for r in ProyekInvestasi.objects.values('provinsi_id').annotate(
-                jumlah=Count('id'),
-                nilai=Sum('nilai_investasi_miliar'),
-                realisasi=Sum('nilai_realisasi_miliar'),
-                tenaga_kerja=Sum('proyeksi_tenaga_kerja'),
-                luas=Sum('luas_ha'),
-            )
-        }
+        komoditas = komoditas_unggulan_semua()
 
         pasar_kerja = peta_pasar_kerja()
 
@@ -164,7 +155,6 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
 
         fitur = []
         for p in qs.defer('geometry', 'geometry_tampilan'):
-            pr = proyek.get(p.id, {})
             fitur.append(
                 {
                     'type': 'Feature',
@@ -174,13 +164,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
                         'kode_bps': p.kode_bps,
                         'nama': p.nama,
                         'luas_laut_km2': p.luas_laut_km2,
-                        'investasi': {
-                            'jumlah_proyek': pr.get('jumlah', 0) or 0,
-                            'nilai_rencana_miliar': round(float(pr.get('nilai') or 0), 1),
-                            'nilai_realisasi_miliar': round(float(pr.get('realisasi') or 0), 1),
-                            'tenaga_kerja': int(pr.get('tenaga_kerja') or 0),
-                            'luas_proyek_ha': round(float(pr.get('luas') or 0), 1),
-                        },
+                        'komoditas_unggulan': komoditas.get(p.id, []),
                         'ruang_laut': {
                             'kkprl_jumlah': (kkprl.get(p.id, {}).get('jumlah') or 0),
                             'kkprl_luas_ha': round(
