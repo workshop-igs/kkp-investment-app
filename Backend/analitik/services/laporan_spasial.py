@@ -683,14 +683,18 @@ def bagian_oseanografi(geom) -> Dict[str, Any]:
         baris.append({'sel': [
             label, f"{'+' if kode == 'ANOMALI_SUHU' and s['rata2'] > 0 else ''}{_desimal(s['rata2'], d)} {s['satuan']}",
             _rentang(s['min'], s['max'], d, s['satuan']),
-            '; '.join(filter(None, [tafsir, f"rentang antarwaktu, {s['periode']}" if s['periode'] else ''])),
+            ' '.join(filter(None, [
+                f'{tafsir[:1].upper()}{tafsir[1:]}.' if tafsir else '',
+                f"Periode data: {s['periode']}." if s['periode'] else '',
+            ])),
         ], 'sumber': s['sumber']})
 
     kosong = [label for kode, label in LABEL_OSEANOGRAFI.items() if (stat.get(kode) or {}).get('rata2') is None]
-    ringkas = (
+    ringkas = ' '.join(filter(None, [
+        'Kolom Rentang memuat nilai terendah dan tertinggi di area ini selama periode data.' if baris else '',
         f"Tidak terpetakan: {', '.join(kosong).lower()} - grid global NOAA terlalu kasar untuk perairan "
-        'yang sangat dekat pantai.'
-    ) if baris and kosong else ''
+        'yang sangat dekat pantai.' if baris and kosong else '',
+    ]))
     suhu = stat.get('SUHU') or {}
     return {
         **_bagian(
