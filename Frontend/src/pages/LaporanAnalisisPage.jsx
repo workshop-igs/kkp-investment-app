@@ -911,7 +911,7 @@ const LaporanAnalisisPage = () => {
       <div className="hidden lg:block flex-1 relative bg-slate-100 print:hidden">
         <PetaProyek posisi={posisi} tampilkanPerkakas={panelTerlipat} />
 
-        <TombolLipatPanel terlipat={panelTerlipat} onUbah={setPanelTerlipat} labelTampil="Tampilkan Laporan Analisis" />
+        <TombolLipatPanel terlipat={panelTerlipat} onUbah={setPanelTerlipat} />
       </div>
     </div>
   );

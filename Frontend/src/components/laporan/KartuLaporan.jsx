@@ -255,24 +255,24 @@ export const KartuTabelSpasial = ({ bagian: b }) => {
   );
 };
 
-export const TombolLipatPanel = ({ terlipat, onUbah, labelTampil }) => {
+export const TombolLipatPanel = ({ terlipat, onUbah }) => {
   const Panah = terlipat ? ChevronRight : ChevronLeft;
   return (
     <button
       type="button"
       onClick={() => onUbah(!terlipat)}
       className="group absolute left-4 top-4 z-[1000] inline-flex items-center gap-2.5 rounded-full bg-white py-1.5 pl-1.5 pr-4
-                 text-[13px] font-semibold text-kkp-900 shadow-[0_10px_28px_-10px_rgba(0,20,45,0.6)] ring-1 ring-slate-200
+                 text-[13px] font-semibold text-black shadow-[0_10px_28px_-10px_rgba(0,20,45,0.6)] ring-1 ring-slate-200
                  transition-shadow hover:ring-2 hover:ring-kkp-700 focus-visible:outline focus-visible:outline-2
                  focus-visible:outline-offset-2 focus-visible:outline-kkp-900 print:hidden"
     >
-      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-kkp-900 text-white">
+      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-kkp-700 text-white">
         <Panah
           className={`h-4 w-4 transition-transform duration-300 ${terlipat ? 'group-hover:translate-x-0.5' : 'group-hover:-translate-x-0.5'}`}
           aria-hidden="true"
         />
       </span>
-      {terlipat ? labelTampil : 'Perbesar Peta'}
+      {terlipat ? 'Tampilkan Analisa Investasi' : 'Analisis Lanjutan'}
     </button>
   );
 };
