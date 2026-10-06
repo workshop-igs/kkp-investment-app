@@ -705,7 +705,7 @@ const DetailProyekPage = () => {
                   {(analisis.finansial.sensitivitas?.pendapatan?.length
                     || analisis.finansial.sensitivitas?.biaya?.length) > 0 && (
                     <div className="mt-3 pt-2 border-t border-slate-100">
-                      <BarisLipat judul="Analisis sensitivitas">
+                      <p className="text-[13.5px] font-semibold text-slate-700 py-2.5">Analisis sensitivitas</p>
                         <p className="text-[12px] text-slate-500 mb-2 leading-snug">
                           Seberapa jauh hasilnya bergeser bila satu asumsi meleset, sementara asumsi
                           lainnya tetap. CapEx, discount rate, dan umur proyek tetap pada nilai dasarnya.
@@ -732,7 +732,6 @@ const DetailProyekPage = () => {
                             />
                           </>
                         )}
-                      </BarisLipat>
                     </div>
                   )}
                 </KartuLaporan>
