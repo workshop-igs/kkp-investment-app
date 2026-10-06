@@ -71,7 +71,6 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
   const [capex, setCapex] = useState("");
   const [revenue, setRevenue] = useState("");
   const [opex, setOpex] = useState("");
-  const [opexTotal, setOpexTotal] = useState(false);
   const [growthRev, setGrowthRev] = useState("");
   const [growthOpex, setGrowthOpex] = useState("");
   const [wacc, setWacc] = useState("");
@@ -173,7 +172,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
     const wajib = [
       [capex, "CapEx (Capital Expenditure) / Investasi Awal"],
       [revenue, "Estimasi Pendapatan Tahun Pertama"],
-      [opex, opexTotal ? "Total OpEx Selama Umur Proyek" : "Estimasi OpEx (Operational Expenditure) Tahun Pertama"],
+      [opex, "Estimasi OpEx (Operational Expenditure) Tahun Pertama"],
       [wacc, "Discount Rate"],
       [lifetime, "Umur Proyek"],
     ];
@@ -185,18 +184,11 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
 
     const angkaAtauNol = (v) => (String(v).trim() === "" ? 0 : parseFloat(v));
 
-    const tumbuhOpex = 1 + angkaAtauNol(growthOpex) / 100;
-    const opexTahunan = opexTotal
-      ? parseFloat(opex)
-        / Array.from({ length: Math.max(1, parseInt(lifetime) || 1) }, (_, t) => tumbuhOpex ** t).reduce((a, b) => a + b, 0)
-      : parseFloat(opex);
-
     if (
-      opexTahunan >= parseFloat(revenue)
+      parseFloat(opex) >= parseFloat(revenue)
       && !window.confirm(
-        `OpEx tahun pertama (${formatRupiah(opexTahunan)}) tidak lebih kecil dari pendapatan tahun pertama `
+        `OpEx tahun pertama (${formatRupiah(parseFloat(opex))}) tidak lebih kecil dari pendapatan tahun pertama `
         + `(${formatRupiah(parseFloat(revenue))}), sehingga arus kas tahun pertama sudah negatif.\n\n`
-        + 'Bila angka OpEx itu total selama umur proyek, pilih "Total selama umur proyek" pada pilihan Isian OpEx.\n\n'
         + 'Tetap jalankan analisis?'
       )
     ) {
@@ -206,7 +198,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
     const hasil = await onAnalyze(sektor, {
       capex_idr: parseFloat(capex),
       annual_revenue_idr: parseFloat(revenue),
-      annual_opex_idr: opexTahunan,
+      annual_opex_idr: parseFloat(opex),
       wacc_pct: parseFloat(wacc),
       lifetime_yr: parseInt(lifetime),
       revenue_growth_pct: angkaAtauNol(growthRev),
@@ -226,6 +218,12 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
       });
     }
   };
+
+  const umurProyek = parseInt(lifetime, 10);
+  const totalOpex = String(opex).trim() !== '' && umurProyek > 0
+    ? Array.from({ length: umurProyek }, (_, t) => parseFloat(opex) * (1 + (parseFloat(growthOpex) || 0) / 100) ** t)
+      .reduce((a, b) => a + b, 0)
+    : null;
 
   return (
     <div className="w-full h-full bg-white flex flex-col font-sans">
@@ -406,7 +404,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-slate-700 mb-1.5">
-                      {opexTotal ? 'Total OpEx Selama Umur Proyek' : 'Estimasi OpEx (Operational Expenditure) Tahun Pertama'} <span className="text-red-500">*</span>
+                      Estimasi OpEx (Operational Expenditure) Tahun Pertama <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">Rp</span>
@@ -417,22 +415,14 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
                         className="w-full bg-white border border-slate-300 rounded-lg p-2.5 pl-9 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700"
                       />
                     </div>
-                    <p className="text-xs text-slate-500 mt-1.5">
-                      {opexTotal
-                        ? 'Dibagi ke setiap tahun dengan memperhitungkan Pertumbuhan OpEx.'
-                        : 'Tahun berikutnya naik sesuai Pertumbuhan OpEx.'}
-                    </p>
+                    <p className="text-xs text-slate-500 mt-1.5">Tahun berikutnya naik sesuai Pertumbuhan OpEx.</p>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Isian OpEx</label>
-                    <select
-                      value={opexTotal ? 'total' : 'tahun'}
-                      onChange={(e) => setOpexTotal(e.target.value === 'total')}
-                      className="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700 appearance-none"
-                    >
-                      <option value="tahun">Nilai tahun pertama</option>
-                      <option value="total">Total selama umur proyek</option>
-                    </select>
+                    <p className="block text-sm text-slate-700 mb-1.5">Total OpEx Selama Umur Proyek</p>
+                    <p className="w-full rounded-lg border border-slate-200 bg-slate-100 p-2.5 text-sm text-slate-700 tabular-nums">
+                      {totalOpex === null ? '—' : formatRupiah(totalOpex)}
+                    </p>
+                    <p className="text-xs text-slate-500 mt-1.5">Dihitung otomatis dari OpEx tahun pertama, Pertumbuhan OpEx, dan Umur Proyek.</p>
                   </div>
                 </div>
 
