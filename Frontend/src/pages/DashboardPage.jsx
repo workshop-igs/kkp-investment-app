@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
-  TrendingUp, Users, MapPin, Activity, DollarSign, 
+  TrendingUp, Users, MapPin, DollarSign, 
   Layers, Filter, Download, ArrowUpRight, 
-  Eye, RefreshCw, BarChart3, PieChart as PieIcon, 
-  ChevronRight, ShieldCheck, Compass, AlertCircle, 
-  Sparkles, CheckCircle2, Globe, Building2, Anchor, Maximize2, Minimize2
+  RefreshCw, BarChart3, PieChart as PieIcon, 
+  ChevronRight, Compass, 
+  Globe, Building2, Anchor, Maximize2, Minimize2
 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import { formatNumber, rupiahMiliar } from '../utils/pemformat';
+import { formatNumber, rupiahMiliar, rupiahRingkas } from '../utils/pemformat';
 import {
   RAMP_BIRU, SERI, TINTA, gayaBatang, opsiDasar, potong, sumbuKategori,
   sumbuNilai, warnaSeri,
@@ -23,7 +23,7 @@ const WARNA_TAHAPAN = Object.fromEntries(
   URUTAN_TAHAPAN.map((kode, i) => [kode, TAHAPAN_WARNA[i]]),
 );
 import { api } from '../api/klien';
-import { BATAS_PETA } from '../components/map/PetaInteraktif';
+import { BATAS_INDONESIA } from '../components/map/PetaInteraktif';
 
 const DIAMETER_PENANDA = 15;
 
@@ -144,6 +144,25 @@ const MapResizeHandler = ({ pemicu }) => {
   return null;
 };
 
+const KunciBatasIndonesia = () => {
+  const map = useMap();
+  useEffect(() => {
+    const batas = L.latLngBounds(BATAS_INDONESIA);
+    const atur = () => {
+      map.setMinZoom(map.getBoundsZoom(batas));
+      map.setMaxBounds(batas.pad(0.15));
+    };
+    atur();
+    map.on('resize', atur);
+    return () => {
+      map.off('resize', atur);
+    };
+  }, [map]);
+  return null;
+};
+
+const sumbuRupiah = () => sumbuNilai('Rupiah', (v) => `Rp ${rupiahRingkas(v * 1e9)}`);
+
 const MapBoundsFitter = ({ markers }) => {
   const map = useMap();
   useEffect(() => {
@@ -222,16 +241,6 @@ const DashboardPage = () => {
       const matchSektor = selectedSektor === 'all' || m.sektor_nama === selectedSektor;
       const matchStatus = selectedStatus === 'all' || m.status === selectedStatus;
       const matchProv = selectedProvinsi === 'all' || m.provinsi_nama === selectedProvinsi;
-      return matchSektor && matchStatus && matchProv;
-    });
-  }, [data, selectedSektor, selectedStatus, selectedProvinsi]);
-
-  const filteredProyekList = useMemo(() => {
-    if (!data?.proyek_unggulan) return [];
-    return data.proyek_unggulan.filter(p => {
-      const matchSektor = selectedSektor === 'all' || p.sektor_nama === selectedSektor;
-      const matchStatus = selectedStatus === 'all' || p.status === selectedStatus;
-      const matchProv = selectedProvinsi === 'all' || p.provinsi_nama === selectedProvinsi;
       return matchSektor && matchStatus && matchProv;
     });
   }, [data, selectedSektor, selectedStatus, selectedProvinsi]);
@@ -367,31 +376,25 @@ const DashboardPage = () => {
   }), [urutanSektor]);
 
   const handleExportCSV = () => {
-    if (!data?.map_markers || data.map_markers.length === 0) return;
-    
-    const headers = ["Kode Proyek", "Nama Proyek", "Investor", "Sektor", "Provinsi", "Status", "Nilai Investasi (Miliar Rp)", "Realisasi (Miliar Rp)", "Luas (Ha)", "Tenaga Kerja (Orang)", "Skor Kelayakan"];
-    const rows = data.map_markers.map(m => [
-      `"${m.kode_proyek || ''}"`,
-      `"${(m.nama || '').replace(/"/g, '""')}"`,
-      `"${(m.investor || '').replace(/"/g, '""')}"`,
-      `"${m.sektor_nama || ''}"`,
-      `"${m.provinsi_nama || ''}"`,
-      `"${m.status || ''}"`,
-      m.nilai_investasi_miliar || 0,
-      m.nilai_realisasi_miliar || 0,
-      m.luas_ha || 0,
-      m.proyeksi_tenaga_kerja || 0,
-      m.skor_kelayakan ? (m.skor_kelayakan * 100).toFixed(1) + '%' : '-'
-    ]);
-
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `KKP_Portofolio_Investasi_Nasional_${new Date().toISOString().slice(0, 10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    if (!filteredMarkers.length) return;
+    const sel = (v) => (typeof v === 'number'
+      ? v.toLocaleString('id-ID', { useGrouping: false, maximumFractionDigits: 2 })
+      : `"${String(v ?? '').replace(/"/g, '""')}"`);
+    const baris = [
+      ['Kode Proyek', 'Nama Proyek', 'Investor', 'Sektor', 'Provinsi', 'Status', 'Nilai Investasi (Miliar Rp)',
+        'Realisasi (Miliar Rp)', 'Luas (Ha)', 'Tenaga Kerja (Orang)', 'Skor Kelayakan (%)'],
+      ...filteredMarkers.map((m) => [
+        m.kode_proyek, m.nama, m.investor, m.sektor_nama, m.provinsi_nama, m.status,
+        m.nilai_investasi_miliar || 0, m.nilai_realisasi_miliar || 0, m.luas_ha || 0, m.proyeksi_tenaga_kerja || 0,
+        m.skor_kelayakan == null ? '' : m.skor_kelayakan * 100,
+      ]),
+    ];
+    const isi = `\ufeff${baris.map((r) => r.map(sel).join(';')).join('\r\n')}`;
+    const tautan = document.createElement('a');
+    tautan.href = URL.createObjectURL(new Blob([isi], { type: 'text/csv;charset=utf-8' }));
+    tautan.download = `KKP_Portofolio_Investasi_Nasional_${new Date().toISOString().slice(0, 10)}.csv`;
+    tautan.click();
+    setTimeout(() => URL.revokeObjectURL(tautan.href), 1000);
   };
 
   return (
@@ -686,7 +689,7 @@ const DashboardPage = () => {
             <MapContainer
               center={[-2.5, 118.0]}
               zoom={5}
-              {...BATAS_PETA}
+              maxBoundsViscosity={1}
               style={{ height: '100%', width: '100%' }}
               className="z-0"
             >
@@ -705,6 +708,7 @@ const DashboardPage = () => {
               )}
 
               <MapResizeHandler pemicu={layarPenuh} />
+              <KunciBatasIndonesia />
               <MapBoundsFitter markers={filteredMarkers} />
 
               <LapisanGugus markers={filteredMarkers}>
@@ -808,7 +812,7 @@ const DashboardPage = () => {
                   Rencana vs Realisasi Investasi per Sektor
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Komparasi alokasi rencana modal investasi dan realisasi aktual (Miliar Rp).
+                  Komparasi alokasi rencana modal investasi dan realisasi aktual.
                 </p>
               </div>
             </div>
@@ -826,12 +830,12 @@ const DashboardPage = () => {
                         title: (item) => sektorBarChartData.namaPenuh?.[item[0].dataIndex]
                           || item[0].label,
                         label: (ctx) =>
-                          `${ctx.dataset.label}: Rp ${ctx.raw.toLocaleString('id-ID')} Miliar`,
+                          `${ctx.dataset.label}: ${rupiahMiliar(ctx.raw)}`,
                       },
                     },
                   },
                   scales: {
-                    x: sumbuNilai('Miliar Rp', (v) => `Rp ${v.toLocaleString('id-ID')}`),
+                    x: sumbuRupiah(),
                     y: sumbuKategori(),
                   },
                 }}
@@ -862,8 +866,7 @@ const DashboardPage = () => {
                           label: (ctx) => {
                             const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
                             const persen = total ? (ctx.raw / total) * 100 : 0;
-                            return `${ctx.label}: Rp ${ctx.raw.toLocaleString('id-ID')} Miliar `
-                              + `(${persen.toFixed(1)}%)`;
+                            return `${ctx.label}: ${rupiahMiliar(ctx.raw)} (${persen.toFixed(1)}%)`;
                           },
                         },
                       },
@@ -890,7 +893,7 @@ const DashboardPage = () => {
               Top 7 Sebaran Wilayah / Provinsi
             </h3>
             <p className="text-xs text-slate-500 mb-4">
-              Provinsi dengan nilai investasi kelautan tertinggi (Miliar Rp).
+              Provinsi dengan nilai investasi kelautan tertinggi.
             </p>
             <div className="h-64 w-full">
               <Bar 
@@ -904,12 +907,12 @@ const DashboardPage = () => {
                     tooltip: {
                       ...opsiDasar().plugins.tooltip,
                       callbacks: {
-                        label: (ctx) => `Rp ${ctx.raw.toLocaleString('id-ID')} Miliar`,
+                        label: (ctx) => rupiahMiliar(ctx.raw),
                       },
                     },
                   },
                   scales: {
-                    x: sumbuNilai('Miliar Rp', (v) => `Rp ${v.toLocaleString('id-ID')}`),
+                    x: sumbuRupiah(),
                     y: sumbuKategori(),
                   },
                 }}
@@ -923,7 +926,7 @@ const DashboardPage = () => {
               Distribusi per Tahapan Pipeline
             </h3>
             <p className="text-xs text-slate-500 mb-4">
-              Nilai kumulatif proyek di setiap fase perizinan (Miliar Rp).
+              Nilai kumulatif proyek di setiap fase perizinan.
             </p>
             <div className="h-64 w-full flex items-center justify-center">
               <Bar
@@ -937,12 +940,12 @@ const DashboardPage = () => {
                     tooltip: {
                       ...opsiDasar().plugins.tooltip,
                       callbacks: {
-                        label: (ctx) => `Rp ${ctx.raw.toLocaleString('id-ID')} Miliar`,
+                        label: (ctx) => rupiahMiliar(ctx.raw),
                       },
                     },
                   },
                   scales: {
-                    x: sumbuNilai('Miliar Rp', (v) => `Rp ${v.toLocaleString('id-ID')}`),
+                    x: sumbuRupiah(),
                     y: sumbuKategori(),
                   },
                 }}
@@ -966,33 +969,33 @@ const DashboardPage = () => {
                 Eksplorasi Potensi Ruang Laut Belum Teralokasi
               </h3>
               <p className="text-slate-300 text-xs leading-relaxed mb-6">
-                Terdapat puluhan zona perairan strategis nasional yang siap ditawarkan kepada investor untuk perikanan budidaya modern, ekowisata bahari, dan jasa maritim.
+                Zona ruang laut berkelas kelayakan tinggi untuk sedikitnya satu jenis investasi dan belum memiliki izin KKPRL di dalamnya.
               </p>
 
               <div className="space-y-3">
                 <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs text-slate-300">Total Titik Potensi:</span>
+                  <span className="text-xs text-slate-300">Zona Kelayakan Tinggi:</span>
                   <span className="font-bold text-teal-300 text-base">
-                    {data?.summary?.potensi?.total_titik || 30} Kawasan
+                    {formatNumber(data?.summary?.potensi?.total_zona || 0, 0)} Zona
                   </span>
                 </div>
                 <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs text-slate-300">Estimasi Nilai Potensi:</span>
+                  <span className="text-xs text-slate-300">Sebaran Wilayah:</span>
                   <span className="font-bold text-sky-300 text-base">
-                    {rupiahMiliar(data?.summary?.potensi?.total_nilai_miliar || 7530)}
+                    {formatNumber(data?.summary?.potensi?.total_provinsi || 0, 0)} Provinsi
                   </span>
                 </div>
                 <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
                   <span className="text-xs text-slate-300">Luas Cadangan Laut:</span>
                   <span className="font-bold text-emerald-300 text-base">
-                    {formatNumber(data?.summary?.potensi?.total_luas_ha || 38950, 0)} Hektar
+                    {formatNumber(data?.summary?.potensi?.total_luas_ha || 0, 0)} Hektar
                   </span>
                 </div>
               </div>
             </div>
 
             <Link
-              to="/peta"
+              to="/peta?lapisan=potensi"
               className="mt-6 w-full py-2.5 px-4 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs text-center transition-colors shadow-lg shadow-teal-500/20"
             >
               Eksplorasi Potensi di Peta Spasial &rarr;
@@ -1007,16 +1010,14 @@ const DashboardPage = () => {
               judul: 'Nilai Investasi per Sektor',
               catatan: 'Rencana modal investasi yang tercatat pada tiap sektor kelautan.',
               data: investasiSektorChartData,
-              satuan: 'Miliar Rp',
-              format: (v) => `Rp ${v.toLocaleString('id-ID')}`,
-              tip: (ctx) => `Nilai investasi: Rp ${ctx.raw.toLocaleString('id-ID')} Miliar`,
+              sumbu: sumbuRupiah(),
+              tip: (ctx) => `Nilai investasi: ${rupiahMiliar(ctx.raw)}`,
             },
             {
               judul: 'Serapan Tenaga Kerja per Sektor',
               catatan: 'Proyeksi lapangan kerja langsung dari proyek yang terdaftar.',
               data: tenagaKerjaChartData,
-              satuan: 'Orang',
-              format: (v) => v.toLocaleString('id-ID'),
+              sumbu: sumbuNilai('Orang', (v) => v.toLocaleString('id-ID')),
               tip: (ctx) => `Tenaga kerja: ${ctx.raw.toLocaleString('id-ID')} orang`,
             },
           ].map((g) => (
@@ -1041,7 +1042,7 @@ const DashboardPage = () => {
                       },
                     },
                     scales: {
-                      x: sumbuNilai(g.satuan, g.format),
+                      x: g.sumbu,
                       y: sumbuKategori(),
                     },
                   }}
@@ -1049,122 +1050,6 @@ const DashboardPage = () => {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-            <div>
-              <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-                <Sparkles className="w-5 h-5 text-amber-500" />
-                Portofolio Proyek Unggulan Terdaftar
-              </h3>
-              <p className="text-xs text-slate-500">
-                Daftar proyek kelautan strategis dengan nilai investasi dan skor kelayakan tertinggi.
-              </p>
-            </div>
-
-            <Link
-              to="/pipeline"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-sky-700 hover:text-sky-800"
-            >
-              <span>Lihat Seluruh {data?.summary?.total_proyek || 0} Proyek</span>
-              <ChevronRight className="w-4 h-4" />
-            </Link>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-slate-50/80 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider font-semibold">
-                  <th className="py-3.5 px-6">Kode & Nama Proyek</th>
-                  <th className="py-3.5 px-6">Sektor & Investor</th>
-                  <th className="py-3.5 px-6">Lokasi</th>
-                  <th className="py-3.5 px-6">Nilai Investasi</th>
-                  <th className="py-3.5 px-6">Tahapan</th>
-                  <th className="py-3.5 px-6">Skor AHP</th>
-                  <th className="py-3.5 px-6 text-right">Aksi</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm text-slate-600 divide-y divide-slate-100">
-                {filteredProyekList.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
-                      Tidak ada proyek yang sesuai dengan filter yang dipilih.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredProyekList.map((p) => {
-                    const statusInfo = STATUS_CONFIG[p.status] || { label: p.status, bg: 'bg-slate-50', text: 'text-slate-700', border: 'border-slate-200' };
-                    const ahpPct = Math.round((p.skor_kelayakan || 0.8) * 100);
-
-                    return (
-                      <tr key={p.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="py-4 px-6">
-                          <div className="font-mono text-xs text-sky-700 font-bold mb-0.5">
-                            {p.kode_proyek || `PRJ-${p.id}`}
-                          </div>
-                          <div className="font-semibold text-slate-900 leading-snug">
-                            {p.nama}
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-6">
-                          <div className="font-medium text-slate-800 text-xs">{p.sektor_nama}</div>
-                          <div className="text-xs text-slate-400">{p.investor || 'Pemerintah / Konsorsium'}</div>
-                        </td>
-
-                        <td className="py-4 px-6 text-xs text-slate-600">
-                          {p.provinsi_nama || '-'}
-                        </td>
-
-                        <td className="py-4 px-6">
-                          <div className="font-bold text-slate-900 text-sm">
-                            {rupiahMiliar(p.nilai_investasi_miliar)}
-                          </div>
-                          <div className="text-[11px] text-slate-400">
-                            Realisasi: {rupiahMiliar(p.nilai_realisasi_miliar || 0)}
-                          </div>
-                        </td>
-
-                        <td className="py-4 px-6">
-                          <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold border ${statusInfo.bg} ${statusInfo.text} ${statusInfo.border}`}>
-                            {statusInfo.label}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-6">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-xs text-slate-800">{ahpPct}%</span>
-                            <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                              <div 
-                                className={`h-1.5 rounded-full ${
-                                  ahpPct >= 75 ? 'bg-emerald-500' : ahpPct >= 50 ? 'bg-amber-500' : 'bg-red-500'
-                                }`}
-                                style={{ width: `${ahpPct}%` }}
-                              ></div>
-                            </div>
-                          </div>
-                          <span className="text-[10px] text-slate-400 block mt-0.5">
-                            {ahpPct >= 75 ? 'Sangat Layak' : 'Layak Bersyarat'}
-                          </span>
-                        </td>
-
-                        <td className="py-4 px-6 text-right">
-                          <Link
-                            to={`/pipeline/${p.id}`}
-                            className="inline-flex items-center gap-1 px-3 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 rounded-lg text-xs font-semibold transition-colors"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>Detail</span>
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
         </div>
 
       </div>
