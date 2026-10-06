@@ -102,6 +102,50 @@ const LAPISAN_INFRASTRUKTUR = Object.fromEntries(
   ])
 );
 
+const POLA_RUANG = {
+  url: '/inventarisasi/zonasi/peta/',
+  urlWilayah: '/inventarisasi/zonasi/wilayah/',
+  legenda: 'zona',
+  pilihan: {
+    param: 'kategori',
+    label: 'Tampilkan peruntukan',
+    semua: 'Semua peruntukan',
+    opsi: URUTAN_KATEGORI.map((kode) => [kode, KATEGORI_ZONA[kode].label]),
+  },
+  gaya: (f) => {
+    const p = f?.properties || {};
+    const warna = warnaZona(p.kategori);
+    const garis = gayaKawasan(p.jenis_kode);
+    return {
+      color: warna,
+      weight: garis.weight,
+      dashArray: garis.dashArray || undefined,
+      fillColor: warna,
+      fillOpacity: 0.32,
+      opacity: 0.9,
+    };
+  },
+  popup: (p) => {
+    const k = kategoriZona(p.kategori);
+    return `<div class="font-sans">
+      <h3 class="font-bold text-kkp-800 mb-1">${aman(p.nama || 'Zona')}</h3>
+      <p class="text-xs mb-2 flex items-center gap-1.5">
+        <span style="width:10px;height:10px;border-radius:2px;display:inline-block;background:${k.warna}"></span>
+        <span class="font-semibold text-slate-700">${k.label}</span>
+      </p>
+      <div class="text-xs border-t pt-1">
+      <b>Kawasan:</b> ${aman(p.jenis || '-')}<br/>
+      <b>Sub-zona:</b> ${aman(p.sub_zona || '-')}<br/>
+      <b>Instrumen:</b> ${
+        { 'KKP-RTRW': 'Perda RTRW Provinsi', 'KKP-PKKPRL': 'PKKPRL pada RTRW Provinsi', 'KKP-WFS': 'Rencana Zonasi KAW' }[p.sumber] || 'RZWP-3-K'
+      }<br/>
+      <b>Dasar hukum:</b> ${aman(p.regulasi || '-')}<br/>
+      <b>Provinsi:</b> ${aman(p.provinsi || '-')}</div>
+      ${TOMBOL_ANALISIS}
+    </div>`;
+  },
+};
+
 export const LAYER_LOKAL = {
   ...Object.fromEntries(
     OSEANOGRAFI.map(([id, citra, label, keteranganLegenda]) => [id, { citra, label, legenda: 'gradasi', keteranganLegenda }])
@@ -427,16 +471,9 @@ export const LAYER_LOKAL = {
   },
 
   polaruang: {
-    url: '/inventarisasi/zonasi/peta/',
-    urlWilayah: '/inventarisasi/zonasi/wilayah/',
-    label: 'Pola Ruang Laut (RTRW Provinsi, PKKPRL & RZWP-3-K)',
-    legenda: 'zona',
-    pilihan: {
-      param: 'kategori',
-      label: 'Tampilkan peruntukan',
-      semua: 'Semua peruntukan',
-      opsi: URUTAN_KATEGORI.map((kode) => [kode, KATEGORI_ZONA[kode].label]),
-    },
+    ...POLA_RUANG,
+    params: { tingkat: 'RTRW_PROVINSI' },
+    label: 'RTRW Provinsi (Perda RTRW, PKKPRL & RZWP-3-K)',
     keteranganLegenda:
       'Alokasi ruang laut provinsi dari tiga instrumen. Zona laut dari geodatabase '
       + 'Perda RTRW Provinsi (KKP) menjadi acuan utama; peta arahan PKKPRL dan '
@@ -444,38 +481,19 @@ export const LAYER_LOKAL = {
       + 'Cipta Kerja zonasi laut diintegrasikan ke dalam RTRW provinsi, sehingga '
       + 'RTRWP sebelum 2021 tidak memuat zona laut. Ketiganya disajikan sebagai satu '
       + 'lapisan dan dapat bertumpuk; popup tiap zona menyebutkan instrumen dasarnya, '
-      + 'dan screening memakai acuan teratas yang tersedia.',
-    gaya: (f) => {
-      const p = f?.properties || {};
-      const warna = warnaZona(p.kategori);
-      const garis = gayaKawasan(p.jenis_kode);
-      return {
-        color: warna,
-        weight: garis.weight,
-        dashArray: garis.dashArray || undefined,
-        fillColor: warna,
-        fillOpacity: 0.32,
-        opacity: 0.9,
-      };
-    },
-    popup: (p) => {
-      const k = kategoriZona(p.kategori);
-      return `<div class="font-sans">
-        <h3 class="font-bold text-kkp-800 mb-1">${aman(p.nama || 'Zona')}</h3>
-        <p class="text-xs mb-2 flex items-center gap-1.5">
-          <span style="width:10px;height:10px;border-radius:2px;display:inline-block;background:${k.warna}"></span>
-          <span class="font-semibold text-slate-700">${k.label}</span>
-        </p>
-        <div class="text-xs border-t pt-1">
-        <b>Kawasan:</b> ${aman(p.jenis || '-')}<br/>
-        <b>Sub-zona:</b> ${aman(p.sub_zona || '-')}<br/>
-        <b>Instrumen:</b> ${
-          { 'KKP-RTRW': 'Perda RTRW Provinsi', 'KKP-PKKPRL': 'PKKPRL pada RTRW Provinsi', 'KKP-WFS': 'Rencana Zonasi KAW' }[p.sumber] || 'RZWP-3-K'
-        }<br/>
-        <b>Dasar hukum:</b> ${aman(p.regulasi || '-')}<br/>
-        <b>Provinsi:</b> ${aman(p.provinsi || '-')}</div>
-        ${TOMBOL_ANALISIS}
-      </div>`;
-    },
+      + 'dan screening memakai acuan teratas yang tersedia. Rencana Zonasi KAW '
+      + 'disajikan pada lapisan tersendiri.',
+  },
+
+  polaruang_kaw: {
+    ...POLA_RUANG,
+    params: { tingkat: 'KAW' },
+    label: 'Rencana Zonasi Kawasan Antarwilayah (KAW)',
+    keteranganLegenda:
+      'Rencana zonasi untuk perairan yang melintasi lebih dari satu provinsi, '
+      + 'ditetapkan dengan Peraturan Presiden. Yang tersedia di basis data baru '
+      + 'Perpres No. 83/2020 (perairan Kalimantan Timur, Kalimantan Selatan, Sulawesi '
+      + 'Barat, Sulawesi Selatan, dan Sulawesi Tengah). Screening memakai KAW untuk '
+      + 'bagian area yang tidak diatur RTRW Provinsi.',
   },
 };
