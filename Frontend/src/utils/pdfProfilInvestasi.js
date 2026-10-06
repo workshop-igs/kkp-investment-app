@@ -10,15 +10,15 @@ import { bersih, logoPdf, pasangFontPdf, siapkanAsetPdf } from './pdfLaporan';
 import { ATRIBUSI_CITRA, gambarGeometri, gambarSkala, gambarUtara, muatCitra } from './petaLaporan';
 import { KATEGORI_ZONA, warnaJenisInvestasi, warnaKelasKelayakan, warnaZona } from './simbologiPeta';
 
-const W = 297;
-const H = 167.0625;
-const TEPI = 14;
-const ATAS = 31;
-const BAWAH = H - 15;
+export const W = 297;
+export const H = 167.0625;
+export const TEPI = 14;
+export const ATAS = 31;
+export const BAWAH = H - 15;
 const MM_PER_PT = 0.3528;
 const SUDUT = 2.6;
 
-const C = {
+export const C = {
   navy: [0, 34, 66],
   biru: [0, 86, 165],
   hijau: [140, 198, 63],
@@ -67,7 +67,7 @@ const senilai = (k) => (k.nilai_juta_rp == null ? '' : ` senilai Rp ${miliar(k.n
 const tanggalPanjang = (iso) =>
   new Date(iso || Date.now()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
 
-const rgb = (hex) => {
+export const rgb = (hex) => {
   const n = parseInt(String(hex).replace('#', ''), 16);
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 };
@@ -268,7 +268,7 @@ function latarSampul() {
   return kanvas.toDataURL('image/jpeg', 0.9);
 }
 
-class Dek {
+export class Dek {
   constructor(kaki) {
     this.doc = new jsPDF({ unit: 'mm', format: [W, H], orientation: 'landscape', compress: true });
     this.font = pasangFontPdf(this.doc);

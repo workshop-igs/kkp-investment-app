@@ -8,7 +8,7 @@ import {
   URUTAN_KELAS_KELAYAKAN,
   URUTAN_KELAS_RISIKO,
 } from '../../utils/simbologiPeta';
-import { KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI, garisKelasKelayakan } from '../../utils/simbologiPeta';
+import { GARIS_KAWASAN, KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI, garisKelasKelayakan } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { buatIkon } from './ikonPeta';
 import { api } from '../../api/klien';
@@ -121,7 +121,7 @@ const LegendaJSON = ({ data }) => (
 );
 
 let janjiOseanografi = null;
-const ambilOseanografi = () => {
+export const ambilOseanografi = () => {
   janjiOseanografi ||= api.get('/analitik/oseanografi/').then(({ data }) => data).catch((e) => {
     janjiOseanografi = null;
     throw e;
@@ -211,15 +211,10 @@ const LegendaLokal = () => (
     <div className="pt-2 border-t border-slate-100">
       <p className="text-[11px] font-semibold text-slate-500 mb-1.5">Garis tepi = jenis kawasan</p>
       <ul className="space-y-1">
-        {[
-          ['Kawasan pemanfaatan umum', '1px solid #64748b'],
-          ['Kawasan konservasi', '2px solid #16a34a'],
-          ['Kawasan strategis nasional', '2px dashed #7c3aed'],
-          ['Alur laut', '2px dotted #0056A5'],
-        ].map(([teks, gaya]) => (
-          <li key={teks} className="flex items-center gap-2">
-            <span className="w-8 shrink-0" style={{ borderTop: gaya }} />
-            <span className="text-[12px] text-slate-700 leading-snug">{teks}</span>
+        {GARIS_KAWASAN.map(({ label, tebal, pola, warna }) => (
+          <li key={label} className="flex items-center gap-2">
+            <span className="w-8 shrink-0" style={{ borderTop: `${tebal}px ${pola} ${warna}` }} />
+            <span className="text-[12px] text-slate-700 leading-snug">{label}</span>
           </li>
         ))}
       </ul>

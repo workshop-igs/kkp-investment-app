@@ -349,6 +349,7 @@ const PetaInteraktif = ({
             attribution='&copy; KKP RI - Sistem Informasi Spasial'
             maxZoom={19}
             maxNativeZoom={18}
+            crossOrigin
           />
 
           <PaneBatas onSiap={setKanvasBatas} />
