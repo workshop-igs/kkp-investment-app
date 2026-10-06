@@ -60,6 +60,13 @@ const GAYA_KAWASAN = {
 
 export const gayaKawasan = (kode) => GAYA_KAWASAN[kode] || GAYA_KAWASAN.ZU;
 
+export const GARIS_KAWASAN = [
+  { label: 'Kawasan pemanfaatan umum', tebal: 1, pola: 'solid', warna: '#64748b' },
+  { label: 'Kawasan konservasi', tebal: 2, pola: 'solid', warna: '#16a34a' },
+  { label: 'Kawasan strategis nasional', tebal: 2, pola: 'dashed', warna: '#7c3aed' },
+  { label: 'Alur laut', tebal: 2, pola: 'dotted', warna: '#0056A5' },
+];
+
 export const KATEGORI_RTRL = {
   ALUR_PELAYARAN: {
     label: 'Alur Pelayaran & ALKI',
