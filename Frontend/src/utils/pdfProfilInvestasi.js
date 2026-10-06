@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { api } from '../api/klien';
 import { bersih, logoPdf, pasangFontPdf, siapkanAsetPdf } from './pdfLaporan';
+import { formatRupiah, rupiahRingkas } from './pemformat';
 import { ATRIBUSI_CITRA, gambarGeometri, gambarSkala, gambarUtara, muatCitra } from './petaLaporan';
 import { KATEGORI_ZONA, warnaJenisInvestasi, warnaKelasKelayakan, warnaZona } from './simbologiPeta';
 
@@ -60,9 +61,9 @@ const namaRapi = (t, maks = 60) => {
   return rapi.length > maks ? `${rapi.slice(0, maks - 1)}…` : rapi;
 };
 
-const miliar = (juta) => (juta == null ? '-' : angka(juta / 1000, 1));
+const rupiah = (juta) => (juta == null ? '-' : rupiahRingkas(juta * 1e6));
 
-const senilai = (k) => (k.nilai_juta_rp == null ? '' : ` senilai Rp ${miliar(k.nilai_juta_rp)} miliar`);
+const senilai = (k) => (k.nilai_juta_rp == null ? '' : ` senilai ${formatRupiah(k.nilai_juta_rp * 1e6)}`);
 
 const tanggalPanjang = (iso) =>
   new Date(iso || Date.now()).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -829,7 +830,7 @@ function komoditasUnggulan(dek, o, bab) {
     dek.gaya(6.2, C.abu);
     dek.doc.text(`ton produksi ${k.tahun}`, x + 4, y + 30);
     dek.gaya(6.6, C.teks, true);
-    dek.doc.text(bersih(`Rp ${miliar(k.nilai_juta_rp)} M  |  #${k.peringkat_nasional} nasional`), x + 4, y + 36);
+    dek.doc.text(bersih(`Rp ${rupiah(k.nilai_juta_rp)}  |  #${k.peringkat_nasional} nasional`), x + 4, y + 36);
     dek.doc.setFillColor(...C.jalur);
     dek.doc.roundedRect(x + 4, y + 39.6, lebarKartu - 8, 2, 1, 1, 'F');
     dek.doc.setFillColor(...a);
@@ -842,9 +843,9 @@ function komoditasUnggulan(dek, o, bab) {
   const kiri = 172;
   let yy = dek.kartu(TEPI, yb, kiri, BAWAH - yb, { judul: 'Seluruh komoditas laut', ikon: 'komoditas' });
   if (o.komoditas.length) {
-    dek.tabel(TEPI + 4, yy - 1, kiri - 8, ['Komoditas', 'Kelompok', 'Tahun', 'Produksi (ton)', 'Nilai (Rp M)', 'Pangsa', 'Peringkat'],
+    dek.tabel(TEPI + 4, yy - 1, kiri - 8, ['Komoditas', 'Kelompok', 'Tahun', 'Produksi (ton)', 'Nilai (Rp)', 'Pangsa', 'Peringkat'],
       o.komoditas.slice(0, 10).map((k) => [k.nama, k.kelompok === 'BUDIDAYA' ? 'Budidaya laut' : 'Tangkap laut', k.tahun,
-        angka(k.produksi_ton), miliar(k.nilai_juta_rp), `${angka(k.pangsa_nasional_persen, 1)}%`, `${k.peringkat_nasional}/${k.jumlah_provinsi}`]),
+        angka(k.produksi_ton), rupiah(k.nilai_juta_rp), `${angka(k.pangsa_nasional_persen, 1)}%`, `${k.peringkat_nasional}/${k.jumlah_provinsi}`]),
       { bagian: [0.2, 0.17, 0.09, 0.16, 0.14, 0.11, 0.13], rataKanan: [2, 3, 4, 5, 6], ukuran: 6.5, batas: BAWAH - 3,
         sorot: o.komoditas.slice(0, 10).map((k, i) => (k.unggulan ? i : -1)).filter((i) => i >= 0) });
   }
@@ -875,7 +876,7 @@ function kajian(dek, o, b, i) {
   if (k) {
     [
       [angka(k.produksi_ton), `ton produksi ${k.tahun}`],
-      [miliar(k.nilai_juta_rp), `Rp miliar nilai produksi ${k.tahun}`],
+      [k.nilai_juta_rp == null ? '-' : formatRupiah(k.nilai_juta_rp * 1e6), `nilai produksi ${k.tahun}`],
       [`${angka(k.pangsa_nasional_persen, 1)}%`, 'pangsa produksi nasional'],
       [`${k.peringkat_nasional} / ${k.jumlah_provinsi}`, 'peringkat di antara provinsi produsen'],
       [k.pertumbuhan_persen == null ? '-' : `${angka(k.pertumbuhan_persen, 1)}%`, `pertumbuhan per tahun (${k.tahun_awal}–${k.tahun})`],
@@ -1052,11 +1053,12 @@ function finansialPasar(dek, o, b, i) {
     return;
   }
   const kiri = 136;
-  let yy = dek.kartu(TEPI, y, kiri, BAWAH - y, { judul: 'Nilai produksi per tahun (Rp miliar)', ikon: 'pasar', aksen });
-  dek.gambar(grafikKanvas(k.seri.map((s) => ({ ...s, nilai_miliar: s.nilai_juta_rp == null ? null : s.nilai_juta_rp / 1000 })), 'nilai_miliar', aksen, { desimal: 1 }),
+  const [bagi, satuan, desimal] = k.seri.some((s) => s.nilai_juta_rp >= 1e6) ? [1e6, 'triliun', 2] : [1e3, 'miliar', 1];
+  let yy = dek.kartu(TEPI, y, kiri, BAWAH - y, { judul: `Nilai produksi per tahun (Rp ${satuan})`, ikon: 'pasar', aksen });
+  dek.gambar(grafikKanvas(k.seri.map((s) => ({ ...s, nilai: s.nilai_juta_rp == null ? null : s.nilai_juta_rp / bagi })), 'nilai', aksen, { desimal }),
     TEPI + 4, yy - 2, kiri - 8, (kiri - 8) * 0.43);
-  dek.tabel(TEPI + 4, yy + (kiri - 8) * 0.43, kiri - 8, ['Tahun', 'Produksi (ton)', 'Nilai (Rp M)', 'Rp/kg'],
-    k.seri.slice(-5).map((s) => [s.tahun, angka(s.produksi_ton), miliar(s.nilai_juta_rp), angka(s.harga_rp_kg)]),
+  dek.tabel(TEPI + 4, yy + (kiri - 8) * 0.43, kiri - 8, ['Tahun', 'Produksi (ton)', 'Nilai (Rp)', 'Rp/kg'],
+    k.seri.slice(-5).map((s) => [s.tahun, angka(s.produksi_ton), rupiah(s.nilai_juta_rp), angka(s.harga_rp_kg)]),
     { bagian: [0.16, 0.3, 0.28, 0.26], rataKanan: [1, 2, 3], ukuran: 6.5, aksen });
 
   const x = TEPI + kiri + 5;

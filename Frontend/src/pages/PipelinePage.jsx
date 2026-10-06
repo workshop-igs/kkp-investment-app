@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Plus, Search, BarChart3, TrendingUp, Users, Trash2, Eye, AlertTriangle, X, CheckCircle2, Loader2, FileText } from 'lucide-react';
-import { formatRupiah, formatNumber } from '../utils/pemformat';
+import { formatRupiah, formatNumber, rupiahMiliar } from '../utils/pemformat';
 import { SECTORS } from '../utils/konstanta';
 import { unduhPdfPipeline } from '../utils/pdfPipeline';
 import { api } from '../api/klien';
@@ -325,7 +325,7 @@ const PipelinePage = () => {
                           {badge.label}
                         </span>
                       </td>
-                      <td className="py-4 px-6 font-medium text-slate-800">Rp {p.nilai_investasi_miliar} M</td>
+                      <td className="py-4 px-6 font-medium text-slate-800">{rupiahMiliar(p.nilai_investasi_miliar)}</td>
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link 
@@ -377,7 +377,7 @@ const PipelinePage = () => {
                 {projectToDelete.nama}
               </div>
               <div className="text-xs text-slate-500">
-                Sektor: {projectToDelete.sektor_nama || '-'} • Nilai: Rp {projectToDelete.nilai_investasi_miliar} M
+                Sektor: {projectToDelete.sektor_nama || '-'} • Nilai: {rupiahMiliar(projectToDelete.nilai_investasi_miliar)}
               </div>
             </div>
 

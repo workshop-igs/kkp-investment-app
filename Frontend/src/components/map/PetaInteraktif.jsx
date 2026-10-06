@@ -44,6 +44,8 @@ export const URL_PETA_DASAR = {
   street: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
 };
 
+export const BATAS_INDONESIA = [[-11.5, 94.5], [6.5, 141.5]];
+
 export const BATAS_PETA = { minZoom: 4, maxBounds: [[-25.0, 81.0], [21.0, 155.0]], maxBoundsViscosity: 0.7 };
 
 const PROFIL_PETA_DASAR = { topo: 'terang', street: 'terang', satellite: 'gelap' };

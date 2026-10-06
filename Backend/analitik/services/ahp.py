@@ -254,6 +254,8 @@ def _angka_id(nilai: float, desimal: int = 1) -> str:
 
 
 def _rupiah(nilai: float) -> str:
+    if round(abs(nilai) / 1e9, 1) >= 1000:
+        return f'Rp {_angka_id(nilai / 1e12, 2)} triliun'
     if abs(nilai) >= 1e9:
         return f'Rp {_angka_id(nilai / 1e9)} miliar'
     if abs(nilai) >= 1e6:

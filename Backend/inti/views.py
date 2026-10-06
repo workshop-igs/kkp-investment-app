@@ -275,6 +275,7 @@ def dashboard_stats(request):
     from django.core.cache import cache
     from django.db.models import Avg, Count, Sum
 
+    from analitik.services.profil_investasi import skor_sesuai
     from inventarisasi.models import KKPRL, PotensiInvestasi, ZonasiRuangLaut
     from pipeline.models import ProyekInvestasi
 
@@ -377,10 +378,11 @@ def dashboard_stats(request):
         for p in provinsi_qs
     ]
 
-    potensi_agg = PotensiInvestasi.objects.aggregate(
-        total_potensi=Count('id'),
-        total_nilai_potensi=Sum('nilai_potensi_miliar'),
-        total_luas_potensi=Sum('luas_ha'),
+    peluang = skor_sesuai().filter(kelas='TINGGI', jumlah_kkprl=0)
+    potensi_agg = ZonasiRuangLaut.objects.filter(id__in=peluang.values('zona_id')).aggregate(
+        zona=Count('id'),
+        luas=Sum('luas_ha'),
+        provinsi=Count('provinsi', distinct=True),
     )
     total_kkprl = KKPRL.objects.count()
     total_zonasi = ZonasiRuangLaut.objects.count()
@@ -413,26 +415,6 @@ def dashboard_stats(request):
         if p.titik is not None
     ]
 
-    proyek_unggulan = [
-        {
-            'id': p.id,
-            'kode_proyek': p.kode_proyek,
-            'nama': p.nama,
-            'investor': p.investor,
-            'sektor_nama': p.sektor.nama if p.sektor_id else 'Umum',
-            'provinsi_nama': p.provinsi.nama if p.provinsi_id else 'Perairan nasional',
-            'nilai_investasi_miliar': p.nilai_investasi_miliar,
-            'nilai_realisasi_miliar': p.nilai_realisasi_miliar,
-            'status': p.status,
-            'skor_kelayakan': p.skor_kelayakan,
-            'luas_ha': p.luas_ha,
-            'proyeksi_tenaga_kerja': p.proyeksi_tenaga_kerja,
-        }
-        for p in ProyekInvestasi.objects.select_related('sektor', 'provinsi')
-        .defer('geometry', 'analisis_json', 'provinsi__geometry')
-        .order_by('-nilai_investasi_miliar')[:6]
-    ]
-
     muatan = {
             'summary': {
                 'total_proyek': total_proyek,
@@ -445,9 +427,10 @@ def dashboard_stats(request):
                 'total_provinsi': Provinsi.objects.count(),
                 'total_sektor': SektorInvestasi.objects.filter(aktif=True).count(),
                 'potensi': {
-                    'total_titik': potensi_agg['total_potensi'] or 0,
-                    'total_nilai_miliar': round(float(potensi_agg['total_nilai_potensi'] or 0), 1),
-                    'total_luas_ha': round(float(potensi_agg['total_luas_potensi'] or 0), 1),
+                    'total_titik': PotensiInvestasi.objects.count(),
+                    'total_zona': potensi_agg['zona'] or 0,
+                    'total_provinsi': potensi_agg['provinsi'] or 0,
+                    'total_luas_ha': round(float(potensi_agg['luas'] or 0), 1),
                     'total_kkprl': total_kkprl,
                     'total_zonasi': total_zonasi,
                 },
@@ -456,7 +439,6 @@ def dashboard_stats(request):
             'proyek_per_sektor': proyek_per_sektor,
             'proyek_per_provinsi': proyek_per_provinsi,
             'map_markers': map_markers,
-            'proyek_unggulan': proyek_unggulan,
     }
 
     cache.set(kunci_cache, muatan, CACHE_DASHBOARD_DETIK)

@@ -5,9 +5,8 @@ import 'leaflet/dist/leaflet.css';
 import { Loader2, MapPin } from 'lucide-react';
 import { api } from '../api/klien';
 import { RingkasanProvinsi, UnduhProfilProvinsi } from '../components/map/PanelDetailProvinsi';
-import { BATAS_PETA, URL_PETA_DASAR } from '../components/map/PetaInteraktif';
+import { BATAS_INDONESIA, BATAS_PETA, URL_PETA_DASAR } from '../components/map/PetaInteraktif';
 
-const BATAS_INDONESIA = [[-11.5, 94.5], [6.5, 141.5]];
 
 const gayaProvinsi = (fitur, kode) => {
   if (!kode) return { color: '#fde047', weight: 1.2, opacity: 0.9, fillColor: '#38bdf8', fillOpacity: 0.14 };
