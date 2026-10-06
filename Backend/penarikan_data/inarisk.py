@@ -49,7 +49,7 @@ def kelas_dari_indeks(nilai: Optional[float]) -> Optional[str]:
 def _statistik_lokal(jenis: str, geom) -> Optional[Dict[str, float]]:
     sql = """
         WITH petak AS (
-            SELECT ST_Clip(rast, ST_GeomFromEWKT(%s), true) AS potong
+            SELECT ST_Clip(rast, ST_GeomFromEWKT(%s), NULL::float8[], true, true) AS potong
             FROM analitik_raster_risiko_bencana
             WHERE jenis = %s
               AND varian = %s
@@ -184,7 +184,9 @@ def indeks_risiko(geom) -> Dict[str, Any]:
         )
     elif not hasil['tersedia'] and hasil['bahaya']:
         hasil['catatan'] = (
-            'Area berada di luar cakupan seluruh peta risiko InaRISK yang tersimpan.'
+            'Tidak ada risiko bencana yang terpetakan di dalam area ini.'
+            if any(b['cakupan_persen'] is not None for b in hasil['bahaya'].values())
+            else 'Area berada di luar cakupan seluruh peta risiko InaRISK yang tersimpan.'
         )
     elif not hasil['bahaya']:
         hasil['catatan'] = (
