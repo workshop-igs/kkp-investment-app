@@ -26,9 +26,17 @@ def _rentang_tahun(langkah):
     return f'[({awal:%Y-%m-%dT%H:%M:%SZ}):{langkah}:({akhir:%Y-%m-%dT%H:%M:%SZ})]'
 
 
-def _tanggal(iso):
-    t = datetime.fromisoformat(iso.replace('Z', '+00:00'))
+def _tanggal(t):
     return f'{t.day} {BULAN[t.month - 1]} {t.year}'
+
+
+def _periode(waktu, bulanan):
+    if not waktu:
+        return ''
+    awal, akhir = (datetime.fromisoformat(w.replace('Z', '+00:00')) for w in (min(waktu), max(waktu)))
+    if bulanan:
+        return f'{BULAN[awal.month - 1]} {awal.year} – {BULAN[akhir.month - 1]} {akhir.year} ({len(waktu)} rata-rata bulanan)'
+    return f'{_tanggal(awal)} – {_tanggal(akhir)} ({len(waktu)} sampel)'
 
 
 PARAMETER = {
@@ -38,18 +46,18 @@ PARAMETER = {
     },
     'SUHU': {
         'server': COASTWATCH, 'dataset': 'NOAA_DHW_monthly', 'variabel': 'sea_surface_temperature', 'satuan': '°C',
-        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True,
+        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True, 'bulanan': True,
         'sumber': 'NOAA Coral Reef Watch bulanan (dataset yang ditayangkan Sidako KKP), 12 bulan terakhir, grid 0,1°',
     },
     'ANOMALI_SUHU': {
         'server': COASTWATCH, 'dataset': 'NOAA_DHW_monthly', 'variabel': 'sea_surface_temperature_anomaly', 'satuan': '°C',
-        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True,
+        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True, 'bulanan': True,
         'sumber': 'NOAA Coral Reef Watch bulanan (dataset yang ditayangkan Sidako KKP), selisih dari rata-rata jangka panjang, '
                   '12 bulan terakhir, grid 0,1°',
     },
     'KLOROFIL': {
         'dataset': 'erdMH1chlamday', 'variabel': 'chlorophyll', 'satuan': 'mg/m³', 'waktu': '[last-11:1:last]',
-        'resolusi': 1 / 24, 'langkah': 3,
+        'resolusi': 1 / 24, 'langkah': 3, 'bulanan': True,
         'sumber': 'NASA MODIS-Aqua klorofil-a bulanan via NOAA ERDDAP, 12 bulan terakhir yang tersedia',
     },
     'GELOMBANG': {
@@ -93,8 +101,7 @@ def _grid(teks, variabel):
         if math.isnan(v):
             continue
         sel.setdefault((float(b[i_lat]), float(b[i_lon])), []).append(v)
-    periode = f'{_tanggal(min(waktu))} - {_tanggal(max(waktu))} ({len(waktu)} sampel)' if waktu else ''
-    return sel, periode
+    return sel, waktu
 
 
 def _raster(sel, resolusi, pita, kosong_bila=None):
@@ -174,9 +181,9 @@ class Command(BaseCommand):
             teks = _unduh(url)
             if teks:
                 break
-        sel, periode = _grid(teks, p['variabel'])
+        sel, waktu = _grid(teks, p['variabel'])
         rast, cakupan = _raster(sel, p['resolusi'] * langkah, [np.mean, np.min, np.max])
         with transaction.atomic():
             RasterOseanografi.objects.filter(parameter=kode).delete()
-            self._simpan(kode, p, rast, cakupan, periode)
+            self._simpan(kode, p, rast, cakupan, _periode(waktu, p.get('bulanan')))
         return 1
