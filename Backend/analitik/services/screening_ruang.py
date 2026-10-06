@@ -1,7 +1,7 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GeometryCollection, GEOSGeometry
 from django.db import connection
 
 from analitik.models import KetentuanRuang
@@ -54,6 +54,12 @@ def _prioritas_sumber(sumber: str) -> int:
 def _geos(ewkb) -> GEOSGeometry:
     g = GEOSGeometry(memoryview(ewkb))
     return g if g.valid else g.buffer(0)
+
+
+def _bagian(geom) -> List[GEOSGeometry]:
+    if geom.geom_type == 'GeometryCollection':
+        return [b for g in geom for b in _bagian(g)]
+    return [geom]
 
 
 def _luas(c, geom) -> float:
@@ -132,7 +138,7 @@ def _zona_efektif(c, geom, luas_aoi):
     for tingkat, sumber, umum in urutan:
         if sisa.empty:
             break
-        gabung = None
+        potongan = []
         for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, ewkb) in baris:
             if tk != tingkat or sd != sumber or (sub in SUB_ZONA_TANPA_RINCIAN) != umum or ewkb is None:
                 continue
@@ -156,9 +162,9 @@ def _zona_efektif(c, geom, luas_aoi):
                 'luas_m2': m2,
                 'persen': round(m2 / luas_aoi * 100, 1) if luas_aoi else 0,
             })
-            gabung = irisan if gabung is None else gabung.union(irisan)
-        if gabung is not None:
-            sisa = sisa.difference(gabung)
+            potongan.extend(_bagian(irisan))
+        if potongan:
+            sisa = sisa.difference(GeometryCollection(*potongan, srid=4326).unary_union)
     luas_sisa = _luas(c, sisa)
     cakupan = max(0.0, 1 - luas_sisa / luas_aoi) if luas_aoi else 0.0
     return efektif, cakupan
