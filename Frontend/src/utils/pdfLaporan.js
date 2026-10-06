@@ -846,8 +846,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     );
     k.bukaKartu(
       'Perkiraan Serapan Tenaga Kerja',
-      'Angka serapan berasal dari rencana operasional yang diisi penyusun analisis; '
-        + 'ia tidak dimodelkan dari nilai investasi.'
+      'Angka serapan berasal dari rencana operasional yang diisi penyusun analisis.'
     );
 
     if (a.kerja.total != null) {
