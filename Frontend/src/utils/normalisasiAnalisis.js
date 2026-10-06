@@ -104,7 +104,6 @@ export function normalkanAnalisis(mentah) {
         pelatihan: k.kebutuhan_pelatihan || [],
         biayaPelatihanJuta: angka(k.total_biaya_pelatihan_juta),
         bagianPosisiAsumsi: k.bagian_posisi_asumsi ?? null,
-        sebaranKabupaten: k.sebaran_kabupaten || [],
       }
     : null;
 
@@ -204,24 +203,12 @@ export const ringkasKkprlZona = (daftar) => {
   return total ? `${n(total)} izin (${daftar.map((k) => `${k.jenis} ${n(k.jumlah)}`).join(', ')})` : 'Belum ada';
 };
 
-export const pisahSebaranTk = (sebaran) => {
-  const semua = Array.isArray(sebaran) ? sebaran : [];
-  if (!semua.length) {
-    return { diArea: [], lain: [], orangLain: 0, tampilkan: false };
-  }
-
-  let diArea = semua.filter((r) => r.di_area);
-  if (!diArea.length) {
-    const terdekat = semua.reduce((a, b) => ((b.jarak_km ?? 1e9) < (a.jarak_km ?? 1e9) ? b : a));
-    diArea = [terdekat];
-  }
-  const lain = semua.filter((r) => !diArea.includes(r));
-  return {
-    diArea,
-    lain,
-    orangLain: lain.reduce((n, r) => n + (r.perkiraan_asal_tk || 0), 0),
-    tampilkan: diArea.length > 0 && !diArea.every((r) => r.jenis_kolam === 'nelayan'),
-  };
+export const itemSerapan = (total, capexIdr) => {
+  const rasio = total > 0 && capexIdr > 0 ? total / (capexIdr / 1e9) : null;
+  return [
+    { nilai: angkaRingkas(total), satuan: 'Tenaga kerja' },
+    ...(rasio === null ? [] : [{ nilai: angkaRingkas(rasio, 1), satuan: 'Tenaga kerja per Rp 1 miliar investasi' }]),
+  ];
 };
 
 export const PENJELASAN_RISIKO = {

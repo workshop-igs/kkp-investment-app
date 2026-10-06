@@ -36,7 +36,7 @@ import {
   namaAspek,
   normalkanAnalisis,
   pilihKonteksBps,
-  pisahSebaranTk,
+  itemSerapan,
   skorBagian,
   warnaStatus,
 } from '../utils/normalisasiAnalisis';
@@ -111,12 +111,10 @@ const DetailProyekPage = () => {
 
   const [spasial, setSpasial] = useState({ memuat: false, data: null, galat: null });
   const [bps, setBps] = useState({ memuat: false, data: null, galat: null });
-  const [sebaranTk, setSebaranTk] = useState([]);
   const [screening, setScreening] = useState(null);
-  const sebaran = useMemo(() => pisahSebaranTk(sebaranTk), [sebaranTk]);
   const konteksBps = useMemo(
     () => pilihKonteksBps(bps.data),
-    [bps.data, sebaran]
+    [bps.data]
   );
 
   const [formRealisasi, setFormRealisasi] = useState(null);
@@ -193,28 +191,6 @@ const DetailProyekPage = () => {
       });
     return () => kontrol.abort();
   }, [geom]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    const total = analisis.kerja?.total;
-    if (!geom || !total) return undefined;
-    const tersimpan = analisis.kerja?.sebaranKabupaten || [];
-    if (tersimpan.length) { setSebaranTk(tersimpan); return undefined; }
-
-    const kontrol = new AbortController();
-    api
-      .post('/analitik/sebaran-tenaga-kerja/', {
-        geometry: geom,
-        total_tenaga_kerja: total,
-        sektor: analisis.kerja?.sektor || proyek?.sektor_kode || null,
-      }, { signal: kontrol.signal })
-      .then(({ data }) => setSebaranTk(data?.sebaran_kabupaten || []))
-      .catch((err) => {
-        if (err.code === 'ERR_CANCELED' || err.name === 'CanceledError') return;
-        setSebaranTk([]);
-      });
-    return () => kontrol.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [geom, analisis.kerja?.total]);
 
   const kodeBps =
     analisis.spasial?.wilayah?.kode_bps ||
@@ -935,7 +911,7 @@ const DetailProyekPage = () => {
                 >
                   {analisis.kerja.total != null ? (
                     <AngkaBesar
-                      item={[{ nilai: nf(analisis.kerja.total), satuan: 'Tenaga kerja' }]}
+                      item={itemSerapan(analisis.kerja.total, analisis.finansial?.capex)}
                     />
                   ) : (
                     <p className="text-[13px] text-amber-800 bg-amber-50 border border-amber-200 rounded p-2.5 my-2 leading-relaxed">
@@ -973,43 +949,6 @@ const DetailProyekPage = () => {
                   <p className="text-[13px] text-slate-500">
                     Proyek ini tidak menyimpan proyeksi ketenagakerjaan.
                   </p>
-                </KartuLaporan>
-              )}
-
-              {sebaran.tampilkan && (
-                <KartuLaporan
-                  judul="Perkiraan Asal Tenaga Kerja"
-                  pengantar={`Kabupaten/kota tempat area proyek berada: ${sebaran.diArea
-                    .map((r) => r.kabupaten_kota)
-                    .join(', ')}.`}
-                  catatan="Sumber kolam tenaga kerja: statistik kabupaten/kota Portal Satu Data KKP. Dihitung ulang dari geometri proyek."
-                  keterangan={
-                    'Ini perkiraan DARI MANA tenaga kerja berasal, BUKAN berapa lapangan '
-                    + 'kerja yang tercipta di kabupaten ini. Pertanyaan kedua menuntut tabel '
-                    + 'input-output dan pengganda regional yang datanya tidak ada di sini. '
-                    + 'Pembagiannya: kolam tenaga kerja dikali peluruhan jarak yang menurun '
-                    + 'lurus sampai nol pada radius 100 km. Kolamnya berbeda menurut sektor — '
-                    + 'proyek perikanan menarik tenaga dari nelayan yang sudah ada, bukan dari '
-                    + 'seluruh penduduk — dan kolom Kolam menyebut mana yang dipakai.'
-                  }
-                >
-                  <TabelRingkas
-                    kolom={['Kabupaten/Kota', 'Jarak (km)', 'Kolam', 'Orang', '%']}
-                    baris={sebaran.diArea.map((r) => [
-                      r.kabupaten_kota,
-                      nf(r.jarak_km, 1),
-                      `${nf(r.kolam_tenaga_kerja)} ${r.jenis_kolam}`,
-                      nf(r.perkiraan_asal_tk),
-                      `${nf(r.persen, 1)}%`,
-                    ])}
-                  />
-                  {sebaran.orangLain > 0 && (
-                    <p className="text-[12px] text-slate-500 mt-2 leading-snug">
-                      {nf(sebaran.orangLain)} orang lainnya diperkirakan berasal dari{' '}
-                      {sebaran.lain.length} kabupaten/kota lain dalam radius 100 km, dan tidak
-                      didaftar di sini.
-                    </p>
-                  )}
                 </KartuLaporan>
               )}
 

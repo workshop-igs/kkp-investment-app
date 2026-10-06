@@ -36,7 +36,7 @@ import {
   namaAspek,
   normalkanAnalisis,
   pilihKonteksBps,
-  pisahSebaranTk,
+  itemSerapan,
   skorBagian,
   warnaStatus,
 } from '../utils/normalisasiAnalisis';
@@ -266,7 +266,6 @@ const LaporanAnalisisPage = () => {
   const kelayakan = result.kelayakan;
   const finansial = result.finansial;
   const kerja = result.ketenagakerjaan;
-  const sebaran = pisahSebaranTk(kerja?.sebaran_kabupaten);
   const konteksBps = pilihKonteksBps(bps.data);
   const spasial = result.spasial;
 
@@ -756,7 +755,7 @@ const LaporanAnalisisPage = () => {
               >
                 {kerja.total_tenaga_kerja != null ? (
                   <AngkaBesar
-                    item={[{ nilai: nf(kerja.total_tenaga_kerja), satuan: 'Tenaga kerja' }]}
+                    item={itemSerapan(kerja.total_tenaga_kerja, finansial?.capex_idr)}
                   />
                 ) : (
                   <p className="text-[13px] text-amber-800 bg-amber-50 border border-amber-200 rounded p-2.5 my-2 leading-relaxed">
@@ -789,45 +788,6 @@ const LaporanAnalisisPage = () => {
                   </div>
                 )}
               </KartuLaporan>
-
-              {sebaran.tampilkan && (
-                <KartuLaporan
-                  judul="Perkiraan Asal Tenaga Kerja"
-                  pengantar={`Kabupaten/kota tempat area proyek berada: ${sebaran.diArea
-                    .map((r) => r.kabupaten_kota)
-                    .join(', ')}.`}
-                  catatan="Sumber kolam tenaga kerja: statistik kabupaten/kota Portal Satu Data KKP."
-                  keterangan={
-                    'Ini perkiraan DARI MANA tenaga kerja berasal, BUKAN berapa lapangan '
-                    + 'kerja yang tercipta di tiap kabupaten. Pertanyaan kedua menuntut tabel '
-                    + 'input-output dan pengganda regional yang datanya tidak ada di sini, dan '
-                    + 'selisih dua istilah itu akan ditanyakan pemeriksa. '
-                    + 'Pembagiannya: kolam tenaga kerja dikali peluruhan jarak yang menurun '
-                    + 'lurus sampai nol pada radius 100 km — sengaja sesederhana itu supaya '
-                    + 'dapat diperiksa dengan pensil. Kolamnya berbeda menurut sektor: proyek '
-                    + 'perikanan menarik tenaga dari nelayan yang sudah ada, bukan dari seluruh '
-                    + 'penduduk, dan kolom Kolam menyebutkan mana yang dipakai tiap baris.'
-                  }
-                >
-                  <TabelRingkas
-                    kolom={['Kabupaten/Kota', 'Jarak (km)', 'Kolam', 'Orang', '%']}
-                    baris={sebaran.diArea.map((r) => [
-                      r.kabupaten_kota,
-                      nf(r.jarak_km, 1),
-                      `${nf(r.kolam_tenaga_kerja)} ${r.jenis_kolam}`,
-                      nf(r.perkiraan_asal_tk),
-                      `${nf(r.persen, 1)}%`,
-                    ])}
-                  />
-                  {sebaran.orangLain > 0 && (
-                    <p className="text-[12px] text-slate-500 mt-2 leading-snug">
-                      {nf(sebaran.orangLain)} orang lainnya diperkirakan berasal dari{' '}
-                      {sebaran.lain.length} kabupaten/kota lain dalam radius 100 km, dan tidak
-                      didaftar di sini.
-                    </p>
-                  )}
-                </KartuLaporan>
-              )}
 
               <KartuLaporan
                 judul="Konteks Ketenagakerjaan Wilayah (BPS)"

@@ -4,7 +4,7 @@ import {
   KETERANGAN_SKOR_BAGIAN,
   PENJELASAN_RISIKO,
   pilihKonteksBps,
-  pisahSebaranTk,
+  itemSerapan,
   ringkasKkprlZona,
   skorBagian,
   warnaStatus,
@@ -850,7 +850,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     );
 
     if (a.kerja.total != null) {
-      k.angkaBesar([{ nilai: nf(a.kerja.total), satuan: 'Tenaga kerja' }]);
+      k.angkaBesar(itemSerapan(a.kerja.total, a.finansial?.capex));
     } else {
       k.peringatan(
         'Serapan tenaga kerja belum diisi pada analisis ini. Angka itu tidak dapat '
@@ -879,38 +879,6 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       );
     }
     k.tutupKartu();
-
-    const sebaran = pisahSebaranTk(a.kerja.sebaranKabupaten);
-    if (sebaran.tampilkan) {
-      k.bukaKartu(
-        'Perkiraan Asal Tenaga Kerja',
-        `Kabupaten/kota tempat area proyek berada: ${sebaran.diArea
-          .map((r) => r.kabupaten_kota)
-          .join(', ')}.`
-      );
-      k.tabel(
-        ['Kabupaten/Kota', 'Jarak (km)', 'Kolam', 'Orang', '%'],
-        sebaran.diArea.map((r) => [
-          r.kabupaten_kota,
-          nf(r.jarak_km, 1),
-          `${nf(r.kolam_tenaga_kerja)} ${r.jenis_kolam}`,
-          nf(r.perkiraan_asal_tk),
-          `${nf(r.persen, 1)}%`,
-        ]),
-        [(LEBAR - 8) * 0.34, (LEBAR - 8) * 0.14, (LEBAR - 8) * 0.24, (LEBAR - 8) * 0.14, (LEBAR - 8) * 0.14]
-      );
-      if (sebaran.orangLain > 0) {
-        k.teks(
-          `${nf(sebaran.orangLain)} orang lainnya diperkirakan berasal dari ${sebaran.lain.length} `
-            + 'kabupaten/kota lain dalam radius 100 km, dan tidak didaftar di sini.',
-          { ukuran: 7 }
-        );
-      }
-      k.tutupKartu(
-        'Perkiraan DARI MANA tenaga kerja berasal, bukan lapangan kerja yang tercipta di '
-          + 'kabupaten ini. Kolam tenaga kerja dikali peluruhan jarak sampai nol pada 100 km.'
-      );
-    }
 
     const konteksBps = pilihKonteksBps(bps);
     if (bps?.tersedia && konteksBps) {
