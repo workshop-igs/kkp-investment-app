@@ -765,8 +765,10 @@ const DetailProyekPage = () => {
                       kolom={['Parameter', 'Nilai']}
                       baris={[
                         ['CapEx (Capital Expenditure)', `Rp ${rupiahRingkas(analisis.finansial.capex)}`],
-                        ['Pendapatan / tahun', `Rp ${rupiahRingkas(analisis.finansial.pendapatan)}`],
-                        ['OpEx (Operational Expenditure) / tahun', `Rp ${rupiahRingkas(analisis.finansial.opex)}`],
+                        ['Pendapatan tahun pertama', `Rp ${rupiahRingkas(analisis.finansial.pendapatan)}`],
+                        ['OpEx (Operational Expenditure) tahun pertama', `Rp ${rupiahRingkas(analisis.finansial.opex)}`],
+                        ['Pertumbuhan pendapatan per tahun', analisis.finansial.tumbuhPendapatan != null ? `${nf(analisis.finansial.tumbuhPendapatan, 1)}%` : '—'],
+                        ['Pertumbuhan OpEx per tahun', analisis.finansial.tumbuhOpex != null ? `${nf(analisis.finansial.tumbuhOpex, 1)}%` : '—'],
                         ['ROI', analisis.finansial.roi != null ? `${nf(analisis.finansial.roi, 0)}%` : '—'],
                       ]}
                     />

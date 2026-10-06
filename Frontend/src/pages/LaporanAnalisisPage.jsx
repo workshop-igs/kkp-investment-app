@@ -632,8 +632,10 @@ const LaporanAnalisisPage = () => {
                       kolom={['Parameter', 'Nilai']}
                       baris={[
                         ['CapEx (Capital Expenditure)', `Rp ${rupiahRingkas(finansial.capex_idr)}`],
-                        ['Pendapatan / tahun', `Rp ${rupiahRingkas(finansial.annual_revenue_idr)}`],
-                        ['OpEx (Operational Expenditure) / tahun', `Rp ${rupiahRingkas(finansial.annual_opex_idr)}`],
+                        ['Pendapatan tahun pertama', `Rp ${rupiahRingkas(finansial.annual_revenue_idr)}`],
+                        ['OpEx (Operational Expenditure) tahun pertama', `Rp ${rupiahRingkas(finansial.annual_opex_idr)}`],
+                        ['Pertumbuhan pendapatan per tahun', finansial.revenue_growth_pct != null ? `${nf(finansial.revenue_growth_pct, 1)}%` : '—'],
+                        ['Pertumbuhan OpEx per tahun', finansial.opex_growth_pct != null ? `${nf(finansial.opex_growth_pct, 1)}%` : '—'],
                         ['ROI', `${nf(finansial.roi_pct, 0)}%`],
                       ]}
                     />
