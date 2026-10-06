@@ -76,7 +76,7 @@ const TEMA = [
   { kunci: 'sosial', label: 'Sosial & Ketenagakerjaan', Ikon: Users },
   { kunci: 'risiko', label: 'Risiko Lingkungan & Sosial', Ikon: Leaf },
   { kunci: 'kelayakan', label: 'Kelayakan Investasi', Ikon: TrendingUp },
-  { kunci: 'pipeline', label: 'Status & Realisasi', Ikon: Workflow },
+  { kunci: 'pipeline', label: 'Status Proyek', Ikon: Workflow },
 ];
 
 const PENGANTAR = {
