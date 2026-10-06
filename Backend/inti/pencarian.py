@@ -169,7 +169,7 @@ def cari_lokasi(request):
     hasil += _cari_kkprl(kata)
     hasil += _cari_sederhana(
         ZonasiRuangLaut, kata, 'Zona Tata Ruang Laut', lambda o: o.get_sub_zona_display(), 'zonasi',
-        bidang_nama='nama_zona',
+        kode=lambda o: o.tingkat_acuan, bidang_nama='nama_zona',
     )
     hasil += _cari_sederhana(
         UnsurRuangLaut, kata, 'Unsur Ruang Laut', lambda o: o.jenis or 'Unsur', 'unsur', kode=lambda o: o.kelompok,

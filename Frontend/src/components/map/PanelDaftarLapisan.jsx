@@ -9,7 +9,8 @@ const KATEGORI = [
   {
     judul: 'Rencana Tata Ruang & Zonasi',
     layer: [
-      { id: 'polaruang', nama: 'Pola Ruang Laut (RTRW, PKKPRL & RZWP-3-K)', warna: '#0056A5' },
+      { id: 'polaruang', nama: 'RTRW Provinsi (Perda RTRW, PKKPRL & RZWP-3-K)', warna: '#0056A5' },
+      { id: 'polaruang_kaw', nama: 'Rencana Zonasi Kawasan Antarwilayah (KAW)', warna: '#7c3aed' },
       { id: 'rtrl', nama: 'Rencana Tata Ruang Laut', warna: '#1d4ed8' },
       { id: 'wilayah_adat', nama: 'Wilayah Kelola Masyarakat Hukum Adat', warna: '#b45309' },
     ],

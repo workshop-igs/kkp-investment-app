@@ -84,6 +84,9 @@ class ZonasiRuangLautViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         }
 
     def peta_queryset_tambahan(self, qs, request):
+        tingkat = request.query_params.get('tingkat')
+        if tingkat:
+            qs = qs.filter(tingkat_acuan=tingkat)
         kategori = request.query_params.get('kategori')
         return qs.filter(sub_zona=kategori) if kategori else qs
 
