@@ -4,8 +4,6 @@ import {
   AlertTriangle,
   ArrowLeft,
   Anchor,
-  ChevronLeft,
-  ChevronRight,
   Info,
   Leaf,
   Loader2,
@@ -27,6 +25,7 @@ import KartuLaporan, {
   KotakBatimetri,
   TabelRingkas,
   TabelTitikSudut,
+  TombolLipatPanel,
 } from '../components/laporan/KartuLaporan';
 import KartuRisikoRuang from '../components/laporan/KartuRisikoRuang';
 import KartuScreening from '../components/laporan/KartuScreening';
@@ -909,31 +908,10 @@ const LaporanAnalisisPage = () => {
         </div>
       </div>
 
-      <button
-        onClick={() => setPanelTerlipat((v) => !v)}
-        title={panelTerlipat ? 'Tampilkan laporan analisis' : 'Sembunyikan laporan, perbesar peta'}
-        className="hidden lg:flex w-4 shrink-0 items-center justify-center bg-slate-50 hover:bg-kkp-100
-                   border-r border-slate-200 text-slate-400 hover:text-kkp-700 transition-colors group print:hidden"
-      >
-        <span className="w-4 h-14 rounded-r bg-white border border-l-0 border-slate-200 group-hover:border-kkp-200 flex items-center justify-center shadow-sm">
-          {panelTerlipat ? <ChevronRight className="w-3.5 h-3.5" /> : <ChevronLeft className="w-3.5 h-3.5" />}
-        </span>
-      </button>
-
       <div className="hidden lg:block flex-1 relative bg-slate-100 print:hidden">
         <PetaProyek posisi={posisi} tampilkanPerkakas={panelTerlipat} />
 
-        {panelTerlipat && (
-          <button
-            onClick={() => setPanelTerlipat(false)}
-            className="absolute top-4 left-4 z-[1000] inline-flex items-center gap-2 px-3 py-2 rounded-lg
-                       bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm
-                       text-[13px] font-semibold text-slate-600 hover:text-kkp-700 hover:border-kkp-200 transition-colors"
-          >
-            <ChevronRight className="w-4 h-4" />
-            Tampilkan Laporan Analisis
-          </button>
-        )}
+        <TombolLipatPanel terlipat={panelTerlipat} onUbah={setPanelTerlipat} labelTampil="Tampilkan Laporan Analisis" />
       </div>
     </div>
   );
