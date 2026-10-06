@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Plus, Minus, Compass, Layers, Download, Keyboard, Ruler, Search, X, CircleHelp } from 'lucide-react';
+import { Plus, Minus, Compass, Layers, Download, Keyboard, Ruler, Search, X, CircleHelp, Loader2 } from 'lucide-react';
 import PanelDaftarLapisan from './PanelDaftarLapisan';
 import PanelKoordinat from './PanelKoordinat';
 import PanelPencarian from './PanelPencarian';
 import AlatUkur from './AlatUkur';
 import PenandaTujuan from './PenandaTujuan';
+import { mulaiMemuat } from '../OverlayMemuat';
+import { unduhPdfPeta } from '../../utils/pdfPetaSpasial';
 
 const KontrolPeta = ({
   fokus,
@@ -29,6 +31,7 @@ const KontrolPeta = ({
 
   const [panelAktif, setPanelAktif] = useState(lapisanAwal ? 'layer' : null);
   const [tujuan, setTujuan] = useState(null);
+  const [mengunduh, setMengunduh] = useState(false);
 
   const bukaPanel = (nama) => {
     setPanelAktif((s) => (s === nama ? null : nama));
@@ -74,15 +77,27 @@ const KontrolPeta = ({
     if (geser) map.panBy(geser, { animate: false });
   };
 
-  const handleExport = () => {
-    alert("Fitur Export Excel akan mengunduh data dari area terpilih di peta.");
-  };
-
   const basemaps = [
-    { id: 'satellite', name: 'Satelit' },
-    { id: 'street', name: 'Jalan' },
-    { id: 'topo', name: 'Topografi' },
+    { id: 'satellite', name: 'Satelit', sumber: 'Esri World Imagery' },
+    { id: 'street', name: 'Jalan', sumber: 'OpenStreetMap' },
+    { id: 'topo', name: 'Topografi', sumber: 'Esri World Topographic Map' },
   ];
+
+  const handleExport = async () => {
+    setMengunduh(true);
+    const selesai = mulaiMemuat('Menyusun PDF peta');
+    try {
+      await unduhPdfPeta(map, {
+        lapisan: activeLayers.filter((id) => daftarLapisan[id]).map((id) => ({ def: daftarLapisan[id], sektor: sektorLapisan[id] })),
+        petaDasar: basemaps.find((b) => b.id === currentBasemap) || basemaps[0],
+      });
+    } catch (e) {
+      alert(`PDF peta gagal disusun: ${e.message}`);
+    } finally {
+      selesai();
+      setMengunduh(false);
+    }
+  };
 
   return (
     <>
@@ -211,10 +226,11 @@ const KontrolPeta = ({
 
       <button 
         onClick={handleExport}
+        disabled={mengunduh}
         className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
-        title="Export Data"
+        title="Unduh PDF Peta"
       >
-        <Download className="w-5 h-5" />
+        {mengunduh ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
       </button>
 
       {onTur && (
