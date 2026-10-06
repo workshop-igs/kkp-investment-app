@@ -53,29 +53,6 @@ class StatistikBPSView(APIView):
         return Response(statistik_ketenagakerjaan(kode, kode_kabupaten=kab if kab.isdigit() else None))
 
 
-class SebaranTenagaKerjaView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        from ketenagakerjaan.sebaran_wilayah import sebaran_tk_kabupaten
-
-        geometry = request.data.get('geometry')
-        if not geometry:
-            return Response(
-                {'detail': 'Geometry (GeoJSON) wajib disertakan.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        try:
-            total = int(request.data.get('total_tenaga_kerja') or 0)
-        except (TypeError, ValueError):
-            total = 0
-        sektor = (request.data.get('sektor') or 'DEFAULT').strip().upper()
-
-        return Response({
-            'sebaran_kabupaten': sebaran_tk_kabupaten(geometry, total, sektor),
-        })
-
-
 class LaporanSpasialView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -372,18 +349,6 @@ class RunAnalysisView(APIView):
             serapan = None
 
         tk = hitung_proyeksi_tk(sektor_kode, serapan_dimasukkan=serapan)
-
-        try:
-            from ketenagakerjaan.sebaran_wilayah import sebaran_tk_kabupaten
-
-            tk['sebaran_kabupaten'] = sebaran_tk_kabupaten(
-                geometry, tk.get('total_tenaga_kerja') or 0, sektor_kode
-            )
-        except Exception as e:
-            logging.getLogger('analitik').warning(
-                f'[Ketenagakerjaan] Sebaran per kabupaten gagal: {e}'
-            )
-            tk['sebaran_kabupaten'] = []
 
         tk['demografi'] = None
         tk['catatan_demografi'] = (
