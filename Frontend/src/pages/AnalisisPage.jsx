@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 import PetaInteraktif from '../components/map/PetaInteraktif';
 import PanelAnalisis from '../components/layout/PanelAnalisis';
@@ -10,7 +11,14 @@ const AnalisisPage = () => {
   const [loading, setLoading] = useState(false);
   const [geometry, setGeometry] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
-  const [fokus, setFokus] = useState(null);
+  const [cari] = useSearchParams();
+  const [fokus, setFokus] = useState(() => {
+    const lat = Number.parseFloat(cari.get('lat'));
+    const lng = Number.parseFloat(cari.get('lng'));
+    return Number.isFinite(lat) && Number.isFinite(lng)
+      ? { lat, lng, label: cari.get('label') || 'Lokasi', keterangan: cari.get('keterangan') || undefined }
+      : null;
+  });
 
   const lihatLokasi = (l) => {
     setPanelOpen(false);

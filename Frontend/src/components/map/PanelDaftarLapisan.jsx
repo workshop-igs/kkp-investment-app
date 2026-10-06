@@ -128,14 +128,13 @@ const PanelDaftarLapisan = ({
   sektorLapisan = {},
   setSektorLapisan,
   statusLapisan = {},
-  lapisanAwal = null,
+  lapisanAwal = [],
 }) => {
   const map = useMap();
   const [cari, setCari] = useState('');
-  const [dibuka, setDibuka] = useState(() => {
-    const grup = KATEGORI.find((k) => k.layer.some((l) => l.id === lapisanAwal));
-    return grup ? { [grup.judul]: true } : {};
-  });
+  const [dibuka, setDibuka] = useState(() =>
+    Object.fromEntries(KATEGORI.filter((k) => k.layer.some((l) => lapisanAwal.includes(l.id))).map((k) => [k.judul, true]))
+  );
   const [keterangan, setKeterangan] = useState(null);
   const [sedangZoom, setSedangZoom] = useState(null);
 

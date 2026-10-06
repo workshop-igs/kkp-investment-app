@@ -25,11 +25,11 @@ const KontrolPeta = ({
   modeUkur = false,
   setModeUkur,
   onTur,
-  lapisanAwal = null,
+  lapisanAwal = [],
 }) => {
   const map = useMap();
 
-  const [panelAktif, setPanelAktif] = useState(lapisanAwal ? 'layer' : null);
+  const [panelAktif, setPanelAktif] = useState(lapisanAwal.length ? 'layer' : null);
   const [tujuan, setTujuan] = useState(null);
   const [mengunduh, setMengunduh] = useState(false);
 
