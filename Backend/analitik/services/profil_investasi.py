@@ -8,7 +8,7 @@ from django.utils import timezone
 from analitik.models import KetentuanRuang, SkorKelayakanZona
 from analitik.services.konstanta import LABEL_SUMBER_ZONASI, PRIORITAS_SUMBER_ZONASI
 from analitik.services.oseanografi import statistik as statistik_oseanografi
-from inti.models import KabupatenKota, SektorInvestasi
+from inti.models import KabupatenKota, Provinsi, SektorInvestasi
 from inventarisasi.models import RegulasiTataRuang, ZonasiRuangLaut
 from penarikan_data.models import ProduksiPerikananBPS
 
@@ -285,11 +285,15 @@ def _juta(ribu):
     return None if ribu is None else ribu / 1000
 
 
-def _produksi_komoditas(provinsi):
-    per_komoditas = {}
-    for b in ProduksiPerikananBPS.objects.filter(produksi_ton__gt=0).values(
+def _baris_produksi():
+    return ProduksiPerikananBPS.objects.filter(produksi_ton__gt=0).values(
         'provinsi_id', 'provinsi__nama', 'kelompok', 'komoditas', 'tahun', 'produksi_ton', 'nilai_ribu_rp',
-    ):
+    )
+
+
+def _produksi_komoditas(provinsi, baris=None):
+    per_komoditas = {}
+    for b in _baris_produksi() if baris is None else baris:
         if b['komoditas'] in KOMODITAS_LAUT[b['kelompok']]:
             per_komoditas.setdefault((b['kelompok'], b['komoditas']), []).append(b)
 
@@ -345,6 +349,27 @@ def peringkat_unggulan(komoditas, luas_sektor):
     for i, k in enumerate(komoditas):
         k['unggulan'] = i < JUMLAH_UNGGULAN
     return komoditas
+
+
+def komoditas_unggulan_semua():
+    baris = list(_baris_produksi())
+    luas = {}
+    for r in skor_sesuai().values('zona__provinsi_id', 'sektor__kode').annotate(sesuai=Sum('zona__luas_ha')):
+        luas.setdefault(r['zona__provinsi_id'], {})[r['sektor__kode']] = r['sesuai'] or 0
+    hasil = {}
+    for provinsi in Provinsi.objects.filter(id__in={b['provinsi_id'] for b in baris}).only('id'):
+        komoditas = peringkat_unggulan(_produksi_komoditas(provinsi, baris), luas.get(provinsi.id, {}))
+        hasil[provinsi.id] = [
+            {
+                'nama': k['nama'],
+                'kelompok_label': k['kelompok_label'],
+                'tahun': k['tahun'],
+                'produksi_ton': k['produksi_ton'],
+                'peringkat_nasional': k['peringkat_nasional'],
+            }
+            for k in komoditas if k['unggulan']
+        ]
+    return hasil
 
 
 def _ketenagakerjaan(provinsi):

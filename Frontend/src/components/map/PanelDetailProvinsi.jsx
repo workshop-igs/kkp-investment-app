@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import {
-  X, Briefcase, Wallet, Users, Ruler, Ship, MapPin, Anchor, Factory, Zap,
+  X, Fish, Users, Ruler, Ship, MapPin, Anchor, Factory, Zap,
   FileCheck, Map, TrendingUp, Leaf, Waves, Download, Loader2,
 } from 'lucide-react';
 import { useSektorAktif } from '../../api/klien';
 import { SECTORS } from '../../utils/konstanta';
-import { formatNumber, rupiahMiliar } from '../../utils/pemformat';
+import { formatNumber } from '../../utils/pemformat';
 import { unduhProfil } from '../../utils/pdfProfilInvestasi';
 import { mulaiMemuat } from '../OverlayMemuat';
 
@@ -54,35 +54,32 @@ const useUnduhProfil = () => {
 
 
 export const RingkasanProvinsi = ({ p }) => {
-  const inv = p.investasi || {};
+  const komoditas = p.komoditas_unggulan || [];
   const rl = p.ruang_laut || {};
   const eko = p.ekosistem || {};
   const infra = p.infrastruktur || {};
   const tk = p.tenaga_kerja || {};
 
-  const persenRealisasi =
-    inv.nilai_rencana_miliar > 0
-      ? Math.round((inv.nilai_realisasi_miliar / inv.nilai_rencana_miliar) * 100)
-      : 0;
-
   return (
     <>
-      <Bagian judul="Portofolio Investasi">
-        <Baris icon={Briefcase} label="Jumlah proyek" nilai={formatNumber(inv.jumlah_proyek, 0)} />
-        <Baris
-          icon={Wallet}
-          label="Nilai rencana"
-          nilai={rupiahMiliar(inv.nilai_rencana_miliar)}
-        />
-        <Baris
-          icon={Wallet}
-          label="Realisasi"
-          nilai={rupiahMiliar(inv.nilai_realisasi_miliar)}
-          satuan={`· ${persenRealisasi}%`}
-          warna={persenRealisasi >= 50 ? 'text-emerald-700' : 'text-amber-700'}
-        />
-        <Baris icon={Users} label="Proyeksi tenaga kerja" nilai={formatNumber(inv.tenaga_kerja, 0)} satuan="orang" />
-        <Baris icon={Ruler} label="Luas area proyek" nilai={formatNumber(inv.luas_proyek_ha, 0)} satuan="Ha" />
+      <Bagian
+        judul="Komoditas Unggulan"
+        tahun={komoditas[0]?.tahun}
+        catatan="Produksi menurut BPS. Urutan menggabungkan nilai produksi dan luas zona yang sesuai, sama dengan profil investasi provinsi."
+      >
+        {komoditas.length ? (
+          komoditas.map((k) => (
+            <Baris
+              key={`${k.kelompok_label}-${k.nama}`}
+              icon={Fish}
+              label={`${k.nama} (${k.kelompok_label.split(' ')[1]})`}
+              nilai={formatNumber(k.produksi_ton, 0)}
+              satuan={`ton · peringkat ${k.peringkat_nasional} nasional`}
+            />
+          ))
+        ) : (
+          <p className="text-sm text-slate-500 py-2">Belum ada data produksi komoditas laut dari BPS.</p>
+        )}
       </Bagian>
 
       <Bagian
