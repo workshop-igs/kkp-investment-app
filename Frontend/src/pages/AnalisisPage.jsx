@@ -15,8 +15,11 @@ const AnalisisPage = () => {
   const [fokus, setFokus] = useState(() => {
     const lat = Number.parseFloat(cari.get('lat'));
     const lng = Number.parseFloat(cari.get('lng'));
+    const bbox = (cari.get('bbox') || '').split(',').map(Number.parseFloat);
+    const label = cari.get('label') || 'Lokasi';
+    if (bbox.length === 4 && bbox.every(Number.isFinite)) return { bbox, label };
     return Number.isFinite(lat) && Number.isFinite(lng)
-      ? { lat, lng, label: cari.get('label') || 'Lokasi', keterangan: cari.get('keterangan') || undefined }
+      ? { lat, lng, label, keterangan: cari.get('keterangan') || undefined }
       : null;
   });
 

@@ -13,6 +13,7 @@ from inventarisasi.models import (
     InfrastrukturPendukung,
     PotensiInvestasi,
     UnsurRuangLaut,
+    ZonasiRuangLaut,
 )
 
 from .models import Provinsi
@@ -36,7 +37,7 @@ class ThrottlePencarian(SimpleRateThrottle):
 
 def _titik(obj):
     t = getattr(obj, 'titik_wakil', None)
-    if t is None:
+    if t is None or t.empty:
         return None
     return [round(t.x, 6), round(t.y, 6)]
 
@@ -64,6 +65,8 @@ def _cari_provinsi(kata):
         hasil.append(
             {
                 'kelompok': 'Wilayah Administratif',
+                'sumber': 'provinsi',
+                'kode': p.kode_bps,
                 'jenis': 'Provinsi',
                 'nama': p.nama,
                 'keterangan': f'Kode BPS {p.kode_bps}',
@@ -75,17 +78,14 @@ def _cari_provinsi(kata):
     return hasil
 
 
-def _cari_sederhana(model, kata, kelompok, label_jenis, bidang_keterangan=None, tambahan=None):
-    saring = Q(nama__icontains=kata)
-    if tambahan:
-        saring |= tambahan
+def _cari_sederhana(model, kata, kelompok, label_jenis, sumber, kode=None, bidang_keterangan=None, bidang_nama='nama'):
     qs = (
-        model.objects.filter(saring)
+        model.objects.filter(**{f'{bidang_nama}__icontains': kata})
         .exclude(geometry=None)
-        .annotate(peringkat=_peringkat('nama', kata), titik_wakil=PointOnSurface('geometry'))
+        .annotate(peringkat=_peringkat(bidang_nama, kata), titik_wakil=PointOnSurface('geometry'))
         .select_related('provinsi')
         .defer('geometry', 'provinsi__geometry')
-        .order_by('peringkat', 'nama')[:BATAS_PER_SUMBER]
+        .order_by('peringkat', bidang_nama)[:BATAS_PER_SUMBER]
     )
     hasil = []
     for o in qs:
@@ -99,8 +99,10 @@ def _cari_sederhana(model, kata, kelompok, label_jenis, bidang_keterangan=None, 
         hasil.append(
             {
                 'kelompok': kelompok,
+                'sumber': sumber,
+                'kode': kode(o) if kode else None,
                 'jenis': label_jenis(o) if callable(label_jenis) else label_jenis,
-                'nama': o.nama,
+                'nama': getattr(o, bidang_nama),
                 'keterangan': ' · '.join(ket),
                 'bbox': None,
                 'titik': _titik(o),
@@ -129,6 +131,8 @@ def _cari_kkprl(kata):
         hasil.append(
             {
                 'kelompok': 'Perizinan Ruang Laut',
+                'sumber': 'kkprl',
+                'kode': None,
                 'jenis': o.get_jenis_dokumen_display(),
                 'nama': o.nama_pemohon,
                 'keterangan': ' · '.join([k for k in ket if k]),
@@ -157,14 +161,18 @@ def cari_lokasi(request):
     hasil += _cari_provinsi(kata)
     hasil += _cari_sederhana(
         InfrastrukturPendukung, kata, 'Infrastruktur & Transportasi',
-        lambda o: o.get_kategori_display(), bidang_keterangan='kelas',
+        lambda o: o.get_kategori_display(), 'infrastruktur', kode=lambda o: o.kategori, bidang_keterangan='kelas',
     )
     hasil += _cari_sederhana(
-        PotensiInvestasi, kata, 'Lokasi Potensi Investasi', 'Lokasi Prioritas',
+        PotensiInvestasi, kata, 'Lokasi Potensi Investasi', 'Lokasi Prioritas', 'potensi',
     )
     hasil += _cari_kkprl(kata)
     hasil += _cari_sederhana(
-        UnsurRuangLaut, kata, 'Unsur Ruang Laut', lambda o: o.jenis or 'Unsur',
+        ZonasiRuangLaut, kata, 'Zona Tata Ruang Laut', lambda o: o.get_sub_zona_display(), 'zonasi',
+        bidang_nama='nama_zona',
+    )
+    hasil += _cari_sederhana(
+        UnsurRuangLaut, kata, 'Unsur Ruang Laut', lambda o: o.jenis or 'Unsur', 'unsur', kode=lambda o: o.kelompok,
     )
 
     hasil.sort(key=lambda h: (h['peringkat'], h['nama'].lower()))

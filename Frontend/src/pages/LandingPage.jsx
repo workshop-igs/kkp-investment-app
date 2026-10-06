@@ -1,13 +1,17 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  Anchor, ArrowRight, ArrowUpRight, Briefcase, Check, Eye, KeyRound, Clock3, Construction, Download, Factory, FileStack, FileText, FlaskConical,
-  Fish, Gem, Layers, Map, MapPin, Palmtree, Shell, SquareDashedMousePointer, Sprout, Upload, Waves, Zap,
+  AlertTriangle, Anchor, ArrowRight, ArrowUpRight, Briefcase, Check, Clock3, Construction, Download, Factory, FileCheck2, FileStack,
+  FileText, FlaskConical, Fish, Gem, Landmark, Layers, LayoutGrid, Loader2, Map, MapPin, Palmtree, Search, Shell,
+  SquareDashedMousePointer, Sprout, Upload, Waves, Waypoints, Zap,
 } from 'lucide-react';
 import { api } from '../api/klien';
+import { LAYER_LOKAL } from '../components/map/katalogLapisan';
+import { usePencarian } from '../components/map/PanelPencarian';
 import { useAuth } from '../context/KonteksAuth';
 import { warnaJenisInvestasi } from '../utils/simbologiPeta';
 import { formatNumber } from '../utils/pemformat';
+import { SECTORS } from '../utils/konstanta';
 
 const IKON_JENIS = {
   PERIKANAN_TANGKAP: Fish,
@@ -94,19 +98,6 @@ const CONTOH_JENIS = [
 ];
 
 const BAGIAN_LAPORAN = ['Tata ruang dan perizinan', 'Transportasi dan infrastruktur', 'Oseanografi', 'Risiko lingkungan dan sosial', 'Kelayakan investasi'];
-
-const AKSES = [
-  {
-    ikon: Eye,
-    judul: 'Tanpa masuk',
-    isi: ['Peta Spasial dan seluruh layer data', 'Profil investasi provinsi dalam PDF', 'Cetak tampilan peta dalam PDF'],
-  },
-  {
-    ikon: KeyRound,
-    judul: 'Dengan akun',
-    isi: ['Analisis kelayakan wilayah dan laporannya', 'Pipeline investasi dari LOI sampai operasional', 'Dashboard pemantauan'],
-  },
-];
 
 const SUDUT_AREA = [[70, 62], [212, 42], [238, 138], [104, 158]];
 
@@ -255,6 +246,245 @@ const LANGKAH = [
   { contoh: ContohJenis, judul: 'Pilih jenis investasi', isi: 'Skor kelayakan dihitung untuk jenis investasi yang dipilih.' },
   { contoh: ContohLaporan, judul: 'Baca laporan, unduh PDF', isi: 'Setiap bagian laporan mencantumkan sumber dan tahun datanya.' },
 ];
+
+const MIN_HURUF = 2;
+const BATAS_TETAP = 5;
+
+const CONTOH_CARI = ['Pelabuhan perikanan', 'Tambakrejo', 'KKPRL', 'Suhu permukaan laut', 'Nusa Tenggara Barat'];
+
+const IKON_KELOMPOK = {
+  Halaman: LayoutGrid,
+  'Layer Peta': Layers,
+  'Profil Investasi': FileText,
+  'Wilayah Administratif': Landmark,
+  'Infrastruktur & Transportasi': Anchor,
+  'Lokasi Potensi Investasi': MapPin,
+  'Perizinan Ruang Laut': FileCheck2,
+  'Zona Tata Ruang Laut': Map,
+  'Unsur Ruang Laut': Waypoints,
+};
+
+const ENTRI_TETAP = [
+  ...[
+    ['Peta Spasial', 'Peta interaktif seluruh layer data ruang laut', '/peta', 'peta spasial'],
+    ['Analisis wilayah', 'Gambar atau unggah area untuk dianalisis', '/peta?mulai=gambar', 'analisis kelayakan gambar poligon unggah shp kml geojson'],
+    ['Profil Investasi', 'Profil investasi per provinsi dalam PDF', '/profil-investasi', 'profil investasi pdf'],
+    ['Pipeline investasi', 'Proyek dari LOI sampai operasional, perlu akun', '/pipeline', 'pipeline proyek loi'],
+    ['Dashboard', 'Ringkasan pemantauan, perlu akun', '/dashboard', 'dashboard pemantauan'],
+  ].map(([nama, keterangan, ke, kunci]) => ({ kelompok: 'Halaman', nama, keterangan, ke, kunci })),
+  ...Object.entries(LAYER_LOKAL).map(([id, d]) => ({
+    kelompok: 'Layer Peta', nama: d.label, keterangan: d.keteranganLegenda || '', ke: `/peta?lapisan=${id}`,
+  })),
+  ...SECTORS.map((s) => ({
+    kelompok: 'Jenis Investasi', kode: s.id, nama: s.label, keterangan: 'Profil investasi per provinsi untuk jenis ini',
+    ke: `/profil-investasi?jenis=${s.id}`,
+  })),
+];
+
+const lapisanHasil = (h) => {
+  if (h.sumber === 'kkprl') return 'kkprl';
+  if (h.sumber === 'zonasi') return 'polaruang';
+  const kunci = { infrastruktur: 'kategori', unsur: 'kelompok' }[h.sumber];
+  return kunci ? Object.keys(LAYER_LOKAL).find((id) => LAYER_LOKAL[id].params?.[kunci] === h.kode) : undefined;
+};
+
+const keHasil = (h) => {
+  const p = new URLSearchParams();
+  const lapisan = lapisanHasil(h);
+  if (lapisan) p.set('lapisan', lapisan);
+  if (h.bbox) p.set('bbox', h.bbox.join(','));
+  if (h.titik) {
+    p.set('lat', h.titik[1]);
+    p.set('lng', h.titik[0]);
+  }
+  p.set('label', h.nama);
+  const keterangan = [h.jenis, h.keterangan].filter(Boolean).join(', ');
+  if (keterangan) p.set('keterangan', keterangan);
+  return `/peta?${p}`;
+};
+
+const PusatInformasi = () => {
+  const navigate = useNavigate();
+  const [kata, setKata] = useState('');
+  const [terbuka, setTerbuka] = useState(false);
+  const { hasil, status } = usePencarian(kata);
+  const refWadah = useRef(null);
+  const refMasukan = useRef(null);
+  const refLangsung = useRef(false);
+
+  const q = kata.trim();
+  const siap = q.length >= MIN_HURUF && !status.memuat && status.untuk === q;
+
+  const daftar = useMemo(() => {
+    if (q.length < MIN_HURUF) return [];
+    const kunci = q.toLowerCase().split(/\s+/);
+    const hitung = {};
+    const tetap = ENTRI_TETAP.filter((e) => {
+      const teks = `${e.nama} ${e.kunci || ''}`.toLowerCase();
+      if (!kunci.every((k) => teks.includes(k))) return false;
+      hitung[e.kelompok] = (hitung[e.kelompok] || 0) + 1;
+      return hitung[e.kelompok] <= BATAS_TETAP;
+    });
+    const data = (status.untuk === q ? hasil : []).flatMap((h) => {
+      const baris = { kelompok: h.kelompok, nama: h.nama, keterangan: [h.jenis, h.keterangan].filter(Boolean).join(', '), ke: keHasil(h) };
+      return h.sumber === 'provinsi'
+        ? [baris, { kelompok: 'Profil Investasi', nama: `Profil investasi ${h.nama}`, keterangan: 'Seluruh jenis investasi di provinsi ini', ke: `/profil-investasi?provinsi=${h.kode}` }]
+        : [baris];
+    });
+    return [...tetap, ...data];
+  }, [q, hasil, status.untuk]);
+
+  const kelompok = useMemo(() => {
+    const peta = new globalThis.Map();
+    daftar.forEach((e) => peta.set(e.kelompok, [...(peta.get(e.kelompok) || []), e]));
+    return [...peta.entries()];
+  }, [daftar]);
+
+  useEffect(() => {
+    const tutup = (e) => {
+      if (!refWadah.current?.contains(e.target)) setTerbuka(false);
+    };
+    document.addEventListener('mousedown', tutup);
+    return () => document.removeEventListener('mousedown', tutup);
+  }, []);
+
+  useEffect(() => {
+    if (!refLangsung.current || !siap) return;
+    refLangsung.current = false;
+    if (daftar.length) navigate(daftar[0].ke);
+  }, [siap, daftar, navigate]);
+
+  const kirim = (e) => {
+    e.preventDefault();
+    setTerbuka(true);
+    if (q.length < MIN_HURUF) return;
+    if (siap && daftar.length) navigate(daftar[0].ke);
+    else refLangsung.current = true;
+  };
+
+  const isiContoh = (teks) => {
+    setKata(teks);
+    setTerbuka(true);
+    refMasukan.current?.focus();
+  };
+
+  return (
+    <section className="px-4 pb-24 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl rounded-3xl bg-[linear-gradient(115deg,#002242_0%,#003a70_55%,#0056A5_100%)] text-white">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl" aria-hidden="true">
+          <GarisKontur className="absolute -right-40 -top-56 h-[680px] w-[680px] text-white/[0.08]" />
+        </div>
+        <div className="relative grid items-center gap-10 px-6 py-12 sm:px-10 lg:grid-cols-12 lg:gap-12 lg:px-14 lg:py-16">
+          <div className="lg:col-span-5">
+            <p className="font-mono text-xs font-medium uppercase tracking-[0.24em] text-kkp-toska sm:text-[13px]">Pusat informasi</p>
+            <h2 className="mt-5 text-balance text-3xl font-extrabold leading-[1.1] tracking-[-0.03em] sm:text-4xl">
+              Temukan data ruang laut yang Anda butuhkan
+            </h2>
+            <p className="mt-4 max-w-md leading-relaxed text-white/75">
+              Telusuri pelabuhan, izin KKPRL, zona tata ruang, provinsi, layer peta, dan jenis investasi dalam satu
+              pencarian.
+            </p>
+          </div>
+
+          <div ref={refWadah} className="relative lg:col-span-7">
+            <form
+              role="search"
+              onSubmit={kirim}
+              className="flex items-center gap-2 rounded-2xl bg-white p-2 pl-4 shadow-[0_24px_50px_-24px_rgba(0,0,0,0.6)]"
+            >
+              <Search className="h-5 w-5 shrink-0 text-slate-400" aria-hidden="true" />
+              <input
+                ref={refMasukan}
+                type="search"
+                value={kata}
+                onChange={(e) => {
+                  setKata(e.target.value);
+                  setTerbuka(true);
+                }}
+                onFocus={() => setTerbuka(true)}
+                onKeyDown={(e) => e.key === 'Escape' && setTerbuka(false)}
+                aria-label="Cari data ruang laut"
+                placeholder="Cari pelabuhan, izin KKPRL, zona, provinsi, atau layer..."
+                className="min-w-0 flex-1 bg-transparent py-3 text-[15px] text-kkp-900 placeholder:text-slate-400 focus:outline-none"
+              />
+              <button
+                type="submit"
+                className={`group inline-flex shrink-0 items-center gap-2 rounded-xl bg-kkp-900 px-5 py-3 text-[15px] font-semibold text-white transition-colors hover:bg-kkp-800 sm:px-6 ${FOKUS}`}
+              >
+                Cari
+                <ArrowRight className={`hidden h-4 w-4 text-kkp-toska sm:block ${GERAK_PANAH}`} aria-hidden="true" />
+              </button>
+            </form>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-xs">
+              <span className="text-white/60">Contoh:</span>
+              {CONTOH_CARI.map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => isiContoh(c)}
+                  className="rounded-full border border-white/25 px-3 py-1 text-white/85 transition-colors hover:border-white/60 hover:text-white"
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
+
+            {terbuka && q.length >= MIN_HURUF && (
+              <div
+                aria-live="polite"
+                className="custom-scrollbar absolute inset-x-0 top-[4.5rem] z-30 max-h-[26rem] overflow-y-auto rounded-2xl border border-slate-200 bg-white text-left text-slate-700 shadow-[0_30px_60px_-25px_rgba(0,20,45,0.6)]"
+              >
+                {kelompok.map(([nama, isi]) => (
+                  <div key={nama}>
+                    <p className="sticky top-0 bg-slate-50 px-4 py-1.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-slate-500">
+                      {nama}
+                    </p>
+                    <ul>
+                      {isi.map((e, i) => {
+                        const Ikon = (e.kode && IKON_JENIS[e.kode]) || IKON_KELOMPOK[e.kelompok] || MapPin;
+                        return (
+                          <li key={`${e.ke}-${i}`}>
+                            <Link
+                              to={e.ke}
+                              className="group flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-[#F6F8FB] focus-visible:bg-[#F6F8FB] focus-visible:outline-none"
+                            >
+                              <Ikon className={`mt-0.5 h-4 w-4 shrink-0 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
+                              <span className="min-w-0 flex-1">
+                                <span className="block text-sm font-semibold leading-snug text-kkp-900">{e.nama}</span>
+                                {e.keterangan && <span className="line-clamp-1 text-xs text-slate-500">{e.keterangan}</span>}
+                              </span>
+                              <ArrowRight className={`mt-0.5 h-4 w-4 shrink-0 text-slate-300 group-hover:text-kkp-700 ${GERAK_PANAH}`} aria-hidden="true" />
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                ))}
+                {status.memuat && (
+                  <p className="flex items-center gap-2 px-4 py-3 text-xs text-slate-500">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" /> Mencari di data peta...
+                  </p>
+                )}
+                {status.galat && (
+                  <p className="flex items-center gap-2 px-4 py-3 text-xs text-rose-600">
+                    <AlertTriangle className="h-3.5 w-3.5" aria-hidden="true" /> {status.galat}
+                  </p>
+                )}
+                {siap && !status.galat && daftar.length === 0 && (
+                  <p className="px-4 py-5 text-center text-sm text-slate-500">
+                    Tidak ada yang cocok dengan &ldquo;{q}&rdquo;. Coba nama pelabuhan, provinsi, zona, atau jenis investasi.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 const LandingPage = () => {
   const { isAuthenticated } = useAuth();
@@ -500,55 +730,7 @@ const LandingPage = () => {
         </div>
       </section>
 
-      <section className="px-4 pb-24 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl rounded-2xl border border-slate-200 bg-[#F6F8FB]">
-          <div className="grid gap-10 px-6 py-12 sm:px-10 lg:grid-cols-12 lg:items-center lg:gap-12 lg:px-14 lg:py-16">
-            <div className="lg:col-span-5">
-              <Label>Akses aplikasi</Label>
-              <h2 className="mt-6 text-balance text-3xl font-extrabold leading-[1.1] tracking-[-0.03em] text-kkp-900 sm:text-4xl">
-                Digunakan oleh unit kerja di lingkungan Kementerian Kelautan dan Perikanan.
-              </h2>
-              <p className="mt-5 max-w-lg leading-relaxed text-slate-600">
-                Peta spasial dan profil investasi dapat dibuka tanpa masuk. Analisis kelayakan wilayah, pipeline
-                investasi, dan dashboard memerlukan akun yang terdaftar.
-              </p>
-              <div className="mt-8 flex flex-wrap gap-3">
-                {isAuthenticated ? (
-                  <>
-                    <TombolUtama to="/dashboard">Buka Dashboard</TombolUtama>
-                    <TombolKedua to="/pipeline">Pipeline Investasi</TombolKedua>
-                  </>
-                ) : (
-                  <>
-                    <TombolUtama to="/login">Masuk</TombolUtama>
-                    <TombolKedua to="/register">Daftar Akun</TombolKedua>
-                  </>
-                )}
-              </div>
-            </div>
-            <ul className="grid items-start gap-4 sm:grid-cols-2 lg:col-span-7">
-              {AKSES.map(({ ikon: Ikon, judul, isi }) => (
-                <li key={judul} className="group rounded-2xl border border-slate-200 bg-white p-6">
-                  <span className="flex items-center gap-3">
-                    <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#D3F0F8] text-kkp-900">
-                      <Ikon className={`h-5 w-5 ${GERAK_IKON}`} strokeWidth={1.8} aria-hidden="true" />
-                    </span>
-                    <span className="text-lg font-bold text-kkp-900">{judul}</span>
-                  </span>
-                  <ul className="mt-5 space-y-3">
-                    {isi.map((t) => (
-                      <li key={t} className="flex items-start gap-2.5 text-[15px] leading-snug text-slate-700">
-                        <Check className={`mt-0.5 h-4 w-4 shrink-0 text-kkp-700 ${GERAK_KECIL}`} strokeWidth={2.6} aria-hidden="true" />
-                        {t}
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
+      <PusatInformasi />
 
       <footer className="bg-kkp-900 text-white">
         <PitaKkp />
