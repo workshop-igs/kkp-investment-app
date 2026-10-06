@@ -172,6 +172,8 @@ export function gambarSkala(ctx, derajatPerPx, lintang, lebar = LEBAR_PX, tinggi
   ctx.stroke();
   ctx.fillStyle = '#0f172a';
   ctx.font = '600 22px sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'alphabetic';
   ctx.fillText(labelSkala(km), x, y - 10);
 }
 
