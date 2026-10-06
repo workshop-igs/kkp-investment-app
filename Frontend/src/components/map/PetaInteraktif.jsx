@@ -159,8 +159,9 @@ const PetaInteraktif = ({
   const [layerVisibility, setLayerVisibility] = useState({});
   
   const [cari] = useSearchParams();
-  const lapisanAwal = LAYER_LOKAL[cari.get('lapisan')] ? cari.get('lapisan') : null;
-  const [activeDataLayers, setActiveDataLayers] = useState(() => [lapisanAwal || 'kkprl']);
+  const lapisanAwal = (cari.get('lapisan') || '').split(',').filter((id) => LAYER_LOKAL[id]);
+  const [activeDataLayers, setActiveDataLayers] = useState(() => (lapisanAwal.length ? lapisanAwal : ['kkprl']));
+  const [petaSiap, setPetaSiap] = useState(false);
   const [wilayahLapisan, setWilayahLapisan] = useState({});
 
   const [sektorLapisan, setSektorLapisan] = useState({});
@@ -317,6 +318,10 @@ const PetaInteraktif = ({
     setPanelOpen(false);
   };
 
+  useEffect(() => {
+    if (petaSiap && cari.get('mulai') === 'gambar') handleStartDrawing();
+  }, [petaSiap]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleFinish = () => drawerRef.current?.finish();
   const handleUndo = () => drawerRef.current?.undo();
   const handleCancel = () => { drawerRef.current?.cancel(); setIsDrawing(false); setVertexCount(0); };
@@ -336,6 +341,7 @@ const PetaInteraktif = ({
       <div className="flex-1 relative h-full">
         <MapContainer
           ref={refPeta}
+          whenReady={() => setPetaSiap(true)}
           center={[-2.5489, 118.0149]}
           zoom={5}
           {...BATAS_PETA}

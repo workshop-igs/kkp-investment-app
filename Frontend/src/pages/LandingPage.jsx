@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Anchor, ArrowRight, Briefcase, Check, Clock3, Construction, Download, Factory, FileStack, FileText, FlaskConical,
+  Anchor, ArrowRight, ArrowUpRight, Briefcase, Check, Clock3, Construction, Download, Factory, FileStack, FileText, FlaskConical,
   Fish, Gem, Layers, Map, MapPin, Palmtree, Shell, SquareDashedMousePointer, Sprout, Upload, Waves, Zap,
 } from 'lucide-react';
 import { api } from '../api/klien';
@@ -23,6 +23,20 @@ const IKON_JENIS = {
 };
 
 const TOSKA_MUDA = '#D3F0F8';
+
+const GERAK = 'transition-transform duration-300 ease-out';
+const GERAK_IKON = `${GERAK} group-hover:-translate-y-1 group-hover:-rotate-6 group-hover:scale-110`;
+const GERAK_KECIL = `${GERAK} group-hover:-translate-y-0.5 group-hover:scale-110`;
+const GERAK_PANAH = `${GERAK} group-hover:translate-x-1`;
+const FOKUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-900';
+
+const KE_TAMBAKREJO = `/peta?${new URLSearchParams({
+  lapisan: 'infra_pelabuhan_perikanan',
+  lat: '-8.3164',
+  lng: '112.1451',
+  label: 'Pelabuhan Perikanan Tambakrejo',
+  keterangan: 'Pelabuhan Perikanan Pantai, Blitar, Jawa Timur',
+})}`;
 
 const SUMBER = ['Portal Satu Data KKP', 'RTRW Provinsi', 'Sidako KKP', 'BNPB InaRISK', 'BPS', 'NOAA'];
 
@@ -112,10 +126,10 @@ const Label = ({ children, nada = 'toska' }) => (
 const TombolUtama = ({ to, children }) => (
   <Link
     to={to}
-    className="inline-flex items-center gap-3 rounded-md bg-kkp-900 px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-kkp-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-900"
+    className={`group inline-flex items-center gap-3 rounded-md bg-kkp-900 px-6 py-3.5 text-[15px] font-semibold text-white transition-colors hover:bg-kkp-800 ${FOKUS}`}
   >
     {children}
-    <ArrowRight className="h-4 w-4 text-kkp-toska" />
+    <ArrowRight className={`h-4 w-4 text-kkp-toska ${GERAK_PANAH}`} />
   </Link>
 );
 
@@ -128,16 +142,20 @@ const TombolKedua = ({ to, children }) => (
   </Link>
 );
 
-const KartuKecil = ({ judul, isi, ikon: Ikon, tanpaIsi }) => (
-  <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4">
+const KartuKecil = ({ to, judul, isi, ikon: Ikon, tanpaIsi }) => (
+  <Link to={to} className={`group flex flex-col rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:border-kkp-900 ${FOKUS}`}>
     <span className="text-[15px] font-semibold leading-snug text-kkp-900">{judul}</span>
     <span className="mt-0.5 text-xs leading-snug text-slate-500">{isi}</span>
-    <Ikon className="mt-4 h-8 w-8 text-kkp-900" strokeWidth={1.5} fill={tanpaIsi ? 'none' : TOSKA_MUDA} aria-hidden="true" />
-  </div>
+    <Ikon className={`mt-4 h-8 w-8 text-kkp-900 ${GERAK_IKON}`} strokeWidth={1.5} fill={tanpaIsi ? 'none' : TOSKA_MUDA} aria-hidden="true" />
+  </Link>
 );
 
 const IlustrasiArea = () => (
-  <div className="relative h-44 overflow-hidden rounded-2xl border border-[#9ADCEC] bg-[#D3F0F8]">
+  <Link
+    to="/peta?mulai=gambar"
+    aria-label="Gambar area analisis di Peta Spasial"
+    className={`group relative block h-44 overflow-hidden rounded-2xl border border-[#9ADCEC] bg-[#D3F0F8] transition-colors hover:border-kkp-900 ${FOKUS}`}
+  >
     <GarisKontur className="absolute -right-24 -top-28 h-96 w-96 text-kkp-900/20" />
     <svg viewBox="0 0 300 180" className="absolute inset-0 h-full w-full" aria-hidden="true">
       <polygon points="70,52 190,34 222,118 96,138" fill="rgba(0,34,66,0.08)" stroke="#002242" strokeWidth="1.8" strokeDasharray="6 5" />
@@ -145,16 +163,16 @@ const IlustrasiArea = () => (
         <circle key={`${x}-${y}`} cx={x} cy={y} r="4.5" fill="#fff" stroke="#002242" strokeWidth="1.8" />
       ))}
     </svg>
-    <MapPin className="absolute left-[44%] top-[30%] h-9 w-9 text-kkp-900" strokeWidth={1.5} fill="#fff" aria-hidden="true" />
-    <MapPin className="absolute bottom-5 right-8 h-7 w-7 text-kkp-900" strokeWidth={1.5} fill={TOSKA_MUDA} aria-hidden="true" />
-  </div>
+    <MapPin className={`absolute left-[44%] top-[30%] h-9 w-9 text-kkp-900 ${GERAK} group-hover:-translate-y-2`} strokeWidth={1.5} fill="#fff" aria-hidden="true" />
+    <MapPin className={`absolute bottom-5 right-8 h-7 w-7 text-kkp-900 ${GERAK} delay-75 group-hover:-translate-y-1.5`} strokeWidth={1.5} fill={TOSKA_MUDA} aria-hidden="true" />
+  </Link>
 );
 
 const Ilustrasi = ({ ikon: Ikon, lencana }) => (
   <div className="relative mx-auto h-36 w-52" aria-hidden="true">
     <div className="absolute inset-x-2 inset-y-0 rounded-[2rem] bg-[radial-gradient(#40BFDB_1.3px,transparent_1.6px)] [background-size:10px_10px] [mask-image:radial-gradient(closest-side,#000_40%,transparent)]" />
-    <Ikon className="absolute inset-0 m-auto h-28 w-28 text-kkp-900" strokeWidth={1.1} fill={TOSKA_MUDA} />
-    <span className="absolute right-9 top-2 flex h-10 w-10 items-center justify-center rounded-full bg-kkp-900 text-lg font-bold text-white">
+    <Ikon className={`absolute inset-0 m-auto h-28 w-28 text-kkp-900 ${GERAK_IKON}`} strokeWidth={1.1} fill={TOSKA_MUDA} />
+    <span className={`absolute right-9 top-2 flex h-10 w-10 items-center justify-center rounded-full bg-kkp-900 text-lg font-bold text-white ${GERAK} group-hover:rotate-12 group-hover:scale-110`}>
       {lencana}
     </span>
   </div>
@@ -171,10 +189,10 @@ const ContohArea = () => (
     </svg>
     <div className="absolute bottom-3 left-3 flex gap-2">
       <span className="inline-flex items-center gap-1.5 rounded-md bg-kkp-900 px-2.5 py-1.5 text-[11px] font-semibold text-white">
-        <SquareDashedMousePointer className="h-3.5 w-3.5" /> Gambar area
+        <SquareDashedMousePointer className={`h-3.5 w-3.5 ${GERAK_KECIL}`} /> Gambar area
       </span>
       <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-kkp-900">
-        <Upload className="h-3.5 w-3.5" /> Unggah berkas
+        <Upload className={`h-3.5 w-3.5 ${GERAK_KECIL}`} /> Unggah berkas
       </span>
     </div>
   </div>
@@ -193,7 +211,7 @@ const ContohJenis = () => (
               i === 1 ? 'border-2 border-kkp-900 bg-[#D3F0F8]' : 'border border-slate-200'
             }`}
           >
-            <Ikon className="h-5 w-5" style={{ color: warnaJenisInvestasi(kode) }} />
+            <Ikon className={`h-5 w-5 ${GERAK_KECIL}`} style={{ color: warnaJenisInvestasi(kode) }} />
             {label}
           </span>
         );
@@ -208,13 +226,13 @@ const ContohLaporan = () => (
     <ul className="mt-1 flex-1 divide-y divide-slate-100">
       {BAGIAN_LAPORAN.map((b) => (
         <li key={b} className="flex items-center gap-2 py-1.5 text-xs text-slate-700">
-          <Check className="h-3.5 w-3.5 shrink-0 text-emerald-600" strokeWidth={3} />
+          <Check className={`h-3.5 w-3.5 shrink-0 text-emerald-600 ${GERAK_KECIL}`} strokeWidth={3} />
           {b}
         </li>
       ))}
     </ul>
     <span className="mt-2 inline-flex items-center justify-center gap-1.5 rounded-md bg-kkp-900 py-2 text-xs font-semibold text-white">
-      <Download className="h-3.5 w-3.5" /> Unduh PDF
+      <Download className={`h-3.5 w-3.5 ${GERAK} group-hover:translate-y-0.5`} /> Unduh PDF
     </span>
   </div>
 );
@@ -237,9 +255,9 @@ const LandingPage = () => {
   const maksPeluang = Math.max(1, ...peluang.map((p) => p.zona));
 
   const ringkasanNasional = [
-    [angka(ringkas?.kkprl_aktif), 'Izin KKPRL berlaku'],
-    [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin'],
-    [angka(ringkas?.proyek), 'Proyek investasi terpantau'],
+    [angka(ringkas?.kkprl_aktif), 'Izin KKPRL berlaku', '/peta?lapisan=kkprl'],
+    [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin', '/peta?lapisan=kkprl'],
+    [angka(ringkas?.proyek), 'Proyek investasi terpantau', '/pipeline'],
   ];
 
   return (
@@ -263,20 +281,30 @@ const LandingPage = () => {
 
           <div className="grid gap-3 sm:grid-cols-2 lg:col-span-6">
             <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-              <figure className="rounded-xl border border-slate-200 bg-[#F6F8FB] p-3">
-                <img
-                  src="/beranda/pelabuhan-tambakrejo.webp"
-                  alt="Perahu nelayan berlabuh di Pelabuhan Perikanan Tambakrejo, Blitar"
-                  width="1200"
-                  height="900"
-                  className="aspect-[4/3] w-full rounded-lg object-cover"
-                />
-                <figcaption className="mt-3 text-center">
-                  <span className="block text-[15px] font-semibold text-kkp-900">Pelabuhan Perikanan Tambakrejo</span>
-                  <span className="block font-mono text-xs text-slate-500">Blitar, Jawa Timur</span>
-                  <span className="mt-1 block text-[10px] text-slate-400">Foto: DKP Provinsi Jawa Timur</span>
-                </figcaption>
-              </figure>
+              <Link
+                to={KE_TAMBAKREJO}
+                className={`group block rounded-xl border border-slate-200 bg-[#F6F8FB] p-3 transition-colors hover:border-kkp-900 ${FOKUS}`}
+              >
+                <figure>
+                  <div className="overflow-hidden rounded-lg">
+                    <img
+                      src="/beranda/pelabuhan-tambakrejo.webp"
+                      alt="Perahu nelayan berlabuh di Pelabuhan Perikanan Tambakrejo, Blitar"
+                      width="1200"
+                      height="900"
+                      className="aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                    />
+                  </div>
+                  <figcaption className="mt-3 text-center">
+                    <span className="block text-[15px] font-semibold text-kkp-900">Pelabuhan Perikanan Tambakrejo</span>
+                    <span className="flex items-center justify-center gap-1 font-mono text-xs text-slate-500">
+                      <MapPin className={`h-3.5 w-3.5 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
+                      Blitar, Jawa Timur
+                    </span>
+                    <span className="mt-1 block text-[10px] text-slate-400">Foto: DKP Provinsi Jawa Timur</span>
+                  </figcaption>
+                </figure>
+              </Link>
               <div className="mt-5 flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-kkp-900">Ringkasan nasional</p>
                 <span className="bg-[#D3F0F8] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-kkp-900">
@@ -288,17 +316,19 @@ const LandingPage = () => {
                   <img src="/logo-kkp.png" alt="" className="h-6 w-6 shrink-0 object-contain" />
                   Seluruh Indonesia
                 </span>
-                <dl className="mt-3 flex flex-1 flex-col justify-around divide-y divide-slate-200 rounded-lg bg-[#F6F8FB] px-3 text-center">
-                  {ringkasanNasional.map(([nilai, label], i) => (
-                    <div key={label} className="flex flex-col-reverse py-2.5">
-                      <dt className="text-xs text-slate-500">{label}</dt>
-                      <dd className="flex items-center justify-center gap-2 text-lg font-bold text-kkp-900 tabular-nums">
-                        {i === 0 && <span className="h-2 w-2 rounded-full bg-kkp-hijau" aria-hidden="true" />}
-                        {nilai}
-                      </dd>
-                    </div>
+                <ul className="mt-3 flex flex-1 flex-col justify-around divide-y divide-slate-200 rounded-lg bg-[#F6F8FB] px-2 text-center">
+                  {ringkasanNasional.map(([nilai, label, ke], i) => (
+                    <li key={label}>
+                      <Link to={ke} className={`group my-1 flex flex-col items-center rounded-md py-1.5 transition-colors hover:bg-white ${FOKUS}`}>
+                        <span className="flex items-center gap-2 text-lg font-bold text-kkp-900 tabular-nums transition-colors group-hover:text-kkp-700">
+                          {i === 0 && <span className={`h-2 w-2 rounded-full bg-kkp-hijau ${GERAK} group-hover:scale-150`} aria-hidden="true" />}
+                          {nilai}
+                        </span>
+                        <span className="text-xs text-slate-500">{label}</span>
+                      </Link>
+                    </li>
                   ))}
-                </dl>
+                </ul>
               </div>
             </div>
 
@@ -306,19 +336,25 @@ const LandingPage = () => {
               <div className="col-span-2">
                 <IlustrasiArea />
               </div>
-              <KartuKecil judul="Peta Spasial" isi="Tata ruang dan izin" ikon={Map} />
-              <KartuKecil judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
-              <div className="col-span-2 rounded-2xl bg-kkp-900 p-5 text-white">
-                <span className="inline-block bg-kkp-toska px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-kkp-900">
-                  Peluang investasi
+              <KartuKecil to="/peta?lapisan=polaruang,kkprl" judul="Peta Spasial" isi="Tata ruang dan izin" ikon={Map} />
+              <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
+              <Link
+                to="/peta?lapisan=potensi"
+                className={`group col-span-2 block rounded-2xl bg-kkp-900 p-5 text-white transition-colors hover:bg-kkp-800 ${FOKUS}`}
+              >
+                <span className="flex items-start justify-between gap-3">
+                  <span className="bg-kkp-toska px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-kkp-900">
+                    Peluang investasi
+                  </span>
+                  <ArrowUpRight className={`h-5 w-5 text-kkp-toska ${GERAK} group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:scale-110`} aria-hidden="true" />
                 </span>
-                <p className="mt-5 text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
+                <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
                   {angka(ringkas?.zona_peluang_tinggi)}
-                </p>
-                <p className="mt-3 text-sm text-white/80">Zona laut berpeluang tinggi untuk minimal satu jenis investasi</p>
-              </div>
-              <KartuKecil judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
-              <KartuKecil judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />
+                </span>
+                <span className="mt-3 block text-sm text-white/80">Zona laut berpeluang tinggi untuk minimal satu jenis investasi</span>
+              </Link>
+              <KartuKecil to="/peta?mulai=gambar" judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
+              <KartuKecil to="/profil-investasi" judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />
             </div>
           </div>
         </section>
@@ -330,7 +366,7 @@ const LandingPage = () => {
           </h2>
           <ul className="mt-16 grid gap-12 md:grid-cols-3 md:gap-8">
             {TANTANGAN.map(({ ikon, lencana, judul, isi }) => (
-              <li key={judul}>
+              <li key={judul} className="group">
                 <Ilustrasi ikon={ikon} lencana={lencana} />
                 <h3 className="mt-6 text-lg font-semibold text-kkp-900">{judul}</h3>
                 <p className="mx-auto mt-2 max-w-xs text-[15px] leading-relaxed text-slate-600">{isi}</p>
@@ -355,8 +391,8 @@ const LandingPage = () => {
 
           <ul className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {FITUR.map(({ ikon: Ikon, judul, isi }) => (
-              <li key={judul} className="rounded-2xl border border-slate-200 p-6">
-                <Ikon className="h-10 w-10 text-kkp-900" strokeWidth={1.4} fill={TOSKA_MUDA} aria-hidden="true" />
+              <li key={judul} className="group rounded-2xl border border-slate-200 p-6">
+                <Ikon className={`h-10 w-10 text-kkp-900 ${GERAK_IKON}`} strokeWidth={1.4} fill={TOSKA_MUDA} aria-hidden="true" />
                 <h3 className="mt-6 text-xl font-bold tracking-[-0.01em] text-kkp-900">{judul}</h3>
                 <p className="mt-2 leading-relaxed text-slate-600">{isi}</p>
               </li>
@@ -393,7 +429,7 @@ const LandingPage = () => {
             className="-mx-4 flex snap-x gap-4 overflow-x-auto px-4 pb-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-kkp-900 sm:mx-0 sm:px-0 lg:col-span-8"
           >
             {LANGKAH.map(({ contoh: Contoh, judul, isi }, i) => (
-              <li key={judul} className="w-[18.5rem] shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-200 bg-white sm:w-[21rem]">
+              <li key={judul} className="group w-[18.5rem] shrink-0 snap-start overflow-hidden rounded-2xl border border-slate-200 bg-white sm:w-[21rem]">
                 <div className="h-72 p-5">
                   <Contoh />
                 </div>
@@ -434,7 +470,7 @@ const LandingPage = () => {
                 to={`/profil-investasi?jenis=${kode}`}
                 className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-4 transition-colors hover:border-kkp-900 focus-visible:outline focus-visible:outline-2 focus-visible:outline-kkp-900 sm:p-5"
               >
-                <Ikon className="h-8 w-8" style={{ color: warna }} strokeWidth={1.6} aria-hidden="true" />
+                <Ikon className={`h-8 w-8 ${GERAK_IKON}`} style={{ color: warna }} strokeWidth={1.6} aria-hidden="true" />
                 <span className="mt-4 min-h-[2.5rem] text-[15px] font-bold leading-snug text-kkp-900">{nama}</span>
                 <span className="mt-3 text-3xl font-extrabold tracking-[-0.02em] text-kkp-900 tabular-nums">{angka(zona)}</span>
                 <span className="text-xs text-slate-500">zona berpeluang tinggi</span>
@@ -442,7 +478,7 @@ const LandingPage = () => {
                   <span className="block h-full rounded-full" style={{ width: `${(zona / maksPeluang) * 100}%`, backgroundColor: warna }} />
                 </span>
                 <span className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-kkp-700 group-hover:underline">
-                  Pilih provinsi <ArrowRight className="h-3.5 w-3.5" />
+                  Pilih provinsi <ArrowRight className={`h-3.5 w-3.5 ${GERAK_PANAH}`} />
                 </span>
               </Link>
             );
