@@ -931,7 +931,7 @@ const DetailProyekPage = () => {
               {analisis.kerja ? (
                 <KartuLaporan
                   judul="Perkiraan Serapan Tenaga Kerja"
-                  pengantar="Angka serapan berasal dari rencana operasional yang diisi penyusun analisis; ia tidak dimodelkan dari nilai investasi."
+                  pengantar="Angka serapan berasal dari rencana operasional yang diisi penyusun analisis."
                 >
                   {analisis.kerja.total != null ? (
                     <AngkaBesar
