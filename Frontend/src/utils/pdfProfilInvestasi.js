@@ -581,7 +581,7 @@ const SUMBER_BPS = (k) => `BPS, Produksi & Nilai Produksi ${k ? (k.kelompok === 
 
 const regulasiTeks = (z) => (z.regulasi
   ? `${z.regulasi.judul} tentang ${z.regulasi.tentang}`
-  : `${z.label_data || z.sumber_label || 'Rencana tata ruang laut'} (${z.sumber_label || 'KKP'}); nomor peraturan daerah belum terverifikasi pada JDIH BPK`);
+  : `${z.label_data || z.sumber_label || 'Rencana tata ruang laut'} (${z.sumber_label || 'KKP'}); nomor peraturan daerah belum terverifikasi pada JDIH Badan Pemeriksa Keuangan`);
 
 const pertumbuhanTeks = (k) => {
   if (k.pertumbuhan_persen == null) return null;
@@ -627,7 +627,7 @@ function sampul(dek, o, bab, citra) {
   d.text(bersih(o.jenis_dipilih ? o.jenis_dipilih.nama : 'Seluruh jenis investasi'), TEPI, y - 1);
   y += 6;
   dek.teks(TEPI, y, 132, 'Disusun otomatis dari data publik: produksi perikanan BPS (data KKP), pola ruang laut KKP, '
-    + 'peraturan daerah tata ruang (JDIH BPK), risiko bencana BNPB InaRISK, dan statistik ketenagakerjaan BPS.',
+    + 'peraturan daerah tata ruang (JDIH Badan Pemeriksa Keuangan), risiko bencana BNPB InaRISK, dan statistik ketenagakerjaan BPS.',
   { ukuran: 8.2, warna: [205, 222, 240] });
 
   const kartu = [
@@ -948,7 +948,9 @@ function lokasiSesuai(dek, o, b, i, citra) {
   const y = dek.slide({
     alis: `Bab ${i + 1}  |  ${b.nama}`,
     judul: `Lokasi Paling Sesuai: ${b.nama}`,
-    sub: `Zona ruang laut Provinsi ${o.wilayah.nama} yang sesuai untuk ${j.nama.toLowerCase()}, menurut kelas kelayakan.`,
+    sub: j.lokasi.length && !j.lokasi.some((l) => l.peruntukan_utama)
+      ? `Rencana tata ruang laut Provinsi ${o.wilayah.nama} belum menetapkan zona peruntukan ${j.nama.toLowerCase()}; lokasi berikut zona yang membolehkannya secara bersyarat.`
+      : `Zona ruang laut Provinsi ${o.wilayah.nama} yang sesuai untuk ${j.nama.toLowerCase()}, menurut kelas kelayakan.`,
     aksen,
   });
   const lebarPeta = 140;
@@ -988,7 +990,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
     const lebarPil = d.getTextWidth(teksKelas) + 3.6;
     dek.pil(x + lebar - 5 - lebarPil, yy, teksKelas, campur(warnaKelas, 0.16), gelap(warnaKelas, 0.8), 5.6);
     dek.gaya(6.4, C.abu);
-    d.text(bersih(`${l.kabupaten || '-'}  |  ${angka(l.luas_ha, 1)} ha  |  skor ${angka(l.skor, 2)}`), x + 11.6, yy + 3.6);
+    d.text(bersih(`${l.kabupaten || '-'}  |  ${angka(l.luas_ha, 1)} ha  |  skor ${angka(l.skor, 2)}${l.peruntukan_utama ? '' : '  |  kegiatan bersyarat'}`), x + 11.6, yy + 3.6);
     let yb = yy + 3.6;
     const laut = l.oseanografi || {};
     const teksLaut = [
@@ -1045,7 +1047,7 @@ function finansialPasar(dek, o, b, i) {
     dek.centang(x + 5, yy, lebar - 10, [
       'Data pasar: volume dan nilai permintaan, harga jual, dan tujuan pasar dari statistik resmi.',
       'Model usaha: biaya investasi awal, biaya operasional per tahun, dan pendapatan per satuan usaha.',
-      'Asumsi kelayakan: umur proyek dan tingkat diskonto untuk menghitung NPV, IRR, dan B/C.',
+      'Asumsi kelayakan: umur proyek dan tingkat diskonto untuk menghitung nilai bersih sekarang (NPV), tingkat pengembalian internal (IRR), dan rasio manfaat-biaya (B/C).',
     ], { aksen, ukuran: 7.6 });
     return;
   }
@@ -1071,7 +1073,7 @@ function finansialPasar(dek, o, b, i) {
     })),
     !milik && { label: `${o.wilayah.nama} (#${k.peringkat_nasional})`, nilai: k.produksi_ton, teks: `${angka(k.produksi_ton)} t  |  ${angka(k.pangsa_nasional_persen, 1)}%`, sorot: true },
   ].filter(Boolean).slice(0, 6), aksen);
-  dek.tanda(x, y + 98, lebar, 'Analisis finansial (biaya investasi, NPV, IRR, B/C) memerlukan model usaha per komoditas dari sumber resmi; acuan tersebut belum tersedia di basis data.');
+  dek.tanda(x, y + 98, lebar, 'Analisis finansial (biaya investasi, nilai bersih sekarang/NPV, tingkat pengembalian internal/IRR, rasio manfaat-biaya/B/C) memerlukan model usaha per komoditas dari sumber resmi; acuan tersebut belum tersedia di basis data.');
   dek.sumber(`Sumber: ${SUMBER_BPS(k)}; nilai per kilogram = nilai produksi dibagi volume produksi.`);
 }
 
@@ -1094,9 +1096,12 @@ function sosialPekerja(dek, o, b, i) {
   const yk = y + 26;
   const kiri = 150;
   let yy = dek.kartu(TEPI, yk, kiri, BAWAH - yk, { judul: 'Kabupaten/kota pesisir', ikon: 'sosial', aksen });
-  dek.tabel(TEPI + 4, yy - 1, kiri - 8, ['Kabupaten/kota', 'Penduduk', 'Nelayan', 'RTP tangkap', 'DTKS (%)'],
+  const ySosial = dek.tabel(TEPI + 4, yy - 1, kiri - 8, ['Kabupaten/kota', 'Penduduk', 'Nelayan', 'RTP tangkap', 'DTKS (%)'],
     o.sosial.kabupaten.slice(0, 10).map((kb) => [kb.nama, angka(kb.penduduk), angka(kb.nelayan), angka(kb.rtp_tangkap), angka(kb.rasio_dtks, 1)]),
     { bagian: [0.34, 0.19, 0.16, 0.17, 0.14], rataKanan: [1, 2, 3, 4], ukuran: 6.5, batas: BAWAH - 2, aksen });
+  dek.teks(TEPI + 4, ySosial + 2, kiri - 8,
+    'RTP tangkap: rumah tangga perikanan tangkap. DTKS: Data Terpadu Kesejahteraan Sosial (Kementerian Sosial), persentase penduduk yang terdaftar.',
+    { ukuran: 5.9, warna: C.abu });
 
   const x = TEPI + kiri + 5;
   const lebar = W - TEPI - x;
@@ -1147,7 +1152,7 @@ function kesimpulanBab(dek, o, b, i) {
   const x = TEPI + lebar + 5;
   yy = dek.kartu(x, yk, lebar, BAWAH - yk, { judul: 'Langkah lanjut', ikon: 'isi', aksen });
   dek.nomor(x + 5, yy, lebar - 10, [
-    'Verifikasi lapangan lokasi prioritas dan pastikan tidak tumpang tindih dengan KKPRL yang telah terbit.',
+    'Verifikasi lapangan lokasi prioritas dan pastikan tidak tumpang tindih dengan izin kesesuaian kegiatan pemanfaatan ruang laut (KKPRL) yang telah terbit.',
     j.lokasi.some((l) => l.pembatas.length) && 'Kaji faktor pembatas lokasi (risiko bencana, ekosistem sensitif, sosial) sebelum penetapan.',
     k ? `Lengkapi model usaha ${b.nama.toLowerCase()} dari sumber resmi untuk analisis finansial.` : 'Lengkapi data pasar dan model usaha dari sumber resmi untuk analisis finansial.',
     'Siapkan pelatihan untuk posisi berprioritas tinggi pada matriks keahlian.',
