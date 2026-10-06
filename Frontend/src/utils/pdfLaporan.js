@@ -869,13 +869,12 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         { ukuran: 7 }
       );
       k.tabel(
-        ['Kompetensi', 'Lembaga & skema sertifikasi', 'Bulan'],
+        ['Kompetensi', 'Lembaga & skema sertifikasi'],
         a.kerja.pelatihan.map((p) => [
           p.keahlian,
           [p.lembaga, p.skema].filter(Boolean).join(' | '),
-          p.durasi_bulan,
         ]),
-        [(LEBAR - 8) * 0.36, (LEBAR - 8) * 0.52, (LEBAR - 8) * 0.12]
+        [(LEBAR - 8) * 0.4, (LEBAR - 8) * 0.6]
       );
     }
     k.tutupKartu();
