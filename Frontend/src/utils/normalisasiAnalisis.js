@@ -84,6 +84,8 @@ export function normalkanAnalisis(mentah) {
         capex: angka(f.capex_idr),
         pendapatan: angka(f.annual_revenue_idr),
         opex: angka(f.annual_opex_idr),
+        tumbuhPendapatan: angka(f.revenue_growth_pct),
+        tumbuhOpex: angka(f.opex_growth_pct),
         wacc: angka(f.wacc_pct),
         umur: angka(f.project_lifetime_yr),
         terbaik: f.skenario_terbaik || null,
