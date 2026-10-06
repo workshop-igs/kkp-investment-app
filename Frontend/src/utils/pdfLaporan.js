@@ -987,8 +987,10 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       ['Parameter', 'Nilai'],
       [
         ['CapEx (Capital Expenditure)', `Rp ${rupiahRingkas(f.capex)}`],
-        ['Pendapatan per tahun', `Rp ${rupiahRingkas(f.pendapatan)}`],
-        ['OpEx (Operational Expenditure) per tahun', `Rp ${rupiahRingkas(f.opex)}`],
+        ['Pendapatan tahun pertama', `Rp ${rupiahRingkas(f.pendapatan)}`],
+        ['OpEx (Operational Expenditure) tahun pertama', `Rp ${rupiahRingkas(f.opex)}`],
+        ['Pertumbuhan pendapatan per tahun', f.tumbuhPendapatan != null ? `${nf(f.tumbuhPendapatan, 1)}%` : '—'],
+        ['Pertumbuhan OpEx per tahun', f.tumbuhOpex != null ? `${nf(f.tumbuhOpex, 1)}%` : '—'],
         ['ROI', f.roi != null ? `${nf(f.roi, 0)}%` : '—'],
       ]
     );

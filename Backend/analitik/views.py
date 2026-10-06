@@ -284,8 +284,8 @@ class RunAnalysisView(APIView):
 
         required_fields = {
             'capex_idr': 'CapEx / Investasi Awal',
-            'annual_revenue_idr': 'Estimasi Pendapatan per Tahun',
-            'annual_opex_idr': 'Estimasi OpEx per Tahun',
+            'annual_revenue_idr': 'Estimasi Pendapatan Tahun Pertama',
+            'annual_opex_idr': 'Estimasi OpEx Tahun Pertama',
             'wacc_pct': 'Discount Rate (%)',
             'lifetime_yr': 'Umur Proyek (Tahun)',
         }

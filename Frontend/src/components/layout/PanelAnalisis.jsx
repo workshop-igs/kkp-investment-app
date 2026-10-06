@@ -172,8 +172,8 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
 
     const wajib = [
       [capex, "CapEx (Capital Expenditure) / Investasi Awal"],
-      [revenue, "Estimasi Pendapatan per Tahun"],
-      [opex, "Estimasi OpEx (Operational Expenditure) per Tahun"],
+      [revenue, "Estimasi Pendapatan Tahun Pertama"],
+      [opex, opexTotal ? "Total OpEx Selama Umur Proyek" : "Estimasi OpEx (Operational Expenditure) Tahun Pertama"],
       [wacc, "Discount Rate"],
       [lifetime, "Umur Proyek"],
     ];
@@ -194,9 +194,9 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
     if (
       opexTahunan >= parseFloat(revenue)
       && !window.confirm(
-        `OpEx per tahun (${formatRupiah(opexTahunan)}) tidak lebih kecil dari pendapatan per tahun `
-        + `(${formatRupiah(parseFloat(revenue))}), sehingga proyek rugi setiap tahun dan NPV-nya negatif.\n\n`
-        + 'Bila angka OpEx itu total selama umur proyek, pilih "Total selama umur proyek" di samping kotak OpEx.\n\n'
+        `OpEx tahun pertama (${formatRupiah(opexTahunan)}) tidak lebih kecil dari pendapatan tahun pertama `
+        + `(${formatRupiah(parseFloat(revenue))}), sehingga arus kas tahun pertama sudah negatif.\n\n`
+        + 'Bila angka OpEx itu total selama umur proyek, pilih "Total selama umur proyek" pada pilihan Isian OpEx.\n\n'
         + 'Tetap jalankan analisis?'
       )
     ) {
@@ -389,7 +389,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Estimasi Pendapatan / Tahun <span className="text-red-500">*</span></label>
+                    <label className="block text-sm text-slate-700 mb-1.5">Estimasi Pendapatan Tahun Pertama <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">Rp</span>
                       <InputAngka
@@ -399,13 +399,14 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
                         className="w-full bg-white border border-slate-300 rounded-lg p-2.5 pl-9 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700"
                       />
                     </div>
+                    <p className="text-xs text-slate-500 mt-1.5">Tahun berikutnya naik sesuai Pertumbuhan Pendapatan.</p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-slate-700 mb-1.5">
-                      Estimasi OpEx (Operational Expenditure) {opexTotal ? '— Total Umur Proyek' : '/ Tahun'} <span className="text-red-500">*</span>
+                      {opexTotal ? 'Total OpEx Selama Umur Proyek' : 'Estimasi OpEx (Operational Expenditure) Tahun Pertama'} <span className="text-red-500">*</span>
                     </label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">Rp</span>
@@ -416,15 +417,20 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
                         className="w-full bg-white border border-slate-300 rounded-lg p-2.5 pl-9 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700"
                       />
                     </div>
+                    <p className="text-xs text-slate-500 mt-1.5">
+                      {opexTotal
+                        ? 'Dibagi ke setiap tahun dengan memperhitungkan Pertumbuhan OpEx.'
+                        : 'Tahun berikutnya naik sesuai Pertumbuhan OpEx.'}
+                    </p>
                   </div>
                   <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">Angka OpEx yang diisi</label>
+                    <label className="block text-sm text-slate-700 mb-1.5">Isian OpEx</label>
                     <select
                       value={opexTotal ? 'total' : 'tahun'}
                       onChange={(e) => setOpexTotal(e.target.value === 'total')}
                       className="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700 appearance-none"
                     >
-                      <option value="tahun">Per tahun (tahun pertama)</option>
+                      <option value="tahun">Nilai tahun pertama</option>
                       <option value="total">Total selama umur proyek</option>
                     </select>
                   </div>
@@ -432,7 +438,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
 
                 <div className="grid grid-cols-4 gap-4 border-t border-slate-200 pt-6">
                   <div>
-                    <label className="block text-xs text-slate-600 mb-1.5">Pertumbuhan Pend.</label>
+                    <label className="block text-xs text-slate-600 mb-1.5">Pertumbuhan Pendapatan</label>
                     <div className="relative">
                       <input 
                         type="number" 
@@ -478,11 +484,14 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
                         value={lifetime}
                         onChange={(e) => setLifetime(e.target.value)}
                         placeholder="Contoh: 20"
-                        className="w-full bg-white border border-slate-300 rounded-lg p-2.5 pr-10 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700"
+                        className="w-full bg-white border border-slate-300 rounded-lg p-2.5 pr-14 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700"
                       />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">Thn</span>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">tahun</span>
                     </div>
                   </div>
+                  <p className="col-span-4 -mt-2 text-xs text-slate-500">
+                    Pertumbuhan pendapatan dan OpEx berlaku setiap tahun, mulai dari tahun kedua. Kosongkan bila nilainya tetap.
+                  </p>
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-slate-200">
