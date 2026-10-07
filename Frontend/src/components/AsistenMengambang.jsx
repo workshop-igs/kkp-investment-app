@@ -13,9 +13,11 @@ const SARAN_HALAMAN = {
 };
 const SARAN_UMUM = ['Apa saja menu di aplikasi ini?', 'Bagaimana skor AHP dihitung?'];
 
-const saranUntuk = (pathname) => {
+const SARAN_AREA = 'Apakah area yang saya gambar sesuai untuk perikanan budidaya?';
+
+const saranUntuk = (pathname, adaArea) => {
   const kunci = Object.keys(SARAN_HALAMAN).find((h) => pathname === h || pathname.startsWith(`${h}/`));
-  return [...(kunci ? SARAN_HALAMAN[kunci] : []), ...SARAN_UMUM];
+  return [...(adaArea ? [SARAN_AREA] : []), ...(kunci ? SARAN_HALAMAN[kunci] : []), ...SARAN_UMUM];
 };
 
 const AsistenMengambang = () => {
@@ -25,6 +27,8 @@ const AsistenMengambang = () => {
   const [pesan, setPesan] = useState([]);
   const [teks, setTeks] = useState('');
   const [memuat, setMemuat] = useState(false);
+  const [modeObrolan, setModeObrolan] = useState(true);
+  const [area, setArea] = useState(null);
   const ujung = useRef(null);
   const terakhir = useRef(null);
   const masukan = useRef(null);
@@ -33,6 +37,12 @@ const AsistenMengambang = () => {
   useEffect(() => {
     (memuat ? ujung : terakhir).current?.scrollIntoView({ block: memuat ? 'end' : 'start' });
   }, [pesan, memuat]);
+
+  useEffect(() => {
+    const simpan = (e) => setArea(e.detail || null);
+    window.addEventListener('kkp:area', simpan);
+    return () => window.removeEventListener('kkp:area', simpan);
+  }, []);
 
   useEffect(() => {
     if (!buka) return undefined;
@@ -46,8 +56,28 @@ const AsistenMengambang = () => {
     const q = pertanyaan.trim();
     if (!q || memuat) return;
     setTeks('');
-    setPesan((p) => [...p, { dari: 'pengguna', teks: q }]);
+    const riwayat = [...pesan, { dari: 'pengguna', teks: q }];
+    setPesan(riwayat);
     setMemuat(true);
+    if (modeObrolan) {
+      try {
+        const { data } = await api.post('/inti/asisten/obrolan/', {
+          pesan: riwayat.filter((m) => m.teks).slice(-8).map((m) => ({ peran: m.dari, teks: m.teks })),
+          halaman: pathname,
+          geometri: area,
+        }, { timeout: 180000 });
+        setPesan((p) => [...p, { dari: 'asisten', teks: data.jawaban, alat: data.alat || [] }]);
+        setMemuat(false);
+        return;
+      } catch (e) {
+        if (e.response?.status !== 503) {
+          setPesan((p) => [...p, { dari: 'asisten', teks: 'Asisten belum dapat menjawab saat ini. Coba lagi sebentar lagi.' }]);
+          setMemuat(false);
+          return;
+        }
+        setModeObrolan(false);
+      }
+    }
     try {
       const { data } = await api.post('/inti/asisten/alat/panduan_aplikasi/', {
         argumen: { pertanyaan: q, halaman: pathname },
@@ -78,7 +108,9 @@ const AsistenMengambang = () => {
           <header className="flex items-center justify-between gap-3 bg-kkp-700 px-4 py-3 text-white">
             <div>
               <h2 className="text-[14px] font-bold leading-tight">Asisten KKP</h2>
-              <p className="text-[11.5px] text-white/80">Panduan memakai aplikasi</p>
+              <p className="text-[11.5px] text-white/80">
+                {modeObrolan ? 'Tanya jawab seputar aplikasi' : 'Panduan memakai aplikasi'}
+              </p>
             </div>
             <button
               type="button"
@@ -107,13 +139,15 @@ const AsistenMengambang = () => {
             <>
               <div className="flex-1 space-y-3 overflow-y-auto bg-slate-50 px-4 py-4">
                 <div className="rounded-xl bg-white p-3 text-[13px] leading-relaxed text-slate-600 ring-1 ring-slate-200">
-                  Tanyakan cara memakai fitur atau cara kerja perhitungan di aplikasi ini. Untuk saat ini jawaban
-                  diambil langsung dari panduan aplikasi.
+                  {modeObrolan
+                    ? 'Tanyakan cara memakai fitur, cara kerja perhitungan, atau data di aplikasi ini, misalnya proyek, lokasi, dan profil investasi provinsi.'
+                    : 'Tanyakan cara memakai fitur atau cara kerja perhitungan di aplikasi ini. Untuk saat ini jawaban diambil langsung dari panduan aplikasi.'}
+                  {modeObrolan && area && ' Area yang sedang Anda gambar ikut diperiksa.'}
                 </div>
 
                 {pesan.length === 0 && (
                   <div className="flex flex-wrap gap-2">
-                    {saranUntuk(pathname).map((s) => (
+                    {saranUntuk(pathname, modeObrolan && area).map((s) => (
                       <button
                         key={s}
                         type="button"
@@ -134,9 +168,12 @@ const AsistenMengambang = () => {
                   ) : (
                     <div key={i} ref={i === pesan.length - 1 ? terakhir : undefined} className="max-w-[92%] space-y-2">
                       {m.teks && (
-                        <div className="rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-[13px] text-slate-700 ring-1 ring-slate-200">
+                        <div className="whitespace-pre-line rounded-2xl rounded-bl-sm bg-white px-3 py-2 text-[13px] leading-relaxed text-slate-700 ring-1 ring-slate-200">
                           {m.teks}
                         </div>
+                      )}
+                      {m.alat?.length > 0 && (
+                        <p className="px-1 text-[11px] text-slate-400">Sumber: {m.alat.join(', ')}</p>
                       )}
                       {m.bagian?.map((b) => (
                         <article key={b.id} className="rounded-2xl rounded-bl-sm bg-white px-3 py-2.5 ring-1 ring-slate-200">
@@ -151,7 +188,7 @@ const AsistenMengambang = () => {
                 {memuat && (
                   <div className="flex items-center gap-2 text-[12px] text-slate-400">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
-                    Mencari di panduan…
+                    {modeObrolan ? 'Asisten sedang menyusun jawaban…' : 'Mencari di panduan…'}
                   </div>
                 )}
                 <div ref={ujung} />

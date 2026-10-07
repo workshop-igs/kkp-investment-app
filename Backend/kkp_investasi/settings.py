@@ -1,4 +1,5 @@
 import glob
+import json
 import os
 from pathlib import Path
 
@@ -177,6 +178,7 @@ REST_FRAMEWORK = {
         'anon': os.getenv('THROTTLE_ANON', '1200/hour'),
         'user': os.getenv('THROTTLE_USER', '6000/hour'),
         'peta': os.getenv('THROTTLE_PETA', '6000/hour'),
+        'asisten': os.getenv('THROTTLE_ASISTEN', '120/hour'),
     },
     'DEFAULT_RENDERER_CLASSES': (
         [
@@ -292,3 +294,10 @@ LOGGING = {
         },
     },
 }
+
+ASISTEN_LLM_URL = os.getenv('ASISTEN_LLM_URL', '')
+ASISTEN_LLM_MODEL = os.getenv('ASISTEN_LLM_MODEL', '')
+ASISTEN_LLM_KUNCI = os.getenv('ASISTEN_LLM_KUNCI', '')
+ASISTEN_LLM_TIMEOUT = float(os.getenv('ASISTEN_LLM_TIMEOUT', '120'))
+ASISTEN_LLM_EKSTRA = json.loads(os.getenv('ASISTEN_LLM_EKSTRA') or '{}')
+ASISTEN_BATAS_HASIL = int(os.getenv('ASISTEN_BATAS_HASIL', '12000'))
