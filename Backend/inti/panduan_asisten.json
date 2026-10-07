@@ -564,7 +564,10 @@
       "satuan",
       "t",
       "m",
-      "jt"
+      "jt",
+      "nilai uang",
+      "singkatan",
+      "ditulis"
     ],
     "isi": "Nilai uang ditampilkan menurut besarnya: 1.000 miliar ke atas dalam triliun, di bawahnya dalam miliar atau juta. Pada tabel dan sumbu grafik yang sempit dipakai singkatan T untuk triliun, M untuk miliar, dan Jt untuk juta. Berkas CSV tetap memakai satuan miliar rupiah pada setiap kolom nilai agar dapat dijumlah dan diurutkan di Excel."
   }
