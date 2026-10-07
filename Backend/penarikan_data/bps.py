@@ -22,6 +22,13 @@ CACHE_DETIK = 60 * 60 * 24
 
 DOMAIN_NASIONAL = '0000'
 
+KODE_BPS_PAPUA = {'91': '94', '92': '91', '93': '95', '94': '96', '95': '97', '96': '92'}
+
+
+def kode_bps(kode_provinsi) -> str:
+    kode = str(kode_provinsi).zfill(2)[:2]
+    return KODE_BPS_PAPUA.get(kode, kode)
+
 VARIABEL_NASIONAL = {
     'tpt': {
         'wajib': [['tingkat'], ['pengangguran'], ['terbuka']],
@@ -267,7 +274,7 @@ def statistik_ketenagakerjaan(
 ) -> Dict[str, Any]:
     from penarikan_data.models import StatistikKetenagakerjaanBPS
 
-    kode = f'{str(kode_provinsi).zfill(2)[:2]}00'
+    kode = f'{kode_bps(kode_provinsi)}00'
 
     tahun_acuan = tahun_analisis or datetime.now().year
 

@@ -9,6 +9,8 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
 
+from penarikan_data.bps import kode_bps
+
 from .models import KabupatenKota, Provinsi, SektorInvestasi, SumberData
 from .peta_bbox import Simplify, jawaban_peta
 from .serializers import (
@@ -187,7 +189,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
                             p.id,
                             {'pelabuhan': 0, 'kawasan_industri': 0, 'tenaga_listrik': 0},
                         ),
-                        'tenaga_kerja': pasar_kerja.get(p.kode_bps, KOSONG_KERJA),
+                        'tenaga_kerja': pasar_kerja.get(kode_bps(p.kode_bps), KOSONG_KERJA),
                     },
                 }
             )
