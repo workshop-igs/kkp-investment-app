@@ -1,0 +1,564 @@
+[
+  {
+    "id": "menu-utama",
+    "judul": "Menu utama aplikasi",
+    "halaman": [
+      "*"
+    ],
+    "kata_kunci": [
+      "menu",
+      "navigasi",
+      "halaman",
+      "fitur",
+      "beranda",
+      "dashboard",
+      "pipeline",
+      "profil investasi",
+      "peta spasial",
+      "administrator"
+    ],
+    "isi": "Beranda adalah halaman depan beserta Pusat Informasi untuk mencari apa pun di aplikasi. Peta Spasial dipakai untuk menentukan area proyek, memeriksa kesesuaian ruangnya, dan menilai kelayakan investasinya. Profil Investasi menyajikan profil per provinsi dan per jenis investasi beserta PDF-nya. Setelah masuk, Dashboard Nasional merangkum portofolio proyek seluruh Indonesia dan Pipeline Investasi berisi proyek yang sudah disimpan. Akun administrator juga melihat menu Administrator."
+  },
+  {
+    "id": "peta-navigasi",
+    "judul": "Menjelajah peta",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "zoom",
+      "perbesar",
+      "perkecil",
+      "peta dasar",
+      "satelit",
+      "topografi",
+      "geser",
+      "peta mini",
+      "koordinat",
+      "lintang",
+      "bujur",
+      "cari lokasi",
+      "tur"
+    ],
+    "isi": "Tombol + dan - atau roda gulir tetikus mengatur skala peta. Tombol peta dasar mengganti latar: Satelit, Jalan, atau Topografi. Tombol U, S, T, dan B menggeser peta ke utara, selatan, timur, dan barat. Input koordinat menuju titik lintang dan bujur tertentu, dan Cari lokasi menemukan pelabuhan, kawasan, atau provinsi berdasarkan namanya. Peta mini di pojok kiri bawah menunjukkan posisi tampilan saat ini. Arahkan kursor ke provinsi untuk melihat namanya, lalu klik untuk membuka ringkasannya. Tur pengenalan dapat dibuka lagi lewat tombol tanda tanya di deret alat kanan."
+  },
+  {
+    "id": "peta-layer",
+    "judul": "Menyalakan dan membaca layer peta",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "layer",
+      "lapisan",
+      "legenda",
+      "kkprl",
+      "infrastruktur",
+      "pelabuhan",
+      "risiko bencana",
+      "oseanografi",
+      "filter",
+      "kategori",
+      "peruntukan",
+      "provinsi",
+      "keterangan",
+      "zoom ke sebaran"
+    ],
+    "isi": "Daftar layer di sisi kanan menyalakan data seperti KKPRL terbit, rencana tata ruang laut, infrastruktur dan transportasi, risiko bencana, oseanografi, serta skor kelayakan zona. Tampilan awal memuat KKPRL yang sudah terbit, diwarnai per jenis investasi. Setelah sebuah layer dinyalakan, Anda dapat memilih satu kategori saja (misalnya hanya perikanan tangkap) atau satu provinsi saja. Ikon kaca pembesar pada layer membawa peta ke sebaran datanya, dan ikon i menampilkan keterangan serta sumber datanya. Legenda di kiri atas menjelaskan arti warna layer yang sedang menyala. Klik sebuah objek di peta untuk melihat rinciannya; pada layer tata ruang dan skor zona tersedia tombol Analisis lokasi ini untuk menjadikan zona itu area proyek."
+  },
+  {
+    "id": "layer-tata-ruang",
+    "judul": "Layer RTRW Provinsi dan Rencana Zonasi KAW",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "rtrw",
+      "rtrw provinsi",
+      "kaw",
+      "kawasan antarwilayah",
+      "rtrwn",
+      "rzwp3k",
+      "rzwp-3-k",
+      "pkkprl",
+      "pola ruang",
+      "zonasi",
+      "tata ruang",
+      "perpres"
+    ],
+    "isi": "Rencana tata ruang laut disajikan dalam dua layer terpisah. RTRW Provinsi memuat zona dari Perda RTRW Provinsi, peta arahan PKKPRL, dan RZWP-3-K yang lebih lama untuk perairan yang belum diatur RTRW. Rencana Zonasi Kawasan Antarwilayah (KAW) memuat zona perairan lintas provinsi yang ditetapkan dengan Peraturan Presiden; yang tersedia saat ini adalah Perpres No. 83/2020 untuk perairan Kalimantan Timur, Kalimantan Selatan, Sulawesi Barat, Sulawesi Selatan, dan Sulawesi Tengah. Data RTRW Nasional (RTRWN) belum tersedia di sistem karena layanan datanya di Portal Satu Data KKP sedang tidak dapat diakses."
+  },
+  {
+    "id": "gambar-area",
+    "judul": "Menggambar area proyek",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "gambar",
+      "menggambar",
+      "poligon",
+      "area",
+      "titik sudut",
+      "selesai menggambar",
+      "undo",
+      "enter",
+      "kembali ke area",
+      "reset"
+    ],
+    "isi": "Tekan Gambar Area Proyek Baru, lalu klik titik-titik sudut area di peta (minimal 3). Akhiri dengan Enter, tombol Selesai Menggambar, atau klik titik pertama. Undo menghapus titik terakhir. Menggambar tetap bisa dilakukan di atas layer yang sedang menyala. Setelah area terbentuk, periksa batasnya lalu tekan Isi Parameter Analisis. Kembali ke Area memusatkan peta ke area itu, Upload Ulang mengganti area, dan Reset menghapusnya. Luas area dihitung secara geodesik sehingga hasilnya dalam meter persegi sesungguhnya."
+  },
+  {
+    "id": "unggah-file",
+    "judul": "Mengunggah file geospasial",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "unggah",
+      "upload",
+      "file",
+      "shapefile",
+      "shp",
+      "zip",
+      "kml",
+      "geojson"
+    ],
+    "isi": "Selain menggambar, area proyek dapat ditentukan dengan menekan Upload File Geospasial lalu memilih shapefile yang dikemas dalam .zip, berkas KML, atau GeoJSON. Setelah terunggah, area tampil di peta dan langkah berikutnya sama dengan area yang digambar: periksa batasnya lalu tekan Isi Parameter Analisis."
+  },
+  {
+    "id": "ukur-dan-unduh-peta",
+    "judul": "Mengukur jarak dan mengunduh tampilan peta sebagai PDF",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "ukur",
+      "jarak",
+      "mengukur",
+      "unduh peta",
+      "download peta",
+      "pdf peta",
+      "cetak peta",
+      "tangkapan"
+    ],
+    "isi": "Alat ukur jarak di deret alat kanan dipakai dengan mengklik titik-titik di peta; klik ganda atau Enter mengakhiri pengukuran dan Esc keluar dari alat. Tombol unduh di deret alat yang sama mengekspor tampilan peta saat ini menjadi PDF, lengkap dengan layer yang menyala, area yang digambar, dan garis ukur yang sedang tampil."
+  },
+  {
+    "id": "langkah-analisis",
+    "judul": "Mengisi analisis tiga langkah",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "parameter",
+      "analisis",
+      "identitas proyek",
+      "jenis investasi",
+      "capex",
+      "investasi awal",
+      "pendapatan",
+      "opex",
+      "pertumbuhan",
+      "discount rate",
+      "diskonto",
+      "wacc",
+      "umur proyek",
+      "naker",
+      "isian",
+      "wajib"
+    ],
+    "isi": "Langkah 1 Identitas Proyek: nama proyek, jenis investasi, investor, dan lokasi detail; provinsi dan kabupaten/kota terisi otomatis dari area. Langkah 2 Analisis Kesesuaian Ruang: kesesuaian terhadap rencana tata ruang, tumpang tindih dengan KKPRL terbit, dan tabel kegiatan diperbolehkan, bersyarat, dan tidak diperbolehkan beserta sumber aturannya; lokasi yang tidak sesuai berhenti di sini dan sistem menawarkan jenis investasi atau lokasi alternatif. Langkah 3 Parameter Finansial: CapEx atau investasi awal, estimasi pendapatan tahun pertama, OpEx tahun pertama, pertumbuhan pendapatan dan pertumbuhan OpEx per tahun, discount rate, dan umur proyek; penyerapan tenaga kerja lokal boleh diisi bila sudah diketahui. CapEx dan pendapatan harus lebih dari 0, OpEx tidak boleh negatif, discount rate antara 0,01% dan 100%, dan umur proyek antara 1 dan 100 tahun. Total OpEx selama umur proyek dihitung otomatis dari OpEx tahun pertama, pertumbuhan OpEx, dan umur proyek."
+  },
+  {
+    "id": "laporan-analisis",
+    "judul": "Membaca dan menyimpan laporan hasil analisis",
+    "halaman": [
+      "/peta",
+      "/analysis-report",
+      "/pipeline"
+    ],
+    "kata_kunci": [
+      "laporan",
+      "hasil",
+      "informasi umum",
+      "tata ruang dan perizinan",
+      "transportasi",
+      "sosial",
+      "ketenagakerjaan",
+      "risiko lingkungan",
+      "kelayakan investasi",
+      "pdf",
+      "simpan",
+      "pipeline",
+      "analisis lanjutan",
+      "tampilkan analisa investasi",
+      "tutup laporan"
+    ],
+    "isi": "Laporan memuat Informasi Umum, Tata Ruang & Perizinan, Transportasi & Infrastruktur, Sosial & Ketenagakerjaan, Risiko Lingkungan & Sosial, dan Kelayakan Investasi, masing-masing dengan sumber dan tahun datanya; ikon i pada kartu menampilkan keterangan sumbernya. Tombol Analisis Lanjutan menutup panel laporan agar peta terlihat penuh untuk menyalakan layer dan memakai alat peta; tombol Tampilkan Analisa Investasi membukanya kembali. Lihat Laporan Lengkap (PDF) mengunduh laporan, dan Simpan ke Pipeline Investasi menyimpan proyek ke daftar pipeline."
+  },
+  {
+    "id": "cara-kerja-screening",
+    "judul": "Cara kerja pemeriksaan kesesuaian ruang (tahap 1)",
+    "halaman": [
+      "/peta"
+    ],
+    "kata_kunci": [
+      "kesesuaian",
+      "sesuai",
+      "tidak sesuai",
+      "bersyarat",
+      "belum terverifikasi",
+      "screening",
+      "kenapa",
+      "ditolak",
+      "berhenti",
+      "kkprl tumpang tindih",
+      "alki",
+      "cakupan",
+      "lokasi alternatif",
+      "status hukum"
+    ],
+    "isi": "Area dicocokkan dengan seluruh zona rencana tata ruang laut dan izin KKPRL yang aktif. Setiap bagian area dinilai oleh satu acuan tertinggi yang mencakupnya, berurutan RTRW Provinsi, Rencana Zonasi KAW, lalu RTRWN; di dalam RTRW Provinsi, Perda RTRW didahulukan, lalu arahan PKKPRL, lalu RZWP-3-K. Setiap zona dicocokkan dengan ketentuan kegiatan untuk jenis investasi yang dipilih: diizinkan, bersyarat, atau tidak diizinkan; ketentuan khusus provinsi mengalahkan ketentuan nasional, dan Alur Laut Kepulauan Indonesia selalu terlarang. Hasilnya Tidak sesuai bila area menumpuk dengan KKPRL aktif atau ada bagiannya, sekecil apa pun, di zona yang tidak mengizinkan kegiatan itu; Belum dapat diverifikasi bila kurang dari 99% area tercakup acuan tata ruang atau ada zona tanpa ketentuan; Sesuai bersyarat bila ada zona yang mengizinkan dengan syarat; dan Sesuai bila semua zona mengizinkan. Hanya Sesuai dan Sesuai bersyarat yang dilanjutkan ke penilaian kelayakan; selain itu sistem menyebutkan alasannya, jenis investasi lain yang cocok di lokasi itu, dan hingga lima lokasi alternatif dalam radius 100 km yang sudah diperiksa dengan aturan yang sama."
+  },
+  {
+    "id": "cara-kerja-skor-spasial",
+    "judul": "Cara kerja penilaian lokasi dan risiko (tahap 2)",
+    "halaman": [
+      "/peta",
+      "/analysis-report",
+      "/pipeline"
+    ],
+    "kata_kunci": [
+      "skor lokasi",
+      "skor risiko",
+      "aksesibilitas",
+      "infrastruktur terdekat",
+      "sosial ekonomi",
+      "potensi sumber daya",
+      "risiko regulasi",
+      "risiko lingkungan",
+      "risiko sosial",
+      "risiko operasional",
+      "risiko pasar",
+      "ekosistem",
+      "mangrove",
+      "terumbu karang",
+      "lamun",
+      "dtks",
+      "nelayan",
+      "adat",
+      "netral",
+      "asumsi"
+    ],
+    "isi": "Area yang lolos tahap 1 diukur terhadap data lokasi. Skor lokasi terdiri atas kesesuaian tata ruang 30%, potensi sumber daya 30%, aksesibilitas 20%, dan sosial-ekonomi 20%. Aksesibilitas memakai jarak ke infrastruktur terdekat: pelabuhan perikanan 35%, pelabuhan umum 20%, jalan nasional 20%, jaringan listrik 15%, dan kawasan industri 10%, dengan nilai penuh bila berada dalam jarak ideal dan turun bertahap sampai jarak maksimum. Sosial-ekonomi memakai jumlah penduduk kabupaten/kota dan status pesisirnya. Skor risiko terdiri atas regulasi 25% (lebih rendah bila sesuai penuh daripada sesuai bersyarat), lingkungan 25% (60% kepekaan ekosistem seperti mangrove, terumbu karang, dan lamun ditambah 40% bahaya bencana), sosial 20% (separuh dari porsi penduduk terdaftar DTKS, separuh dari konflik tenurial yang diukur dari porsi nelayan dan naik bila beririsan dengan wilayah adat, kawasan suci, atau permukiman), operasional 15% (bahaya bencana), dan pasar 15%. Indikator yang belum punya data memakai nilai netral dan ditandai sebagai asumsi di laporan; saat ini risiko pasar dan potensi sumber daya masih memakai nilai netral."
+  },
+  {
+    "id": "cara-kerja-ahp",
+    "judul": "Cara skor akhir AHP dan keputusan kelayakan ditentukan",
+    "halaman": [
+      "/peta",
+      "/analysis-report",
+      "/pipeline",
+      "/dashboard"
+    ],
+    "kata_kunci": [
+      "ahp",
+      "skor ahp",
+      "bobot",
+      "keputusan",
+      "layak",
+      "tidak layak",
+      "bersyarat",
+      "prioritas",
+      "consistency ratio",
+      "konsistensi",
+      "rekomendasi",
+      "skor akhir",
+      "mcda"
+    ],
+    "isi": "Skor finansial, risiko, lokasi, prediksi laba, dan rekomendasi digabung dengan bobot AHP yang diturunkan dari matriks perbandingan berpasangan: finansial 41,6%, risiko 26,2%, lokasi 16,1%, prediksi laba 9,9%, dan rekomendasi 6,2%. Konsistensi matriks diuji dengan consistency ratio 0,015, jauh di bawah batas 0,1. Keputusan LAYAK bila skor sekurang-kurangnya 0,70, area sesuai tata ruang, dan NPV positif; BERSYARAT bila skor sekurang-kurangnya 0,40; selain itu TIDAK LAYAK. Prioritas tinggi diberikan pada skor di atas 0,85. Skor tinggi saja tidak cukup: proyek yang melanggar tata ruang tidak pernah berstatus LAYAK."
+  },
+  {
+    "id": "cara-kerja-finansial",
+    "judul": "Cara kerja analisis finansial",
+    "halaman": [
+      "/peta",
+      "/analysis-report",
+      "/pipeline"
+    ],
+    "kata_kunci": [
+      "npv",
+      "irr",
+      "payback",
+      "roi",
+      "arus kas",
+      "finansial",
+      "sensitivitas",
+      "skenario",
+      "terbaik",
+      "terburuk",
+      "diskonto",
+      "nilai sekarang"
+    ],
+    "isi": "Arus kas tahunan dihitung dari pendapatan dan OpEx yang tumbuh sesuai isian pertumbuhan selama umur proyek, lalu didiskontokan dengan discount rate. NPV menyatakan nilai bersih hari ini, IRR tingkat pengembalian tahunan yang dibandingkan dengan discount rate, payback berapa tahun sampai modal kembali, dan ROI total keuntungan dibanding modal. Keempatnya dinilai 0 sampai 1 lalu digabung dengan bobot NPV 35%, IRR 25%, payback 25%, dan ROI 15%; IRR 30% dan ROI 100% sudah mendapat nilai penuh, dan payback 3 tahun atau kurang bernilai 1,0. Analisis sensitivitas menghitung ulang arus kas dengan pendapatan dan biaya digeser plus-minus 5% dan 10%, serta skenario terbaik (pendapatan +20%, biaya -10%) dan terburuk (pendapatan -20%, biaya +10%)."
+  },
+  {
+    "id": "risiko-bencana",
+    "judul": "Data risiko bencana InaRISK",
+    "halaman": [
+      "/peta",
+      "/analysis-report",
+      "/pipeline"
+    ],
+    "kata_kunci": [
+      "bencana",
+      "inarisk",
+      "tsunami",
+      "abrasi",
+      "gelombang ekstrem",
+      "banjir",
+      "bnpb",
+      "di luar cakupan",
+      "indeks"
+    ],
+    "isi": "Risiko tsunami, gelombang ekstrem dan abrasi, serta banjir dibaca dari raster BNPB InaRISK beresolusi 100 m yang disimpan di server. Raster dipotong tepat mengikuti area, termasuk piksel yang tersentuh tepi area, dan indeksnya adalah rata-rata piksel yang terpapar pada skala 0 sampai 1. InaRISK memetakan risiko terutama di daratan dan pesisir, sehingga area yang seluruhnya di laut lepas sering berada di luar cakupannya; dalam hal itu laporan menyatakan area di luar cakupan dan skor risikonya memakai nilai netral."
+  },
+  {
+    "id": "oseanografi",
+    "judul": "Kondisi oseanografi dan kedalaman laut",
+    "halaman": [
+      "/peta",
+      "/analysis-report",
+      "/pipeline",
+      "/profil-investasi"
+    ],
+    "kata_kunci": [
+      "oseanografi",
+      "suhu",
+      "suhu permukaan laut",
+      "anomali",
+      "klorofil",
+      "gelombang",
+      "kedalaman",
+      "batimetri",
+      "periode",
+      "rentang",
+      "sampel"
+    ],
+    "isi": "Suhu permukaan laut, anomali suhu, klorofil-a, tinggi gelombang signifikan, dan kedalaman laut ditampilkan sebagai keterangan kondisi lokasi beserta periode dan sumber datanya, misalnya citra satelit NASA dan NOAA. Nilai-nilai ini tidak ikut dihitung dalam skor kelayakan. Rentang waktu dan jumlah sampel yang tertulis menunjukkan periode data yang dirata-ratakan."
+  },
+  {
+    "id": "ketenagakerjaan",
+    "judul": "Perkiraan serapan tenaga kerja",
+    "halaman": [
+      "/peta",
+      "/analysis-report",
+      "/pipeline",
+      "/dashboard"
+    ],
+    "kata_kunci": [
+      "tenaga kerja",
+      "naker",
+      "serapan",
+      "rasio",
+      "per miliar",
+      "kompetensi",
+      "pelatihan",
+      "pengangguran",
+      "tpt",
+      "bps"
+    ],
+    "isi": "Serapan tenaga kerja berasal dari isian Penyerapan Naker Lokal pada parameter analisis; bila tidak diisi, laporan menyatakannya belum diisi dan sistem tidak membuat angka perkiraan. Rasio tenaga kerja per miliar investasi adalah jumlah tenaga kerja dibagi total nilai investasi dalam miliar rupiah. Laporan juga menampilkan kompetensi yang dibutuhkan beserta lembaga dan skema sertifikasinya, serta konteks pasar kerja wilayah dari Badan Pusat Statistik seperti tingkat pengangguran terbuka provinsi."
+  },
+  {
+    "id": "sumber-data",
+    "judul": "Sumber data aplikasi",
+    "halaman": [
+      "*"
+    ],
+    "kata_kunci": [
+      "sumber data",
+      "data",
+      "dari mana",
+      "portal satu data",
+      "bps",
+      "bnpb",
+      "global mangrove watch",
+      "sidako",
+      "noaa",
+      "nasa",
+      "tahun data",
+      "pembaruan"
+    ],
+    "isi": "Zona rencana tata ruang laut (53.706 zona), izin KKPRL, infrastruktur dan transportasi (9.016 objek), unsur ruang laut, dan wilayah kelola masyarakat hukum adat berasal dari Portal Satu Data KKP dan Sidako KKP. Risiko bencana berasal dari BNPB InaRISK, statistik produksi perikanan dan ketenagakerjaan dari Badan Pusat Statistik, mangrove dari Global Mangrove Watch dan KKP, serta oseanografi dari NOAA dan NASA. Seluruh data disimpan di server aplikasi sehingga analisis tidak bergantung pada layanan luar saat dijalankan. Setiap kartu laporan mencantumkan sumber dan tahun datanya."
+  },
+  {
+    "id": "skor-zona",
+    "judul": "Layer skor kelayakan per zona dan wilayah disarankan",
+    "halaman": [
+      "/peta",
+      "/dashboard"
+    ],
+    "kata_kunci": [
+      "skor zona",
+      "skor kelayakan per zona",
+      "wilayah disarankan",
+      "kelas",
+      "tinggi",
+      "sedang",
+      "rendah",
+      "potensi",
+      "zona kelayakan tinggi"
+    ],
+    "isi": "Skor kelayakan per zona dihitung lebih dulu untuk setiap zona rencana tata ruang dan setiap jenis investasi, dengan bobot 50% lokasi dan 50% risiko. Kelasnya TINGGI pada skor 0,70 ke atas, SEDANG 0,55 ke atas, RENDAH 0,40 ke atas, dan SANGAT RENDAH di bawahnya. Layer Wilayah Disarankan per Jenis menampilkan zona berkelas TINGGI untuk jenis investasi yang dipilih. Skor ini bukan skor AHP proyek karena belum memuat kriteria finansial; penilaian proyek tetap dilakukan dengan menggambar area dan menjalankan analisis."
+  },
+  {
+    "id": "profil-investasi",
+    "judul": "Memakai halaman Profil Investasi",
+    "halaman": [
+      "/profil-investasi",
+      "/peta"
+    ],
+    "kata_kunci": [
+      "profil investasi",
+      "provinsi",
+      "unduh",
+      "pdf",
+      "komoditas unggulan",
+      "lokasi prioritas",
+      "jenis investasi",
+      "nasional"
+    ],
+    "isi": "Pilih provinsi pada daftar atau klik provinsi di peta, lalu pilih semua jenis investasi atau satu jenis saja. Tombol Unduh Profil Investasi Provinsi menghasilkan PDF berisi gambaran wilayah, komoditas unggulan, ruang laut yang tersedia, lokasi prioritas per jenis investasi, sosial dan ketenagakerjaan, serta sumber datanya. Komoditas unggulan diurutkan dari gabungan nilai produksi BPS dan luas zona yang sesuai. Lokasi prioritas adalah zona berkelas kelayakan tinggi atau sedang, dengan zona yang peruntukan utamanya sesuai jenis investasi didahulukan. Dari Peta Spasial, panel ringkasan provinsi juga menyediakan unduhan profil yang sama."
+  },
+  {
+    "id": "dashboard",
+    "judul": "Memakai Dashboard Nasional",
+    "halaman": [
+      "/dashboard"
+    ],
+    "kata_kunci": [
+      "dashboard",
+      "filter",
+      "portofolio",
+      "ekspor",
+      "csv",
+      "excel",
+      "peta sebaran",
+      "layar penuh",
+      "refresh",
+      "eksplorasi potensi",
+      "cadangan",
+      "grafik"
+    ],
+    "isi": "Dashboard Nasional merangkum jumlah proyek, nilai rencana dan realisasi, tenaga kerja, luas area, dan rata-rata skor AHP. Filter portofolio menyaring menurut jenis investasi, tahapan pipeline, dan provinsi, dan semua angka serta peta ikut tersaring. Peta sebaran dapat dibuat layar penuh dan pembesarannya dibatasi pada wilayah Indonesia. Ekspor CSV mengunduh daftar proyek sesuai filter dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah. Kartu Eksplorasi Potensi menghitung zona ruang laut berkelas kelayakan tinggi yang belum memiliki izin KKPRL, beserta jumlah provinsi dan luasnya."
+  },
+  {
+    "id": "pipeline",
+    "judul": "Mengelola Pipeline Investasi",
+    "halaman": [
+      "/pipeline",
+      "/dashboard"
+    ],
+    "kata_kunci": [
+      "pipeline",
+      "proyek",
+      "tahapan",
+      "status",
+      "loi",
+      "fs",
+      "dev",
+      "op",
+      "letter of intent",
+      "feasibility study",
+      "development",
+      "operational",
+      "hapus",
+      "detail proyek",
+      "perbarui status",
+      "export pdf"
+    ],
+    "isi": "Pipeline Investasi berisi proyek yang disimpan dari laporan analisis. Daftarnya dapat disaring menurut jenis investasi dan tahapan. Tahapannya berurutan Letter of Intent (LOI), Feasibility Study (FS), Development (DEV), dan Operational (OP). Ikon mata membuka detail proyek yang berisi tab Informasi Umum, Tata Ruang & Perizinan, Transportasi & Infrastruktur, Sosial & Ketenagakerjaan, Risiko Lingkungan & Sosial, Kelayakan Investasi, dan Status Proyek. Di detail proyek tersedia Perbarui Status Proyek, Export PDF, Cetak, dan Hapus; perubahan status tercatat di riwayat."
+  },
+  {
+    "id": "pusat-informasi",
+    "judul": "Mencari lewat Pusat Informasi di Beranda",
+    "halaman": [
+      "/"
+    ],
+    "kata_kunci": [
+      "cari",
+      "pencarian",
+      "pusat informasi",
+      "beranda",
+      "temukan",
+      "pelabuhan",
+      "kkprl",
+      "zona"
+    ],
+    "isi": "Kotak pencarian Pusat Informasi di Beranda mencari di seluruh isi aplikasi: provinsi, pelabuhan dan infrastruktur, izin KKPRL, zona tata ruang laut, layer peta, jenis investasi, dan halaman. Memilih hasil berupa lokasi membuka Peta Spasial yang langsung menuju lokasi itu dengan layer yang sesuai menyala."
+  },
+  {
+    "id": "akun",
+    "judul": "Akun, kata sandi, dan riwayat aktivitas",
+    "halaman": [
+      "/profil",
+      "*"
+    ],
+    "kata_kunci": [
+      "akun",
+      "profil saya",
+      "kata sandi",
+      "sandi",
+      "password",
+      "ganti sandi",
+      "aktivitas",
+      "masuk",
+      "keluar",
+      "login"
+    ],
+    "isi": "Halaman Profil Saya, dibuka dari nama pengguna di pojok kanan atas, menampilkan data akun, formulir ganti kata sandi, dan riwayat aktivitas beserta alamat IP-nya. Kata sandi baru minimal 8 karakter, tidak seluruhnya angka, bukan kata sandi yang umum dipakai, dan tidak mirip nama pengguna, nama, atau surel."
+  },
+  {
+    "id": "administrator",
+    "judul": "Menu Administrator",
+    "halaman": [
+      "/admin"
+    ],
+    "kata_kunci": [
+      "admin",
+      "administrator",
+      "pengguna",
+      "kelola pengguna",
+      "sektor",
+      "rasio naker",
+      "ketentuan",
+      "kompetensi",
+      "sumber data",
+      "log aktivitas",
+      "realisasi"
+    ],
+    "isi": "Menu Administrator hanya tampil untuk akun administrator. Isinya ringkasan sistem, kelola pengguna, pipeline (termasuk mengisi nilai realisasi dan status), sumber data, sektor investasi (rasio tenaga kerja per miliar, ketentuan kegiatan per sub-zona, dan kompetensi yang dibutuhkan), serta log aktivitas yang mencatat masuk, keluar, perubahan data, analisis, dan upaya akses yang ditolak."
+  },
+  {
+    "id": "format-angka",
+    "judul": "Format angka dan satuan rupiah",
+    "halaman": [
+      "*"
+    ],
+    "kata_kunci": [
+      "triliun",
+      "miliar",
+      "juta",
+      "rupiah",
+      "format",
+      "angka",
+      "satuan",
+      "t",
+      "m",
+      "jt"
+    ],
+    "isi": "Nilai uang ditampilkan menurut besarnya: 1.000 miliar ke atas dalam triliun, di bawahnya dalam miliar atau juta. Pada tabel dan sumbu grafik yang sempit dipakai singkatan T untuk triliun, M untuk miliar, dan Jt untuk juta. Berkas CSV tetap memakai satuan miliar rupiah pada setiap kolom nilai agar dapat dijumlah dan diurutkan di Excel."
+  }
+]
