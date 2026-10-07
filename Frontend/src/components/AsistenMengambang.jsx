@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Loader2, MessageCircle, Send, X } from 'lucide-react';
+import { Bot, Loader2, Send, X } from 'lucide-react';
 import { api } from '../api/klien';
 import { useAuth } from '../context/KonteksAuth';
 
@@ -197,7 +197,7 @@ const AsistenMengambang = () => {
           diPeta ? 'bottom-[104px]' : 'bottom-6'
         }`}
       >
-        {buka ? <X className="h-6 w-6" /> : <MessageCircle className="h-6 w-6" />}
+        {buka ? <X className="h-6 w-6" /> : <Bot className="h-7 w-7" />}
       </button>
     </div>
   );
