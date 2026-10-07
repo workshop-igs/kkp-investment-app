@@ -8,6 +8,7 @@ from .views_admin import (
     AdminSektorViewSet,
     AdminUserViewSet,
 )
+from .asisten import daftar_alat, pakai_alat
 from .pencarian import cari_lokasi
 from .views import (
     KabupatenKotaViewSet,
@@ -40,6 +41,8 @@ admin_router.register(r'log-aktivitas', AdminLogAktivitasViewSet, basename='admi
 
 urlpatterns = [
     path('cari/', cari_lokasi, name='cari-lokasi'),
+    path('asisten/alat/', daftar_alat, name='asisten-alat'),
+    path('asisten/alat/<str:nama>/', pakai_alat, name='asisten-pakai-alat'),
     path('dashboard/', dashboard_stats, name='dashboard-stats'),
     path('ringkasan-publik/', ringkasan_publik, name='ringkasan-publik'),
     path('auth/login/', login_api, name='auth-login'),

@@ -73,7 +73,8 @@ class JejakAktivitasMiddleware:
             return
 
         aksi = ringkasan = None
-        if metode in METODE_DICATAT:
+        dicatat = metode in METODE_DICATAT and '/asisten/alat/' not in jalur
+        if dicatat:
             for potongan, aksi_khusus, teks in JALUR_KHUSUS:
                 if jalur.endswith(potongan):
                     aksi, ringkasan = aksi_khusus, teks
@@ -82,7 +83,7 @@ class JejakAktivitasMiddleware:
         ditolak = kode in (401, 403)
 
         if aksi is None:
-            if metode not in METODE_DICATAT and not ditolak:
+            if not dicatat and not ditolak:
                 return
             aksi = AKSI_METODE.get(metode, 'DITOLAK')
             ringkasan = ''

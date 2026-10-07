@@ -4,6 +4,7 @@ import { PenyediaAuth } from './context/KonteksAuth';
 import BatasGalat from './components/BatasGalat';
 import RuteTerlindung from './components/RuteTerlindung';
 import OverlayMemuat from './components/OverlayMemuat';
+import AsistenMengambang from './components/AsistenMengambang';
 
 import LandingPage from './pages/LandingPage';
 import AnalisisPage from './pages/AnalisisPage';
@@ -80,6 +81,7 @@ function App() {
       <PenyediaAuth>
         <AppLayout />
         <OverlayMemuat />
+        <AsistenMengambang />
       </PenyediaAuth>
     </Router>
   );
