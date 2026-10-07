@@ -35,7 +35,7 @@ const LANGKAH = [
   {
     pilih: '[data-tur="lapisan"]',
     judul: 'Daftar layer',
-    isi: 'Menyalakan data seperti KKPRL terbit, Pola Ruang Laut, infrastruktur, risiko bencana, dan skor zona. Pada KKPRL dan Pola Ruang Laut bisa dipilih satu kategori saja, misalnya hanya perikanan tangkap. Klik sebuah zona di peta untuk rinciannya; pada Pola Ruang Laut dan Skor Zona tersedia tombol "Analisis lokasi ini" untuk menjadikan zona itu area proyek.',
+    isi: 'Menyalakan data seperti KKPRL terbit, RTRW Provinsi, Rencana Zonasi KAW, infrastruktur, risiko bencana, dan skor zona. Pada KKPRL dan layer tata ruang bisa dipilih satu kategori saja, misalnya hanya perikanan tangkap. Klik sebuah zona di peta untuk rinciannya; pada layer tata ruang dan Skor Zona tersedia tombol "Analisis lokasi ini" untuk menjadikan zona itu area proyek.',
   },
   {
     pilih: '[data-tur="koordinat"]',
