@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from inti.models import Provinsi
-from penarikan_data.bps import DOMAIN_NASIONAL, BPSTidakTersedia, data_komoditas, tahun_tersedia
+from penarikan_data.bps import DOMAIN_NASIONAL, BPSTidakTersedia, data_komoditas, kode_bps, tahun_tersedia
 from penarikan_data.models import ProduksiPerikananBPS
 
 VARIABEL = [('BUDIDAYA', 1513, 1514), ('TANGKAP_LAUT', 1515, 1516)]
@@ -12,7 +12,7 @@ class Command(BaseCommand):
     help = 'Tarik produksi dan nilai produksi perikanan per provinsi dan komoditas utama dari BPS (sumber data KKP).'
 
     def handle(self, *args, **options):
-        provinsi = {p.kode_bps.zfill(2): p for p in Provinsi.objects.all()}
+        provinsi = {kode_bps(p.kode_bps): p for p in Provinsi.objects.all()}
         for kelompok, var_ton, var_nilai in VARIABEL:
             daftar_tahun = tahun_tersedia(DOMAIN_NASIONAL, var_ton, batas=JUMLAH_TAHUN)
             if not daftar_tahun:

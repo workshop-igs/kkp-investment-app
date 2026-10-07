@@ -14,6 +14,7 @@ from penarikan_data.bps import (
     daftar_variabel,
     data_masih_layak,
     data_per_wilayah,
+    kode_bps,
     peringkat_variabel,
     tahun_angka,
     tahun_tersedia,
@@ -76,7 +77,7 @@ class Command(BaseCommand):
         mulai = time.time()
         rekap = {'baru': 0, 'diperbarui': 0, 'tetap': 0}
         galat = ''
-        for domain, provinsi in [(DOMAIN_NASIONAL, None)] + [(f'{p.kode_bps}00', p) for p in Provinsi.objects.order_by('kode_bps')]:
+        for domain, provinsi in [(DOMAIN_NASIONAL, None)] + [(f'{kode_bps(p.kode_bps)}00', p) for p in Provinsi.objects.order_by('kode_bps')]:
             self.stdout.write(self.style.MIGRATE_HEADING(
                 f'Domain {domain} — ' + (f'TPT per kabupaten/kota {provinsi.nama}' if provinsi
                                          else 'TPT & jumlah penganggur per provinsi')
