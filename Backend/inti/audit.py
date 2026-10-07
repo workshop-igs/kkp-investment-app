@@ -73,7 +73,7 @@ class JejakAktivitasMiddleware:
             return
 
         aksi = ringkasan = None
-        dicatat = metode in METODE_DICATAT and '/asisten/alat/' not in jalur
+        dicatat = metode in METODE_DICATAT and '/asisten/' not in jalur
         if dicatat:
             for potongan, aksi_khusus, teks in JALUR_KHUSUS:
                 if jalur.endswith(potongan):

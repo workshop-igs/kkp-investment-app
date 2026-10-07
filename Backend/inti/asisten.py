@@ -1,12 +1,23 @@
 import json
+import logging
 import re
+import time
 from pathlib import Path
 
+import httpx
+from django.conf import settings
 from django.test import RequestFactory
 from django.urls import resolve
 from rest_framework import permissions, status
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
+from rest_framework.throttling import SimpleRateThrottle
+
+from analitik.services.ahp import _rupiah
+
+from .models import SektorInvestasi
+
+logger = logging.getLogger('inti')
 
 PANDUAN = json.loads(Path(__file__).with_name('panduan_asisten.json').read_text(encoding='utf-8'))
 
@@ -68,13 +79,13 @@ def _api(request, metode, path, data=None):
     return jawaban.status_code, json.loads(jawaban.content or b'null')
 
 
-def _pangkas(data):
+def _pangkas(data, maks=MAKS_DAFTAR):
     if isinstance(data, dict):
-        return {k: _pangkas(v) for k, v in data.items() if k not in BUANG}
+        return {k: _pangkas(v, maks) for k, v in data.items() if k not in BUANG}
     if isinstance(data, list):
-        isi = [_pangkas(v) for v in data[:MAKS_DAFTAR]]
-        if len(data) > MAKS_DAFTAR:
-            isi.append(f'{len(data) - MAKS_DAFTAR} butir lain tidak ditampilkan')
+        isi = [_pangkas(v, maks) for v in data[:maks]]
+        if len(data) > maks:
+            isi.append(f'{len(data) - maks} butir lain tidak ditampilkan')
         return isi
     if isinstance(data, float):
         return round(data, 4)
@@ -115,7 +126,10 @@ ALAT = {
     'cari_lokasi': (
         'Mencari lokasi menurut nama: provinsi, pelabuhan dan infrastruktur, izin KKPRL, zona tata ruang laut, '
         'dan unsur ruang laut. Hasilnya berisi nama, jenis, keterangan, dan titik [bujur, lintang].',
-        _skema({'kata_kunci': _teks('Nama yang dicari, minimal 2 huruf.')}, ['kata_kunci']),
+        _skema({'kata_kunci': _teks(
+            'Satu nama tempat atau objek saja, misalnya "Lombok" atau "Tanjung Luar"; jangan digabung dengan jenis '
+            'objeknya.'
+        )}, ['kata_kunci']),
         lambda r, a: _api(r, 'GET', '/api/v1/inti/cari/', {'q': a['kata_kunci']}),
     ),
     'daftar_jenis_investasi': (
@@ -153,7 +167,8 @@ ALAT = {
     'screening_ruang': (
         'Pemeriksaan kesesuaian ruang sebuah area untuk satu jenis investasi terhadap rencana tata ruang laut dan '
         'KKPRL terbit. SATU-SATUNYA sumber status kesesuaian dan izin ruang: jangan menyimpulkan boleh atau '
-        'tidaknya kegiatan di suatu lokasi dari alat lain.',
+        'tidaknya kegiatan di suatu lokasi dari alat lain. Jelaskan hasilnya memakai status_label dan kalimat pada '
+        'alasan apa adanya.',
         _skema({'geometri': GEOMETRI, 'jenis_investasi': JENIS}, ['geometri', 'jenis_investasi']),
         lambda r, a: _api(r, 'POST', '/api/v1/analitik/screening/', {
             'geometry': a['geometri'], 'sektor': a['jenis_investasi'],
@@ -195,6 +210,23 @@ ALAT = {
 TIPE = {'string': str, 'integer': int, 'object': dict}
 
 
+def _lengkapi(skema):
+    sifat = skema['properties']
+    if 'jenis_investasi' not in sifat:
+        return skema
+    jenis = list(SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama').values_list('kode', 'nama'))
+    daftar = ', '.join(f'{kode} = {nama}' for kode, nama in jenis)
+    return {
+        **skema,
+        'properties': {
+            **sifat,
+            'jenis_investasi': {
+                **sifat['jenis_investasi'], 'enum': [kode for kode, _ in jenis], 'description': f'Kode jenis investasi: {daftar}.',
+            },
+        },
+    }
+
+
 def _periksa(skema, argumen):
     if not isinstance(argumen, dict):
         return 'Argumen harus berupa objek JSON.'
@@ -221,24 +253,227 @@ def _periksa(skema, argumen):
 def daftar_alat(request):
     return Response({
         'alat': [
-            {'type': 'function', 'function': {'name': nama, 'description': keterangan, 'parameters': skema}}
+            {'type': 'function', 'function': {'name': nama, 'description': keterangan, 'parameters': _lengkapi(skema)}}
             for nama, (keterangan, skema, _) in ALAT.items()
         ]
     })
 
 
+def _eksekusi(request, nama, argumen):
+    if nama not in ALAT:
+        return status.HTTP_404_NOT_FOUND, {'detail': f'Alat "{nama}" tidak dikenal.'}
+    _, skema, jalankan = ALAT[nama]
+    salah = _periksa(_lengkapi(skema), argumen)
+    if salah:
+        return status.HTTP_400_BAD_REQUEST, {'detail': salah}
+    kode, data = jalankan(request, argumen)
+    if kode >= 400:
+        return kode, {'alat': nama, 'detail': data.get('detail', data) if isinstance(data, dict) else data}
+    return kode, {'alat': nama, 'hasil': _pangkas(data)}
+
+
 @api_view(['POST'])
 @permission_classes([permissions.IsAuthenticated])
 def pakai_alat(request, nama):
-    if nama not in ALAT:
-        return Response({'detail': f'Alat "{nama}" tidak dikenal.'}, status=status.HTTP_404_NOT_FOUND)
-    _, skema, jalankan = ALAT[nama]
     argumen = request.data.get('argumen', {}) if isinstance(request.data, dict) else None
-    salah = _periksa(skema, argumen)
-    if salah:
-        return Response({'detail': salah}, status=status.HTTP_400_BAD_REQUEST)
-    kode, data = jalankan(request, argumen)
-    if kode >= 400:
-        rinci = data.get('detail', data) if isinstance(data, dict) else data
-        return Response({'alat': nama, 'detail': rinci}, status=kode)
-    return Response({'alat': nama, 'hasil': _pangkas(data)})
+    kode, isi = _eksekusi(request, nama, argumen)
+    return Response(isi, status=kode)
+
+
+BUTUH_AREA = frozenset({'screening_ruang', 'informasi_area'})
+MAKS_PUTARAN = 5
+MAKS_RIWAYAT = 8
+MAKS_TEKS = 2000
+MAKS_TOKEN_JAWABAN = 1500
+JUMLAH_PANDUAN_KONTEKS = 2
+LABEL_ALAT = {
+    'panduan_aplikasi': 'panduan aplikasi',
+    'cari_lokasi': 'pencarian lokasi',
+    'daftar_jenis_investasi': 'daftar jenis investasi',
+    'daftar_provinsi': 'daftar provinsi',
+    'profil_investasi_provinsi': 'profil investasi provinsi',
+    'statistik_ketenagakerjaan': 'statistik BPS',
+    'screening_ruang': 'pemeriksaan kesesuaian ruang',
+    'informasi_area': 'informasi area',
+    'ringkasan_portofolio': 'ringkasan portofolio',
+    'daftar_proyek': 'pipeline investasi',
+    'detail_proyek': 'detail proyek',
+    'cari_kkprl': 'data KKPRL',
+}
+SISTEM = (
+    'Anda adalah Asisten KKP, asisten aplikasi internal Kementerian Kelautan dan Perikanan untuk penilaian investasi '
+    'ruang laut; sebut aplikasi ini sebagai "aplikasi ini". Penggunanya pegawai KKP. Aturan:\n'
+    '1. Jawab dalam bahasa Indonesia yang baku, singkat, dan jelas, tanpa format Markdown (tanpa tanda bintang atau '
+    'pagar); pakai daftar bernomor bila perlu.\n'
+    '2. Untuk pertanyaan cara memakai aplikasi atau cara kerja perhitungannya, panggil panduan_aplikasi dan jawab '
+    'hanya berdasarkan hasilnya.\n'
+    '3. Untuk pertanyaan data seperti lokasi, provinsi, proyek, izin, atau statistik, panggil alat yang sesuai. '
+    'Jangan mengarang angka, nama, maupun status.\n'
+    '4. Status kesesuaian ruang, yaitu boleh tidaknya suatu kegiatan di suatu lokasi, hanya boleh diambil dari '
+    'screening_ruang. Jangan menyimpulkan kesesuaian, potensi, atau kelayakan lokasi dari alat lain. Bila '
+    'screening_ruang gagal atau tidak dipanggil, katakan bahwa status kesesuaiannya belum dapat ditentukan. {area}\n'
+    '5. Bila alat tidak memberikan jawaban atau datanya tidak ada, katakan terus terang bahwa datanya tidak '
+    'tersedia.\n'
+    '6. Nilai uang dari alat sudah ditulis lengkap dengan satuannya; salin apa adanya tanpa menghitung ulang.\n'
+    '7. Jangan menyebut nama alat atau fungsi kepada pengguna dan jangan meminta pengguna menjalankannya; '
+    'panggil sendiri alat yang diperlukan.\n'
+    'Halaman yang sedang dibuka pengguna: {halaman}.'
+)
+PENGANTAR_PANDUAN = (
+    '\nBagian panduan aplikasi yang mungkin relevan; pakai sebagai dasar jawaban bila pertanyaan menyangkut cara '
+    'memakai atau cara kerja aplikasi:'
+)
+KALIMAT_AREA = {
+    True: 'Pengguna sudah memiliki area di Peta Spasial. Bila pengguna menanyakan kesesuaian area itu untuk suatu '
+          'kegiatan, langsung panggil screening_ruang dengan jenis investasi yang paling sesuai; screening_ruang dan '
+          'informasi_area otomatis memakai area itu.',
+    False: 'Pengguna belum menggambar area; bila pertanyaannya menyangkut lokasi tertentu, minta pengguna menggambar '
+           'atau mengunggah area di Peta Spasial terlebih dahulu.',
+}
+
+
+class ThrottleAsisten(SimpleRateThrottle):
+    scope = 'asisten'
+
+    def get_cache_key(self, request, view):
+        return self.cache_format % {'scope': self.scope, 'ident': request.user.pk}
+
+
+def _alat_obrolan(ada_area):
+    hasil = []
+    for nama, (keterangan, skema, _) in ALAT.items():
+        skema = _lengkapi(skema)
+        if nama in BUTUH_AREA:
+            if not ada_area:
+                continue
+            skema = {
+                **skema,
+                'properties': {k: v for k, v in skema['properties'].items() if k != 'geometri'},
+                'required': [k for k in skema['required'] if k != 'geometri'],
+            }
+        hasil.append({'type': 'function', 'function': {'name': nama, 'description': keterangan, 'parameters': skema}})
+    return hasil
+
+
+SATUAN_RUPIAH = (('_miliar', 1e9), ('_juta_rp', 1e6), ('_ribu_rp', 1e3), ('_idr', 1))
+
+
+def _rupiah_terbaca(data):
+    if isinstance(data, list):
+        return [_rupiah_terbaca(v) for v in data]
+    if not isinstance(data, dict):
+        return data
+    hasil = {}
+    for k, v in data.items():
+        kali = next((x for akhiran, x in SATUAN_RUPIAH if k.endswith(akhiran) and 'per_miliar' not in k), None)
+        if kali and isinstance(v, (int, float)) and not isinstance(v, bool):
+            hasil[k] = _rupiah(v * kali)
+        else:
+            hasil[k] = _rupiah_terbaca(v)
+    return hasil
+
+
+DIDAHULUKAN = ('status', 'status_label', 'alasan', 'rekomendasi')
+
+
+def _untuk_model(isi):
+    teks = ''
+    isi = _rupiah_terbaca(isi)
+    if isinstance(isi.get('hasil'), dict):
+        hasil = isi['hasil']
+        isi = {**isi, 'hasil': {**{k: hasil[k] for k in DIDAHULUKAN if k in hasil}, **hasil}}
+    for maks in (MAKS_DAFTAR, 8, 3):
+        teks = json.dumps(_pangkas(isi, maks), ensure_ascii=False, default=str)
+        if len(teks) <= settings.ASISTEN_BATAS_HASIL:
+            return teks
+    return teks[:settings.ASISTEN_BATAS_HASIL] + ' ...(hasil dipangkas)'
+
+
+def _tanya_model(riwayat, alat, sisa_detik):
+    kepala = {'Authorization': f'Bearer {settings.ASISTEN_LLM_KUNCI}'} if settings.ASISTEN_LLM_KUNCI else {}
+    jawab = httpx.post(
+        settings.ASISTEN_LLM_URL.rstrip('/') + '/chat/completions',
+        json={
+            'model': settings.ASISTEN_LLM_MODEL, 'messages': riwayat, 'tools': alat, 'temperature': 0.2,
+            'max_tokens': MAKS_TOKEN_JAWABAN,
+            **settings.ASISTEN_LLM_EKSTRA,
+        },
+        headers=kepala,
+        timeout=max(5.0, sisa_detik),
+    )
+    jawab.raise_for_status()
+    return jawab.json()['choices'][0]['message']
+
+
+def _bersihkan(teks):
+    teks = re.sub(r'<think>.*?</think>', '', teks or '', flags=re.S)
+    teks = re.sub(r'\*\*|__|`', '', teks)
+    teks = re.sub(r'^[ \t]*#+[ \t]*', '', teks, flags=re.M)
+    teks = re.sub(r'^([ \t]*)[*-][ \t]+', r'\1• ', teks, flags=re.M)
+    return teks.strip()
+
+
+def _riwayat_sah(pesan):
+    if not isinstance(pesan, list) or not pesan:
+        return None
+    hasil = []
+    for m in pesan[-MAKS_RIWAYAT:]:
+        if not isinstance(m, dict) or m.get('peran') not in ('pengguna', 'asisten') or not isinstance(m.get('teks'), str):
+            return None
+        hasil.append({'role': 'user' if m['peran'] == 'pengguna' else 'assistant', 'content': m['teks'][:MAKS_TEKS]})
+    return hasil if hasil[-1]['role'] == 'user' and hasil[-1]['content'].strip() else None
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+@throttle_classes([ThrottleAsisten])
+def obrolan(request):
+    if not settings.ASISTEN_LLM_URL:
+        return Response({'detail': 'Model asisten belum terhubung.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+    data = request.data if isinstance(request.data, dict) else {}
+    riwayat = _riwayat_sah(data.get('pesan'))
+    if riwayat is None:
+        return Response({'detail': 'Pesan tidak valid.'}, status=status.HTTP_400_BAD_REQUEST)
+    halaman = str(data.get('halaman') or '/')[:200]
+    geometri = data.get('geometri')
+    ada_area = isinstance(geometri, dict) and geometri.get('type') in ('Polygon', 'MultiPolygon')
+    alat = _alat_obrolan(ada_area)
+    sistem = SISTEM.format(area=KALIMAT_AREA[ada_area], halaman=halaman)
+    bagian = cari_panduan(riwayat[-1]['content'], halaman)['bagian'][:JUMLAH_PANDUAN_KONTEKS]
+    if bagian:
+        sistem += PENGANTAR_PANDUAN + ''.join(f"\n- {b['judul']}: {b['isi']}" for b in bagian)
+    riwayat = [{'role': 'system', 'content': sistem}, *riwayat]
+    dipakai = []
+    batas = time.monotonic() + settings.ASISTEN_LLM_TIMEOUT
+    try:
+        for _ in range(MAKS_PUTARAN):
+            pesan = _tanya_model(riwayat, alat, batas - time.monotonic())
+            panggilan = pesan.get('tool_calls') or []
+            if not panggilan:
+                teks = _bersihkan(pesan.get('content'))
+                return Response({'jawaban': teks or 'Maaf, asisten belum dapat menyusun jawaban.', 'alat': dipakai})
+            riwayat.append({'role': 'assistant', 'content': pesan.get('content') or '', 'tool_calls': panggilan})
+            for p in panggilan:
+                nama = (p.get('function') or {}).get('name', '')
+                try:
+                    argumen = json.loads(p['function'].get('arguments') or '{}')
+                except (TypeError, ValueError):
+                    argumen = None
+                if isinstance(argumen, dict):
+                    if nama in BUTUH_AREA and ada_area:
+                        argumen['geometri'] = geometri
+                    if nama == 'panduan_aplikasi':
+                        argumen.setdefault('halaman', halaman)
+                _, isi = _eksekusi(request, nama, argumen)
+                if nama in LABEL_ALAT and LABEL_ALAT[nama] not in dipakai:
+                    dipakai.append(LABEL_ALAT[nama])
+                riwayat.append({'role': 'tool', 'tool_call_id': p.get('id', ''), 'content': _untuk_model(isi)})
+            if time.monotonic() >= batas:
+                break
+    except (httpx.HTTPError, KeyError, ValueError) as e:
+        logger.warning(f'[ASISTEN] Model tidak dapat dihubungi: {type(e).__name__}: {e}')
+        return Response({'detail': 'Model asisten tidak dapat dihubungi.'}, status=status.HTTP_502_BAD_GATEWAY)
+    return Response({
+        'jawaban': 'Maaf, pertanyaan ini membutuhkan terlalu banyak langkah. Coba persempit pertanyaannya.',
+        'alat': dipakai,
+    })
