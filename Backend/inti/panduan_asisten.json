@@ -84,9 +84,11 @@
       "pola ruang",
       "zonasi",
       "tata ruang",
-      "perpres"
+      "perpres",
+      "singkatan",
+      "kepanjangan"
     ],
-    "isi": "Rencana tata ruang laut disajikan dalam dua layer terpisah. RTRW Provinsi memuat zona dari Perda RTRW Provinsi, peta arahan PKKPRL, dan RZWP-3-K yang lebih lama untuk perairan yang belum diatur RTRW. Rencana Zonasi Kawasan Antarwilayah (KAW) memuat zona perairan lintas provinsi yang ditetapkan dengan Peraturan Presiden; yang tersedia saat ini adalah Perpres No. 83/2020 untuk perairan Kalimantan Timur, Kalimantan Selatan, Sulawesi Barat, Sulawesi Selatan, dan Sulawesi Tengah. Data RTRW Nasional (RTRWN) belum tersedia di sistem karena layanan datanya di Portal Satu Data KKP sedang tidak dapat diakses."
+    "isi": "Rencana tata ruang laut disajikan dalam dua layer terpisah. RTRW Provinsi memuat zona dari Perda RTRW Provinsi, peta arahan PKKPRL (Persetujuan Kesesuaian Kegiatan Pemanfaatan Ruang Laut), dan RZWP-3-K yang lebih lama untuk perairan yang belum diatur RTRW. Rencana Zonasi Kawasan Antarwilayah (KAW) memuat zona perairan lintas provinsi yang ditetapkan dengan Peraturan Presiden; yang tersedia saat ini adalah Perpres No. 83/2020 untuk perairan Kalimantan Timur, Kalimantan Selatan, Sulawesi Barat, Sulawesi Selatan, dan Sulawesi Tengah. Data RTRW Nasional (RTRWN) belum tersedia di sistem karena layanan datanya di Portal Satu Data KKP sedang tidak dapat diakses. KKPRL adalah singkatan dari Kesesuaian Kegiatan Pemanfaatan Ruang Laut, dan KAW dari Kawasan Antarwilayah."
   },
   {
     "id": "gambar-area",
@@ -249,9 +251,10 @@
       "nelayan",
       "adat",
       "netral",
-      "asumsi"
+      "asumsi",
+      "dtks"
     ],
-    "isi": "Area yang lolos tahap 1 diukur terhadap data lokasi. Skor lokasi terdiri atas kesesuaian tata ruang 30%, potensi sumber daya 30%, aksesibilitas 20%, dan sosial-ekonomi 20%. Aksesibilitas memakai jarak ke infrastruktur terdekat: pelabuhan perikanan 35%, pelabuhan umum 20%, jalan nasional 20%, jaringan listrik 15%, dan kawasan industri 10%, dengan nilai penuh bila berada dalam jarak ideal dan turun bertahap sampai jarak maksimum. Sosial-ekonomi memakai jumlah penduduk kabupaten/kota dan status pesisirnya. Skor risiko terdiri atas regulasi 25% (lebih rendah bila sesuai penuh daripada sesuai bersyarat), lingkungan 25% (60% kepekaan ekosistem seperti mangrove, terumbu karang, dan lamun ditambah 40% bahaya bencana), sosial 20% (separuh dari porsi penduduk terdaftar DTKS, separuh dari konflik tenurial yang diukur dari porsi nelayan dan naik bila beririsan dengan wilayah adat, kawasan suci, atau permukiman), operasional 15% (bahaya bencana), dan pasar 15%. Indikator yang belum punya data memakai nilai netral dan ditandai sebagai asumsi di laporan; saat ini risiko pasar dan potensi sumber daya masih memakai nilai netral."
+    "isi": "Area yang lolos tahap 1 diukur terhadap data lokasi. Skor lokasi terdiri atas kesesuaian tata ruang 30%, potensi sumber daya 30%, aksesibilitas 20%, dan sosial-ekonomi 20%. Aksesibilitas memakai jarak ke infrastruktur terdekat: pelabuhan perikanan 35%, pelabuhan umum 20%, jalan nasional 20%, jaringan listrik 15%, dan kawasan industri 10%, dengan nilai penuh bila berada dalam jarak ideal dan turun bertahap sampai jarak maksimum. Sosial-ekonomi memakai jumlah penduduk kabupaten/kota dan status pesisirnya. Skor risiko terdiri atas regulasi 25% (lebih rendah bila sesuai penuh daripada sesuai bersyarat), lingkungan 25% (60% kepekaan ekosistem seperti mangrove, terumbu karang, dan lamun ditambah 40% bahaya bencana), sosial 20% (separuh dari porsi penduduk miskin yang terdaftar di DTKS (Data Terpadu Kesejahteraan Sosial), separuh dari konflik tenurial yang diukur dari porsi nelayan dan naik bila beririsan dengan wilayah adat, kawasan suci, atau permukiman), operasional 15% (bahaya bencana), dan pasar 15%. Indikator yang belum punya data memakai nilai netral dan ditandai sebagai asumsi di laporan; saat ini risiko pasar dan potensi sumber daya masih memakai nilai netral."
   },
   {
     "id": "cara-kerja-ahp",
@@ -389,7 +392,11 @@
       "noaa",
       "nasa",
       "tahun data",
-      "pembaruan"
+      "pembaruan",
+      "jumlah zona",
+      "berapa zona",
+      "objek infrastruktur",
+      "jumlah infrastruktur"
     ],
     "isi": "Zona rencana tata ruang laut (53.706 zona), izin KKPRL, infrastruktur dan transportasi (9.016 objek), unsur ruang laut, dan wilayah kelola masyarakat hukum adat berasal dari Portal Satu Data KKP dan Sidako KKP. Risiko bencana berasal dari BNPB InaRISK, statistik produksi perikanan dan ketenagakerjaan dari Badan Pusat Statistik, mangrove dari Global Mangrove Watch dan KKP, serta oseanografi dari NOAA dan NASA. Seluruh data disimpan di server aplikasi sehingga analisis tidak bergantung pada layanan luar saat dijalankan. Setiap kartu laporan mencantumkan sumber dan tahun datanya."
   },
