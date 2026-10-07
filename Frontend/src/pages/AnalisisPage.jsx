@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import PetaInteraktif from '../components/map/PetaInteraktif';
@@ -32,6 +32,11 @@ const AnalisisPage = () => {
       keterangan: `${l.sub_zona_label} · ${l.provinsi} · ${l.status_label}`,
     });
   };
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('kkp:area', { detail: geometry }));
+    return () => window.dispatchEvent(new CustomEvent('kkp:area', { detail: null }));
+  }, [geometry]);
 
   const handlePolygonCreated = (geoJsonGeometry) => {
     setGeometry(geoJsonGeometry);
