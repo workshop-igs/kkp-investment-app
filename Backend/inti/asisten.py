@@ -247,15 +247,17 @@ ALAT = {
     'ringkasan_portofolio': (
         'Ringkasan portofolio proyek nasional: jumlah proyek, nilai rencana dan realisasi (miliar rupiah), tenaga '
         'kerja, sebaran per tahapan, per jenis investasi, dan per provinsi, serta zona berpotensi yang belum '
-        'berizin. Pakai untuk jumlah proyek atau nilai investasi per provinsi maupun per jenis investasi.',
+        'berizin. Pakai untuk jumlah proyek atau nilai investasi per provinsi maupun per jenis investasi. Untuk satu '
+        'proyek tertentu pakai daftar_proyek.',
         _skema(),
         lambda r, a: _api(r, 'GET', '/api/v1/inti/dashboard/'),
     ),
     'daftar_proyek': (
         'Daftar proyek di Pipeline Investasi, bisa dicari menurut nama, investor, kode, atau lokasi, dan disaring '
-        'menurut tahapan atau provinsi.',
+        'menurut tahapan atau provinsi. Untuk proyek tertentu selalu isi kata_kunci dengan kode PRJ, nama, atau '
+        'investornya; tanpa kata_kunci daftarnya bisa terpotong.',
         _skema({
-            'kata_kunci': _teks('Kata pencarian, opsional.'),
+            'kata_kunci': _teks('Kode PRJ, nama proyek, investor, atau lokasi.'),
             'tahap': _teks('Tahapan pipeline, opsional.', enum=TAHAP),
             'provinsi': _teks('Nama provinsi, opsional.'),
         }),
@@ -267,7 +269,7 @@ ALAT = {
     'detail_proyek': (
         'Detail satu proyek di Pipeline Investasi beserta hasil analisis kelayakannya (keputusan dan skor) dan '
         'riwayat status.',
-        _skema({'proyek_id': _bulat('Id proyek dari daftar_proyek.')}, ['proyek_id']),
+        _skema({'proyek_id': _bulat('Kolom id (angka) dari daftar_proyek, bukan kode PRJ.')}, ['proyek_id']),
         lambda r, a: _detail_proyek(r, a['proyek_id']),
     ),
     'cari_kkprl': (
