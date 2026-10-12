@@ -10,7 +10,6 @@ import {
   KELAS_KELAYAKAN,
   KELAS_RISIKO,
   URUTAN_KATEGORI,
-  URUTAN_KELAS_KELAYAKAN,
   URUTAN_KELAS_RISIKO,
   URUTAN_RTRL,
   WARNA_JENIS_INVESTASI,
@@ -131,8 +130,6 @@ function itemLegenda(def, osea) {
       ];
     case 'risiko':
       return kotak(URUTAN_KELAS_RISIKO, KELAS_RISIKO);
-    case 'kelayakan':
-      return kotak(URUTAN_KELAS_KELAYAKAN, KELAS_KELAYAKAN);
     case 'rtrl':
       return URUTAN_RTRL.map((k) => {
         const r = KATEGORI_RTRL[k];

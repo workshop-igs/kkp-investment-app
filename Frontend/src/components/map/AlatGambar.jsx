@@ -172,6 +172,7 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
   };
 
   const loadGeometry = (geometry) => {
+    if (!['Polygon', 'MultiPolygon'].includes(geometry?.type)) return;
     cleanupPreview();
     isActiveRef.current = false;
     map.getContainer().style.cursor = '';
