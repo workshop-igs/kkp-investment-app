@@ -29,6 +29,7 @@ from .models import (
 )
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
+from .services.konstanta import AMBANG_TERBANGUN_PERSEN
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
 from .services.profil_investasi import _saring_sumber_utama
@@ -425,9 +426,10 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         for f in muatan['features']:
             anggota.setdefault(area[f['id']], []).append(f)
         for daftar in anggota.values():
-            for i, f in enumerate(daftar):
+            wakil = max(daftar, key=lambda f: (f['properties']['kelas'] == 'TINGGI', f['properties']['luas_ha'] or 0))
+            for f in daftar:
                 f['properties']['zona_dalam_area'] = len(daftar)
-                if i:
+                if f is not wakil:
                     f['properties'].pop('titik', None)
         return muatan
 
@@ -458,7 +460,8 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         penyaring['skor_kelayakan__kelas__in'] = kelas
         penyaring['skor_kelayakan__kesesuaian_tr'] = True
         penyaring['skor_kelayakan__jumlah_kkprl'] = 0
-        return self._anotasi(_saring_sumber_utama(qs, prefiks=''), penyaring)
+        qs = _saring_sumber_utama(qs, prefiks='').filter(persen_terbangun__lt=AMBANG_TERBANGUN_PERSEN)
+        return self._anotasi(qs, penyaring)
 
     ANOTASI_SKOR = {
         '_skor_id': 'id', '_skor': 'skor_total', '_kelas': 'kelas', '_lokasi': 'skor_lokasi',
@@ -478,7 +481,7 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         'nama_zona', 'sub_zona', 'provinsi__nama',
         '_skor', '_kelas', '_lokasi', '_risiko', '_sesuai', '_jarak',
         '_bencana', '_kkprl', '_sosek', '_ekosistem', '_sosial', '_adat',
-        '_sumber_sosial', '_sektor_nama', '_sektor_kode',
+        '_sumber_sosial', '_sektor_nama', '_sektor_kode', 'persen_terbangun', 'luas_ha',
     )
 
     def properti_peta(self, r):
@@ -498,6 +501,8 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
             'jarak_infra_km': r['_jarak'],
             'risiko_bencana': bulat(r['_bencana'], 2),
             'jumlah_kkprl': r['_kkprl'],
+            'persen_terbangun': bulat(r['persen_terbangun'], 1),
+            'luas_ha': bulat(r['luas_ha'], 1),
             'sumber_sosek': r['_sosek'],
             'sensitivitas_ekosistem': bulat(r['_ekosistem'], 2),
             'risiko_sosial': bulat(r['_sosial'], 2),

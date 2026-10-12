@@ -962,7 +962,7 @@ const DashboardPage = () => {
                 Eksplorasi Potensi Ruang Laut Belum Teralokasi
               </h3>
               <p className="text-slate-300 text-xs leading-relaxed mb-6">
-                Zona ruang laut berkelas kelayakan tinggi untuk sedikitnya satu jenis investasi dan belum memiliki izin KKPRL di dalamnya.
+                Zona ruang laut berkelas kelayakan tinggi untuk sedikitnya satu jenis investasi, belum memiliki izin KKPRL di dalamnya, dan belum terbangun.
               </p>
 
               <div className="space-y-3">
