@@ -22,3 +22,13 @@ export const WARNA_AKSI = {
   DITOLAK: 'bg-red-100 text-red-700 ring-1 ring-red-300',
 };
 
+
+export const TAHAPAN_PROYEK = [
+  { kode: 'PERENCANAAN', label: 'Perencanaan', desc: 'Investor menyatakan minat; lokasi dan rencana kegiatan masih dijajaki.' },
+  { kode: 'PENYIAPAN', label: 'Penyiapan', desc: 'Studi kelayakan, pengurusan izin termasuk KKPRL, dan penyiapan lahan.' },
+  { kode: 'TRANSAKSI', label: 'Transaksi', desc: 'Kesepakatan kerja sama dan pembiayaan disusun sampai dana siap dipakai (financial close).' },
+  { kode: 'KONSTRUKSI', label: 'Konstruksi', desc: 'Pembangunan fisik berjalan sejak peletakan batu pertama.' },
+  { kode: 'OPERASI', label: 'Operasi', desc: 'Fasilitas sudah berjalan dan melayani kegiatan usaha.' },
+];
+
+export const LABEL_TAHAPAN = Object.fromEntries(TAHAPAN_PROYEK.map((t) => [t.kode, t.label]));

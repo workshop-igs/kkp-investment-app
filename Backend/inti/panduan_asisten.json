@@ -15,9 +15,10 @@
       "pipeline",
       "profil investasi",
       "peta spasial",
-      "administrator"
+      "administrator",
+      "proyek investasi"
     ],
-    "isi": "Beranda adalah halaman depan beserta Pusat Informasi untuk mencari apa pun di aplikasi. Peta Spasial dipakai untuk menentukan area proyek, memeriksa kesesuaian ruangnya, dan menilai kelayakan investasinya. Profil Investasi menyajikan profil per provinsi dan per jenis investasi beserta PDF-nya. Setelah masuk, Dashboard Nasional merangkum portofolio proyek seluruh Indonesia dan Pipeline Investasi berisi proyek yang sudah disimpan. Akun administrator juga melihat menu Administrator."
+    "isi": "Beranda adalah halaman depan beserta Pusat Informasi untuk mencari apa pun di aplikasi. Peta Spasial dipakai untuk menentukan area proyek, memeriksa kesesuaian ruangnya, dan menilai kelayakan investasinya. Profil Investasi menyajikan profil per provinsi dan per jenis investasi beserta PDF-nya. Setelah masuk, Dashboard Nasional merangkum portofolio proyek seluruh Indonesia dan Proyek Investasi berisi proyek yang sudah disimpan beserta tahapnya. Akun administrator juga melihat menu Administrator."
   },
   {
     "id": "peta-navigasi",
@@ -197,7 +198,7 @@
       "tampilkan analisa investasi",
       "tutup laporan"
     ],
-    "isi": "Laporan memuat Informasi Umum, Tata Ruang & Perizinan, Transportasi & Infrastruktur, Sosial & Ketenagakerjaan, Risiko Lingkungan & Sosial, dan Kelayakan Investasi, masing-masing dengan sumber dan tahun datanya; ikon i pada kartu menampilkan keterangan sumbernya. Tombol Analisis Lanjutan menutup panel laporan agar peta terlihat penuh untuk menyalakan layer dan memakai alat peta; tombol Tampilkan Analisa Investasi membukanya kembali. Lihat Laporan Lengkap (PDF) mengunduh laporan, dan Simpan ke Pipeline Investasi menyimpan proyek ke daftar pipeline."
+    "isi": "Laporan memuat Informasi Umum, Tata Ruang & Perizinan, Transportasi & Infrastruktur, Sosial & Ketenagakerjaan, Risiko Lingkungan & Sosial, dan Kelayakan Investasi, masing-masing dengan sumber dan tahun datanya; ikon i pada kartu menampilkan keterangan sumbernya. Tombol Analisis Lanjutan menutup panel laporan agar peta terlihat penuh untuk menyalakan layer dan memakai alat peta; tombol Tampilkan Analisa Investasi membukanya kembali. Lihat Laporan Lengkap (PDF) mengunduh laporan, dan Simpan ke Proyek Investasi menyimpan proyek ke daftar Proyek Investasi."
   },
   {
     "id": "cara-kerja-screening",
@@ -459,11 +460,11 @@
       "cadangan",
       "grafik"
     ],
-    "isi": "Dashboard Nasional merangkum jumlah proyek, nilai rencana dan realisasi, tenaga kerja, luas area, dan rata-rata skor AHP. Filter portofolio menyaring menurut jenis investasi, tahapan pipeline, dan provinsi, dan semua angka serta peta ikut tersaring. Peta sebaran dapat dibuat layar penuh dan pembesarannya dibatasi pada wilayah Indonesia. Ekspor CSV mengunduh daftar proyek sesuai filter dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah. Kartu Eksplorasi Potensi menghitung zona ruang laut berkelas kelayakan tinggi yang belum memiliki izin KKPRL, beserta jumlah provinsi dan luasnya."
+    "isi": "Dashboard Nasional merangkum jumlah proyek, nilai rencana dan realisasi, tenaga kerja, luas area, dan rata-rata skor AHP. Filter portofolio menyaring menurut jenis investasi, tahap proyek, dan provinsi, dan semua angka serta peta ikut tersaring. Peta sebaran dapat dibuat layar penuh dan pembesarannya dibatasi pada wilayah Indonesia. Ekspor CSV mengunduh daftar proyek sesuai filter dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah. Kartu Eksplorasi Potensi menghitung zona ruang laut berkelas kelayakan tinggi yang belum memiliki izin KKPRL, beserta jumlah provinsi dan luasnya."
   },
   {
     "id": "pipeline",
-    "judul": "Mengelola Pipeline Investasi",
+    "judul": "Mengelola Proyek Investasi",
     "halaman": [
       "/pipeline",
       "/dashboard"
@@ -484,9 +485,21 @@
       "hapus",
       "detail proyek",
       "perbarui status",
-      "export pdf"
+      "export pdf",
+      "proyek investasi",
+      "tahap proyek",
+      "perencanaan",
+      "penyiapan",
+      "transaksi",
+      "konstruksi",
+      "operasi",
+      "kppip",
+      "psn",
+      "proyek strategis nasional",
+      "financial close",
+      "perbarui tahap"
     ],
-    "isi": "Pipeline Investasi berisi proyek yang disimpan dari laporan analisis. Daftarnya dapat disaring menurut jenis investasi dan tahapan. Tahapannya berurutan Letter of Intent (LOI), Feasibility Study (FS), Development (DEV), dan Operational (OP). Ikon mata membuka detail proyek yang berisi tab Informasi Umum, Tata Ruang & Perizinan, Transportasi & Infrastruktur, Sosial & Ketenagakerjaan, Risiko Lingkungan & Sosial, Kelayakan Investasi, dan Status Proyek. Di detail proyek tersedia Perbarui Status Proyek, Export PDF, Cetak, dan Hapus; perubahan status tercatat di riwayat."
+    "isi": "Menu Proyek Investasi (dulu bernama Pipeline Investasi) berisi proyek yang disimpan dari laporan analisis, lalu dipantau perkembangannya. Daftarnya dapat disaring menurut jenis investasi dan tahap. Tahapnya mengikuti tahapan Proyek Strategis Nasional dalam PP 42/2021 yang dipakai KPPIP Kemenko Perekonomian, berurutan: Perencanaan (investor menyatakan minat dan lokasi masih dijajaki), Penyiapan (studi kelayakan, pengurusan izin termasuk KKPRL, dan penyiapan lahan), Transaksi (kesepakatan kerja sama dan pembiayaan sampai dana siap dipakai atau financial close), Konstruksi (pembangunan fisik sejak peletakan batu pertama), dan Operasi (fasilitas sudah berjalan). Tahap lama disesuaikan otomatis: LOI menjadi Perencanaan, FS menjadi Penyiapan, DEV menjadi Konstruksi, dan OP menjadi Operasi. Tombol Detail membuka halaman proyek dengan tab Informasi Umum, Tata Ruang & Perizinan, Transportasi & Infrastruktur, Sosial & Ketenagakerjaan, Risiko Lingkungan & Sosial, Kelayakan Investasi, dan Tahap Proyek. Di halaman itu tersedia Perbarui Tahap Proyek, Unduh PDF, Cetak, dan Hapus; setiap perubahan tahap tercatat di riwayat."
   },
   {
     "id": "pusat-informasi",
@@ -546,7 +559,7 @@
       "log aktivitas",
       "realisasi"
     ],
-    "isi": "Menu Administrator hanya tampil untuk akun administrator. Isinya ringkasan sistem, kelola pengguna, pipeline (termasuk mengisi nilai realisasi dan status), sumber data, sektor investasi (rasio tenaga kerja per miliar, ketentuan kegiatan per sub-zona, dan kompetensi yang dibutuhkan), serta log aktivitas yang mencatat masuk, keluar, perubahan data, analisis, dan upaya akses yang ditolak."
+    "isi": "Menu Administrator hanya tampil untuk akun administrator. Isinya ringkasan sistem, kelola pengguna, proyek investasi (termasuk mengisi nilai realisasi dan tahap), sumber data, sektor investasi (rasio tenaga kerja per miliar, ketentuan kegiatan per sub-zona, dan kompetensi yang dibutuhkan), serta log aktivitas yang mencatat masuk, keluar, perubahan data, analisis, dan upaya akses yang ditolak."
   },
   {
     "id": "format-angka",

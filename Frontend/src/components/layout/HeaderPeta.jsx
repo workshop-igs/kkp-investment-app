@@ -16,7 +16,7 @@ const MENU_TAMU = [BERANDA, PETA, PROFIL];
 const MENU_PENGGUNA = [
   BERANDA,
   { label: 'Dashboard Nasional', link: '/dashboard' },
-  { label: 'Pipeline Investasi', link: '/pipeline' },
+  { label: 'Proyek Investasi', link: '/pipeline' },
   PETA,
   PROFIL,
 ];

@@ -132,11 +132,11 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
 
   const handleSaveToPipeline = async () => {
     if (!projectName.trim()) {
-      alert("Nama proyek harus diisi sebelum menyimpan ke Pipeline.");
+      alert("Nama proyek harus diisi sebelum menyimpan ke Proyek Investasi.");
       return;
     }
     if (!investor.trim()) {
-      alert("Nama investor / badan usaha harus diisi sebelum menyimpan ke Pipeline.");
+      alert("Nama investor / badan usaha harus diisi sebelum menyimpan ke Proyek Investasi.");
       return;
     }
     setSaving(true);
@@ -152,11 +152,10 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
         analisis_json: { ...result, geometry: geometry },
         skor_kelayakan: result.ahp_score || result.kelayakan?.skor_ahp_total || 0,
         proyeksi_tenaga_kerja: result.ketenagakerjaan?.total_tenaga_kerja || result.ketenagakerjaan?.total_lapangan_kerja || 0,
-        status: 'LOI'
       };
 
       await api.post('/pipeline/proyek/', payload);
-      alert("Proyek berhasil disimpan ke Investment Pipeline!");
+      alert("Proyek berhasil disimpan ke daftar Proyek Investasi pada tahap Perencanaan.");
       navigate('/pipeline');
     } catch (error) {
       console.error("Save Pipeline Error:", error);
@@ -672,7 +671,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
                 disabled={saving}
                 className="flex-1 py-3 bg-[#0056A5] hover:bg-sky-600 text-white rounded-lg font-bold transition-all shadow-md flex items-center justify-center gap-2"
               >
-                {saving ? "Menyimpan..." : "Simpan ke Pipeline Investasi"}
+                {saving ? "Menyimpan..." : "Simpan ke Proyek Investasi"}
               </button>
             </div>
           </div>

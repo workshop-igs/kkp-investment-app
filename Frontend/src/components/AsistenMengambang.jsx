@@ -7,7 +7,7 @@ import { useAuth } from '../context/KonteksAuth';
 const SARAN_HALAMAN = {
   '/peta': ['Bagaimana cara menggambar area proyek?', 'Bagaimana kesesuaian ruang diperiksa?'],
   '/dashboard': ['Bagaimana cara ekspor CSV?', 'Apa arti kartu Eksplorasi Potensi?'],
-  '/pipeline': ['Bagaimana cara memperbarui status proyek?'],
+  '/pipeline': ['Bagaimana cara memperbarui tahap proyek?'],
   '/profil-investasi': ['Bagaimana lokasi prioritas ditentukan?'],
   '/admin': ['Apa saja isi menu Administrator?'],
 };

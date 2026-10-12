@@ -138,7 +138,7 @@ class ProyekInvestasiViewSet(viewsets.ModelViewSet):
                     data['kabupaten_kota'] = kabkota.id
 
         if not data.get('status'):
-            data['status'] = 'LOI'
+            data['status'] = 'PERENCANAAN'
 
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
@@ -194,7 +194,7 @@ class ProyekInvestasiViewSet(viewsets.ModelViewSet):
         valid_statuses = [c[0] for c in ProyekInvestasi.STATUS_CHOICES]
         if new_status not in valid_statuses:
             return Response(
-                {'detail': f'Status tidak valid. Pilihan: {valid_statuses}'}, status=status.HTTP_400_BAD_REQUEST
+                {'detail': f'Tahap tidak valid. Pilihan: {valid_statuses}'}, status=status.HTTP_400_BAD_REQUEST
             )
 
         if catatan:

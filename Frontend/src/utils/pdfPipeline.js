@@ -1,5 +1,6 @@
 import { Kanvas, siapkanAsetPdf } from './pdfLaporan';
 import { rupiahRingkas } from './pemformat';
+import { LABEL_TAHAPAN, TAHAPAN_PROYEK } from './konstanta';
 
 const angka = (v, d = 0) =>
   v === null || v === undefined || Number.isNaN(Number(v))
@@ -20,19 +21,19 @@ const bagianRealisasi = (rencana, realisasi) => {
 export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, proyek, cakupan }) {
   const s = ringkas || {};
   const k = new Kanvas(
-    'Laporan Pipeline Investasi Ruang Laut',
-    'Rekapitulasi portofolio proyek investasi ruang laut yang tercatat pada pipeline.',
-    { keteranganKop: 'Laporan Pipeline Investasi' }
+    'Laporan Proyek Investasi Ruang Laut',
+    'Rekapitulasi proyek investasi ruang laut yang tercatat di aplikasi beserta tahap perkembangannya.',
+    { keteranganKop: 'Laporan Proyek Investasi' }
   );
   k.blokJudul([
-    cakupan ? `Cakupan: ${cakupan}` : 'Cakupan: seluruh pipeline',
+    cakupan ? `Cakupan: ${cakupan}` : 'Cakupan: seluruh proyek',
     'Disusun dari basis data aplikasi pada saat penerbitan',
   ]);
 
   k.tema(
     'Ringkasan Portofolio',
-    'Rekapitulasi proyek investasi ruang laut yang tercatat pada pipeline, '
-      + 'dari tahap Letter of Intent sampai operasional.'
+    'Rekapitulasi proyek investasi ruang laut yang tercatat di aplikasi, '
+      + 'dari tahap perencanaan sampai beroperasi.'
   );
 
   k.angkaBesar([
@@ -43,30 +44,30 @@ export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, pr
   ]);
 
   k.angkaBesar([
-    { nilai: angka(s.total_tenaga_kerja), satuan: 'proyeksi tenaga kerja' },
+    { nilai: angka(s.total_tenaga_kerja), satuan: 'perkiraan tenaga kerja' },
     { nilai: `${angka(s.total_luas_ha, 1)} ha`, satuan: 'luas area proyek' },
     { nilai: angka(s.total_provinsi), satuan: 'provinsi tercakup' },
-    { nilai: angka(s.total_sektor), satuan: 'sektor tersedia' },
+    { nilai: angka(s.total_sektor), satuan: 'jenis investasi tersedia' },
   ]);
 
   if (cakupan) {
     k.peringatan(
       `Cakupan dokumen ini: ${cakupan}. Daftar proyek di bawah mengikuti penyaring tersebut, `
-        + 'sedangkan angka ringkasan dan rekapitulasi di atas dihitung atas SELURUH pipeline.'
+        + 'sedangkan angka ringkasan dan rekapitulasi di atas dihitung atas SELURUH proyek.'
     );
   }
 
   if (perStatus?.length) {
     const totalProyek = perStatus.reduce((a, r) => a + (r.count || 0), 0) || 1;
     k.tema(
-      'Sebaran menurut Tahapan',
-      'Tahapan mengikuti alur pembinaan investasi: Letter of Intent, studi kelayakan, '
-        + 'pembangunan, lalu operasional.'
+      'Sebaran menurut Tahap Proyek',
+      'Tahap mengikuti tahapan Proyek Strategis Nasional (PP 42/2021, KPPIP Kemenko Perekonomian): '
+        + `${TAHAPAN_PROYEK.map((t) => t.label.toLowerCase()).join(', ')}.`
     );
     k.tabel(
-      ['Tahapan', 'Proyek', 'Bagian', 'Nilai Rencana'],
+      ['Tahap', 'Proyek', 'Bagian', 'Nilai Rencana'],
       perStatus.map((r) => [
-        r.label || r.status,
+        LABEL_TAHAPAN[r.status] || r.label || r.status,
         angka(r.count),
         persen(((r.count || 0) / totalProyek) * 100),
         rupiahRingkas((r.total_miliar || 0) * 1e9),
@@ -77,12 +78,12 @@ export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, pr
 
   if (perSektor?.length) {
     k.tema(
-      'Rekapitulasi menurut Sektor Investasi',
-      'Hanya sektor yang sudah memiliki proyek tercatat yang muncul di sini; '
-        + 'sektor tanpa proyek bukan berarti tertutup bagi investasi.'
+      'Rekapitulasi menurut Jenis Investasi',
+      'Hanya jenis investasi yang sudah memiliki proyek tercatat yang muncul di sini; '
+        + 'jenis tanpa proyek bukan berarti tertutup bagi investasi.'
     );
     k.tabel(
-      ['Sektor', 'Proyek', 'Rencana', 'Realisasi', 'Capaian'],
+      ['Jenis Investasi', 'Proyek', 'Rencana', 'Realisasi', 'Capaian'],
       perSektor.map((r) => [
         r.sektor_nama || '—',
         angka(r.count),
@@ -118,15 +119,15 @@ export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, pr
       'Daftar Proyek',
       cakupan
         ? `Proyek yang tercakup penyaring aktif (${proyek.length} baris).`
-        : `Seluruh proyek pada pipeline (${proyek.length} baris).`
+        : `Seluruh proyek tercatat (${proyek.length} baris).`
     );
     k.tabel(
-      ['Nama Proyek', 'Sektor', 'Provinsi', 'Tahap', 'Nilai'],
+      ['Nama Proyek', 'Jenis Investasi', 'Provinsi', 'Tahap', 'Nilai'],
       proyek.map((p) => [
         `${p.kode_proyek ? `${p.kode_proyek} · ` : ''}${p.nama || '—'}`,
         p.sektor_nama || '—',
         p.provinsi_nama || '—',
-        p.status || '—',
+        LABEL_TAHAPAN[p.status] || p.status || '—',
         rupiahRingkas((p.nilai_investasi_miliar || 0) * 1e9),
       ]),
       [62, 38, 34, 18, 26]
@@ -142,12 +143,12 @@ export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, pr
       + 'rupiah disajikan ringkas (T = triliun, M = miliar, Jt = juta) mengikuti besarannya.'
   );
   k.teks(
-    'Capaian realisasi adalah nilai terealisasi dibagi nilai rencana. Sektor atau wilayah '
+    'Capaian realisasi adalah nilai terealisasi dibagi nilai rencana. Jenis investasi atau wilayah '
       + 'yang rencananya nol ditulis "—", bukan 0%, karena keduanya berbeda arti: yang '
       + 'pertama belum punya rencana, yang kedua punya rencana tetapi belum terealisasi.'
   );
   k.teks(
-    'Proyeksi tenaga kerja adalah perkiraan serapan, bukan lapangan kerja yang sudah '
+    'Perkiraan tenaga kerja adalah perkiraan serapan, bukan lapangan kerja yang sudah '
       + 'tercipta. Angkanya tersimpan bersama proyek saat analisis kelayakannya dijalankan.'
   );
 
@@ -158,7 +159,7 @@ export async function unduhPdfPipeline(opsi) {
   await siapkanAsetPdf();
   const doc = buatPdfPipeline(opsi);
   const tgl = new Date().toISOString().slice(0, 10);
-  doc.save(`Laporan-Pipeline-Investasi-${tgl}.pdf`);
+  doc.save(`Laporan-Proyek-Investasi-${tgl}.pdf`);
 }
 
 export default unduhPdfPipeline;

@@ -42,7 +42,7 @@ SINONIM = {
 JUMLAH_PANDUAN = 3
 BUANG = frozenset({'geometry', 'batas', 'peta', 'grafik', 'map_markers', 'next', 'previous', 'created_at', 'updated_at'})
 MAKS_DAFTAR = 40
-TAHAP = ['LOI', 'FS', 'DEV', 'OP']
+TAHAP = ['PERENCANAAN', 'PENYIAPAN', 'TRANSAKSI', 'KONSTRUKSI', 'OPERASI']
 SINGKATAN_PROVINSI = {
     'ntb': 'Nusa Tenggara Barat', 'ntt': 'Nusa Tenggara Timur', 'diy': 'DI Yogyakarta', 'jogja': 'DI Yogyakarta',
     'dki': 'DKI Jakarta', 'jabar': 'Jawa Barat', 'jateng': 'Jawa Tengah', 'jatim': 'Jawa Timur',
@@ -174,7 +174,7 @@ ALAT = {
     'panduan_aplikasi': (
         'Cara memakai fitur aplikasi dan cara kerja perhitungannya: menggambar area, layer peta, langkah analisis, '
         'laporan, pemeriksaan kesesuaian ruang, skor lokasi dan risiko, AHP, finansial, sumber data, dashboard, '
-        'pipeline, profil investasi, dan akun. Pakai untuk setiap pertanyaan "bagaimana cara" atau "bagaimana '
+        'proyek investasi, profil investasi, dan akun. Pakai untuk setiap pertanyaan "bagaimana cara" atau "bagaimana '
         'dihitung", dan jawab hanya berdasarkan bagian panduan yang dikembalikan.',
         _skema({
             'pertanyaan': _teks('Pertanyaan pengguna apa adanya.'),
@@ -253,12 +253,12 @@ ALAT = {
         lambda r, a: _api(r, 'GET', '/api/v1/inti/dashboard/'),
     ),
     'daftar_proyek': (
-        'Daftar proyek di Pipeline Investasi, bisa dicari menurut nama, investor, kode, atau lokasi, dan disaring '
-        'menurut tahapan atau provinsi. Untuk proyek tertentu selalu isi kata_kunci dengan kode PRJ, nama, atau '
+        'Daftar Proyek Investasi, bisa dicari menurut nama, investor, kode, atau lokasi, dan disaring '
+        'menurut tahap proyek atau provinsi. Untuk proyek tertentu selalu isi kata_kunci dengan kode PRJ, nama, atau '
         'investornya; tanpa kata_kunci daftarnya bisa terpotong.',
         _skema({
             'kata_kunci': _teks('Kode PRJ, nama proyek, investor, atau lokasi.'),
-            'tahap': _teks('Tahapan pipeline, opsional.', enum=TAHAP),
+            'tahap': _teks('Tahap proyek, opsional.', enum=TAHAP),
             'provinsi': _teks('Nama provinsi, opsional.'),
         }),
         lambda r, a: _api(r, 'GET', '/api/v1/pipeline/proyek/', {
@@ -267,8 +267,8 @@ ALAT = {
         }),
     ),
     'detail_proyek': (
-        'Detail satu proyek di Pipeline Investasi beserta hasil analisis kelayakannya (keputusan dan skor) dan '
-        'riwayat status.',
+        'Detail satu proyek investasi beserta hasil analisis kelayakannya (keputusan dan skor) dan '
+        'riwayat perubahan tahapnya.',
         _skema({'proyek_id': _bulat('Kolom id (angka) dari daftar_proyek, bukan kode PRJ.')}, ['proyek_id']),
         lambda r, a: _detail_proyek(r, a['proyek_id']),
     ),
@@ -372,7 +372,7 @@ LABEL_ALAT = {
     'screening_ruang': 'pemeriksaan kesesuaian ruang',
     'informasi_area': 'informasi area',
     'ringkasan_portofolio': 'ringkasan portofolio',
-    'daftar_proyek': 'pipeline investasi',
+    'daftar_proyek': 'daftar proyek investasi',
     'detail_proyek': 'detail proyek',
     'cari_kkprl': 'data KKPRL',
 }
