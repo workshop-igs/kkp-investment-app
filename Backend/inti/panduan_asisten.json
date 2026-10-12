@@ -424,9 +424,11 @@
       "wilayah potensial",
       "sangat sesuai",
       "sesuai",
-      "tampilan awal"
+      "tampilan awal",
+      "kkprl",
+      "belum berizin"
     ],
-    "isi": "Skor kelayakan per zona dihitung lebih dulu untuk setiap zona rencana tata ruang dan setiap jenis investasi, dengan bobot 50% lokasi dan 50% risiko. Kelasnya Sangat sesuai pada skor 0,70 ke atas, Sesuai 0,55 ke atas, Sesuai bersyarat 0,40 ke atas, dan Tidak sesuai di bawahnya. Layer Rekomendasi Wilayah Potensial, yang tampil saat Peta Spasial dibuka, menampilkan zona Sangat sesuai dan Sesuai untuk sedikitnya satu jenis investasi, masing-masing dengan jenis yang skornya tertinggi; pilihan jenis investasi pada layer itu mempersempitnya ke satu jenis. Skor ini bukan skor AHP proyek karena belum memuat kriteria finansial; penilaian proyek tetap dilakukan dengan menggambar area dan menjalankan analisis."
+    "isi": "Skor kelayakan per zona dihitung lebih dulu untuk setiap zona rencana tata ruang dan setiap jenis investasi, dengan bobot 50% lokasi dan 50% risiko. Kelasnya Sangat sesuai pada skor 0,70 ke atas, Sesuai 0,55 ke atas, Sesuai bersyarat 0,40 ke atas, dan Tidak sesuai di bawahnya. Layer Rekomendasi Wilayah Potensial, yang tampil saat Peta Spasial dibuka, menampilkan zona Sangat sesuai dan Sesuai untuk sedikitnya satu jenis investasi yang peruntukan tata ruangnya mengizinkan jenis itu dan belum memiliki KKPRL terbit di dalamnya, masing-masing dengan jenis yang skornya tertinggi; pilihan jenis investasi pada layer itu mempersempitnya ke satu jenis. Skor ini bukan skor AHP proyek karena belum memuat kriteria finansial; penilaian proyek tetap dilakukan dengan menggambar area dan menjalankan analisis."
   },
   {
     "id": "profil-investasi",

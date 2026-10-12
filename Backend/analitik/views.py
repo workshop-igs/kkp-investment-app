@@ -32,6 +32,7 @@ from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
+from .services.profil_investasi import _saring_sumber_utama
 from .services.screening_ruang import screening_ruang
 from .services.skor_spasial import ambil_skor_spasial
 
@@ -390,16 +391,24 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
     def peta_urutan(self, qs, request, batas):
         if request.query_params.get('kelas'):
-            baris = sorted(qs.values_list('id', 'provinsi_id', '_skor'), key=lambda b: -(b[2] or 0))
-            self._dipangkas = len(baris) > batas
+            terbaik = {}
+            for zona_id, provinsi_id, skor, skor_id in qs.values_list('id', 'provinsi_id', '_skor', '_skor_id'):
+                lama = terbaik.get(zona_id)
+                if lama is None or (skor, -skor_id) > (lama[1], -lama[2]):
+                    terbaik[zona_id] = (provinsi_id, skor, skor_id)
+            urut = sorted(terbaik.values(), key=lambda b: -b[1])
+            self._dipangkas = len(urut) > batas
             self._pemilihan = 'skor tertinggi per provinsi' if self._dipangkas else 'semua'
+            pilihan = [skor_id for _, _, skor_id in urut]
             if self._dipangkas:
                 per_provinsi = {}
-                for zona_id, provinsi_id, _ in baris:
-                    per_provinsi.setdefault(provinsi_id, []).append(zona_id)
+                for provinsi_id, _, skor_id in urut:
+                    per_provinsi.setdefault(provinsi_id, []).append(skor_id)
                 kuota = max(1, batas // len(per_provinsi))
-                qs = qs.filter(id__in=[z for daftar in per_provinsi.values() for z in daftar[:kuota]])
-            return qs.order_by('-_skor', '-luas_ha', 'id')
+                pilihan = [s for daftar in per_provinsi.values() for s in daftar[:kuota]]
+            return self._anotasi(self.get_queryset(), {'skor_kelayakan__id__in': pilihan}).order_by(
+                '-_skor', '-luas_ha', 'id'
+            )
         urut = super().peta_urutan(qs, request, batas)
         self._pemilihan = 'terbesar'
         self._dipangkas = False
@@ -459,11 +468,7 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
         if kode == 'SEMUA':
             self._sektor = None
-            terbaik = SkorKelayakanZona.objects.filter(sektor__aktif=True)
-            if kelas:
-                terbaik = terbaik.filter(kelas__in=kelas)
-            terbaik = terbaik.order_by('zona_id', '-skor_total', 'sektor_id').distinct('zona_id').values('id')
-            penyaring = {'skor_kelayakan__id__in': terbaik}
+            penyaring = {'skor_kelayakan__sektor__aktif': True}
         else:
             sektor = None
             if kode:
@@ -477,28 +482,25 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
         if kelas:
             penyaring['skor_kelayakan__kelas__in'] = kelas
+            penyaring['skor_kelayakan__kesesuaian_tr'] = True
+            penyaring['skor_kelayakan__jumlah_kkprl'] = 0
+            qs = _saring_sumber_utama(qs, prefiks='')
 
+        return self._anotasi(qs, penyaring)
+
+    ANOTASI_SKOR = {
+        '_skor_id': 'id', '_skor': 'skor_total', '_kelas': 'kelas', '_lokasi': 'skor_lokasi',
+        '_risiko': 'skor_risiko', '_sesuai': 'kesesuaian_tr', '_akses': 'aksesibilitas',
+        '_jarak': 'jarak_infra_km', '_bencana': 'risiko_bencana', '_kkprl': 'jumlah_kkprl',
+        '_sosek': 'sumber_sosek', '_ekosistem': 'sensitivitas_ekosistem', '_ekosistem_rincian': 'ekosistem_rincian',
+        '_sumber_lingkungan': 'sumber_lingkungan', '_sosial': 'risiko_sosial', '_dtks': 'rasio_dtks',
+        '_nelayan': 'rasio_nelayan', '_adat': 'wilayah_adat', '_sumber_sosial': 'sumber_sosial',
+        '_sektor_nama': 'sektor__nama', '_sektor_kode': 'sektor__kode',
+    }
+
+    def _anotasi(self, qs, penyaring):
         return qs.filter(**penyaring).annotate(
-            _skor=F('skor_kelayakan__skor_total'),
-            _kelas=F('skor_kelayakan__kelas'),
-            _lokasi=F('skor_kelayakan__skor_lokasi'),
-            _risiko=F('skor_kelayakan__skor_risiko'),
-            _sesuai=F('skor_kelayakan__kesesuaian_tr'),
-            _akses=F('skor_kelayakan__aksesibilitas'),
-            _jarak=F('skor_kelayakan__jarak_infra_km'),
-            _bencana=F('skor_kelayakan__risiko_bencana'),
-            _kkprl=F('skor_kelayakan__jumlah_kkprl'),
-            _sosek=F('skor_kelayakan__sumber_sosek'),
-            _ekosistem=F('skor_kelayakan__sensitivitas_ekosistem'),
-            _ekosistem_rincian=F('skor_kelayakan__ekosistem_rincian'),
-            _sumber_lingkungan=F('skor_kelayakan__sumber_lingkungan'),
-            _sosial=F('skor_kelayakan__risiko_sosial'),
-            _dtks=F('skor_kelayakan__rasio_dtks'),
-            _nelayan=F('skor_kelayakan__rasio_nelayan'),
-            _adat=F('skor_kelayakan__wilayah_adat'),
-            _sumber_sosial=F('skor_kelayakan__sumber_sosial'),
-            _sektor_nama=F('skor_kelayakan__sektor__nama'),
-            _sektor_kode=F('skor_kelayakan__sektor__kode'),
+            **{nama: F(f'skor_kelayakan__{medan}') for nama, medan in self.ANOTASI_SKOR.items()}
         )
 
     PETA_KOLOM = (

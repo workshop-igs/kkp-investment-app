@@ -297,7 +297,8 @@ export const LAYER_LOKAL = {
     warnaIkon: (p) => warnaKelasKelayakan(p.kelas),
     keteranganLegenda:
       'Zona ruang laut yang Sangat sesuai (skor 0,70 ke atas) atau Sesuai (0,55 sampai di bawah 0,70) '
-      + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Setiap zona '
+      + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Hanya zona yang '
+      + 'peruntukan tata ruangnya mengizinkan jenis itu dan belum memiliki KKPRL terbit di dalamnya. Setiap zona '
       + 'ditampilkan dengan jenis investasi yang skornya paling tinggi; pilih satu jenis untuk melihat '
       + 'sebaran khusus jenis itu. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
       + 'perbesar peta untuk melihat zona lainnya. Skor menimbang kesesuaian tata ruang, potensi sumber daya, '

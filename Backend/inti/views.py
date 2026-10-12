@@ -459,7 +459,7 @@ def ringkasan_publik(request):
         return Response(tersimpan)
 
     kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'))
-    tinggi = skor_sesuai().filter(kelas='TINGGI')
+    tinggi = skor_sesuai().filter(kelas='TINGGI', jumlah_kkprl=0)
     muatan = {
         'proyek': ProyekInvestasi.objects.count(),
         'kkprl_aktif': kkprl['jumlah'] or 0,
