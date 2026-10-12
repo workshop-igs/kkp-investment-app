@@ -25,6 +25,13 @@ const NAMA_HALAMAN = [
   ['/admin', 'Dashboard Admin'],
 ];
 
+const GELOMBANG = 'M0 16C20 6 40 6 60 16S100 26 120 16S160 6 180 16S220 26 240 16V40H0Z';
+const LAPIS_OMBAK = [
+  { warna: '#40BFDB', opasitas: 0.28, tinggi: 46, durasi: '7s' },
+  { warna: '#1B6A8A', opasitas: 0.22, tinggi: 36, durasi: '5s' },
+  { warna: '#0056A5', opasitas: 0.3, tinggi: 26, durasi: '3.6s' },
+];
+
 const namaHalaman = (path) => (NAMA_HALAMAN.find(([awalan]) => path.startsWith(awalan)) || [null, 'Beranda'])[1];
 
 let urutan = 0;
@@ -161,36 +168,44 @@ const OverlayMemuat = () => {
         tampil ? 'visible opacity-100' : 'invisible opacity-0 pointer-events-none'
       }`}
     >
-      <div className="absolute inset-0 bg-kkp-900/55 backdrop-blur-[3px]" />
+      <div className="absolute inset-0 bg-kkp-900/45 backdrop-blur-[2px]" />
       <div
-        className={`relative w-full max-w-xs rounded-2xl bg-white px-7 py-7 text-center shadow-2xl ring-1 ring-black/5 transition-transform duration-200 ${
-          tampil ? 'scale-100' : 'scale-95'
+        className={`relative w-full max-w-[22rem] overflow-hidden rounded-2xl bg-white shadow-[0_30px_70px_-25px_rgba(0,34,66,0.55)] ring-1 ring-kkp-900/10 transition-transform duration-200 ${
+          tampil ? 'translate-y-0' : 'translate-y-2'
         }`}
       >
-        {detik >= 3 && (
-          <span className="absolute right-4 top-3 font-mono text-[11px] text-slate-400">{detik} dtk</span>
-        )}
-        <div className="relative mx-auto h-20 w-20">
-          <div
-            className={`absolute inset-0 rounded-full ${tampil ? 'animate-spin [animation-duration:1.1s]' : ''}`}
-            style={{
-              background: 'conic-gradient(from 0deg, rgba(64,191,219,0) 0 30%, #40BFDB 65%, #0056A5 100%)',
-              WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px))',
-              mask: 'radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3.5px))',
-            }}
-          />
-          <div className="absolute inset-[7px] flex items-center justify-center rounded-full bg-kkp-100/60">
-            <img src="/logo-kkp.png" alt="" className="h-11 w-11 object-contain" />
+        <div className="relative h-24 overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#EEF8FC_45%,#D3F0F8_100%)]">
+          <div className="absolute inset-x-0 top-[22px] flex justify-center">
+            <img
+              src="/logo-kkp.png"
+              alt=""
+              className={`h-12 w-12 object-contain drop-shadow-[0_6px_8px_rgba(0,34,66,0.25)] ${
+                tampil ? 'animate-[apung_2.6s_ease-in-out_infinite] motion-reduce:animate-none' : ''
+              }`}
+            />
           </div>
+          {LAPIS_OMBAK.map(({ warna, opasitas, tinggi, durasi }) => (
+            <svg
+              key={warna + durasi}
+              viewBox="0 0 240 40"
+              preserveAspectRatio="none"
+              aria-hidden="true"
+              className={`absolute bottom-0 left-0 w-[200%] ${tampil ? 'animate-[ombak_linear_infinite] motion-reduce:animate-none' : ''}`}
+              style={{ height: tinggi, animationDuration: durasi }}
+            >
+              <path d={GELOMBANG} fill={warna} fillOpacity={opasitas} />
+            </svg>
+          ))}
         </div>
-        <p className="mt-5 text-[15px] font-bold leading-snug text-kkp-900">{judul}</p>
-        <p className="mt-1.5 text-xs leading-relaxed text-slate-500">{keterangan}</p>
-        <div className="mt-5 h-1 overflow-hidden rounded-full bg-kkp-100">
-          <div
-            className={`h-full w-2/5 rounded-full bg-gradient-to-r from-kkp-700 to-kkp-toska ${
-              tampil ? 'animate-[geser-muat_1.3s_ease-in-out_infinite]' : ''
-            }`}
-          />
+        <div className="px-6 pb-5 pt-4">
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.2em] text-kkp-700">
+              {jenis === 'halaman' ? 'Memuat' : 'Sedang diproses'}
+            </span>
+            {detik >= 3 && <span className="font-mono text-[11px] tabular-nums text-slate-400">{detik} dtk</span>}
+          </div>
+          <p className="mt-1.5 text-[16px] font-bold leading-snug text-kkp-900">{judul}</p>
+          <p className="mt-1 text-[12.5px] leading-relaxed text-slate-500">{keterangan}</p>
         </div>
       </div>
     </div>

@@ -84,7 +84,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
         && f.geometry?.type !== 'MultiPoint'
       ) {
         titik = buatPenanda(L.latLng(t[1], t[0]), f.properties);
-        titik.feature = { type: 'Feature', geometry: { type: 'Point', coordinates: t }, properties: f.properties };
+        titik.feature = { type: 'Feature', id: f.id, geometry: { type: 'Point', coordinates: t }, properties: f.properties };
         if (opsi.current.onEachFeature) opsi.current.onEachFeature(titik.feature, titik);
         grupTitik.addLayer(titik);
       }
@@ -103,7 +103,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
 
     const terapkan = (fitur, tol) => {
       const berId = fitur.every((f) => f.id !== undefined && f.id !== null);
-      const kunci = (f, i) => (berId ? f.id : i);
+      const kunci = (f, i) => (berId ? `${f.id}:${Boolean(f.properties?.titik)}` : i);
       if (!berId || tol !== toleransi) {
         entri.forEach(buang);
         entri.clear();

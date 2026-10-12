@@ -5,7 +5,6 @@ import {
   KELAS_KELAYAKAN,
   KELAS_RISIKO,
   URUTAN_KATEGORI,
-  URUTAN_KELAS_KELAYAKAN,
   URUTAN_KELAS_RISIKO,
 } from '../../utils/simbologiPeta';
 import { GARIS_KAWASAN, KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI, garisKelasKelayakan } from '../../utils/simbologiPeta';
@@ -256,33 +255,7 @@ const LegendaUnsurRtrl = () => (
 );
 
 
-const LegendaKelayakan = () => (
-  <div>
-    <p className="text-[11px] font-semibold text-slate-500 mb-1.5">
-      Warna = kelas kelayakan
-    </p>
-    <ul className="space-y-1">
-      {URUTAN_KELAS_KELAYAKAN.map((kode) => {
-        const k = KELAS_KELAYAKAN[kode];
-        return (
-          <li key={kode} className="flex items-start gap-2">
-            <span
-              className="mt-[3px] w-3.5 h-3.5 rounded-[3px] border border-black/10 shrink-0"
-              style={{ backgroundColor: k.warna, opacity: 0.85 }}
-            />
-            <span className="text-[12px] text-slate-700 leading-snug">{k.label}</span>
-          </li>
-        );
-      })}
-    </ul>
-    <p className="mt-2 text-[10px] text-slate-400 leading-snug">
-      Tanpa kriteria finansial &mdash; NPV, IRR, payback, dan ROI lahir dari CapEx
-      satu proyek, sedangkan zona tidak punya CapEx.
-    </p>
-  </div>
-);
-
-const AMBANG_KELAS = { TINGGI: 'skor ≥0,70', SEDANG: 'skor 0,55–<0,70', RENDAH: 'skor 0,40–<0,55', SANGAT_RENDAH: 'skor <0,40' };
+const AMBANG_KELAS = { TINGGI: 'skor ≥0,70', SEDANG: 'skor 0,55–<0,70' };
 
 const LegendaDisarankan = ({ def }) => (
   <ul className="space-y-1.5">
@@ -423,8 +396,6 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
                 <LegendaLokal />
               ) : daftarLokal[id].legenda === 'risiko' ? (
                 <LegendaRisiko />
-              ) : daftarLokal[id].legenda === 'kelayakan' ? (
-                <LegendaKelayakan />
               ) : daftarLokal[id].legenda === 'rtrl' ? (
                 <LegendaUnsurRtrl />
               ) : daftarLokal[id].legenda === 'gradasi' ? (

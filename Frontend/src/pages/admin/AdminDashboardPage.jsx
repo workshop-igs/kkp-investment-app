@@ -372,7 +372,7 @@ const AdminDashboardPage = () => {
         <div className="flex items-start gap-3 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
           <Database className="w-4 h-4 shrink-0 mt-0.5 text-slate-400" />
           <p className="leading-relaxed">
-            Tabel lokasi potensi investasi kosong. Lapisan <b>Rekomendasi Wilayah Potensial</b> di
+            Tabel lokasi potensi investasi kosong. Lapisan <b>Peta Sebaran Wilayah Potensial Investasi</b> di
             peta tidak bergantung padanya — ia disusun dari 280.280 skor kelayakan zona yang
             dihitung <span className="font-mono">hitung_skor_zona</span> atas 28.028 zona RZWP-3-K
             nyata untuk sepuluh sektor.

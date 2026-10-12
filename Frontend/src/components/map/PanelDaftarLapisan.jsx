@@ -56,8 +56,7 @@ const KATEGORI = [
   {
     judul: 'Analisis Investasi',
     layer: [
-      { id: 'skor_zona', nama: 'Skor Kelayakan per Zona', warna: '#eab308' },
-      { id: 'potensi', nama: 'Rekomendasi Wilayah Potensial', warna: '#15803d' },
+      { id: 'potensi', nama: 'Peta Sebaran Wilayah Potensial Investasi', warna: '#15803d' },
     ],
   },
 ];
