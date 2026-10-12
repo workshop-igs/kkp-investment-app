@@ -15,7 +15,7 @@ const LANGKAH = [
   {
     pilih: '[data-tur="legenda"]',
     judul: 'Legenda peta',
-    isi: 'Arti warna setiap layer yang sedang menyala. Tampilan awal memuat Rekomendasi Wilayah Potensial: zona yang sangat sesuai (hijau tua) atau sesuai (hijau muda) untuk sedikitnya satu jenis investasi. Klik judulnya untuk membuka atau menutup legenda.',
+    isi: 'Arti warna setiap layer yang sedang menyala. Tampilan awal memuat Peta Sebaran Wilayah Potensial Investasi: zona yang sangat sesuai (hijau tua) atau sesuai (hijau muda) untuk sedikitnya satu jenis investasi, satu penanda untuk setiap area yang bersambung. Klik judulnya untuk membuka atau menutup legenda.',
   },
   {
     peraga: true,
@@ -35,7 +35,7 @@ const LANGKAH = [
   {
     pilih: '[data-tur="lapisan"]',
     judul: 'Daftar layer',
-    isi: 'Menyalakan data seperti KKPRL terbit, RTRW Provinsi, Rencana Zonasi KAW, infrastruktur, risiko bencana, dan skor zona. Pada KKPRL dan layer tata ruang bisa dipilih satu kategori saja, misalnya hanya perikanan tangkap. Klik sebuah zona di peta untuk rinciannya; pada layer tata ruang dan Skor Zona tersedia tombol "Analisis lokasi ini" untuk menjadikan zona itu area proyek.',
+    isi: 'Menyalakan data seperti KKPRL terbit, RTRW Provinsi, Rencana Zonasi KAW, infrastruktur, risiko bencana, dan sebaran wilayah potensial investasi. Pada KKPRL dan layer tata ruang bisa dipilih satu kategori saja, misalnya hanya perikanan tangkap. Klik sebuah zona di peta untuk rinciannya; pada layer tata ruang dan Peta Sebaran Wilayah Potensial Investasi tersedia tombol "Analisis lokasi ini" untuk menjadikan zona itu area proyek.',
   },
   {
     pilih: '[data-tur="koordinat"]',

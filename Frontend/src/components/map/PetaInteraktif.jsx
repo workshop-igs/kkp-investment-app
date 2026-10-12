@@ -402,9 +402,18 @@ const PetaInteraktif = ({
                     e.popup
                       .getElement()
                       ?.querySelector('[data-analisis-lokasi]')
-                      ?.addEventListener('click', () => {
+                      ?.addEventListener('click', async () => {
                         layer.closePopup();
-                        drawerRef.current?.loadGeometry(feature.geometry);
+                        let geometri = feature.geometry;
+                        if (feature.id !== undefined && feature.id !== null) {
+                          try {
+                            const { data } = await api.get(LAYER_LOKAL[id].url.replace(/peta\/$/, `${feature.id}/`));
+                            geometri = data?.geometry || geometri;
+                          } catch {
+                            geometri = feature.geometry;
+                          }
+                        }
+                        drawerRef.current?.loadGeometry(geometri);
                       });
                   });
                 }}

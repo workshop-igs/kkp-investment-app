@@ -254,9 +254,14 @@ body {
   animation: fade-in 0.35s ease-out forwards;
 }
 
-@keyframes geser-muat {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(250%); }
+@keyframes ombak {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes apung {
+  0%, 100% { transform: translateY(0) rotate(-4deg); }
+  50%      { transform: translateY(-5px) rotate(4deg); }
 }
 
 .leaflet-container.mode-ukur {

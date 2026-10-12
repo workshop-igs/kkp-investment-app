@@ -210,95 +210,20 @@ export const LAYER_LOKAL = {
   ),
 
   ...LAPISAN_INFRASTRUKTUR,
-  skor_zona: {
-    url: '/analitik/skor-zona/peta/',
-    urlWilayah: '/analitik/skor-zona/wilayah/',
-    params: { sektor: 'PARIWISATA_BAHARI' },
-    label: 'Skor Kelayakan per Zona',
-    legenda: 'kelayakan',
-    keteranganLegenda:
-      'Skor 0-1 per zona ruang laut untuk sektor terpilih, disusun dari '
-      + 'kesesuaian tata ruang, potensi sumber daya, aksesibilitas infrastruktur, '
-      + 'kondisi sosial-ekonomi, serta risiko bencana dan regulasi. '
-      + 'Risiko lingkungannya memakai indeks kesehatan ekosistem dari sebaran '
-      + 'mangrove (dengan kondisi tutupan) Portal Satu Data KKP, '
-      + 'dilengkapi sebaran mangrove Global Mangrove Watch v3.0 untuk perairan yang '
-      + 'penarikan KKP-nya belum sampai — keduanya tidak pernah dijumlahkan, karena '
-      + 'memetakan tegakan yang sama. Terumbu karang dan padang lamun 2025 diambil dari Sidako Ekosistem KKP. '
-      + 'Risiko sosialnya memakai dua hal: bagian penduduk kabupaten yang terdaftar '
-      + 'DTKS desil 1-4 — pendataan Kemensos, BUKAN angka kemiskinan BPS — dan '
-      + 'konflik tenurial dari ketergantungan penduduk pada perikanan serta irisan '
-      + 'dengan wilayah kelola masyarakat hukum adat. Data adat baru mencakup lima '
-      + 'provinsi, jadi zona tanpa tanda adat berarti belum tercatat, bukan bebas klaim. '
-      + 'BUKAN skor AHP proyek: kriteria finansial (NPV, IRR, payback, ROI) '
-      + 'tidak ikut, karena keempatnya lahir dari CapEx satu proyek sedangkan '
-      + 'zona tidak punya CapEx. Ambang kelasnya sama dengan ambang keputusan '
-      + 'laporan: Sangat sesuai mulai 0,70 (sebagaimana proyek berstatus Layak), Sesuai mulai 0,55, '
-      + 'Sesuai bersyarat mulai 0,40, dan Tidak sesuai di bawahnya.',
-    gaya: (f) => {
-      const kelas = f && f.properties ? f.properties.kelas : null;
-      return {
-        color: garisKelasKelayakan(kelas),
-        weight: 0.8,
-        fillColor: warnaKelasKelayakan(kelas),
-        fillOpacity: 0.62,
-        opacity: 0.9,
-      };
-    },
-    popup: (p) => {
-      const baris = (label, nilai) =>
-        nilai === null || nilai === undefined ? '' : `<b>${label}:</b> ${aman(nilai)}<br/>`;
-      return `<div class="font-sans">
-        <h3 class="font-bold mb-1" style="color:${warnaKelasKelayakan(p.kelas)}">${aman(p.nama || 'Zona ruang laut')}</h3>
-        <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.sub_zona || '-')} · ${aman(p.provinsi || '-')}</p>
-        <div class="text-xs mb-1.5">
-          <span class="font-bold text-base" style="color:${warnaKelasKelayakan(p.kelas)}">${(p.skor ?? 0).toFixed(2)}</span>
-          <span class="text-slate-500"> skor kelayakan &middot; ${aman(KELAS_KELAYAKAN[p.kelas]?.label || '-')}</span>
-        </div>
-        <div class="text-xs border-t pt-1">
-          ${baris('Sektor dinilai', p.sektor)}
-          ${baris('Skor lokasi', p.skor_lokasi)}
-          ${baris('Skor risiko', p.skor_risiko)}
-          ${baris('Sesuai tata ruang', p.sesuai_tata_ruang ? 'Ya' : 'Tidak')}
-          ${baris('Infrastruktur terdekat', p.jarak_infra_km === null ? null : `${p.jarak_infra_km} km`)}
-          ${baris('Risiko bencana', p.risiko_bencana)}
-          ${baris('Izin tumpang tindih', p.jumlah_kkprl)}
-          ${baris('Indeks ekosistem', p.sensitivitas_ekosistem)}
-          ${p.ekosistem ? `<b>Ekosistem:</b> ${aman(p.ekosistem)}<br/>` : ''}
-          ${baris('Risiko sosial', p.risiko_sosial)}
-          ${p.rasio_dtks === null || p.rasio_dtks === undefined
-            ? ''
-            : `<b>DTKS desil 1-4:</b> ${(p.rasio_dtks * 100).toFixed(1)}% penduduk<br/>`}
-          ${p.rasio_nelayan === null || p.rasio_nelayan === undefined
-            ? ''
-            : `<b>Nelayan:</b> ${(p.rasio_nelayan * 100).toFixed(1)}% penduduk<br/>`}
-          ${p.wilayah_adat
-            ? '<b class="text-amber-700">Beririsan wilayah kelola masyarakat hukum adat</b><br/>'
-            : ''}
-        </div>
-        ${p.sumber_sosek === 'NETRAL'
-          ? '<p class="text-[10px] text-amber-700 mt-1.5 leading-snug">Kondisi sosial-ekonomi masih nilai netral &mdash; kabupaten/kota penaung zona ini belum berdata.</p>'
-          : ''}
-        ${p.sumber_sosial === 'NETRAL'
-          ? '<p class="text-[10px] text-amber-700 mt-1.5 leading-snug">Risiko sosial belum berdata untuk zona ini; komponennya dilewati, bukan diisi angka netral.</p>'
-          : ''}
-        ${catatanAdat(p.sumber_sosial)}
-      </div>`;
-    },
-  },
   potensi: {
     url: '/analitik/skor-zona/peta/',
     urlWilayah: '/analitik/skor-zona/wilayah/',
     params: { sektor: 'SEMUA', kelas: 'TINGGI,SEDANG' },
     semuaJenis: 'Semua jenis investasi',
-    label: 'Rekomendasi Wilayah Potensial',
+    label: 'Peta Sebaran Wilayah Potensial Investasi',
     legenda: 'disarankan',
     ikon: 'bintang',
     warnaIkon: (p) => warnaKelasKelayakan(p.kelas),
     keteranganLegenda:
       'Zona ruang laut yang Sangat sesuai (skor 0,70 ke atas) atau Sesuai (0,55 sampai di bawah 0,70) '
       + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Hanya zona yang '
-      + 'peruntukan tata ruangnya mengizinkan jenis itu dan belum memiliki KKPRL terbit di dalamnya. Setiap zona '
+      + 'peruntukan tata ruangnya mengizinkan jenis itu dan belum memiliki KKPRL terbit di dalamnya. Zona yang '
+      + 'bersambung membentuk satu area dengan satu penanda pada zona berskor tertinggi. Setiap zona '
       + 'ditampilkan dengan jenis investasi yang skornya paling tinggi; pilih satu jenis untuk melihat '
       + 'sebaran khusus jenis itu. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
       + 'perbesar peta untuk melihat zona lainnya. Skor menimbang kesesuaian tata ruang, potensi sumber daya, '
@@ -371,6 +296,9 @@ export const LAYER_LOKAL = {
         <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Kenapa disarankan</p>
         <ul class="text-[11px] space-y-0.5 mb-1">${butir}</ul>
         <p class="text-[10px] text-slate-500 border-t pt-1">Lokasi ${angka(p.skor_lokasi)} &middot; risiko ${angka(p.skor_risiko)}</p>
+        ${p.zona_dalam_area > 1
+          ? `<p class="text-[10px] text-slate-500 mt-1 leading-snug">Bagian dari satu area potensial berisi ${p.zona_dalam_area} zona bersambung; penanda diletakkan pada zona berskor tertinggi.</p>`
+          : ''}
         ${p.sumber_sosek === 'NETRAL'
           ? '<p class="text-[10px] text-amber-700 mt-1 leading-snug">Kondisi sosial-ekonomi masih nilai netral &mdash; kabupaten/kota penaung zona ini belum berdata.</p>'
           : ''}
