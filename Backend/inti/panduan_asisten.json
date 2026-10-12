@@ -67,7 +67,7 @@
       "tampilan awal",
       "rekomendasi"
     ],
-    "isi": "Daftar layer di sisi kanan menyalakan data seperti KKPRL terbit, rencana tata ruang laut, infrastruktur dan transportasi, risiko bencana, oseanografi, serta sebaran wilayah potensial investasi. Tampilan awal memuat Peta Sebaran Wilayah Potensial Investasi, yaitu zona yang sangat sesuai atau sesuai untuk sedikitnya satu jenis investasi; KKPRL terbit dan layer lain dapat dinyalakan dari daftar layer. Setelah sebuah layer dinyalakan, Anda dapat memilih satu kategori saja (misalnya hanya perikanan tangkap) atau satu provinsi saja. Ikon kaca pembesar pada layer membawa peta ke sebaran datanya, dan ikon i menampilkan keterangan serta sumber datanya. Legenda di kiri atas menjelaskan arti warna layer yang sedang menyala. Klik sebuah objek di peta untuk melihat rinciannya; pada layer tata ruang dan Peta Sebaran Wilayah Potensial Investasi tersedia tombol Analisis lokasi ini untuk menjadikan zona itu area proyek."
+    "isi": "Daftar layer di sisi kanan menyalakan data seperti KKPRL terbit, rencana tata ruang laut, infrastruktur dan transportasi, risiko bencana, oseanografi, serta sebaran wilayah potensial investasi. Tampilan awal memuat Peta Sebaran Wilayah Potensial Investasi, yaitu zona yang sangat sesuai atau sesuai untuk sedikitnya satu jenis investasi dan belum terbangun; KKPRL terbit dan layer lain dapat dinyalakan dari daftar layer. Setelah sebuah layer dinyalakan, Anda dapat memilih satu kategori saja (misalnya hanya perikanan tangkap) atau satu provinsi saja. Ikon kaca pembesar pada layer membawa peta ke sebaran datanya, dan ikon i menampilkan keterangan serta sumber datanya. Legenda di kiri atas menjelaskan arti warna layer yang sedang menyala. Klik sebuah objek di peta untuk melihat rinciannya; pada layer tata ruang dan Peta Sebaran Wilayah Potensial Investasi tersedia tombol Analisis lokasi ini untuk menjadikan zona itu area proyek."
   },
   {
     "id": "layer-tata-ruang",
@@ -429,9 +429,13 @@
       "peta sebaran",
       "sebaran wilayah potensial",
       "pin",
-      "penanda"
+      "penanda",
+      "bangunan",
+      "terbangun",
+      "pelabuhan eksisting",
+      "struktur"
     ],
-    "isi": "Skor kelayakan per zona dihitung lebih dulu untuk setiap zona rencana tata ruang dan setiap jenis investasi, dengan bobot 50% lokasi dan 50% risiko. Kelasnya Sangat sesuai pada skor 0,70 ke atas, Sesuai 0,55 ke atas, Sesuai bersyarat 0,40 ke atas, dan Tidak sesuai di bawahnya. Layer Peta Sebaran Wilayah Potensial Investasi, yang tampil saat Peta Spasial dibuka, menampilkan zona Sangat sesuai dan Sesuai untuk sedikitnya satu jenis investasi yang peruntukan tata ruangnya mengizinkan jenis itu dan belum memiliki KKPRL terbit di dalamnya, masing-masing dengan jenis yang skornya tertinggi; pilihan jenis investasi pada layer itu mempersempitnya ke satu jenis. Zona yang bersambung dihitung sebagai satu area potensial dengan satu penanda pada zona berskor tertinggi. Skor per zona tidak lagi tersedia sebagai layer tersendiri. Skor ini bukan skor AHP proyek karena belum memuat kriteria finansial; penilaian proyek tetap dilakukan dengan menggambar area dan menjalankan analisis."
+    "isi": "Skor kelayakan per zona dihitung lebih dulu untuk setiap zona rencana tata ruang dan setiap jenis investasi, dengan bobot 50% lokasi dan 50% risiko. Kelasnya Sangat sesuai pada skor 0,70 ke atas, Sesuai 0,55 ke atas, Sesuai bersyarat 0,40 ke atas, dan Tidak sesuai di bawahnya. Layer Peta Sebaran Wilayah Potensial Investasi, yang tampil saat Peta Spasial dibuka, menampilkan zona Sangat sesuai dan Sesuai untuk sedikitnya satu jenis investasi yang peruntukan tata ruangnya mengizinkan jenis itu belum memiliki KKPRL terbit di dalamnya, dan belum terbangun (kurang dari 10% luas zona beserta lingkungan 25 m di sekelilingnya tertutup pelabuhan, dermaga, pemecah gelombang, industri, permukiman, bandara, pembangkit, anjungan migas, atau bangunan lain menurut OpenStreetMap dan data infrastruktur KKP), masing-masing dengan jenis yang skornya tertinggi; pilihan jenis investasi pada layer itu mempersempitnya ke satu jenis. Zona yang bersambung dihitung sebagai satu area potensial dengan satu penanda pada zona terluas berkelas tertinggi. Skor per zona tidak lagi tersedia sebagai layer tersendiri. Skor ini bukan skor AHP proyek karena belum memuat kriteria finansial; penilaian proyek tetap dilakukan dengan menggambar area dan menjalankan analisis."
   },
   {
     "id": "profil-investasi",
@@ -472,7 +476,7 @@
       "cadangan",
       "grafik"
     ],
-    "isi": "Dashboard Nasional merangkum jumlah proyek, nilai rencana dan realisasi, tenaga kerja, luas area, dan rata-rata skor AHP. Filter portofolio menyaring menurut jenis investasi, tahap proyek, dan provinsi, dan semua angka serta peta ikut tersaring. Peta sebaran dapat dibuat layar penuh dan pembesarannya dibatasi pada wilayah Indonesia. Ekspor CSV mengunduh daftar proyek sesuai filter dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah. Kartu Eksplorasi Potensi menghitung zona ruang laut berkelas kelayakan tinggi yang belum memiliki izin KKPRL, beserta jumlah provinsi dan luasnya."
+    "isi": "Dashboard Nasional merangkum jumlah proyek, nilai rencana dan realisasi, tenaga kerja, luas area, dan rata-rata skor AHP. Filter portofolio menyaring menurut jenis investasi, tahap proyek, dan provinsi, dan semua angka serta peta ikut tersaring. Peta sebaran dapat dibuat layar penuh dan pembesarannya dibatasi pada wilayah Indonesia. Ekspor CSV mengunduh daftar proyek sesuai filter dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah. Kartu Eksplorasi Potensi menghitung zona ruang laut berkelas kelayakan tinggi yang belum memiliki izin KKPRL dan belum terbangun, beserta jumlah provinsi dan luasnya."
   },
   {
     "id": "pipeline",

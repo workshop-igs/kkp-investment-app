@@ -222,8 +222,9 @@ export const LAYER_LOKAL = {
     keteranganLegenda:
       'Zona ruang laut yang Sangat sesuai (skor 0,70 ke atas) atau Sesuai (0,55 sampai di bawah 0,70) '
       + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Hanya zona yang '
-      + 'peruntukan tata ruangnya mengizinkan jenis itu dan belum memiliki KKPRL terbit di dalamnya. Zona yang '
-      + 'bersambung membentuk satu area dengan satu penanda pada zona berskor tertinggi. Setiap zona '
+      + 'peruntukan tata ruangnya mengizinkan jenis itu, belum memiliki KKPRL terbit di dalamnya, dan belum terbangun: '
+      + 'kurang dari 10% luas zona beserta lingkungan 25 m di sekelilingnya tertutup pelabuhan, dermaga, pemecah gelombang, industri, permukiman, bandara, pembangkit, anjungan migas, atau bangunan lain menurut OpenStreetMap dan data infrastruktur KKP. Zona yang '
+      + 'bersambung membentuk satu area dengan satu penanda pada zona terluas berkelas tertinggi. Setiap zona '
       + 'ditampilkan dengan jenis investasi yang skornya paling tinggi; pilih satu jenis untuk melihat '
       + 'sebaran khusus jenis itu. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
       + 'perbesar peta untuk melihat zona lainnya. Skor menimbang kesesuaian tata ruang, potensi sumber daya, '
@@ -266,6 +267,14 @@ export const LAYER_LOKAL = {
             : `${p.jumlah_kkprl} izin KKPRL tumpang tindih`,
         ]);
       }
+      if (p.persen_terbangun !== null && p.persen_terbangun !== undefined) {
+        alasan.push([
+          p.persen_terbangun === 0,
+          p.persen_terbangun === 0
+            ? 'Belum ada bangunan atau struktur tercatat di zona'
+            : `${angka(p.persen_terbangun, 1)}% zona dan sekitarnya sudah terbangun`,
+        ]);
+      }
       if (p.sensitivitas_ekosistem !== null && p.sensitivitas_ekosistem !== undefined) {
         const rendah = p.sensitivitas_ekosistem < 0.5;
         alasan.push([rendah, `Indeks ekosistem ${angka(p.sensitivitas_ekosistem)}${rendah ? '' : ' — ekosistem sensitif'}`]);
@@ -297,7 +306,7 @@ export const LAYER_LOKAL = {
         <ul class="text-[11px] space-y-0.5 mb-1">${butir}</ul>
         <p class="text-[10px] text-slate-500 border-t pt-1">Lokasi ${angka(p.skor_lokasi)} &middot; risiko ${angka(p.skor_risiko)}</p>
         ${p.zona_dalam_area > 1
-          ? `<p class="text-[10px] text-slate-500 mt-1 leading-snug">Bagian dari satu area potensial berisi ${p.zona_dalam_area} zona bersambung; penanda diletakkan pada zona berskor tertinggi.</p>`
+          ? `<p class="text-[10px] text-slate-500 mt-1 leading-snug">Bagian dari satu area potensial berisi ${p.zona_dalam_area} zona bersambung; penanda diletakkan pada zona terluas berkelas tertinggi.</p>`
           : ''}
         ${p.sumber_sosek === 'NETRAL'
           ? '<p class="text-[10px] text-amber-700 mt-1 leading-snug">Kondisi sosial-ekonomi masih nilai netral &mdash; kabupaten/kota penaung zona ini belum berdata.</p>'

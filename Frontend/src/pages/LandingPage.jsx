@@ -608,7 +608,7 @@ const LandingPage = () => {
                   <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
                     {angka(ringkas?.zona_peluang_tinggi)}
                   </span>
-                  <span className="mt-3 block text-sm text-white/80">Zona laut berpeluang tinggi untuk minimal satu jenis investasi dan belum berizin KKPRL</span>
+                  <span className="mt-3 block text-sm text-white/80">Zona laut berpeluang tinggi untuk minimal satu jenis investasi, belum berizin KKPRL, dan belum terbangun</span>
                 </Link>
                 <KartuKecil to="/peta?mulai=gambar" judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
                 <KartuKecil to="/profil-investasi" judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />
@@ -711,7 +711,7 @@ const LandingPage = () => {
           <p className="mx-auto mt-5 max-w-2xl leading-relaxed text-slate-600">
             Setiap zona laut diberi skor untuk tiap jenis investasi dari kesesuaian tata ruang, potensi sumber daya,
             aksesibilitas, kondisi sosial ekonomi, dan risikonya. Yang dihitung hanya zona yang belum memiliki KKPRL
-            terbit. Pilih satu jenis untuk membuka profil investasinya per provinsi.
+            terbit dan belum terbangun, misalnya oleh pelabuhan, dermaga, industri, atau permukiman. Pilih satu jenis untuk membuka profil investasinya per provinsi.
           </p>
           <Link to="/peta?lapisan=potensi" className="mt-5 inline-block text-sm font-bold text-kkp-700 underline-offset-4 hover:underline">
             Lihat sebarannya di peta

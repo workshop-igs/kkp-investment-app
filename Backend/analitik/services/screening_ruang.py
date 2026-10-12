@@ -224,6 +224,13 @@ def _lokasi_alternatif(c, geom, aturan) -> List[Dict[str, Any]]:
             break
         diperiksa += 1
         uji = titik.buffer(0.0005)
+        c.execute(
+            'SELECT EXISTS (SELECT 1 FROM inventarisasi_bangunan_eksisting '
+            'WHERE geometry && ST_GeomFromEWKT(%s) AND ST_Intersects(geometry, ST_GeomFromEWKT(%s)))',
+            [uji.ewkt, uji.ewkt],
+        )
+        if c.fetchone()[0]:
+            continue
         efektif, cakupan = _zona_efektif(c, uji, _luas(c, uji))
         status = _nilai(efektif, aturan, cakupan, bool(_kkprl(c, uji)))
         if status not in ('SESUAI', 'SESUAI_BERSYARAT'):

@@ -82,6 +82,7 @@ const PEMBARUAN = [
   ['tarik_risiko_bencana', 'Indeks risiko bencana pesisir BNPB InaRISK'],
   ['tarik_statistik_bps', 'Pengangguran BPS per provinsi dan per kabupaten/kota'],
   ['hitung_skor_zona', 'Menghitung ulang skor kelayakan zona setelah data di atas diperbarui'],
+  ['tarik_bangunan_eksisting', 'Bangunan dan struktur eksisting (pelabuhan, dermaga, industri, permukiman, bandara, anjungan migas) dari OpenStreetMap dan infrastruktur KKP; zona yang 10% atau lebih luasnya (beserta lingkungan 25 m) sudah terbangun tidak direkomendasikan. Jalankan setelah hitung_skor_zona'],
 ];
 
 const AdminDashboardPage = () => {

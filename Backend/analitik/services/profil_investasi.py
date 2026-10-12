@@ -6,7 +6,7 @@ from django.db.models import Case, Count, IntegerField, Q, Sum, When
 from django.utils import timezone
 
 from analitik.models import KetentuanRuang, SkorKelayakanZona
-from analitik.services.konstanta import LABEL_SUMBER_ZONASI, PRIORITAS_SUMBER_ZONASI
+from analitik.services.konstanta import AMBANG_TERBANGUN_PERSEN, LABEL_SUMBER_ZONASI, PRIORITAS_SUMBER_ZONASI
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
 from inventarisasi.models import RegulasiTataRuang, ZonasiRuangLaut
@@ -231,7 +231,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         if not k.provinsi_id and k.status == 'DIIZINKAN':
             utama.add(k.sub_zona)
 
-    skor = skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG'], jumlah_kkprl=0)
+    skor = belum_dimanfaatkan(skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG']))
     lokasi = []
     kandidat = skor.annotate(utama=Case(When(zona__sub_zona__in=utama, then=1), default=0, output_field=IntegerField()))
     for s in kandidat.order_by('-utama', '-kelas', '-zona__luas_ha', '-skor_total').values(
@@ -444,3 +444,7 @@ def skor_sesuai(sektor=None, provinsi=None):
     qs = SkorKelayakanZona.objects.filter(kesesuaian_tr=True)
     skor = _saring_sumber_utama(qs.filter(sektor=sektor) if sektor else qs)
     return skor.filter(zona__provinsi=provinsi) if provinsi else skor
+
+
+def belum_dimanfaatkan(skor):
+    return skor.filter(jumlah_kkprl=0, zona__persen_terbangun__lt=AMBANG_TERBANGUN_PERSEN)
