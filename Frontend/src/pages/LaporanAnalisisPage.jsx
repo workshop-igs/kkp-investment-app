@@ -225,7 +225,6 @@ const LaporanAnalisisPage = () => {
           analisis_json: { ...result, geometry: geom },
           skor_kelayakan: result?.kelayakan?.skor_ahp_total || 0,
           proyeksi_tenaga_kerja: result?.ketenagakerjaan?.total_tenaga_kerja || 0,
-          status: 'LOI',
       });
 
       if (disimpan?.catatan_wilayah) alert(disimpan.catatan_wilayah);
@@ -515,7 +514,7 @@ const LaporanAnalisisPage = () => {
             <button
               onClick={simpanKePipeline}
               disabled={menyimpan}
-              title="Tambahkan proyek ini ke Pipeline Investasi"
+              title="Simpan proyek ini ke daftar Proyek Investasi"
               className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded text-[12px] font-semibold
                          text-white bg-kkp-700 hover:bg-sky-600 disabled:opacity-40 transition-colors
                          print:hidden"
@@ -526,7 +525,7 @@ const LaporanAnalisisPage = () => {
                 <Save className="w-4 h-4" />
               )}
               <span className="hidden sm:inline">
-                {menyimpan ? 'Menyimpan…' : 'Tambah ke Pipeline'}
+                {menyimpan ? 'Menyimpan…' : 'Simpan ke Proyek Investasi'}
               </span>
             </button>
           </div>

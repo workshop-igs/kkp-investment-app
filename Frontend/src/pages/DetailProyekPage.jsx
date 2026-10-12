@@ -44,15 +44,9 @@ import { keLatLng } from '../utils/koordinat';
 import { angkaRingkas as nf, rupiahRingkas } from '../utils/pemformat';
 import { unduhPdfLaporan } from '../utils/pdfLaporan';
 import { mulaiMemuat } from '../components/OverlayMemuat';
+import { LABEL_TAHAPAN, TAHAPAN_PROYEK } from '../utils/konstanta';
 
 const PALET = ['#0056A5', '#3d81c0', '#7aa9d6', '#a9c6e5', '#cfdff0', '#8fa3b8'];
-
-const STAGES = [
-  { key: 'LOI', label: 'Letter of Intent (LOI)', desc: 'Pernyataan minat awal dari investor.' },
-  { key: 'FS', label: 'Feasibility Study (FS)', desc: 'Analisis kelayakan teknis, spasial, finansial, dan lingkungan.' },
-  { key: 'DEV', label: 'Development', desc: 'Fase konstruksi, izin lanjutan (KKPRL), dan persiapan operasional.' },
-  { key: 'OP', label: 'Operational', desc: 'Proyek telah aktif beroperasi penuh di ruang laut.' },
-];
 
 const KOLOM_SENSITIVITAS = ['Perubahan', 'NPV', 'IRR', 'Payback (th)'];
 
@@ -76,7 +70,7 @@ const TEMA = [
   { kunci: 'sosial', label: 'Sosial & Ketenagakerjaan', Ikon: Users },
   { kunci: 'risiko', label: 'Risiko Lingkungan & Sosial', Ikon: Leaf },
   { kunci: 'kelayakan', label: 'Kelayakan Investasi', Ikon: TrendingUp },
-  { kunci: 'pipeline', label: 'Status Proyek', Ikon: Workflow },
+  { kunci: 'pipeline', label: 'Tahap Proyek', Ikon: Workflow },
 ];
 
 const PENGANTAR = {
@@ -85,7 +79,7 @@ const PENGANTAR = {
   transportasi: 'Kedekatan area proyek dengan alur pelayaran, unsur ruang laut, dan infrastruktur pendukung.',
   kelayakan: 'Hasil penilaian kelayakan dan proyeksi arus kas yang tersimpan bersama proyek ini.',
   sosial: 'Perkiraan serapan tenaga kerja proyek dan konteks pasar kerja wilayah dari BPS.',
-  pipeline: 'Posisi proyek dalam tahapan pipeline dan riwayat perubahan status.',
+  pipeline: 'Posisi proyek dalam tahapan Proyek Strategis Nasional (KPPIP) dan riwayat perubahan tahapnya.',
   risiko: PENJELASAN_RISIKO.tema,
 };
 
@@ -208,7 +202,7 @@ const DetailProyekPage = () => {
   }, [tema, kunciBps]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const bukaModalStatus = () => {
-    setTahapDipilih(proyek?.status || 'LOI');
+    setTahapDipilih(proyek?.status || 'PERENCANAAN');
     setCatatanStatus('');
     setModalStatus(true);
   };
@@ -231,7 +225,7 @@ const DetailProyekPage = () => {
             catatan: catatanStatus.trim(),
           });
         } catch (galatPatch) {
-          throw new Error('Gagal memperbarui status proyek.');
+          throw new Error('Gagal memperbarui tahap proyek.');
         }
       }
       setProyek(balasan.data);
@@ -316,7 +310,7 @@ const DetailProyekPage = () => {
             onClick={() => navigate('/pipeline')}
             className="px-4 py-2 rounded bg-kkp-700 text-white text-[14px] font-semibold hover:bg-kkp-800"
           >
-            Kembali ke Pipeline
+            Kembali ke daftar proyek
           </button>
         </div>
       </div>
@@ -326,7 +320,7 @@ const DetailProyekPage = () => {
   const temaAktif = TEMA.find((t) => t.kunci === tema);
   const bagian = (kunci) => (spasial.data?.bagian || []).find((b) => b.kunci === kunci);
   const area = spasial.data?.area;
-  const tahapSekarang = STAGES.findIndex((s) => s.key === proyek.status);
+  const tahapSekarang = TAHAPAN_PROYEK.findIndex((s) => s.kode === proyek.status);
 
   const KartuBencana = () => {
     if (bencana.memuat) {
@@ -513,7 +507,7 @@ const DetailProyekPage = () => {
       >
         <button
           onClick={() => navigate('/pipeline')}
-          title="Kembali ke Pipeline"
+          title="Kembali ke daftar proyek"
           className="w-9 lg:w-10 h-9 lg:h-10 rounded flex items-center justify-center text-slate-400 hover:text-kkp-700 hover:bg-white mb-2"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -556,7 +550,7 @@ const DetailProyekPage = () => {
             <button
               onClick={eksporPdf}
               disabled={membuatPdf}
-              title="Export PDF"
+              title="Unduh PDF"
               className="p-1.5 rounded text-slate-400 hover:text-kkp-700 hover:bg-slate-100 disabled:opacity-40"
             >
               {membuatPdf ? <Loader2 className="w-4 h-4 animate-spin" /> : <FileDown className="w-4 h-4" />}
@@ -957,14 +951,14 @@ const DetailProyekPage = () => {
           {tema === 'pipeline' && (
             <>
               <KartuLaporan
-                judul="Tahapan Pipeline"
-                pengantar={STAGES.find((s) => s.key === proyek.status)?.desc || ''}
+                judul="Tahap Proyek"
+                pengantar={TAHAPAN_PROYEK.find((s) => s.kode === proyek.status)?.desc || ''}
               >
                 <div className="space-y-2 mb-3">
-                  {STAGES.map((s, i) => {
+                  {TAHAPAN_PROYEK.map((s, i) => {
                     const lewat = i <= tahapSekarang;
                     return (
-                      <div key={s.key} className="flex items-start gap-2.5">
+                      <div key={s.kode} className="flex items-start gap-2.5">
                         <span
                           className={`w-5 h-5 rounded-full shrink-0 flex items-center justify-center text-[11px] font-bold ${
                             lewat ? 'bg-kkp-700 text-white' : 'bg-slate-100 text-slate-400'
@@ -986,17 +980,17 @@ const DetailProyekPage = () => {
                   onClick={bukaModalStatus}
                   className="w-full px-3 py-2 rounded bg-kkp-700 text-white text-[13px] font-semibold hover:bg-kkp-800 print:hidden"
                 >
-                  Perbarui Status Proyek
+                  Perbarui Tahap Proyek
                 </button>
               </KartuLaporan>
 
               {proyek.riwayat_status?.length > 0 && (
-                <KartuLaporan judul="Riwayat Perubahan Status">
+                <KartuLaporan judul="Riwayat Perubahan Tahap">
                   <TabelRingkas
-                    kolom={['Tanggal', 'Status']}
+                    kolom={['Tanggal', 'Tahap']}
                     baris={proyek.riwayat_status.map((h) => [
                       tanggal(h.created_at || h.tanggal),
-                      h.status_baru || h.status || '—',
+                      LABEL_TAHAPAN[h.status_baru] || h.status_baru_display || h.status_baru || '—',
                     ])}
                   />
                 </KartuLaporan>
@@ -1031,21 +1025,21 @@ const DetailProyekPage = () => {
             className="bg-white rounded-lg border border-slate-200 shadow-xl w-full max-w-md overflow-hidden"
           >
             <div className="px-5 py-3 border-b border-slate-200">
-              <h3 className="text-[15px] font-bold text-slate-900">Perbarui Status Proyek</h3>
+              <h3 className="text-[15px] font-bold text-slate-900">Perbarui Tahap Proyek</h3>
             </div>
             <div className="p-5 space-y-3">
-              {STAGES.map((s) => (
+              {TAHAPAN_PROYEK.map((s) => (
                 <label
-                  key={s.key}
+                  key={s.kode}
                   className={`flex items-start gap-2.5 p-2.5 rounded border cursor-pointer transition-colors ${
-                    tahapDipilih === s.key ? 'border-kkp-700 bg-kkp-100' : 'border-slate-200 hover:bg-slate-50'
+                    tahapDipilih === s.kode ? 'border-kkp-700 bg-kkp-100' : 'border-slate-200 hover:bg-slate-50'
                   }`}
                 >
                   <input
                     type="radio"
                     name="tahap"
-                    value={s.key}
-                    checked={tahapDipilih === s.key}
+                    value={s.kode}
+                    checked={tahapDipilih === s.kode}
                     onChange={(e) => setTahapDipilih(e.target.value)}
                     className="accent-kkp-700 mt-0.5"
                   />

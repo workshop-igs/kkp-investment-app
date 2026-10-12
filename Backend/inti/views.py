@@ -311,21 +311,14 @@ def dashboard_stats(request):
         .values_list('status', 'total_val')
     )
 
-    status_labels = {
-        'LOI': 'Letter of Intent',
-        'FS': 'Feasibility Study',
-        'DEV': 'Development',
-        'OP': 'Operational',
-    }
-
     proyek_per_status = [
         {
             'status': k,
-            'label': status_labels.get(k, k),
+            'label': label,
             'count': status_counts.get(k, 0),
             'total_miliar': round(float(status_values.get(k, 0) or 0), 1),
         }
-        for k in ['LOI', 'FS', 'DEV', 'OP']
+        for k, label in ProyekInvestasi.STATUS_CHOICES
     ]
 
     sektor_qs = (

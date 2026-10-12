@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react';
 import { api, ambilDaftar } from '../../api/klien';
 import { Edit2, Check, X, MapPin } from 'lucide-react';
 import { rupiahMiliar } from '../../utils/pemformat';
-
-
-const STATUS_OPTIONS = ['LOI', 'FS', 'DEV', 'OP'];
+import { LABEL_TAHAPAN, TAHAPAN_PROYEK } from '../../utils/konstanta';
 
 const AdminPipelinePage = () => {
   const [projects, setProjects] = useState([]);
@@ -46,13 +44,13 @@ const AdminPipelinePage = () => {
     }
   };
 
-  if (loading && projects.length === 0) return <div className="p-8 text-slate-500">Memuat pipeline...</div>;
+  if (loading && projects.length === 0) return <div className="p-8 text-slate-500">Memuat daftar proyek...</div>;
 
   return (
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 font-syne">Pipeline Investasi (Super Admin)</h1>
-        <p className="text-slate-500 text-sm mt-1">Pantau seluruh usulan dan realisasi proyek investasi ruang laut nasional.</p>
+        <h1 className="text-2xl font-bold text-slate-900 font-syne">Kelola Proyek Investasi</h1>
+        <p className="text-slate-500 text-sm mt-1">Perbarui nilai realisasi dan tahap seluruh proyek investasi ruang laut. Tahap mengikuti tahapan Proyek Strategis Nasional (KPPIP).</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
@@ -64,7 +62,7 @@ const AdminPipelinePage = () => {
                 <th className="px-6 py-4">Investor</th>
                 <th className="px-6 py-4">Rencana</th>
                 <th className="px-6 py-4">Realisasi</th>
-                <th className="px-6 py-4">Status</th>
+                <th className="px-6 py-4">Tahap</th>
                 <th className="px-6 py-4 text-right">Aksi</th>
               </tr>
             </thead>
@@ -107,11 +105,11 @@ const AdminPipelinePage = () => {
                         onChange={(e) => setEditForm({...editForm, status: e.target.value})}
                         className="px-2 py-1 border rounded text-sm bg-white"
                       >
-                        {STATUS_OPTIONS.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        {TAHAPAN_PROYEK.map((t) => <option key={t.kode} value={t.kode}>{t.label}</option>)}
                       </select>
                     ) : (
                       <span className="px-2.5 py-1 bg-slate-100 text-slate-700 font-bold text-[11px] rounded-full">
-                        {p.status}
+                        {LABEL_TAHAPAN[p.status] || p.status}
                       </span>
                     )}
                   </td>

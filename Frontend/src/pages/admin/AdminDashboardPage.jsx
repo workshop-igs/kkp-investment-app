@@ -200,8 +200,8 @@ const AdminDashboardPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Panel
-          judul="Tahapan Pipeline"
-          keterangan="Sebaran proyek menurut tahapan, LOI sampai operasional"
+          judul="Tahap Proyek"
+          keterangan="Sebaran proyek menurut tahap, dari perencanaan sampai operasi"
           tautan="/admin/pipeline"
           tautanTeks="Kelola proyek"
         >

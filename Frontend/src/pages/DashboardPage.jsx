@@ -15,10 +15,11 @@ import {
   RAMP_BIRU, SERI, TINTA, gayaBatang, opsiDasar, potong, sumbuKategori,
   sumbuNilai, warnaSeri,
 } from '../utils/temaGrafik';
+import { LABEL_TAHAPAN, TAHAPAN_PROYEK } from '../utils/konstanta';
 
-const TAHAPAN_WARNA = [RAMP_BIRU[1], RAMP_BIRU[3], RAMP_BIRU[4], RAMP_BIRU[6]];
+const TAHAPAN_WARNA = [RAMP_BIRU[1], RAMP_BIRU[2], RAMP_BIRU[3], RAMP_BIRU[4], RAMP_BIRU[6]];
 
-const URUTAN_TAHAPAN = ['LOI', 'FS', 'DEV', 'OP'];
+const URUTAN_TAHAPAN = TAHAPAN_PROYEK.map((t) => t.kode);
 const WARNA_TAHAPAN = Object.fromEntries(
   URUTAN_TAHAPAN.map((kode, i) => [kode, TAHAPAN_WARNA[i]]),
 );
@@ -126,13 +127,6 @@ const LapisanGugus = ({ markers, children }) => {
       })}
     </>
   );
-};
-
-const STATUS_CONFIG = {
-  'LOI': { label: 'Letter of Intent', color: '#3b82f6', bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-200' },
-  'FS':  { label: 'Feasibility Study', color: '#f59e0b', bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-200' },
-  'DEV': { label: 'Development', color: '#8b5cf6', bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-200' },
-  'OP':  { label: 'Operational', color: '#10b981', bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-200' },
 };
 
 const MapResizeHandler = ({ pemicu }) => {
@@ -381,10 +375,10 @@ const DashboardPage = () => {
       ? v.toLocaleString('id-ID', { useGrouping: false, maximumFractionDigits: 2 })
       : `"${String(v ?? '').replace(/"/g, '""')}"`);
     const baris = [
-      ['Kode Proyek', 'Nama Proyek', 'Investor', 'Sektor', 'Provinsi', 'Status', 'Nilai Investasi (Miliar Rp)',
+      ['Kode Proyek', 'Nama Proyek', 'Investor', 'Sektor', 'Provinsi', 'Tahap', 'Nilai Investasi (Miliar Rp)',
         'Realisasi (Miliar Rp)', 'Luas (Ha)', 'Tenaga Kerja (Orang)', 'Skor Kelayakan (%)'],
       ...filteredMarkers.map((m) => [
-        m.kode_proyek, m.nama, m.investor, m.sektor_nama, m.provinsi_nama, m.status,
+        m.kode_proyek, m.nama, m.investor, m.sektor_nama, m.provinsi_nama, LABEL_TAHAPAN[m.status] || m.status,
         m.nilai_investasi_miliar || 0, m.nilai_realisasi_miliar || 0, m.luas_ha || 0, m.proyeksi_tenaga_kerja || 0,
         m.skor_kelayakan == null ? '' : m.skor_kelayakan * 100,
       ]),
@@ -446,7 +440,7 @@ const DashboardPage = () => {
               to="/pipeline"
               className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-sky-700 hover:bg-sky-800 rounded-xl transition-all shadow-sm shadow-sky-700/20"
             >
-              <span>Semua Pipeline</span>
+              <span>Semua Proyek</span>
               <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
 
@@ -483,11 +477,10 @@ const DashboardPage = () => {
               onChange={(e) => setSelectedStatus(e.target.value)}
               className="bg-slate-50 border border-slate-300 rounded-lg text-xs px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-kkp-700"
             >
-              <option value="all">Semua Tahapan Pipeline</option>
-              <option value="LOI">Letter of Intent (LOI)</option>
-              <option value="FS">Feasibility Study (FS)</option>
-              <option value="DEV">Development (DEV)</option>
-              <option value="OP">Operational (OP)</option>
+              <option value="all">Semua Tahap Proyek</option>
+              {TAHAPAN_PROYEK.map((t) => (
+                <option key={t.kode} value={t.kode}>{t.label}</option>
+              ))}
             </select>
 
             <select
@@ -567,7 +560,7 @@ const DashboardPage = () => {
                 <Layers className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pipeline</span>
+                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Proyek</span>
                 <span className="text-xs font-bold text-slate-700">Total Proyek</span>
               </div>
             </div>
@@ -575,9 +568,9 @@ const DashboardPage = () => {
               {dynamicKPI?.total_proyek || 0} <span className="text-xs font-normal text-slate-500">proyek</span>
             </div>
             <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>Tahap Operasional:</span>
+              <span>Tahap Operasi:</span>
               <span className="font-semibold text-blue-600">
-                {data?.proyek_per_status?.find(s => s.status === 'OP')?.count || 0} proyek
+                {data?.proyek_per_status?.find(s => s.status === 'OPERASI')?.count || 0} proyek
               </span>
             </div>
           </div>
@@ -713,8 +706,8 @@ const DashboardPage = () => {
 
               <LapisanGugus markers={filteredMarkers}>
                 {(marker) => {
-                  const statusInfo = STATUS_CONFIG[marker.status] || { label: marker.status, color: '#64748b' };
-                  const warnaTahap = WARNA_TAHAPAN[marker.status] || statusInfo.color;
+                  const warnaTahap = WARNA_TAHAPAN[marker.status] || '#64748b';
+                  const statusInfo = { label: LABEL_TAHAPAN[marker.status] || marker.status, color: warnaTahap };
 
                 return (
                   <Marker
@@ -790,7 +783,7 @@ const DashboardPage = () => {
                     }}
                   />
                   <span className="text-slate-600">
-                    {(STATUS_CONFIG[kode] || {}).label || kode} ({kode})
+                    {LABEL_TAHAPAN[kode]}
                   </span>
                 </div>
               ))}
@@ -923,7 +916,7 @@ const DashboardPage = () => {
           <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
             <h3 className="font-bold text-base text-slate-800 flex items-center gap-2 mb-1">
               <Layers className="w-4 h-4 text-purple-600" />
-              Distribusi per Tahapan Pipeline
+              Distribusi per Tahap Proyek
             </h3>
             <p className="text-xs text-slate-500 mb-4">
               Nilai kumulatif proyek di setiap fase perizinan.
