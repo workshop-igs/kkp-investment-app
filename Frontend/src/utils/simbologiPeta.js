@@ -139,10 +139,10 @@ export const warnaKelasRisiko = (kode) =>
   (KELAS_RISIKO[kode] || { warna: '#94a3b8' }).warna;
 
 export const KELAS_KELAYAKAN = {
-  SANGAT_RENDAH: { label: 'Sangat Rendah', warna: '#991b1b', garis: '#5f0f0f' },
-  RENDAH: { label: 'Rendah', warna: '#ef4444', garis: '#b91c1c' },
-  SEDANG: { label: 'Sedang', warna: '#eab308', garis: '#a16207' },
-  TINGGI: { label: 'Tinggi', warna: '#16a34a', garis: '#15803d' },
+  SANGAT_RENDAH: { label: 'Tidak sesuai', warna: '#dc2626', garis: '#991b1b' },
+  RENDAH: { label: 'Sesuai bersyarat', warna: '#eab308', garis: '#a16207' },
+  SEDANG: { label: 'Sesuai', warna: '#84cc16', garis: '#4d7c0f' },
+  TINGGI: { label: 'Sangat sesuai', warna: '#15803d', garis: '#14532d' },
 };
 
 export const URUTAN_KELAS_KELAYAKAN = ['TINGGI', 'SEDANG', 'RENDAH', 'SANGAT_RENDAH'];
