@@ -1,6 +1,6 @@
 import { gayaUnsurRtrl } from '../../utils/simbologiPeta';
 import { warnaKelasRisiko } from '../../utils/simbologiPeta';
-import { garisKelasKelayakan, warnaKelasKelayakan } from '../../utils/simbologiPeta';
+import { KELAS_KELAYAKAN, garisKelasKelayakan, warnaKelasKelayakan } from '../../utils/simbologiPeta';
 import { KATEGORI_ZONA, URUTAN_KATEGORI, gayaKawasan, kategoriZona, warnaJenisInvestasi, warnaZona } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { API_V1_URL } from '../../api/alamat';
@@ -233,7 +233,8 @@ export const LAYER_LOKAL = {
       + 'BUKAN skor AHP proyek: kriteria finansial (NPV, IRR, payback, ROI) '
       + 'tidak ikut, karena keempatnya lahir dari CapEx satu proyek sedangkan '
       + 'zona tidak punya CapEx. Ambang kelasnya sama dengan ambang keputusan '
-      + 'laporan — Tinggi mulai 0,70, sebagaimana proyek berstatus Layak.',
+      + 'laporan: Sangat sesuai mulai 0,70 (sebagaimana proyek berstatus Layak), Sesuai mulai 0,55, '
+      + 'Sesuai bersyarat mulai 0,40, dan Tidak sesuai di bawahnya.',
     gaya: (f) => {
       const kelas = f && f.properties ? f.properties.kelas : null;
       return {
@@ -252,7 +253,7 @@ export const LAYER_LOKAL = {
         <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.sub_zona || '-')} · ${aman(p.provinsi || '-')}</p>
         <div class="text-xs mb-1.5">
           <span class="font-bold text-base" style="color:${warnaKelasKelayakan(p.kelas)}">${(p.skor ?? 0).toFixed(2)}</span>
-          <span class="text-slate-500"> skor kelayakan &middot; ${aman(p.kelas ? p.kelas.replace('_', ' ').toLowerCase() : '-')}</span>
+          <span class="text-slate-500"> skor kelayakan &middot; ${aman(KELAS_KELAYAKAN[p.kelas]?.label || '-')}</span>
         </div>
         <div class="text-xs border-t pt-1">
           ${baris('Sektor dinilai', p.sektor)}
@@ -288,26 +289,22 @@ export const LAYER_LOKAL = {
   potensi: {
     url: '/analitik/skor-zona/peta/',
     urlWilayah: '/analitik/skor-zona/wilayah/',
-    params: { sektor: 'PERIKANAN_BUDIDAYA', kelas: 'TINGGI' },
-    label: 'Wilayah Disarankan per Jenis',
+    params: { sektor: 'SEMUA', kelas: 'TINGGI,SEDANG' },
+    semuaJenis: 'Semua jenis investasi',
+    label: 'Rekomendasi Wilayah Potensial',
     legenda: 'disarankan',
     ikon: 'bintang',
-    warnaIkon: '#16a34a',
+    warnaIkon: (p) => warnaKelasKelayakan(p.kelas),
     keteranganLegenda:
-      'Zona ruang laut yang berkelas kelayakan TINGGI untuk jenis investasi '
-      + 'yang dipilih — 13.407 dari 280.280 baris skor (28.028 zona x 10 sektor). '
-      + 'Ambangnya 0,70, sama dengan ambang proyek berstatus Layak pada laporan. '
-      + 'Zonanya nyata: RZWP-3-K, PKKPRL, dan kawasan konservasi nasional dari '
-      + 'Portal Satu Data KKP. Skornya dihitung lebih dulu oleh '
-      + '`manage.py hitung_skor_zona`, bukan saat permintaan. '
-      + 'Penandanya adalah titik wakil di dalam zona; poligonnya batas '
-      + 'sebenarnya, terlihat begitu peta cukup dekat — banyak zona berskor '
-      + 'tinggi hanya beberapa hektare dan tak terlihat pada tampilan nasional. '
-      + 'BUKAN skor AHP proyek: kriteria finansial (NPV, IRR, payback, ROI) '
-      + 'tidak ikut, karena keempatnya lahir dari CapEx satu proyek sedangkan '
-      + 'zona tidak punya CapEx. '
-      + 'Lapisan Skor Kelayakan per Zona menampilkan sebaran SELURUH kelas dari '
-      + 'sumber yang sama, bila yang dicari perbandingan antarwilayah.',
+      'Zona ruang laut yang Sangat sesuai (skor 0,70 ke atas) atau Sesuai (0,55 sampai di bawah 0,70) '
+      + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Setiap zona '
+      + 'ditampilkan dengan jenis investasi yang skornya paling tinggi; pilih satu jenis untuk melihat '
+      + 'sebaran khusus jenis itu. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
+      + 'perbesar peta untuk melihat zona lainnya. Skor menimbang kesesuaian tata ruang, potensi sumber daya, '
+      + 'aksesibilitas infrastruktur, kondisi sosial-ekonomi, serta risiko bencana, regulasi, lingkungan, dan '
+      + 'sosial. Zonanya nyata: RZWP-3-K, PKKPRL, dan kawasan konservasi dari Portal Satu Data KKP. '
+      + 'Kriteria finansial proyek (NPV, IRR, payback, ROI) tidak ikut karena zona belum punya rencana biaya; '
+      + 'penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
     gaya: (f) => {
       const kelas = f && f.properties ? f.properties.kelas : null;
       return {
@@ -367,8 +364,8 @@ export const LAYER_LOKAL = {
         <h3 class="font-bold mb-1" style="color:${warna}">${aman(p.nama || 'Zona ruang laut')}</h3>
         <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.sub_zona || '-')} &middot; ${aman(p.provinsi || '-')}</p>
         <div class="text-xs mb-1.5">
-          <span class="font-bold text-base" style="color:${warna}">${angka(p.skor) || '-'}</span>
-          <span class="text-slate-500"> skor kelayakan untuk ${aman(p.sektor || 'sektor terpilih')}</span>
+          <span class="font-bold text-base" style="color:${warna}">${aman(KELAS_KELAYAKAN[p.kelas]?.label || '-')}</span>
+          <span class="text-slate-500"> untuk ${aman(p.sektor || 'jenis terpilih')} &middot; skor ${angka(p.skor) || '-'}</span>
         </div>
         <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Kenapa disarankan</p>
         <ul class="text-[11px] space-y-0.5 mb-1">${butir}</ul>

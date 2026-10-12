@@ -162,7 +162,7 @@ const PetaInteraktif = ({
   
   const [cari] = useSearchParams();
   const lapisanAwal = (cari.get('lapisan') || '').split(',').filter((id) => LAYER_LOKAL[id]);
-  const [activeDataLayers, setActiveDataLayers] = useState(() => (lapisanAwal.length ? lapisanAwal : ['kkprl']));
+  const [activeDataLayers, setActiveDataLayers] = useState(() => (lapisanAwal.length ? lapisanAwal : ['potensi']));
   const [petaSiap, setPetaSiap] = useState(false);
   const [wilayahLapisan, setWilayahLapisan] = useState({});
 

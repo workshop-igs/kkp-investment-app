@@ -389,10 +389,21 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
     ]
 
     def peta_urutan(self, qs, request, batas):
+        if request.query_params.get('kelas'):
+            baris = sorted(qs.values_list('id', 'provinsi_id', '_skor'), key=lambda b: -(b[2] or 0))
+            self._dipangkas = len(baris) > batas
+            self._pemilihan = 'skor tertinggi per provinsi' if self._dipangkas else 'semua'
+            if self._dipangkas:
+                per_provinsi = {}
+                for zona_id, provinsi_id, _ in baris:
+                    per_provinsi.setdefault(provinsi_id, []).append(zona_id)
+                kuota = max(1, batas // len(per_provinsi))
+                qs = qs.filter(id__in=[z for daftar in per_provinsi.values() for z in daftar[:kuota]])
+            return qs.order_by('-_skor', '-luas_ha', 'id')
         urut = super().peta_urutan(qs, request, batas)
         self._pemilihan = 'terbesar'
         self._dipangkas = False
-        if request.query_params.get('kelas') or not getattr(self, '_sektor', None):
+        if not getattr(self, '_sektor', None):
             return urut
 
         baris = SkorKelayakanZona.objects.filter(
@@ -440,23 +451,30 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
     def peta_queryset_tambahan(self, qs, request):
         kode = (request.query_params.get('sektor') or '').strip().upper()
-        sektor = None
-        if kode:
-            sektor = SektorInvestasi.objects.filter(kode=kode, aktif=True).first()
-        if sektor is None:
-            sektor = SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'kode').first()
-        if sektor is None:
-            return qs.none()
-
-        self._sektor = sektor
-
         kelas = [
             k.strip().upper()
             for k in (request.query_params.get('kelas') or '').split(',')
             if k.strip()
         ]
 
-        penyaring = {'skor_kelayakan__sektor_id': sektor.id}
+        if kode == 'SEMUA':
+            self._sektor = None
+            terbaik = SkorKelayakanZona.objects.filter(sektor__aktif=True)
+            if kelas:
+                terbaik = terbaik.filter(kelas__in=kelas)
+            terbaik = terbaik.order_by('zona_id', '-skor_total', 'sektor_id').distinct('zona_id').values('id')
+            penyaring = {'skor_kelayakan__id__in': terbaik}
+        else:
+            sektor = None
+            if kode:
+                sektor = SektorInvestasi.objects.filter(kode=kode, aktif=True).first()
+            if sektor is None:
+                sektor = SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'kode').first()
+            if sektor is None:
+                return qs.none()
+            self._sektor = sektor
+            penyaring = {'skor_kelayakan__sektor_id': sektor.id}
+
         if kelas:
             penyaring['skor_kelayakan__kelas__in'] = kelas
 
@@ -479,6 +497,8 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
             _nelayan=F('skor_kelayakan__rasio_nelayan'),
             _adat=F('skor_kelayakan__wilayah_adat'),
             _sumber_sosial=F('skor_kelayakan__sumber_sosial'),
+            _sektor_nama=F('skor_kelayakan__sektor__nama'),
+            _sektor_kode=F('skor_kelayakan__sektor__kode'),
         )
 
     PETA_KOLOM = (
@@ -486,19 +506,18 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         '_skor', '_kelas', '_lokasi', '_risiko', '_sesuai', '_akses', '_jarak',
         '_bencana', '_kkprl', '_sosek', '_ekosistem', '_ekosistem_rincian',
         '_sumber_lingkungan', '_sosial', '_dtks', '_nelayan', '_adat',
-        '_sumber_sosial',
+        '_sumber_sosial', '_sektor_nama', '_sektor_kode',
     )
 
     def properti_peta(self, r):
-        sektor = getattr(self, '_sektor', None)
         bulat = lambda v, n: round(v, n) if v is not None else None  # noqa: E731
         return {
             'nama': r['nama_zona'],
             'sub_zona': self.label_peta('sub_zona', r['sub_zona']),
             'kategori': r['sub_zona'],
             'provinsi': r['provinsi__nama'],
-            'sektor': sektor.nama if sektor else None,
-            'sektor_kode': sektor.kode if sektor else None,
+            'sektor': r['_sektor_nama'],
+            'sektor_kode': r['_sektor_kode'],
             'skor': bulat(r['_skor'], 3),
             'kelas': r['_kelas'],
             'skor_lokasi': bulat(r['_lokasi'], 3),
