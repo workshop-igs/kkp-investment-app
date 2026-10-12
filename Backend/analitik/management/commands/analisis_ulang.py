@@ -57,7 +57,7 @@ def _ringkas(aj):
 
 
 class Command(BaseCommand):
-    help = 'Jalankan ulang analisis kelayakan proyek pipeline dengan mesin yang berlaku sekarang.'
+    help = 'Jalankan ulang analisis kelayakan proyek investasi dengan mesin yang berlaku sekarang.'
 
     def add_arguments(self, parser):
         parser.add_argument('--terapkan', action='store_true', help='Tulis hasilnya ke basis data.')

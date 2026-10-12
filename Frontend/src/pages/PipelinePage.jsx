@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Plus, Search, BarChart3, TrendingUp, Users, Trash2, Eye, AlertTriangle, X, CheckCircle2, Loader2, FileText } from 'lucide-react';
 import { formatRupiah, formatNumber, rupiahMiliar } from '../utils/pemformat';
-import { SECTORS } from '../utils/konstanta';
+import { LABEL_TAHAPAN, SECTORS, TAHAPAN_PROYEK } from '../utils/konstanta';
 import { unduhPdfPipeline } from '../utils/pdfPipeline';
 import { api } from '../api/klien';
 import { mulaiMemuat } from '../components/OverlayMemuat';
 
-const STATUS_BADGES = {
-  'LOI': { label: 'Letter of Intent', style: 'bg-blue-500/10 border-blue-500/30 text-blue-400' },
-  'FS': { label: 'Feasibility Study', style: 'bg-amber-500/10 border-amber-500/30 text-amber-400' },
-  'DEV': { label: 'Development', style: 'bg-purple-500/10 border-purple-500/30 text-purple-400' },
-  'OP': { label: 'Operational', style: 'bg-teal-500/10 border-teal-500/30 text-teal-400' }
+const GAYA_TAHAP = {
+  PERENCANAAN: 'bg-blue-500/10 border-blue-500/30 text-blue-600',
+  PENYIAPAN: 'bg-amber-500/10 border-amber-500/30 text-amber-600',
+  TRANSAKSI: 'bg-indigo-500/10 border-indigo-500/30 text-indigo-600',
+  KONSTRUKSI: 'bg-purple-500/10 border-purple-500/30 text-purple-600',
+  OPERASI: 'bg-teal-500/10 border-teal-500/30 text-teal-600',
 };
 
 const PipelinePage = () => {
@@ -36,14 +37,14 @@ const PipelinePage = () => {
 
   const eksporLaporan = async () => {
     setMenyusunLaporan(true);
-    const selesai = mulaiMemuat('Menyusun laporan pipeline investasi');
+    const selesai = mulaiMemuat('Menyusun laporan proyek investasi');
     try {
       const { data } = await api.get('/inti/dashboard/');
       const bagian = [];
       if (sectorFilter !== 'all') {
-        bagian.push(`sektor ${SECTORS.find((s) => s.id === sectorFilter)?.label || sectorFilter}`);
+        bagian.push(`jenis ${SECTORS.find((s) => s.id === sectorFilter)?.label || sectorFilter}`);
       }
-      if (statusFilter !== 'all') bagian.push(`tahap ${statusFilter}`);
+      if (statusFilter !== 'all') bagian.push(`tahap ${LABEL_TAHAPAN[statusFilter] || statusFilter}`);
       if (searchTerm.trim()) bagian.push(`pencarian "${searchTerm.trim()}"`);
 
       await unduhPdfPipeline({
@@ -55,7 +56,7 @@ const PipelinePage = () => {
         cakupan: bagian.length ? bagian.join(', ') : null,
       });
     } catch (err) {
-      setNotification({ type: 'error', message: 'Gagal menyusun laporan pipeline.' });
+      setNotification({ type: 'error', message: 'Gagal menyusun laporan proyek investasi.' });
     } finally {
       selesai();
       setMenyusunLaporan(false);
@@ -188,8 +189,17 @@ const PipelinePage = () => {
 
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-syne font-bold text-slate-800 mb-2">Investment Pipeline</h1>
-          <p className="text-slate-400">Pantau dan kelola portofolio investasi ruang laut.</p>
+          <h1 className="text-3xl font-syne font-bold text-slate-800 mb-2">Proyek Investasi</h1>
+          <p className="text-slate-500">Daftar proyek investasi ruang laut dan perkembangannya, dari perencanaan sampai beroperasi.</p>
+          <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+            <span>Tahap proyek mengikuti tahapan Proyek Strategis Nasional (KPPIP):</span>
+            {TAHAPAN_PROYEK.map((t, i) => (
+              <span key={t.kode} className="inline-flex items-center gap-1.5">
+                {i > 0 && <span aria-hidden="true">→</span>}
+                <span title={t.desc} className={`cursor-help rounded border px-1.5 py-0.5 font-semibold ${GAYA_TAHAP[t.kode]}`}>{t.label}</span>
+              </span>
+            ))}
+          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button
@@ -232,7 +242,7 @@ const PipelinePage = () => {
             <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-lg flex items-center justify-center border border-blue-500/30 shadow-inner">
               <BarChart3 className="w-6 h-6" />
             </div>
-            <h3 className="text-slate-500 font-medium">Jumlah Proyek Aktif</h3>
+            <h3 className="text-slate-500 font-medium">Jumlah Proyek</h3>
           </div>
           <div className="text-3xl font-bold font-syne text-slate-800">{stats.total_proyek} <span className="text-lg text-slate-500 font-normal">proyek</span></div>
         </div>
@@ -243,7 +253,7 @@ const PipelinePage = () => {
             <div className="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-lg flex items-center justify-center border border-purple-500/30 shadow-inner">
               <Users className="w-6 h-6" />
             </div>
-            <h3 className="text-slate-500 font-medium">Proyeksi Serapan Naker</h3>
+            <h3 className="text-slate-500 font-medium">Perkiraan Tenaga Kerja Terserap</h3>
           </div>
           <div className="text-3xl font-bold font-syne text-slate-800">{formatNumber(stats.tk_langsung, 0)} <span className="text-lg text-slate-500 font-normal">orang</span></div>
         </div>
@@ -270,7 +280,7 @@ const PipelinePage = () => {
               onChange={(e) => setSectorFilter(e.target.value)}
               className="bg-white border border-slate-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-teal-500 text-slate-600"
             >
-              <option value="all">Semua Sektor</option>
+              <option value="all">Semua Jenis Investasi</option>
               {SECTORS.map((s) => (
                 <option key={s.id} value={s.id}>{s.label}</option>
               ))}
@@ -282,10 +292,9 @@ const PipelinePage = () => {
               className="bg-white border border-slate-300 rounded-lg text-sm px-3 py-2 focus:outline-none focus:border-teal-500 text-slate-600"
             >
               <option value="all">Semua Tahap</option>
-              <option value="LOI">Letter of Intent</option>
-              <option value="FS">Feasibility Study</option>
-              <option value="DEV">Development</option>
-              <option value="OP">Operational</option>
+              {TAHAPAN_PROYEK.map((t) => (
+                <option key={t.kode} value={t.kode}>{t.label}</option>
+              ))}
             </select>
           </div>
         </div>
@@ -294,7 +303,7 @@ const PipelinePage = () => {
           {loading ? (
             <div className="py-24 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
               <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
-              <span>Memuat data pipeline...</span>
+              <span>Memuat daftar proyek...</span>
             </div>
           ) : filteredProjects.length === 0 ? (
             <div className="py-24 text-center text-slate-500">Tidak ada proyek yang ditemukan.</div>
@@ -305,7 +314,7 @@ const PipelinePage = () => {
                   <th className="py-3.5 px-6 font-semibold">Kode</th>
                   <th className="py-3.5 px-6 font-semibold">Nama Proyek</th>
                   <th className="py-3.5 px-6 font-semibold">Lokasi</th>
-                  <th className="py-3.5 px-6 font-semibold">Sektor</th>
+                  <th className="py-3.5 px-6 font-semibold">Jenis Investasi</th>
                   <th className="py-3.5 px-6 font-semibold">Tahap</th>
                   <th className="py-3.5 px-6 font-semibold">Nilai Investasi</th>
                   <th className="py-3.5 px-6 font-semibold text-right">Aksi</th>
@@ -313,7 +322,7 @@ const PipelinePage = () => {
               </thead>
               <tbody className="text-sm text-slate-600 divide-y divide-slate-200">
                 {filteredProjects.map((p) => {
-                  const badge = STATUS_BADGES[p.status] || { label: p.status, style: 'bg-slate-100 text-slate-600 border border-slate-200' };
+                  const badge = { label: LABEL_TAHAPAN[p.status] || p.status, style: GAYA_TAHAP[p.status] || 'bg-slate-100 text-slate-600 border border-slate-200' };
                   return (
                     <tr key={p.id} className="hover:bg-slate-50 transition-colors">
                       <td className="py-4 px-6 font-mono text-xs text-teal-600 font-semibold">{p.kode_proyek || `PRJ-${p.id.toString().padStart(4, '0')}`}</td>
@@ -321,7 +330,7 @@ const PipelinePage = () => {
                       <td className="py-4 px-6 text-slate-500 text-xs">{p.provinsi_nama || p.lokasi_detail || '-'}</td>
                       <td className="py-4 px-6 text-slate-500 text-sm">{p.sektor_nama}</td>
                       <td className="py-4 px-6">
-                        <span className={`px-2.5 py-1 rounded text-xs font-semibold ${badge.style}`}>
+                        <span className={`px-2.5 py-1 rounded border text-xs font-semibold ${badge.style}`}>
                           {badge.label}
                         </span>
                       </td>
@@ -366,7 +375,7 @@ const PipelinePage = () => {
             </div>
 
             <p className="text-sm text-slate-600 mb-4">
-              Apakah Anda yakin ingin menghapus proyek ini dari Investment Pipeline?
+              Apakah Anda yakin ingin menghapus proyek ini dari daftar Proyek Investasi?
             </p>
 
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-5 space-y-1.5">
@@ -377,13 +386,13 @@ const PipelinePage = () => {
                 {projectToDelete.nama}
               </div>
               <div className="text-xs text-slate-500">
-                Sektor: {projectToDelete.sektor_nama || '-'} • Nilai: {rupiahMiliar(projectToDelete.nilai_investasi_miliar)}
+                Jenis: {projectToDelete.sektor_nama || '-'} • Nilai: {rupiahMiliar(projectToDelete.nilai_investasi_miliar)}
               </div>
             </div>
 
             <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg p-2.5 mb-6 flex items-start gap-2">
               <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span>Tindakan ini permanen. Seluruh data analisis spasial, kelayakan finansial, dan audit trail status akan terhapus.</span>
+              <span>Tindakan ini permanen. Hasil analisis lokasi, kelayakan finansial, dan riwayat perubahan tahap proyek ini akan ikut terhapus.</span>
             </p>
 
             <div className="flex items-center justify-end gap-3">

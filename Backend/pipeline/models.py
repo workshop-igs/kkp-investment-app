@@ -6,10 +6,11 @@ from inti.models import KabupatenKota, Provinsi, SektorInvestasi
 
 class ProyekInvestasi(models.Model):
     STATUS_CHOICES = [
-        ('LOI', 'Letter of Intent'),
-        ('FS', 'Feasibility Study'),
-        ('DEV', 'Development'),
-        ('OP', 'Operational'),
+        ('PERENCANAAN', 'Perencanaan'),
+        ('PENYIAPAN', 'Penyiapan'),
+        ('TRANSAKSI', 'Transaksi'),
+        ('KONSTRUKSI', 'Konstruksi'),
+        ('OPERASI', 'Operasi'),
     ]
 
     kode_proyek = models.CharField(max_length=20, unique=True, help_text='Auto-generated: PRJ-XXXX')
@@ -36,7 +37,7 @@ class ProyekInvestasi(models.Model):
     nilai_investasi_miliar = models.FloatField(default=0)
     nilai_realisasi_miliar = models.FloatField(default=0, help_text='Realisasi investasi aktual')
 
-    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='LOI')
+    status = models.CharField(max_length=15, choices=STATUS_CHOICES, default='PERENCANAAN')
     tanggal_mulai = models.DateField(null=True, blank=True)
     tanggal_target_selesai = models.DateField(null=True, blank=True)
     progress_pct = models.FloatField(default=0, help_text='Persentase progress (0-100)')
@@ -82,7 +83,7 @@ class ProyekInvestasi(models.Model):
                 status_baru=self.status,
                 catatan=catatan
                 or (
-                    f'Proyek didaftarkan ke Investment Pipeline dengan status awal '
+                    f'Proyek didaftarkan ke daftar Proyek Investasi pada tahap '
                     f'{label.get(self.status, self.status)}.'
                 ),
                 diubah_oleh=user,
@@ -94,7 +95,7 @@ class ProyekInvestasi(models.Model):
                 status_baru=self.status,
                 catatan=catatan
                 or (
-                    f'Status proyek diperbarui dari {label.get(old_status, old_status)} '
+                    f'Tahap proyek diperbarui dari {label.get(old_status, old_status)} '
                     f'ke {label.get(self.status, self.status)}.'
                 ),
                 diubah_oleh=user,
@@ -139,7 +140,7 @@ class RiwayatStatus(models.Model):
     class Meta:
         db_table = 'pipeline_riwayat_status'
         ordering = ['-tanggal']
-        verbose_name_plural = 'Status History'
+        verbose_name_plural = 'Riwayat Tahap Proyek'
 
     def __str__(self):
         return f'{self.proyek.kode_proyek}: {self.status_lama} → {self.status_baru} ({self.tanggal})'

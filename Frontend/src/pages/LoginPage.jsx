@@ -116,7 +116,7 @@ const LoginPage = () => {
               {[
                 { title: 'Analisis Spasial Multi-Kriteria (MCDA)', desc: 'Validasi otomatis kesesuaian RZWP-3-K dan izin KKPRL.' },
                 { title: 'Kalkulator Finansial DCF 20 Tahun', desc: 'Estimasi arus kas, NPV, IRR, dan analisis sensitivitas pasar.' },
-                { title: 'Pipeline Investasi Nasional', desc: 'Pemantauan usulan hingga realisasi proyek ruang laut.' },
+                { title: 'Proyek Investasi Nasional', desc: 'Pemantauan proyek ruang laut dari perencanaan sampai beroperasi.' },
               ].map((feat, idx) => (
                 <div key={idx} className="flex items-start gap-3 bg-white/5 border border-white/5 p-3 rounded-2xl">
                   <div className="w-6 h-6 rounded-full bg-teal-500/20 text-teal-400 border border-teal-500/30 flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5">

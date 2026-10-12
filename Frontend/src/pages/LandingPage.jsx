@@ -75,8 +75,8 @@ const FITUR = [
   },
   {
     ikon: Briefcase,
-    judul: 'Pipeline investasi',
-    isi: 'Pantau proyek investasi dari LOI sampai operasional.',
+    judul: 'Pemantauan proyek investasi',
+    isi: 'Pantau proyek investasi dari tahap perencanaan sampai beroperasi.',
   },
 ];
 
@@ -307,7 +307,7 @@ const ENTRI_TETAP = [
     ['Peta Spasial', 'Peta interaktif seluruh layer data ruang laut', '/peta', 'peta spasial'],
     ['Analisis wilayah', 'Gambar atau unggah area untuk dianalisis', '/peta?mulai=gambar', 'analisis kelayakan gambar poligon unggah shp kml geojson'],
     ['Profil Investasi', 'Profil investasi per provinsi dalam PDF', '/profil-investasi', 'profil investasi pdf'],
-    ['Pipeline investasi', 'Proyek dari LOI sampai operasional, perlu akun', '/pipeline', 'pipeline proyek loi'],
+    ['Proyek investasi', 'Proyek dari perencanaan sampai beroperasi, perlu akun', '/pipeline', 'proyek investasi pipeline tahap perencanaan penyiapan transaksi konstruksi operasi loi'],
     ['Dashboard', 'Ringkasan pemantauan, perlu akun', '/dashboard', 'dashboard pemantauan'],
   ].map(([nama, keterangan, ke, kunci]) => ({ kelompok: 'Halaman', nama, keterangan, ke, kunci })),
   ...Object.entries(LAYER_LOKAL).map(([id, d]) => ({
@@ -593,7 +593,7 @@ const LandingPage = () => {
                 <div className="col-span-2">
                   <KartuDataPeta />
                 </div>
-                <KartuKecil to="/pipeline" judul="Pantau proyek" isi="Tahap LOI sampai operasional" ikon={Briefcase} />
+                <KartuKecil to="/pipeline" judul="Pantau proyek" isi="Dari perencanaan sampai beroperasi" ikon={Briefcase} />
                 <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
                 <Link
                   to="/peta?lapisan=potensi"

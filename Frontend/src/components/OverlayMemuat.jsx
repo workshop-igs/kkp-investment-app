@@ -12,7 +12,7 @@ const NAMA_HALAMAN = [
   ['/profil-investasi', 'Profil Investasi'],
   ['/dashboard', 'Dashboard Nasional'],
   ['/pipeline/', 'Detail Proyek'],
-  ['/pipeline', 'Pipeline Investasi'],
+  ['/pipeline', 'Proyek Investasi'],
   ['/analysis-report', 'Laporan Analisis'],
   ['/profil', 'Profil Saya'],
   ['/login', 'Halaman Masuk'],

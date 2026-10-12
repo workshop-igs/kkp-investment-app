@@ -10,7 +10,7 @@ const LANGKAH = [
   {
     pilih: '[data-tur="menu"]',
     judul: 'Menu utama',
-    isi: 'Beranda kembali ke halaman depan, Peta Spasial adalah halaman ini, dan Profil Investasi menyajikan profil investasi per provinsi beserta PDF-nya. Setelah masuk, Dashboard Nasional merangkum potensi dan proyek seluruh Indonesia, dan Pipeline Investasi berisi proyek yang sudah disimpan. Akun administrator juga melihat menu Administrator.',
+    isi: 'Beranda kembali ke halaman depan, Peta Spasial adalah halaman ini, dan Profil Investasi menyajikan profil investasi per provinsi beserta PDF-nya. Setelah masuk, Dashboard Nasional merangkum potensi dan proyek seluruh Indonesia, dan Proyek Investasi berisi proyek yang sudah disimpan beserta tahapnya. Akun administrator juga melihat menu Administrator.',
   },
   {
     pilih: '[data-tur="legenda"]',
@@ -83,7 +83,7 @@ const LANGKAH = [
   },
   {
     judul: 'Laporan hasil analisis',
-    isi: 'Laporan memuat informasi umum, tata ruang dan perizinan, transportasi dan infrastruktur, sosial dan ketenagakerjaan, risiko lingkungan dan sosial, serta kelayakan investasi, masing-masing dengan sumber dan tahun datanya. Lihat Laporan Lengkap (PDF) mengunduh laporan, dan Simpan ke Pipeline Investasi menyimpan proyek.',
+    isi: 'Laporan memuat informasi umum, tata ruang dan perizinan, transportasi dan infrastruktur, sosial dan ketenagakerjaan, risiko lingkungan dan sosial, serta kelayakan investasi, masing-masing dengan sumber dan tahun datanya. Lihat Laporan Lengkap (PDF) mengunduh laporan, dan Simpan ke Proyek Investasi menyimpan proyek.',
   },
   {
     pilih: '[data-tur="ulang-tur"]',
