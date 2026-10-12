@@ -63,9 +63,11 @@
       "peruntukan",
       "provinsi",
       "keterangan",
-      "zoom ke sebaran"
+      "zoom ke sebaran",
+      "tampilan awal",
+      "rekomendasi"
     ],
-    "isi": "Daftar layer di sisi kanan menyalakan data seperti KKPRL terbit, rencana tata ruang laut, infrastruktur dan transportasi, risiko bencana, oseanografi, serta skor kelayakan zona. Tampilan awal memuat KKPRL yang sudah terbit, diwarnai per jenis investasi. Setelah sebuah layer dinyalakan, Anda dapat memilih satu kategori saja (misalnya hanya perikanan tangkap) atau satu provinsi saja. Ikon kaca pembesar pada layer membawa peta ke sebaran datanya, dan ikon i menampilkan keterangan serta sumber datanya. Legenda di kiri atas menjelaskan arti warna layer yang sedang menyala. Klik sebuah objek di peta untuk melihat rinciannya; pada layer tata ruang dan skor zona tersedia tombol Analisis lokasi ini untuk menjadikan zona itu area proyek."
+    "isi": "Daftar layer di sisi kanan menyalakan data seperti KKPRL terbit, rencana tata ruang laut, infrastruktur dan transportasi, risiko bencana, oseanografi, serta skor kelayakan zona. Tampilan awal memuat Rekomendasi Wilayah Potensial, yaitu zona yang sangat sesuai atau sesuai untuk sedikitnya satu jenis investasi; KKPRL terbit dan layer lain dapat dinyalakan dari daftar layer. Setelah sebuah layer dinyalakan, Anda dapat memilih satu kategori saja (misalnya hanya perikanan tangkap) atau satu provinsi saja. Ikon kaca pembesar pada layer membawa peta ke sebaran datanya, dan ikon i menampilkan keterangan serta sumber datanya. Legenda di kiri atas menjelaskan arti warna layer yang sedang menyala. Klik sebuah objek di peta untuk melihat rinciannya; pada layer tata ruang dan skor zona tersedia tombol Analisis lokasi ini untuk menjadikan zona itu area proyek."
   },
   {
     "id": "layer-tata-ruang",
@@ -417,9 +419,14 @@
       "sedang",
       "rendah",
       "potensi",
-      "zona kelayakan tinggi"
+      "zona kelayakan tinggi",
+      "rekomendasi",
+      "wilayah potensial",
+      "sangat sesuai",
+      "sesuai",
+      "tampilan awal"
     ],
-    "isi": "Skor kelayakan per zona dihitung lebih dulu untuk setiap zona rencana tata ruang dan setiap jenis investasi, dengan bobot 50% lokasi dan 50% risiko. Kelasnya TINGGI pada skor 0,70 ke atas, SEDANG 0,55 ke atas, RENDAH 0,40 ke atas, dan SANGAT RENDAH di bawahnya. Layer Wilayah Disarankan per Jenis menampilkan zona berkelas TINGGI untuk jenis investasi yang dipilih. Skor ini bukan skor AHP proyek karena belum memuat kriteria finansial; penilaian proyek tetap dilakukan dengan menggambar area dan menjalankan analisis."
+    "isi": "Skor kelayakan per zona dihitung lebih dulu untuk setiap zona rencana tata ruang dan setiap jenis investasi, dengan bobot 50% lokasi dan 50% risiko. Kelasnya Sangat sesuai pada skor 0,70 ke atas, Sesuai 0,55 ke atas, Sesuai bersyarat 0,40 ke atas, dan Tidak sesuai di bawahnya. Layer Rekomendasi Wilayah Potensial, yang tampil saat Peta Spasial dibuka, menampilkan zona Sangat sesuai dan Sesuai untuk sedikitnya satu jenis investasi, masing-masing dengan jenis yang skornya tertinggi; pilihan jenis investasi pada layer itu mempersempitnya ke satu jenis. Skor ini bukan skor AHP proyek karena belum memuat kriteria finansial; penilaian proyek tetap dilakukan dengan menggambar area dan menjalankan analisis."
   },
   {
     "id": "profil-investasi",

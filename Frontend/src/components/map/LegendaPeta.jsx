@@ -282,15 +282,21 @@ const LegendaKelayakan = () => (
   </div>
 );
 
+const AMBANG_KELAS = { TINGGI: 'skor ≥0,70', SEDANG: 'skor 0,55–<0,70', RENDAH: 'skor 0,40–<0,55', SANGAT_RENDAH: 'skor <0,40' };
+
 const LegendaDisarankan = ({ def }) => (
   <ul className="space-y-1.5">
-    <li className="flex items-center gap-2">
-      <span
-        className="w-3.5 shrink-0 flex justify-center"
-        dangerouslySetInnerHTML={{ __html: buatIkon(def.ikon, def.warnaIkon, 0.55).options.html }}
-      />
-      <span className="text-[12px] text-slate-700 leading-snug">Titik wakil zona berkelas kelayakan tinggi</span>
-    </li>
+    {def.params.kelas.split(',').map((kode) => (
+      <li key={kode} className="flex items-center gap-2">
+        <span
+          className="w-3.5 shrink-0 flex justify-center"
+          dangerouslySetInnerHTML={{ __html: buatIkon(def.ikon, KELAS_KELAYAKAN[kode].warna, 0.55).options.html }}
+        />
+        <span className="text-[12px] text-slate-700 leading-snug">
+          {KELAS_KELAYAKAN[kode].label} <span className="text-slate-400">({AMBANG_KELAS[kode]})</span>
+        </span>
+      </li>
+    ))}
     <li className="flex items-start gap-2">
       <span
         className="mt-[3px] w-3.5 h-3.5 rounded-[3px] border shrink-0"
@@ -334,7 +340,7 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
 
   const aktif = layerAktif.filter((id) => daftarLayer[id]);
   const aktifLokal = layerAktif.filter((id) => daftarLokal[id]);
-  const namaSektor = (kode) => SECTORS.find((s) => s.id === kode)?.label || kode;
+  const namaSektor = (kode) => (kode === 'SEMUA' ? 'Semua jenis investasi' : SECTORS.find((s) => s.id === kode)?.label || kode);
 
   const urlLegenda = (id, format) => {
     const l = daftarLayer[id];

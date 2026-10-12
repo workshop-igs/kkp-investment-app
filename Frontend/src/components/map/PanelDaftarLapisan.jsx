@@ -57,7 +57,7 @@ const KATEGORI = [
     judul: 'Analisis Investasi',
     layer: [
       { id: 'skor_zona', nama: 'Skor Kelayakan per Zona', warna: '#eab308' },
-      { id: 'potensi', nama: 'Wilayah Disarankan per Jenis', warna: '#16a34a' },
+      { id: 'potensi', nama: 'Rekomendasi Wilayah Potensial', warna: '#15803d' },
     ],
   },
 ];
@@ -315,8 +315,10 @@ const PanelDaftarLapisan = ({
 
                       {aktif && def.params && 'sektor' in def.params && (
                         <PemilihSektor
-                          nilai={sektorLapisan[layer.id] || def.params.sektor}
+                          nilai={def.semuaJenis ? sektorLapisan[layer.id] : sektorLapisan[layer.id] || def.params.sektor}
                           onPilih={(kode) => setSektorLapisan && setSektorLapisan(layer.id, kode)}
+                          label={def.semuaJenis ? 'Jenis investasi' : undefined}
+                          semua={def.semuaJenis}
                         />
                       )}
 
@@ -333,8 +335,8 @@ const PanelDaftarLapisan = ({
                       {aktif && def.urlWilayah && (
                         <PemilihWilayah
                           urlWilayah={def.urlWilayah}
-                          params={def.pilihan && sektorLapisan[layer.id]
-                            ? { ...(def.params || {}), [def.pilihan.param]: sektorLapisan[layer.id] }
+                          params={sektorLapisan[layer.id]
+                            ? { ...(def.params || {}), [def.pilihan?.param || 'sektor']: sektorLapisan[layer.id] }
                             : def.params}
                           nilai={wilayahLapisan[layer.id]}
                           onPilih={(id) => setWilayahLapisan(layer.id, id)}

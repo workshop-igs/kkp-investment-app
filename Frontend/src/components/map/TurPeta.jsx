@@ -15,7 +15,7 @@ const LANGKAH = [
   {
     pilih: '[data-tur="legenda"]',
     judul: 'Legenda peta',
-    isi: 'Arti warna setiap layer yang sedang menyala. Tampilan awal memuat KKPRL yang sudah terbit, diwarnai per jenis investasi. Klik judulnya untuk membuka atau menutup legenda.',
+    isi: 'Arti warna setiap layer yang sedang menyala. Tampilan awal memuat Rekomendasi Wilayah Potensial: zona yang sangat sesuai (hijau tua) atau sesuai (hijau muda) untuk sedikitnya satu jenis investasi. Klik judulnya untuk membuka atau menutup legenda.',
   },
   {
     peraga: true,

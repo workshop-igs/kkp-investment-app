@@ -143,7 +143,7 @@ function itemLegenda(def, osea) {
         .map(([k, label]) => ({ warna: WARNA_JENIS_INVESTASI[k], label }));
     case 'disarankan':
       return [
-        { warna: def.warnaIkon, label: 'Titik wakil zona berkelas kelayakan tinggi', bulat: true },
+        ...def.params.kelas.split(',').map((k) => ({ warna: KELAS_KELAYAKAN[k].warna, label: KELAS_KELAYAKAN[k].label, bulat: true })),
         { warna: KELAS_KELAYAKAN.TINGGI.warna, label: 'Batas zona, tampak setelah peta diperbesar' },
       ];
     case 'gradasi':
