@@ -119,6 +119,21 @@ const PitaKkp = () => (
   </div>
 );
 
+const LatarLaut = () => (
+  <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+    <div className="absolute inset-0 bg-[linear-gradient(180deg,#FFFFFF_0%,#EEF8FC_55%,#DDF2F9_100%)]" />
+    <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_92%_0%,#BFE9F4_0%,transparent_50%),radial-gradient(ellipse_at_0%_100%,#E2F1CC_0%,transparent_40%)]" />
+    <div className="absolute inset-0 bg-[radial-gradient(#002242_1px,transparent_1.4px)] opacity-[0.07] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,#000,transparent_70%)]" />
+    <GarisKontur className="absolute -right-56 -top-80 h-[860px] w-[860px] text-[#1B6A8A]/20" />
+    <GarisKontur className="absolute -left-96 top-1/4 h-[1000px] w-[1000px] text-kkp-900/[0.07]" />
+    <svg viewBox="0 0 1440 160" preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-24 w-full sm:h-32">
+      <path d="M0 78C240 34 480 122 720 88S1200 36 1440 70V160H0Z" fill="#40BFDB" fillOpacity="0.22" />
+      <path d="M0 108C280 76 520 146 800 116S1240 86 1440 108V160H0Z" fill="#1B6A8A" fillOpacity="0.16" />
+      <path d="M0 136C320 118 600 160 900 142S1280 126 1440 140V160H0Z" fill="#F6F8FB" />
+    </svg>
+  </div>
+);
+
 const LATAR_LABEL = { toska: 'bg-[#D3F0F8]', hijau: 'bg-[#E2F1CC]', putih: 'bg-white/85' };
 
 const Label = ({ children, nada = 'toska' }) => (
@@ -506,101 +521,104 @@ const LandingPage = () => {
   return (
     <div className="h-full overflow-y-auto bg-white pt-[72px] text-slate-800">
       <div className="border-b border-slate-200 bg-[#F6F8FB]">
-        <section className="mx-auto grid max-w-7xl items-center gap-14 px-4 pb-20 pt-14 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:px-8 lg:pb-24 lg:pt-20">
-          <div className="lg:col-span-6">
-            <Label>Analisis kelayakan ruang laut</Label>
-            <h1 className="mt-7 text-balance text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.035em] text-kkp-900 sm:text-6xl xl:text-[4.25rem]">
-              Platform Manajemen Investasi Ruang Laut
-            </h1>
-            <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-600">
-              Alat kerja KKP untuk menilai kelayakan ruang laut bagi investasi: kesesuaian lokasi dengan rencana
-              tata ruang laut, tumpang tindih dengan KKPRL yang sudah terbit, dan kelayakan finansialnya.
-            </p>
-            <div className="mt-10 flex flex-wrap gap-3">
-              <TombolUtama to="/peta">Buka Peta Spasial</TombolUtama>
-              <TombolKedua to="/profil-investasi">Profil Investasi</TombolKedua>
-            </div>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-2 lg:col-span-6">
-            <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-              <Link
-                to={KE_TAMBAKREJO}
-                className={`group block rounded-xl border border-slate-200 bg-[#F6F8FB] p-3 transition-colors hover:border-kkp-900 ${FOKUS}`}
-              >
-                <figure>
-                  <div className="overflow-hidden rounded-lg">
-                    <img
-                      src="/beranda/pelabuhan-tambakrejo.webp"
-                      alt="Perahu nelayan berlabuh di Pelabuhan Perikanan Tambakrejo, Blitar"
-                      width="1200"
-                      height="900"
-                      className="aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                    />
-                  </div>
-                  <figcaption className="mt-3 text-center">
-                    <span className="block text-[15px] font-semibold text-kkp-900">Pelabuhan Perikanan Tambakrejo</span>
-                    <span className="flex items-center justify-center gap-1 font-mono text-xs text-slate-500">
-                      <MapPin className={`h-3.5 w-3.5 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
-                      Blitar, Jawa Timur
-                    </span>
-                    <span className="mt-1 block text-[10px] text-slate-400">Foto: DKP Provinsi Jawa Timur</span>
-                  </figcaption>
-                </figure>
-              </Link>
-              <div className="mt-5 flex items-center justify-between gap-2">
-                <p className="text-sm font-semibold text-kkp-900">Ringkasan nasional</p>
-                <span className="bg-[#D3F0F8] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-kkp-900">
-                  Data terkini
-                </span>
-              </div>
-              <div className="mt-2 flex flex-1 flex-col rounded-xl border border-slate-200 p-3">
-                <span className="flex items-center gap-2 text-sm font-semibold text-kkp-900">
-                  <img src="/logo-kkp.png" alt="" className="h-6 w-6 shrink-0 object-contain" />
-                  Seluruh Indonesia
-                </span>
-                <ul className="mt-3 flex flex-1 flex-col justify-around divide-y divide-slate-200 rounded-lg bg-[#F6F8FB] px-2 text-center">
-                  {ringkasanNasional.map(([nilai, label, ke], i) => (
-                    <li key={label}>
-                      <Link to={ke} className={`group my-1 flex flex-col items-center rounded-md py-1.5 transition-colors hover:bg-white ${FOKUS}`}>
-                        <span className="flex items-center gap-2 text-lg font-bold text-kkp-900 tabular-nums transition-colors group-hover:text-kkp-700">
-                          {i === 0 && <span className={`h-2 w-2 rounded-full bg-kkp-hijau ${GERAK} group-hover:scale-150`} aria-hidden="true" />}
-                          {nilai}
-                        </span>
-                        <span className="text-xs text-slate-500">{label}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
+        <div className="relative">
+          <LatarLaut />
+          <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-28 pt-14 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:px-8 lg:pb-32 lg:pt-20">
+            <div className="lg:col-span-6">
+              <Label>Analisis kelayakan ruang laut</Label>
+              <h1 className="mt-7 text-balance text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.035em] text-kkp-900 sm:text-6xl xl:text-[4.25rem]">
+                Platform Manajemen Investasi Ruang Laut
+              </h1>
+              <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-600">
+                Alat kerja KKP untuk menilai kelayakan ruang laut bagi investasi: kesesuaian lokasi dengan rencana
+                tata ruang laut, tumpang tindih dengan KKPRL yang sudah terbit, dan kelayakan finansialnya.
+              </p>
+              <div className="mt-10 flex flex-wrap gap-3">
+                <TombolUtama to="/peta">Buka Peta Spasial</TombolUtama>
+                <TombolKedua to="/profil-investasi">Profil Investasi</TombolKedua>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 content-start gap-3">
-              <div className="col-span-2">
-                <IlustrasiArea />
-              </div>
-              <KartuKecil to="/peta?lapisan=polaruang,polaruang_kaw,kkprl" judul="Peta Spasial" isi="Tata ruang dan izin" ikon={Map} />
-              <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
-              <Link
-                to="/peta?lapisan=potensi"
-                className={`group col-span-2 block rounded-2xl bg-kkp-900 p-5 text-white transition-colors hover:bg-kkp-800 ${FOKUS}`}
-              >
-                <span className="flex items-start justify-between gap-3">
-                  <span className="bg-kkp-toska px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-kkp-900">
-                    Peluang investasi
+            <div className="grid gap-3 sm:grid-cols-2 lg:col-span-6">
+              <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
+                <Link
+                  to={KE_TAMBAKREJO}
+                  className={`group block rounded-xl border border-slate-200 bg-[#F6F8FB] p-3 transition-colors hover:border-kkp-900 ${FOKUS}`}
+                >
+                  <figure>
+                    <div className="overflow-hidden rounded-lg">
+                      <img
+                        src="/beranda/pelabuhan-tambakrejo.webp"
+                        alt="Perahu nelayan berlabuh di Pelabuhan Perikanan Tambakrejo, Blitar"
+                        width="1200"
+                        height="900"
+                        className="aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                      />
+                    </div>
+                    <figcaption className="mt-3 text-center">
+                      <span className="block text-[15px] font-semibold text-kkp-900">Pelabuhan Perikanan Tambakrejo</span>
+                      <span className="flex items-center justify-center gap-1 font-mono text-xs text-slate-500">
+                        <MapPin className={`h-3.5 w-3.5 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
+                        Blitar, Jawa Timur
+                      </span>
+                      <span className="mt-1 block text-[10px] text-slate-400">Foto: DKP Provinsi Jawa Timur</span>
+                    </figcaption>
+                  </figure>
+                </Link>
+                <div className="mt-5 flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-kkp-900">Ringkasan nasional</p>
+                  <span className="bg-[#D3F0F8] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-kkp-900">
+                    Data terkini
                   </span>
-                  <ArrowUpRight className={`h-5 w-5 text-kkp-toska ${GERAK} group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:scale-110`} aria-hidden="true" />
-                </span>
-                <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
-                  {angka(ringkas?.zona_peluang_tinggi)}
-                </span>
-                <span className="mt-3 block text-sm text-white/80">Zona laut berpeluang tinggi untuk minimal satu jenis investasi</span>
-              </Link>
-              <KartuKecil to="/peta?mulai=gambar" judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
-              <KartuKecil to="/profil-investasi" judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />
+                </div>
+                <div className="mt-2 flex flex-1 flex-col rounded-xl border border-slate-200 p-3">
+                  <span className="flex items-center gap-2 text-sm font-semibold text-kkp-900">
+                    <img src="/logo-kkp.png" alt="" className="h-6 w-6 shrink-0 object-contain" />
+                    Seluruh Indonesia
+                  </span>
+                  <ul className="mt-3 flex flex-1 flex-col justify-around divide-y divide-slate-200 rounded-lg bg-[#F6F8FB] px-2 text-center">
+                    {ringkasanNasional.map(([nilai, label, ke], i) => (
+                      <li key={label}>
+                        <Link to={ke} className={`group my-1 flex flex-col items-center rounded-md py-1.5 transition-colors hover:bg-white ${FOKUS}`}>
+                          <span className="flex items-center gap-2 text-lg font-bold text-kkp-900 tabular-nums transition-colors group-hover:text-kkp-700">
+                            {i === 0 && <span className={`h-2 w-2 rounded-full bg-kkp-hijau ${GERAK} group-hover:scale-150`} aria-hidden="true" />}
+                            {nilai}
+                          </span>
+                          <span className="text-xs text-slate-500">{label}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 content-start gap-3">
+                <div className="col-span-2">
+                  <IlustrasiArea />
+                </div>
+                <KartuKecil to="/peta?lapisan=polaruang,polaruang_kaw,kkprl" judul="Peta Spasial" isi="Tata ruang dan izin" ikon={Map} />
+                <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
+                <Link
+                  to="/peta?lapisan=potensi"
+                  className={`group col-span-2 block rounded-2xl bg-kkp-900 p-5 text-white transition-colors hover:bg-kkp-800 ${FOKUS}`}
+                >
+                  <span className="flex items-start justify-between gap-3">
+                    <span className="bg-kkp-toska px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-kkp-900">
+                      Peluang investasi
+                    </span>
+                    <ArrowUpRight className={`h-5 w-5 text-kkp-toska ${GERAK} group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:scale-110`} aria-hidden="true" />
+                  </span>
+                  <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
+                    {angka(ringkas?.zona_peluang_tinggi)}
+                  </span>
+                  <span className="mt-3 block text-sm text-white/80">Zona laut berpeluang tinggi untuk minimal satu jenis investasi</span>
+                </Link>
+                <KartuKecil to="/peta?mulai=gambar" judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
+                <KartuKecil to="/profil-investasi" judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        </div>
 
         <section className="mx-auto max-w-7xl px-4 pb-24 pt-8 text-center sm:px-6 lg:px-8 lg:pb-28">
           <Label nada="hijau">Tantangan</Label>
