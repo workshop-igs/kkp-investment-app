@@ -34,14 +34,6 @@ const GERAK_KECIL = `${GERAK} group-hover:-translate-y-0.5 group-hover:scale-110
 const GERAK_PANAH = `${GERAK} group-hover:translate-x-1`;
 const FOKUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-900';
 
-const KE_TAMBAKREJO = `/peta?${new URLSearchParams({
-  lapisan: 'infra_pelabuhan_perikanan',
-  lat: '-8.3164',
-  lng: '112.1451',
-  label: 'Pelabuhan Perikanan Tambakrejo',
-  keterangan: 'Pelabuhan Perikanan Pantai, Blitar, Jawa Timur',
-})}`;
-
 const SUMBER = ['Portal Satu Data KKP', 'RTRW Provinsi', 'Sidako KKP', 'BNPB InaRISK', 'BPS', 'NOAA'];
 
 const TANTANGAN = [
@@ -103,14 +95,6 @@ const SUDUT_AREA = [[70, 62], [212, 42], [238, 138], [104, 158]];
 
 const angka = (n) => (n === undefined || n === null ? '—' : formatNumber(n, 0));
 
-const GarisKontur = ({ className }) => (
-  <svg viewBox="0 0 800 800" fill="none" stroke="currentColor" strokeWidth="1.2" className={className} aria-hidden="true">
-    {[380, 330, 280, 232, 186, 142, 100, 62].map((r, i) => (
-      <ellipse key={r} cx="400" cy="400" rx={r} ry={r * (0.78 + (i % 3) * 0.05)} transform={`rotate(${-18 + i * 7} 400 400)`} />
-    ))}
-  </svg>
-);
-
 const PitaKkp = () => (
   <div className="flex h-1.5" aria-hidden="true">
     <span className="w-[20%] bg-kkp-hijau" />
@@ -123,9 +107,7 @@ const LatarLaut = () => (
   <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
     <div className="absolute inset-0 bg-[linear-gradient(180deg,#FFFFFF_0%,#EEF8FC_55%,#DDF2F9_100%)]" />
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_92%_0%,#BFE9F4_0%,transparent_50%),radial-gradient(ellipse_at_0%_100%,#E2F1CC_0%,transparent_40%)]" />
-    <div className="absolute inset-0 bg-[radial-gradient(#002242_1px,transparent_1.4px)] opacity-[0.07] [background-size:22px_22px] [mask-image:linear-gradient(to_bottom,#000,transparent_70%)]" />
-    <GarisKontur className="absolute -right-56 -top-80 h-[860px] w-[860px] text-[#1B6A8A]/20" />
-    <GarisKontur className="absolute -left-96 top-1/4 h-[1000px] w-[1000px] text-kkp-900/[0.07]" />
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(0,34,66,0.07)_1px,transparent_1px),linear-gradient(to_bottom,rgba(0,34,66,0.07)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:linear-gradient(to_bottom,#000,transparent_85%)]" />
     <svg viewBox="0 0 1440 160" preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 h-24 w-full sm:h-32">
       <path d="M0 78C240 34 480 122 720 88S1200 36 1440 70V160H0Z" fill="#40BFDB" fillOpacity="0.22" />
       <path d="M0 108C280 76 520 146 800 116S1240 86 1440 108V160H0Z" fill="#1B6A8A" fillOpacity="0.16" />
@@ -169,21 +151,63 @@ const KartuKecil = ({ to, judul, isi, ikon: Ikon, tanpaIsi }) => (
   </Link>
 );
 
-const IlustrasiArea = () => (
+const DATA_PETA = [
+  ['Zona tata ruang laut', '/peta?lapisan=polaruang,polaruang_kaw', Map],
+  ['Izin KKPRL terbit', '/peta?lapisan=kkprl', FileCheck2],
+  ['Pelabuhan perikanan', '/peta?lapisan=infra_pelabuhan_perikanan', Anchor],
+  ['Risiko tsunami', '/peta?lapisan=risiko_tsunami', AlertTriangle],
+];
+
+const KartuDataPeta = () => (
+  <div className="rounded-2xl border border-[#9ADCEC] bg-[#D3F0F8] p-4">
+    <Link to="/peta" className={`group inline-flex items-center gap-1.5 text-[15px] font-semibold text-kkp-900 ${FOKUS}`}>
+      Lihat data ruang laut di peta
+      <ArrowRight className={`h-4 w-4 text-kkp-700 ${GERAK_PANAH}`} aria-hidden="true" />
+    </Link>
+    <p className="mt-0.5 text-xs text-slate-600">Pilih data yang ingin ditampilkan:</p>
+    <div className="mt-3 grid grid-cols-2 gap-2">
+      {DATA_PETA.map(([judul, ke, Ikon]) => (
+        <Link
+          key={judul}
+          to={ke}
+          className={`group flex items-center gap-2 rounded-lg border border-white bg-white/80 px-2.5 py-2 text-xs font-semibold leading-tight text-kkp-900 transition-colors hover:border-kkp-900 ${FOKUS}`}
+        >
+          <Ikon className={`h-4 w-4 shrink-0 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
+          {judul}
+        </Link>
+      ))}
+    </div>
+  </div>
+);
+
+const PEMERIKSAAN = [
+  'Kesesuaian dengan rencana tata ruang laut',
+  'Tumpang tindih dengan izin KKPRL yang sudah terbit',
+  'Risiko bencana dan kelayakan finansial',
+];
+
+const KartuCekLokasi = () => (
   <Link
     to="/peta?mulai=gambar"
-    aria-label="Gambar area analisis di Peta Spasial"
-    className={`group relative block h-44 overflow-hidden rounded-2xl border border-[#9ADCEC] bg-[#D3F0F8] transition-colors hover:border-kkp-900 ${FOKUS}`}
+    className={`group flex flex-col rounded-xl border border-slate-200 bg-[#F6F8FB] p-4 transition-colors hover:border-kkp-900 ${FOKUS}`}
   >
-    <GarisKontur className="absolute -right-24 -top-28 h-96 w-96 text-kkp-900/20" />
-    <svg viewBox="0 0 300 180" className="absolute inset-0 h-full w-full" aria-hidden="true">
-      <polygon points="70,52 190,34 222,118 96,138" fill="rgba(0,34,66,0.08)" stroke="#002242" strokeWidth="1.8" strokeDasharray="6 5" />
-      {[[70, 52], [190, 34], [222, 118], [96, 138]].map(([x, y]) => (
-        <circle key={`${x}-${y}`} cx={x} cy={y} r="4.5" fill="#fff" stroke="#002242" strokeWidth="1.8" />
+    <span className="flex items-center gap-2 text-[15px] font-semibold text-kkp-900">
+      <SquareDashedMousePointer className={`h-5 w-5 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
+      Cek kelayakan lokasi
+    </span>
+    <span className="mt-1 text-xs leading-snug text-slate-500">Gambar atau unggah area rencana investasi, lalu aplikasi memeriksa:</span>
+    <ul className="mt-3 space-y-2">
+      {PEMERIKSAAN.map((teks) => (
+        <li key={teks} className="flex items-start gap-2 text-[13px] leading-snug text-slate-700">
+          <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600" strokeWidth={3} aria-hidden="true" />
+          {teks}
+        </li>
       ))}
-    </svg>
-    <MapPin className={`absolute left-[44%] top-[30%] h-9 w-9 text-kkp-900 ${GERAK} group-hover:-translate-y-2`} strokeWidth={1.5} fill="#fff" aria-hidden="true" />
-    <MapPin className={`absolute bottom-5 right-8 h-7 w-7 text-kkp-900 ${GERAK} delay-75 group-hover:-translate-y-1.5`} strokeWidth={1.5} fill={TOSKA_MUDA} aria-hidden="true" />
+    </ul>
+    <span className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-md bg-kkp-900 py-2 text-xs font-semibold text-white transition-colors group-hover:bg-kkp-800">
+      Mulai di Peta Spasial
+      <ArrowRight className={`h-3.5 w-3.5 text-kkp-toska ${GERAK_PANAH}`} aria-hidden="true" />
+    </span>
   </Link>
 );
 
@@ -199,7 +223,6 @@ const Ilustrasi = ({ ikon: Ikon, lencana }) => (
 
 const ContohArea = () => (
   <div className="relative h-full overflow-hidden rounded-xl bg-[#D3F0F8]">
-    <GarisKontur className="absolute -left-24 -top-28 h-[440px] w-[440px] text-kkp-900/15" />
     <svg viewBox="0 0 300 200" className="absolute inset-0 h-full w-full" aria-hidden="true">
       <polygon points={SUDUT_AREA.join(' ')} fill="rgba(0,86,165,0.14)" stroke="#002242" strokeWidth="2" strokeDasharray="6 5" />
       {SUDUT_AREA.map(([x, y]) => (
@@ -386,9 +409,6 @@ const PusatInformasi = () => {
   return (
     <section className="px-4 pb-24 sm:px-6 lg:px-8">
       <div className="relative mx-auto max-w-7xl rounded-3xl bg-[linear-gradient(115deg,#002242_0%,#003a70_55%,#0056A5_100%)] text-white">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl" aria-hidden="true">
-          <GarisKontur className="absolute -right-40 -top-56 h-[680px] w-[680px] text-white/[0.08]" />
-        </div>
         <div className="relative grid items-center gap-10 px-6 py-12 sm:px-10 lg:grid-cols-12 lg:gap-12 lg:px-14 lg:py-16">
           <div className="lg:col-span-5">
             <p className="font-mono text-xs font-medium uppercase tracking-[0.24em] text-kkp-toska sm:text-[13px]">Pusat informasi</p>
@@ -541,30 +561,7 @@ const LandingPage = () => {
 
             <div className="grid gap-3 sm:grid-cols-2 lg:col-span-6">
               <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-                <Link
-                  to={KE_TAMBAKREJO}
-                  className={`group block rounded-xl border border-slate-200 bg-[#F6F8FB] p-3 transition-colors hover:border-kkp-900 ${FOKUS}`}
-                >
-                  <figure>
-                    <div className="overflow-hidden rounded-lg">
-                      <img
-                        src="/beranda/pelabuhan-tambakrejo.webp"
-                        alt="Perahu nelayan berlabuh di Pelabuhan Perikanan Tambakrejo, Blitar"
-                        width="1200"
-                        height="900"
-                        className="aspect-[4/3] w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-                      />
-                    </div>
-                    <figcaption className="mt-3 text-center">
-                      <span className="block text-[15px] font-semibold text-kkp-900">Pelabuhan Perikanan Tambakrejo</span>
-                      <span className="flex items-center justify-center gap-1 font-mono text-xs text-slate-500">
-                        <MapPin className={`h-3.5 w-3.5 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
-                        Blitar, Jawa Timur
-                      </span>
-                      <span className="mt-1 block text-[10px] text-slate-400">Foto: DKP Provinsi Jawa Timur</span>
-                    </figcaption>
-                  </figure>
-                </Link>
+                <KartuCekLokasi />
                 <div className="mt-5 flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-kkp-900">Ringkasan nasional</p>
                   <span className="bg-[#D3F0F8] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-kkp-900">
@@ -594,9 +591,9 @@ const LandingPage = () => {
 
               <div className="grid grid-cols-2 content-start gap-3">
                 <div className="col-span-2">
-                  <IlustrasiArea />
+                  <KartuDataPeta />
                 </div>
-                <KartuKecil to="/peta?lapisan=polaruang,polaruang_kaw,kkprl" judul="Peta Spasial" isi="Tata ruang dan izin" ikon={Map} />
+                <KartuKecil to="/pipeline" judul="Pantau proyek" isi="Tahap LOI sampai operasional" ikon={Briefcase} />
                 <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
                 <Link
                   to="/peta?lapisan=potensi"
