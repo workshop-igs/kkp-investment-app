@@ -50,6 +50,7 @@ class ZonasiRuangLaut(models.Model):
     nomor_regulasi = models.CharField(max_length=255, blank=True, help_text='No. Perpres/Perda RTR/RZ')
     geometry = models.MultiPolygonField(srid=4326)
     luas_ha = models.FloatField(default=0)
+    persen_terbangun = models.FloatField(default=0, help_text='Bagian luas zona yang tertutup bangunan atau struktur eksisting')
     keterangan = models.TextField(blank=True)
     tahun_penetapan = models.IntegerField(null=True, blank=True)
     sumber_data = models.CharField(max_length=100, default='DJPRL')
@@ -207,6 +208,37 @@ class InfrastrukturPendukung(models.Model):
 
     def __str__(self):
         return f'{self.nama} ({self.get_kategori_display()})'
+
+
+class BangunanEksisting(models.Model):
+    JENIS_CHOICES = [
+        ('PELABUHAN', 'Pelabuhan dan kolam pelabuhan'),
+        ('DERMAGA', 'Dermaga dan jeti'),
+        ('PEMECAH_GELOMBANG', 'Pemecah gelombang dan tanggul'),
+        ('JEMBATAN', 'Jembatan'),
+        ('ANJUNGAN', 'Anjungan dan sumur migas'),
+        ('INDUSTRI', 'Industri'),
+        ('PEMBANGKIT', 'Pembangkit dan gardu listrik'),
+        ('BANDARA', 'Bandar udara'),
+        ('PERMUKIMAN', 'Permukiman dan kawasan komersial'),
+        ('KONSTRUKSI', 'Lahan konstruksi atau reklamasi'),
+        ('MILITER', 'Kawasan militer'),
+        ('BANGUNAN', 'Bangunan'),
+    ]
+
+    kode = models.CharField(max_length=40, unique=True, help_text='osm/way/123 atau kkp/45')
+    jenis = models.CharField(max_length=20, choices=JENIS_CHOICES)
+    nama = models.CharField(max_length=255, blank=True)
+    sumber_data = models.CharField(max_length=40)
+    geometry = models.MultiPolygonField(srid=4326)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'inventarisasi_bangunan_eksisting'
+        verbose_name_plural = 'Bangunan Eksisting'
+
+    def __str__(self):
+        return f'{self.nama or self.get_jenis_display()} ({self.kode})'
 
 
 class ProgramKKP(models.Model):

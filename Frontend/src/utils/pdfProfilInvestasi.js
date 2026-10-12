@@ -1154,7 +1154,7 @@ function kesimpulanBab(dek, o, b, i) {
   const x = TEPI + lebar + 5;
   yy = dek.kartu(x, yk, lebar, BAWAH - yk, { judul: 'Langkah lanjut', ikon: 'isi', aksen });
   dek.nomor(x + 5, yy, lebar - 10, [
-    'Verifikasi lapangan lokasi prioritas dan pastikan tidak tumpang tindih dengan izin kesesuaian kegiatan pemanfaatan ruang laut (KKPRL) yang telah terbit.',
+    'Verifikasi lapangan lokasi prioritas dan pastikan tidak tumpang tindih dengan izin kesesuaian kegiatan pemanfaatan ruang laut (KKPRL) yang telah terbit maupun bangunan atau struktur yang sudah berdiri.',
     j.lokasi.some((l) => l.pembatas.length) && 'Kaji faktor pembatas lokasi (risiko bencana, ekosistem sensitif, sosial) sebelum penetapan.',
     k ? `Lengkapi model usaha ${b.nama.toLowerCase()} dari sumber resmi untuk analisis finansial.` : 'Lengkapi data pasar dan model usaha dari sumber resmi untuk analisis finansial.',
     'Siapkan pelatihan untuk posisi berprioritas tinggi pada matriks keahlian.',

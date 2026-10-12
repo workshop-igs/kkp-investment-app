@@ -277,7 +277,7 @@ def dashboard_stats(request):
     from django.core.cache import cache
     from django.db.models import Avg, Count, Sum
 
-    from analitik.services.profil_investasi import skor_sesuai
+    from analitik.services.profil_investasi import belum_dimanfaatkan, skor_sesuai
     from inventarisasi.models import KKPRL, PotensiInvestasi, ZonasiRuangLaut
     from pipeline.models import ProyekInvestasi
 
@@ -373,7 +373,7 @@ def dashboard_stats(request):
         for p in provinsi_qs
     ]
 
-    peluang = skor_sesuai().filter(kelas='TINGGI', jumlah_kkprl=0)
+    peluang = belum_dimanfaatkan(skor_sesuai().filter(kelas='TINGGI'))
     potensi_agg = ZonasiRuangLaut.objects.filter(id__in=peluang.values('zona_id')).aggregate(
         zona=Count('id'),
         luas=Sum('luas_ha'),
@@ -449,7 +449,7 @@ def ringkasan_publik(request):
     from django.core.cache import cache
     from django.db.models import Count, F, Sum
 
-    from analitik.services.profil_investasi import skor_sesuai
+    from analitik.services.profil_investasi import belum_dimanfaatkan, skor_sesuai
     from inventarisasi.models import KKPRL
     from pipeline.models import ProyekInvestasi
 
@@ -459,7 +459,7 @@ def ringkasan_publik(request):
         return Response(tersimpan)
 
     kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'))
-    tinggi = skor_sesuai().filter(kelas='TINGGI', jumlah_kkprl=0)
+    tinggi = belum_dimanfaatkan(skor_sesuai().filter(kelas='TINGGI'))
     muatan = {
         'proyek': ProyekInvestasi.objects.count(),
         'kkprl_aktif': kkprl['jumlah'] or 0,
