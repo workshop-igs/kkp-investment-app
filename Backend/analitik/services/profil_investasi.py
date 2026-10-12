@@ -231,7 +231,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         if not k.provinsi_id and k.status == 'DIIZINKAN':
             utama.add(k.sub_zona)
 
-    skor = skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG'])
+    skor = skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG'], jumlah_kkprl=0)
     lokasi = []
     kandidat = skor.annotate(utama=Case(When(zona__sub_zona__in=utama, then=1), default=0, output_field=IntegerField()))
     for s in kandidat.order_by('-utama', '-kelas', '-zona__luas_ha', '-skor_total').values(
@@ -431,9 +431,12 @@ def profil_provinsi(provinsi, sektor=None):
 
 
 def _saring_sumber_utama(qs, prefiks='zona__'):
-    kondisi = Q(pk__in=[])
+    per_sumber = {}
     for prov_id, sumber in _sumber_utama_semua().items():
-        kondisi |= Q(**{f'{prefiks}provinsi_id': prov_id, f'{prefiks}sumber_data': sumber})
+        per_sumber.setdefault(sumber, []).append(prov_id)
+    kondisi = Q(pk__in=[])
+    for sumber, prov in per_sumber.items():
+        kondisi |= Q(**{f'{prefiks}sumber_data': sumber, f'{prefiks}provinsi_id__in': prov})
     return qs.filter(kondisi, **{f'{prefiks}tingkat_acuan': 'RTRW_PROVINSI'})
 
 

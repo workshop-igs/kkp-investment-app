@@ -233,7 +233,7 @@ class PetaBBoxMixin:
         baris = (
             qs.filter(provinsi__isnull=False)
             .values('provinsi_id', 'provinsi__nama')
-            .annotate(jumlah=Count('id'))
+            .annotate(jumlah=Count('id', distinct=True))
             .order_by('provinsi__nama')
         )
         return Response(
