@@ -143,6 +143,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('--provinsi', help='Kode BPS provinsi, dipisah koma')
         parser.add_argument('--mulai', type=int, default=0, help='Lanjutkan dari potongan ke-N')
+        parser.add_argument('--hanya-darat', action='store_true', help='Hanya zona kandidat di darat pesisir')
 
     def handle(self, *args, **opsi):
         skor = _saring_sumber_utama(
@@ -150,6 +151,8 @@ class Command(BaseCommand):
         )
         if opsi['provinsi']:
             skor = skor.filter(zona__provinsi__kode_bps__in=opsi['provinsi'].split(','))
+        if opsi['hanya_darat']:
+            skor = skor.filter(zona__ranah='DARAT')
         ids = list(skor.values_list('zona_id', flat=True).distinct())
         if not ids:
             raise CommandError('Belum ada zona kandidat; jalankan hitung_skor_zona lebih dulu.')
@@ -183,7 +186,7 @@ class Command(BaseCommand):
         with connection.cursor() as c:
             c.execute(SISIP_KKP, [PENYANGGA_PELABUHAN_KKP, KATEGORI_KKP])
             self.stdout.write(f'{c.rowcount} pelabuhan, terminal, dan pembangkit dari infrastruktur KKP')
-            if not opsi['provinsi'] and not opsi['mulai']:
+            if not (opsi['provinsi'] or opsi['mulai'] or opsi['hanya_darat']):
                 c.execute(
                     "DELETE FROM inventarisasi_bangunan_eksisting WHERE sumber_data = 'OpenStreetMap' AND updated_at < %s",
                     [waktu_mulai],

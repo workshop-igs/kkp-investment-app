@@ -220,8 +220,11 @@ export const LAYER_LOKAL = {
     ikon: 'bintang',
     warnaIkon: (p) => warnaKelasKelayakan(p.kelas),
     keteranganLegenda:
-      'Zona ruang laut yang Sangat sesuai (skor 0,70 ke atas) atau Sesuai (0,55 sampai di bawah 0,70) '
+      'Zona ruang laut, atau kawasan Pola Ruang darat RTRW Provinsi di pesisir (100 m sampai 4 km dari zona laut), '
+      + 'yang Sangat sesuai (skor 0,70 ke atas) atau Sesuai (0,55 sampai di bawah 0,70) '
       + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Hanya zona yang '
+      + 'karakter lokasinya cocok dengan jenis investasinya (misalnya tambak garam dan unit pengolahan di darat pesisir, '
+      + 'budi daya laut di perairan 1 sampai 30 m, OTEC di perairan dalam; kedalaman dan gelombang bersifat indikatif), '
       + 'peruntukan tata ruangnya mengizinkan jenis itu, belum memiliki KKPRL terbit di dalamnya, dan belum terbangun: '
       + 'kurang dari 10% luas zona beserta lingkungan 25 m di sekelilingnya tertutup pelabuhan, dermaga, pemecah gelombang, industri, permukiman, bandara, pembangkit, anjungan migas, atau bangunan lain menurut OpenStreetMap dan data infrastruktur KKP. Zona yang '
       + 'bersambung membentuk satu area dengan satu penanda pada zona terluas berkelas tertinggi. Zona yang '
@@ -249,9 +252,11 @@ export const LAYER_LOKAL = {
         v === null || v === undefined ? null : Number(v).toFixed(d).replace('.', ',');
 
       const alasan = [];
-      if (p.status_tata_ruang === 'BERSYARAT') alasan.push([false, 'Diizinkan bersyarat oleh rencana tata ruang laut']);
-      else if (p.sesuai_tata_ruang) alasan.push([true, 'Sesuai peruntukan rencana tata ruang laut']);
+      const rencana = p.ranah === 'DARAT' ? 'Pola Ruang darat RTRW Provinsi' : 'rencana tata ruang laut';
+      if (p.status_tata_ruang === 'BERSYARAT') alasan.push([false, `Diizinkan bersyarat oleh ${rencana}`]);
+      else if (p.sesuai_tata_ruang) alasan.push([true, `Sesuai peruntukan ${rencana}`]);
       else alasan.push([false, 'Belum sesuai peruntukan tata ruang']);
+      if (p.karakter) alasan.push([true, `Karakter lokasi cocok: ${p.karakter}`]);
 
       if (p.jarak_infra_km !== null && p.jarak_infra_km !== undefined) {
         const dekat = p.jarak_infra_km <= 25;
@@ -298,7 +303,7 @@ export const LAYER_LOKAL = {
         .join('');
 
       return `<div class="font-sans">
-        <h3 class="font-bold mb-1" style="color:${warna}">${aman(p.nama || 'Zona ruang laut')}</h3>
+        <h3 class="font-bold mb-1" style="color:${warna}">${aman(p.nama || (p.ranah === 'DARAT' ? 'Kawasan darat pesisir' : 'Zona ruang laut'))}</h3>
         <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.sub_zona || '-')} &middot; ${aman(p.provinsi || '-')}</p>
         <div class="text-xs mb-1.5">
           <span class="font-bold text-base" style="color:${warna}">${aman(KELAS_KELAYAKAN[p.kelas]?.label || '-')}</span>

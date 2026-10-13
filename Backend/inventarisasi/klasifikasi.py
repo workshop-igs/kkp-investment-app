@@ -72,6 +72,52 @@ def sub_zona(teks, jenis):
     return hasil
 
 
+PETA_KAWASAN_DARAT = [
+    ('mangrove', 'DARAT_MANGROVE'),
+    ('badan air', 'DARAT_LINDUNG'),
+    ('lindung', 'DARAT_LINDUNG'),
+    ('perlindungan', 'DARAT_LINDUNG'),
+    ('konservasi', 'DARAT_LINDUNG'),
+    ('sempadan', 'DARAT_LINDUNG'),
+    ('cagar', 'DARAT_LINDUNG'),
+    ('rawan', 'DARAT_LINDUNG'),
+    ('suaka', 'DARAT_LINDUNG'),
+    ('taman', 'DARAT_LINDUNG'),
+    ('resapan', 'DARAT_LINDUNG'),
+    ('garam', 'DARAT_PERGARAMAN'),
+    ('perikanan', 'DARAT_PERIKANAN'),
+    ('tambak', 'DARAT_PERIKANAN'),
+    ('industri', 'DARAT_INDUSTRI'),
+    ('wisata', 'DARAT_PARIWISATA'),
+    ('transportasi', 'DARAT_TRANSPORTASI'),
+    ('pelabuhan', 'DARAT_TRANSPORTASI'),
+    ('bandar', 'DARAT_TRANSPORTASI'),
+    ('permukiman', 'DARAT_PERMUKIMAN'),
+    ('pemukiman', 'DARAT_PERMUKIMAN'),
+    ('perkotaan', 'DARAT_PERMUKIMAN'),
+    ('perdesaan', 'DARAT_PERMUKIMAN'),
+    ('pertanian', 'DARAT_PERTANIAN'),
+    ('sawah', 'DARAT_PERTANIAN'),
+    ('pangan', 'DARAT_PERTANIAN'),
+    ('hortikultura', 'DARAT_PERTANIAN'),
+    ('perkebunan', 'DARAT_PERKEBUNAN'),
+    ('hutan', 'DARAT_HUTAN_PRODUKSI'),
+    ('tambang', 'DARAT_PERTAMBANGAN'),
+    ('energi', 'DARAT_PERTAMBANGAN'),
+    ('pertahanan', 'DARAT_PERTAHANAN'),
+    ('keamanan', 'DARAT_PERTAHANAN'),
+]
+
+SUB_ZONA_DARAT_LINDUNG = ('DARAT_LINDUNG', 'DARAT_MANGROVE')
+
+
+def kawasan_darat(namobj, jnsrpr=''):
+    hasil = cocokkan(namobj, PETA_KAWASAN_DARAT, None)
+    if hasil is None:
+        hasil = 'DARAT_LINDUNG' if str(jnsrpr).startswith('31') else 'DARAT_LAINNYA'
+    return hasil, 'KL' if hasil in SUB_ZONA_DARAT_LINDUNG else 'KB'
+
+
 PETA_UNSUR_RTRL = [
     ('kabel', 'KABEL'),
     ('pipa', 'PIPA'),

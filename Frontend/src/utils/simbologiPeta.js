@@ -19,6 +19,20 @@ export const KATEGORI_ZONA = {
   TIDAK_DIBAGI: { label: 'Tidak dibagi ke dalam jenis', warna: '#78716c' },
   BELUM_DIATUR: { label: 'Belum diatur dalam RZWP-3-K', warna: '#94a3b8' },
   LAINNYA: { label: 'Peruntukan lain', warna: '#cbd5e1' },
+  DARAT_PERGARAMAN: { label: 'Kawasan Pergaraman (darat)', warna: '#65a30d' },
+  DARAT_PERIKANAN: { label: 'Kawasan Perikanan (darat)', warna: '#0284c7' },
+  DARAT_INDUSTRI: { label: 'Kawasan Peruntukan Industri (darat)', warna: '#ea580c' },
+  DARAT_PARIWISATA: { label: 'Kawasan Pariwisata (darat)', warna: '#db2777' },
+  DARAT_TRANSPORTASI: { label: 'Kawasan Transportasi (darat)', warna: '#7c3aed' },
+  DARAT_PERMUKIMAN: { label: 'Kawasan Permukiman (darat)', warna: '#a16207' },
+  DARAT_PERTANIAN: { label: 'Kawasan Pertanian (darat)', warna: '#ca8a04' },
+  DARAT_PERKEBUNAN: { label: 'Kawasan Perkebunan (darat)', warna: '#84cc16' },
+  DARAT_HUTAN_PRODUKSI: { label: 'Kawasan Hutan Produksi (darat)', warna: '#166534' },
+  DARAT_PERTAMBANGAN: { label: 'Kawasan Pertambangan dan Energi (darat)', warna: '#92400e' },
+  DARAT_PERTAHANAN: { label: 'Kawasan Pertahanan dan Keamanan (darat)', warna: '#334155' },
+  DARAT_MANGROVE: { label: 'Kawasan Ekosistem Mangrove (darat)', warna: '#4d7c0f' },
+  DARAT_LINDUNG: { label: 'Kawasan Lindung (darat)', warna: '#16a34a' },
+  DARAT_LAINNYA: { label: 'Kawasan darat lainnya', warna: '#cbd5e1' },
 };
 
 export const URUTAN_KATEGORI = [

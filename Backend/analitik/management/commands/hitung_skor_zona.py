@@ -6,8 +6,10 @@ from django.db.models import Count
 
 from analitik.models import SkorKelayakanZona
 from analitik.services.konstanta import (
+    BATAS_JARAK_PANTAI_DERAJAT,
     BOBOT_RISIKO_LINGKUNGAN,
     BOBOT_SKOR_ZONA,
+    KM_PER_DERAJAT,
     GMW_TAHUN_AKHIR,
     kelas_risiko_investasi as hitung_kelas_risiko,
     risiko_sosial as hitung_risiko_sosial,
@@ -29,7 +31,7 @@ from analitik.services.konstanta import (
     kelas_kelayakan,
     rerata_berbobot_berdata,
 )
-from analitik.services.screening_ruang import BOLEH, _aturan_per_sektor, _ketentuan
+from analitik.services.screening_ruang import BOLEH, _aturan_per_sektor, _ketentuan, cocok_karakter
 from inti.models import Provinsi, SektorInvestasi
 
 KELAS_KE_RISIKO = {
@@ -149,6 +151,53 @@ class Command(BaseCommand):
         for zona_id, sumber in per_sumber.items():
             hasil[zona_id] = ((sumber.get('KKP-EKOSISTEM') or sumber.get('GMW-MANGROVE') or [])
                               + sumber.get('SIDAKO-LAMUN', []) + sumber.get('SIDAKO-KARANG', []))
+        return hasil
+
+    def _karakter(self, provinsi_id):
+        hasil = {}
+        with connection.cursor() as c:
+            c.execute(
+                """
+                SELECT z.id, o.parameter, MIN((t.s).min), MAX((t.s).max),
+                       SUM((t.s).sum) / NULLIF(SUM((t.s).count), 0)
+                FROM inventarisasi_zonasi_ruang_laut z
+                JOIN analitik_raster_oseanografi o
+                  ON o.parameter IN ('KEDALAMAN', 'GELOMBANG', 'SUHU') AND o.cakupan && z.geometry
+                CROSS JOIN LATERAL (
+                    SELECT ST_SummaryStats(
+                        ST_Clip(o.rast, z.geometry, true),
+                        CASE WHEN o.parameter = 'SUHU' THEN LEAST(2, ST_NumBands(o.rast)) ELSE 1 END,
+                        true
+                    ) AS s
+                ) t
+                WHERE z.provinsi_id = %s AND z.ranah = 'LAUT'
+                GROUP BY 1, 2
+                """,
+                [provinsi_id],
+            )
+            for zona_id, parameter, minimum, maksimum, rata2 in c.fetchall():
+                data = hasil.setdefault(zona_id, {})
+                if parameter == 'KEDALAMAN' and minimum is not None:
+                    data['kedalaman_min'], data['kedalaman_maks'] = max(0.0, -maksimum), max(0.0, -minimum)
+                elif parameter == 'GELOMBANG':
+                    data['gelombang'] = rata2
+                elif parameter == 'SUHU':
+                    data['suhu_min'] = minimum
+            c.execute(
+                """
+                WITH z AS MATERIALIZED (
+                    SELECT id, ST_SimplifyPreserveTopology(geometry, 0.001) AS g
+                    FROM inventarisasi_zonasi_ruang_laut WHERE provinsi_id = %s AND ranah = 'LAUT'
+                )
+                SELECT z.id, (SELECT MIN(ST_Distance(z.g, d.g)) FROM darat_terbagi d WHERE ST_DWithin(z.g, d.g, %s))
+                FROM z
+                """,
+                [provinsi_id, BATAS_JARAK_PANTAI_DERAJAT],
+            )
+            for zona_id, jarak in c.fetchall():
+                hasil.setdefault(zona_id, {})['jarak_pantai_km'] = (
+                    (jarak if jarak is not None else BATAS_JARAK_PANTAI_DERAJAT) * KM_PER_DERAJAT
+                )
         return hasil
 
     def _sosial(self, provinsi_id):
@@ -405,12 +454,13 @@ class Command(BaseCommand):
 
         zona = list(
             ZonasiRuangLaut.objects.filter(provinsi_id=prov.id).values_list(
-                'id', 'sub_zona', 'jenis_zona', 'luas_ha'
+                'id', 'sub_zona', 'jenis_zona', 'luas_ha', 'ranah'
             )
         )
         if not zona:
             return 0
 
+        karakter = self._karakter(prov.id)
         bencana = self._bencana(prov.id)
         kkprl = self._kkprl(prov.id)
         jarak = self._aksesibilitas(prov.id)
@@ -422,12 +472,13 @@ class Command(BaseCommand):
         aturan = _aturan_per_sektor()
 
         baris = []
-        for zona_id, sub_zona, jenis_zona, luas_zona in zona:
+        for zona_id, sub_zona, jenis_zona, luas_zona, ranah in zona:
             b = bencana.get(zona_id, {})
             j = jarak.get(zona_id, {})
             p = potensi.get(zona_id, [])
             n = kkprl.get(zona_id, 0)
             e = ekosistem.get(zona_id, [])
+            k = {**karakter.get(zona_id, {}), 'ranah': ranah, 'ekosistem': {x['jenis'] for x in e}}
             for sektor in sektor_list:
                 ket = _ketentuan(
                     aturan.get(sektor.id, {}),
@@ -437,6 +488,9 @@ class Command(BaseCommand):
                     sub_zona, ket['status'], sektor.kode, b, j, p, n, e, luas_zona,
                     sosial.get(zona_id), zona_id in adat, adat_terdata,
                 )
+                nilai['sesuai_karakter'] = cocok_karakter(sektor.kode, k)[0]
+                if not nilai['sesuai_karakter']:
+                    nilai['kelas'] = 'SANGAT_RENDAH'
                 baris.append(SkorKelayakanZona(zona_id=zona_id, sektor_id=sektor.id, **nilai))
 
         with transaction.atomic():
@@ -469,6 +523,14 @@ class Command(BaseCommand):
         )
 
         mulai = time.time()
+        with connection.cursor() as c:
+            c.execute('DROP TABLE IF EXISTS darat_terbagi')
+            c.execute(
+                'CREATE TEMP TABLE darat_terbagi AS '
+                'SELECT ST_Subdivide(ST_SimplifyPreserveTopology(geometry, 0.0005), 128) AS g '
+                'FROM inti_provinsi WHERE geometry IS NOT NULL'
+            )
+            c.execute('CREATE INDEX ON darat_terbagi USING gist (g)')
         total = dilewati = 0
         for i, prov in enumerate(daftar, 1):
             if opsi['lanjutkan'] and SkorKelayakanZona.objects.filter(
