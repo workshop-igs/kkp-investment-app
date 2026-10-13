@@ -21,6 +21,7 @@ const AOI_ISI = 'rgba(185, 28, 28, 0.14)';
 const PANEL = {
   tata_ruang: {
     url: '/inventarisasi/zonasi/peta/',
+    params: { ranah: 'SEMUA' },
     warna: (p) => warnaZona(p.kategori),
     label: (p) => kategoriZona(p.kategori).label,
     isi: 0.38,

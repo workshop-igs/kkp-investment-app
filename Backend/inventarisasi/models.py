@@ -11,6 +11,8 @@ class ZonasiRuangLaut(models.Model):
         ('ALKI', 'Alur Laut Kepulauan Indonesia'),
         ('KSN', 'Kawasan Strategis Nasional'),
         ('KST', 'Kawasan Strategis Nasional Tertentu'),
+        ('KL', 'Kawasan Lindung (darat)'),
+        ('KB', 'Kawasan Budi Daya (darat)'),
     ]
     SUB_ZONA_CHOICES = [
         ('PERIKANAN_TANGKAP', 'Sub Zona Perikanan Tangkap'),
@@ -33,6 +35,24 @@ class ZonasiRuangLaut(models.Model):
         ('TIDAK_DIBAGI', 'Tidak Dibagi ke dalam Sub Zona'),
         ('BELUM_DIATUR', 'Belum Diatur dalam RZWP-3-K'),
         ('LAINNYA', 'Lainnya'),
+        ('DARAT_PERGARAMAN', 'Kawasan Pergaraman (darat)'),
+        ('DARAT_PERIKANAN', 'Kawasan Perikanan (darat)'),
+        ('DARAT_INDUSTRI', 'Kawasan Peruntukan Industri (darat)'),
+        ('DARAT_PARIWISATA', 'Kawasan Pariwisata (darat)'),
+        ('DARAT_TRANSPORTASI', 'Kawasan Transportasi (darat)'),
+        ('DARAT_PERMUKIMAN', 'Kawasan Permukiman (darat)'),
+        ('DARAT_PERTANIAN', 'Kawasan Pertanian (darat)'),
+        ('DARAT_PERKEBUNAN', 'Kawasan Perkebunan (darat)'),
+        ('DARAT_HUTAN_PRODUKSI', 'Kawasan Hutan Produksi (darat)'),
+        ('DARAT_PERTAMBANGAN', 'Kawasan Pertambangan dan Energi (darat)'),
+        ('DARAT_PERTAHANAN', 'Kawasan Pertahanan dan Keamanan (darat)'),
+        ('DARAT_MANGROVE', 'Kawasan Ekosistem Mangrove (darat)'),
+        ('DARAT_LINDUNG', 'Kawasan Lindung (darat)'),
+        ('DARAT_LAINNYA', 'Kawasan darat lainnya'),
+    ]
+    RANAH_CHOICES = [
+        ('LAUT', 'Perairan'),
+        ('DARAT', 'Darat pesisir'),
     ]
     TINGKAT_ACUAN_CHOICES = [
         ('RTRW_PROVINSI', 'RTRW Provinsi'),
@@ -47,6 +67,7 @@ class ZonasiRuangLaut(models.Model):
     nama_zona = models.CharField(max_length=255)
     jenis_zona = models.CharField(max_length=10, choices=JENIS_ZONA_CHOICES, default='ZU')
     sub_zona = models.CharField(max_length=30, choices=SUB_ZONA_CHOICES, default='LAINNYA')
+    ranah = models.CharField(max_length=5, choices=RANAH_CHOICES, default='LAUT', db_index=True)
     nomor_regulasi = models.CharField(max_length=255, blank=True, help_text='No. Perpres/Perda RTR/RZ')
     geometry = models.MultiPolygonField(srid=4326)
     luas_ha = models.FloatField(default=0)

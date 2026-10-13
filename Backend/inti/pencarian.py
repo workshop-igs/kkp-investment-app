@@ -78,9 +78,10 @@ def _cari_provinsi(kata):
     return hasil
 
 
-def _cari_sederhana(model, kata, kelompok, label_jenis, sumber, kode=None, bidang_keterangan=None, bidang_nama='nama'):
+def _cari_sederhana(model, kata, kelompok, label_jenis, sumber, kode=None, bidang_keterangan=None, bidang_nama='nama',
+                    saring=None):
     qs = (
-        model.objects.filter(**{f'{bidang_nama}__icontains': kata})
+        model.objects.filter(**{f'{bidang_nama}__icontains': kata}, **(saring or {}))
         .exclude(geometry=None)
         .annotate(peringkat=_peringkat(bidang_nama, kata), titik_wakil=PointOnSurface('geometry'))
         .select_related('provinsi')
@@ -169,7 +170,7 @@ def cari_lokasi(request):
     hasil += _cari_kkprl(kata)
     hasil += _cari_sederhana(
         ZonasiRuangLaut, kata, 'Zona Tata Ruang Laut', lambda o: o.get_sub_zona_display(), 'zonasi',
-        kode=lambda o: o.tingkat_acuan, bidang_nama='nama_zona',
+        kode=lambda o: o.tingkat_acuan, bidang_nama='nama_zona', saring={'ranah': 'LAUT'},
     )
     hasil += _cari_sederhana(
         UnsurRuangLaut, kata, 'Unsur Ruang Laut', lambda o: o.jenis or 'Unsur', 'unsur', kode=lambda o: o.kelompok,

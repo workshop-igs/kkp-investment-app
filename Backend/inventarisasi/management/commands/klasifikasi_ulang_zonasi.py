@@ -17,7 +17,7 @@ class Command(BaseCommand):
                             help='Batasi pada satu sumber_data saja.')
 
     def handle(self, *args, **options):
-        qs = ZonasiRuangLaut.objects.all()
+        qs = ZonasiRuangLaut.objects.filter(ranah='LAUT')
         if options['sumber']:
             qs = qs.filter(sumber_data=options['sumber'])
 

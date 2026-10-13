@@ -36,7 +36,7 @@ def _geojson(teks):
 def _sumber_utama_semua():
     ada = {}
     for prov_id, sumber in (
-        ZonasiRuangLaut.objects.filter(tingkat_acuan='RTRW_PROVINSI')
+        ZonasiRuangLaut.objects.filter(tingkat_acuan='RTRW_PROVINSI', ranah='LAUT')
         .values_list('provinsi_id', 'sumber_data').distinct()
     ):
         ada.setdefault(prov_id, set()).add(sumber)
@@ -102,7 +102,7 @@ def _zona(c, provinsi, sumber, tol, sektor=None):
         return {'sumber_label': None, 'label_data': None, 'regulasi': None, 'baris': [], 'total_ha': 0, 'peta': []}
     qs = ZonasiRuangLaut.objects.filter(provinsi=provinsi, sumber_data=sumber, tingkat_acuan='RTRW_PROVINSI')
     if sektor:
-        qs = qs.filter(id__in=skor_sesuai(sektor, provinsi).values('zona_id'))
+        qs = ZonasiRuangLaut.objects.filter(id__in=skor_sesuai(sektor, provinsi).values('zona_id'))
     baris = list(qs.values('sub_zona').annotate(luas=Sum('luas_ha'), n=Count('id')).order_by('-luas'))
     total = sum(b['luas'] or 0 for b in baris)
     ids = list(qs.order_by('-luas_ha').values_list('id', flat=True)[:BATAS_ZONA_PETA])
@@ -434,14 +434,14 @@ def _saring_sumber_utama(qs, prefiks='zona__'):
     per_sumber = {}
     for prov_id, sumber in _sumber_utama_semua().items():
         per_sumber.setdefault(sumber, []).append(prov_id)
-    kondisi = Q(pk__in=[])
+    kondisi = Q(**{f'{prefiks}ranah': 'DARAT'})
     for sumber, prov in per_sumber.items():
         kondisi |= Q(**{f'{prefiks}sumber_data': sumber, f'{prefiks}provinsi_id__in': prov})
     return qs.filter(kondisi, **{f'{prefiks}tingkat_acuan': 'RTRW_PROVINSI'})
 
 
 def skor_sesuai(sektor=None, provinsi=None):
-    qs = SkorKelayakanZona.objects.filter(kesesuaian_tr=True)
+    qs = SkorKelayakanZona.objects.filter(kesesuaian_tr=True, sesuai_karakter=True)
     skor = _saring_sumber_utama(qs.filter(sektor=sektor) if sektor else qs)
     return skor.filter(zona__provinsi=provinsi) if provinsi else skor
 

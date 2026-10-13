@@ -192,16 +192,87 @@ SEKTOR_SUB_ZONA_COCOK = {
     'KONSERVASI_PESISIR': ['KONSERVASI', 'MANGROVE'],
 }
 
+KETENTUAN_DARAT_BAWAAN = {
+    'GARAM': {'DARAT_PERGARAMAN': 'DIIZINKAN', 'DARAT_PERIKANAN': 'BERSYARAT', 'DARAT_INDUSTRI': 'BERSYARAT'},
+    'PERIKANAN_BUDIDAYA': {'DARAT_PERIKANAN': 'DIIZINKAN', 'DARAT_PERGARAMAN': 'BERSYARAT'},
+    'PENGOLAHAN_HASIL_LAUT': {
+        'DARAT_INDUSTRI': 'DIIZINKAN', 'DARAT_PERIKANAN': 'BERSYARAT', 'DARAT_TRANSPORTASI': 'BERSYARAT',
+    },
+    'PARIWISATA_BAHARI': {'DARAT_PARIWISATA': 'DIIZINKAN'},
+    'KONSERVASI_PESISIR': {'DARAT_MANGROVE': 'DIIZINKAN', 'DARAT_LINDUNG': 'DIIZINKAN'},
+}
+
+PITA_PESISIR_DARAT_M = (100, 4000)
+KM_PER_DERAJAT = 111.32
+BATAS_JARAK_PANTAI_DERAJAT = 0.06
+
+EKOSISTEM_PESISIR = ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG']
+
+KARAKTER_LOKASI = {
+    'GARAM': {
+        'uraian': 'tambak garam di darat pesisir, 100 m sampai 4 km dari garis pantai',
+        'DARAT': [{}],
+    },
+    'PENGOLAHAN_HASIL_LAUT': {
+        'uraian': 'unit pengolahan di darat pesisir, paling jauh 4 km dari garis pantai',
+        'DARAT': [{}],
+    },
+    'PERIKANAN_BUDIDAYA': {
+        'uraian': 'budi daya laut di perairan 1-30 m bergelombang paling tinggi 1,5 m, atau tambak di kawasan '
+                  'perikanan darat pesisir, 100 m sampai 4 km dari garis pantai',
+        'LAUT': [{'kedalaman': (1, 30), 'gelombang_maks': 1.5}],
+        'DARAT': [{}],
+    },
+    'PERIKANAN_TANGKAP': {
+        'uraian': 'daerah penangkapan di perairan sedalam 10 m atau lebih',
+        'LAUT': [{'kedalaman': (10, None)}],
+    },
+    'PARIWISATA_BAHARI': {
+        'uraian': 'perairan paling dalam 30 m dan paling jauh 5 km dari pantai atau berterumbu karang, '
+                  'serta kawasan pariwisata di darat pesisir',
+        'LAUT': [{'kedalaman': (None, 30), 'jarak_pantai_maks_km': 5}, {'ekosistem': ['TERUMBU_KARANG']}],
+        'DARAT': [{}],
+    },
+    'JASA_MARITIM': {
+        'uraian': 'perairan yang menempel garis pantai (paling jauh 500 m) dengan gelombang paling tinggi 1,5 m',
+        'LAUT': [{'jarak_pantai_maks_km': 0.5, 'gelombang_maks': 1.5}],
+    },
+    'INFRASTRUKTUR_LAUT': {
+        'uraian': 'perairan paling dalam 40 m tanpa terumbu karang atau lamun',
+        'LAUT': [{'kedalaman': (None, 40), 'tanpa_ekosistem': ['TERUMBU_KARANG', 'LAMUN']}],
+    },
+    'ENERGI_KELAUTAN': {
+        'uraian': 'perairan untuk OTEC (sedalam 500 m atau lebih, suhu permukaan minimum 25 °C), energi gelombang '
+                  '(tinggi gelombang 1 m atau lebih), atau PLTS terapung (5-50 m, gelombang di bawah 1,5 m)',
+        'LAUT': [
+            {'kedalaman': (500, None), 'suhu_min': 25},
+            {'gelombang_min': 1.0},
+            {'kedalaman': (5, 50), 'gelombang_maks': 1.5},
+        ],
+    },
+    'KONSERVASI_PESISIR': {
+        'uraian': 'pesisir yang memiliki mangrove, lamun, atau terumbu karang, di perairan maupun di darat',
+        'LAUT': [{'ekosistem': EKOSISTEM_PESISIR}],
+        'DARAT': [{'ekosistem': EKOSISTEM_PESISIR}],
+    },
+    'BIOTEKNOLOGI_KELAUTAN': {
+        'uraian': 'perairan yang memiliki mangrove, lamun, atau terumbu karang sebagai sumber bahan baku hayati',
+        'LAUT': [{'ekosistem': EKOSISTEM_PESISIR}],
+    },
+}
+
 JENIS_ZONA_TERLARANG = ['ALKI']
 
-SUB_ZONA_TANPA_RINCIAN = ['LAINNYA', 'BELUM_DIATUR', 'TIDAK_DIBAGI']
+SUB_ZONA_TANPA_RINCIAN = ['LAINNYA', 'BELUM_DIATUR', 'TIDAK_DIBAGI', 'DARAT_LAINNYA']
 
+SUMBER_ZONASI_DARAT = 'KKP-RTRW-DARAT'
 PRIORITAS_SUMBER_ZONASI = ['KKP-RTRW', 'KKP-PKKPRL', 'KKP-RZWP3K']
 LABEL_SUMBER_ZONASI = {
     'KKP-RTRW': 'RTRW Provinsi (KKP)',
     'KKP-PKKPRL': 'Peta arahan PKKPRL 1:50.000',
     'KKP-RZWP3K': 'RZWP-3-K',
     'KKP-WFS': 'Rencana Zonasi KAW (Perpres 83/2020)',
+    SUMBER_ZONASI_DARAT: 'Pola Ruang darat RTRW Provinsi (KKP)',
 }
 
 AMBANG_CAKUPAN_ACUAN = 0.99
