@@ -25,12 +25,68 @@ const NAMA_HALAMAN = [
   ['/admin', 'Dashboard Admin'],
 ];
 
-const GELOMBANG = 'M0 16C20 6 40 6 60 16S100 26 120 16S160 6 180 16S220 26 240 16V40H0Z';
-const LAPIS_OMBAK = [
-  { warna: '#40BFDB', opasitas: 0.28, tinggi: 46, durasi: '7s' },
-  { warna: '#1B6A8A', opasitas: 0.22, tinggi: 36, durasi: '5s' },
-  { warna: '#0056A5', opasitas: 0.3, tinggi: 26, durasi: '3.6s' },
-];
+const OMBAK = 'M0 6q20-7 40 0' + 't40 0'.repeat(12) + 'V90H0z';
+const FONT_TANDA = "'Public Sans', ui-sans-serif, system-ui, sans-serif";
+const IKAN = [[66, 'lm-ikan', 1.25], [75, 'lm-ikan-b', 1], [60, 'lm-ikan-c', 0.9]];
+const GELEMBUNG = [[64, 0], [118, -0.9], [172, -1.7], [236, -0.4], [298, -2.1]];
+const RUMPUT = [[40, 22, '#8CC63F'], [96, 28, '#4E8A2E'], [150, 20, '#8CC63F'], [214, 26, '#4E8A2E'], [268, 24, '#8CC63F'], [322, 20, '#4E8A2E']];
+const rumput = (h) => `M0 0c-4 ${-h / 4} 4 ${-h / 4} 0 ${-h / 2}s-4 ${-h / 4} 0 ${-h / 2}`;
+
+const TandaLaut = ({ className }) => (
+  <svg viewBox="0 0 360 136" className={className} aria-hidden="true">
+    <defs>
+      <linearGradient id="lm-langit" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stopColor="#9ADFEC" />
+        <stop offset="1" stopColor="#5BBFD6" />
+      </linearGradient>
+      <linearGradient id="lm-air" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="40">
+        <stop offset="0" stopColor="#40BFDB" />
+        <stop offset=".45" stopColor="#1B6A8A" />
+        <stop offset=".75" stopColor="#0056A5" />
+        <stop offset="1" stopColor="#002242" />
+      </linearGradient>
+      <clipPath id="lm-huruf">
+        <text x="180" y="84" textAnchor="middle" textLength="330" lengthAdjust="spacingAndGlyphs" fontFamily={FONT_TANDA} fontWeight="800" fontSize="68">
+          ruang laut
+        </text>
+      </clipPath>
+    </defs>
+    <g clipPath="url(#lm-huruf)">
+      <rect width="360" height="136" fill="url(#lm-langit)" />
+      <g className="lm-pasang">
+        <g transform="translate(-40 50)">
+          <path className="lm-ombak-b" d={OMBAK} fill="#7FD3E6" />
+        </g>
+        <g transform="translate(0 54)">
+          <path className="lm-ombak" d={OMBAK} fill="url(#lm-air)" />
+        </g>
+      </g>
+      {IKAN.map(([y, kelas, skala]) => (
+        <g key={kelas} transform={`translate(0 ${y}) scale(${skala})`}>
+          <path className={kelas} d="M0 0q8-6 15 0q-7 6-15 0zM14 0l6-4.5v9z" fill="#E7F7FB" fillOpacity=".9" />
+        </g>
+      ))}
+      {GELEMBUNG.map(([x, jeda]) => (
+        <g key={x} transform={`translate(${x} 92)`}>
+          <circle className="lm-gelembung" r="1.8" fill="#fff" fillOpacity=".85" style={{ animationDelay: `${jeda}s` }} />
+        </g>
+      ))}
+      {RUMPUT.map(([x, tinggi, warna]) => (
+        <g key={x} transform={`translate(${x} 92)`}>
+          <path className="lm-rumput" d={rumput(tinggi)} stroke={warna} strokeWidth="3" fill="none" strokeLinecap="round" />
+        </g>
+      ))}
+      {[128, 250].map((x) => (
+        <g key={x} transform={`translate(${x} 92)`}>
+          <path d="M0 0V-12M0-5L-5-11M0-8L4-14M-5-11L-7-14M4-14L7-15" stroke="#F2994A" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+        </g>
+      ))}
+    </g>
+    <text x="184.5" y="122" textAnchor="middle" fontFamily={FONT_TANDA} fontWeight="700" fontSize="19" letterSpacing="9" fill="#1E3A5F">
+      investasi
+    </text>
+  </svg>
+);
 
 const namaHalaman = (path) => (NAMA_HALAMAN.find(([awalan]) => path.startsWith(awalan)) || [null, 'Beranda'])[1];
 
@@ -168,45 +224,19 @@ const OverlayMemuat = () => {
         tampil ? 'visible opacity-100' : 'invisible opacity-0 pointer-events-none'
       }`}
     >
-      <div className="absolute inset-0 bg-kkp-900/45 backdrop-blur-[2px]" />
+      <div className="absolute inset-0 bg-white/85 backdrop-blur-[3px]" />
       <div
-        className={`relative w-full max-w-[22rem] overflow-hidden rounded-2xl bg-white shadow-[0_30px_70px_-25px_rgba(0,34,66,0.55)] ring-1 ring-kkp-900/10 transition-transform duration-200 ${
+        className={`relative flex w-full max-w-sm flex-col items-center text-center transition-transform duration-300 ${
           tampil ? 'translate-y-0' : 'translate-y-2'
         }`}
       >
-        <div className="relative h-24 overflow-hidden bg-[linear-gradient(180deg,#FFFFFF_0%,#EEF8FC_45%,#D3F0F8_100%)]">
-          <div className="absolute inset-x-0 top-[22px] flex justify-center">
-            <img
-              src="/logo-kkp.png"
-              alt=""
-              className={`h-12 w-12 object-contain drop-shadow-[0_6px_8px_rgba(0,34,66,0.25)] ${
-                tampil ? 'animate-[apung_2.6s_ease-in-out_infinite] motion-reduce:animate-none' : ''
-              }`}
-            />
-          </div>
-          {LAPIS_OMBAK.map(({ warna, opasitas, tinggi, durasi }) => (
-            <svg
-              key={warna + durasi}
-              viewBox="0 0 240 40"
-              preserveAspectRatio="none"
-              aria-hidden="true"
-              className={`absolute bottom-0 left-0 w-[200%] ${tampil ? 'animate-[ombak_linear_infinite] motion-reduce:animate-none' : ''}`}
-              style={{ height: tinggi, animationDuration: durasi }}
-            >
-              <path d={GELOMBANG} fill={warna} fillOpacity={opasitas} />
-            </svg>
-          ))}
+        <TandaLaut className={`w-[300px] max-w-full ${tampil ? '' : 'lm-diam'}`} />
+        <div className="mt-3 flex items-center gap-2 font-mono text-[10.5px] font-medium uppercase tracking-[0.2em] text-kkp-700">
+          <span>{jenis === 'halaman' ? 'Memuat' : 'Sedang diproses'}</span>
+          {detik >= 3 && <span className="tabular-nums text-slate-400">· {detik} dtk</span>}
         </div>
-        <div className="px-6 pb-5 pt-4">
-          <div className="flex items-center justify-between gap-3">
-            <span className="font-mono text-[10.5px] font-medium uppercase tracking-[0.2em] text-kkp-700">
-              {jenis === 'halaman' ? 'Memuat' : 'Sedang diproses'}
-            </span>
-            {detik >= 3 && <span className="font-mono text-[11px] tabular-nums text-slate-400">{detik} dtk</span>}
-          </div>
-          <p className="mt-1.5 text-[16px] font-bold leading-snug text-kkp-900">{judul}</p>
-          <p className="mt-1 text-[12.5px] leading-relaxed text-slate-500">{keterangan}</p>
-        </div>
+        <p className="mt-1.5 text-[15px] font-bold leading-snug text-kkp-900">{judul}</p>
+        <p className="mt-1 max-w-xs text-[12.5px] leading-relaxed text-slate-500">{keterangan}</p>
       </div>
     </div>
   );
