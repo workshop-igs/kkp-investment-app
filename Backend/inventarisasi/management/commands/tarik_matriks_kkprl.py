@@ -1,7 +1,9 @@
+import json
 import os
 import re
 import tempfile
 from collections import Counter
+from pathlib import Path
 
 import pdfplumber
 from django.core.management.base import BaseCommand
@@ -18,6 +20,7 @@ MATRIKS = {
     '18': (r'PERDA LAMPUNG NO 14', 153, 201),
     '31': (r'Nomor 7 Tahun 2024', 429, 454),
     '32': (r'Perda No 9 Tahun 2022', 346, 375),
+    '33': (r'Perda 8 tahun 2024', 259, 310),
     '34': (r'Perda DIY Nomor 10', 243, 251),
     '35': (r'LAMPIRAN PERDA 10 TAHUN 2023', 49, 135),
     '36': (r'02\. LAMPIRAN PERDA RTRW BANTEN', 40, 119),
@@ -31,6 +34,7 @@ MATRIKS = {
     '82': (r'LAMPIRAN XVIII TABEL KESESUAIAN', 1, 69),
 }
 PENANDA_MATRIKS = 'Lampiran Matriks KKPRL'
+TRANSKRIPSI = Path(__file__).resolve().parents[2] / 'data' / 'matriks_kkprl_transkripsi.json'
 STATUS = ('DIIZINKAN', 'BERSYARAT', 'TIDAK_DIIZINKAN')
 KEGIATAN_INTI = {
     'PERIKANAN_TANGKAP': ('Penangkapan Pisces/Ikan Bersirip di Laut',),
@@ -70,7 +74,7 @@ AWALAN_ZONA = {
 KODE = re.compile(r'^[A-Z][A-Za-z]{0,6}(?:[-–.][A-Za-z0-9]{1,6}){0,3}[-–. ]?\d{1,4}[A-Za-z]?$')
 DAFTAR = ('boleh', 'bersyarat', 'tidak')
 KATA_KEPALA = re.compile(r'boleh|syarat|khusus|tambahan|kode|zona|lokasi|koordinat|perairan|kab|toponimi|luas|lon|lat|'
-                         r'bujur|lintang|bt|ls|pola|kegiatan|pemanfaatan|^\d{1,2}$|^[xy]$', re.I)
+                         r'bujur|lintang|bt|ls|pola|kegiatan|pemanfaatan|kota|^\d{1,2}$|^\(?[xy]\)?$', re.I)
 JUDUL = re.compile(r'\b(ZONA|KAWASAN|SUB[ -]?ZONA|Zona|Kawasan|Sub[ -]?[Zz]ona)\b')
 PELURU = '·•●▪◦‣∙'
 PELURU_TUNGGAL = set(PELURU) | {'−', '–', '-'}
@@ -249,17 +253,21 @@ def ekstrak(pdf, awal, akhir):
                         isi[p] = (isi.get(p, '') + '\n' + teks).strip()
                 if not isi or all(re.fullmatch(r'\d{1,2}', v) for v in isi.values()):
                     continue
-                zona, pola = ('' if '°' in isi.get(p, '') else re.sub(r'^[\d.\s]+$', '', bersih(isi.get(p, '')).replace('\n', ' '))
+                zona, pola = ('' if '°' in isi.get(p, '') else re.sub(
+                    r'(?<=[a-z]{3}) ([a-z])\b', r'\1', re.sub(r'^[\d.\s]+$', '', bersih(isi.get(p, '')).replace('\n', ' ')))
                               for p in ('zona', 'pola'))
                 daftar = {p: bersih(isi.get(p, '')) for p in (*DAFTAR, 'khusus')}
                 ada_daftar = any(daftar[p] for p in DAFTAR)
                 ada_kode = bool(re.sub(r'\s+', '', isi.get('kode', '')))
                 sel_asli = any('\n' in (isi.get(p) or '') for p in DAFTAR)
-                ganti = bool(pola and pola != nama['pola']) or bool(
-                    zona and zona != nama['zona'] and len(zona) < 80 and ('pola' not in rentang or ada_kode))
+                pola_baru = bool(pola and pola != nama['pola'])
+                terpotong = bool(zona) and not pola_baru and (
+                    (k == len(baris) - 1 and nama['zona'].startswith(zona)) or (baris_pertama and zona[0] in '(abcdefghijklmnopqrstuvwxyz'))
+                ganti = pola_baru or bool(
+                    zona and zona != nama['zona'] and not terpotong and len(zona) < 80 and ('pola' not in rentang or ada_kode))
                 if pola:
                     nama['pola'] = pola
-                if zona:
+                if zona and not terpotong:
                     nama['zona'] = zona
                 elif pola and ganti:
                     nama['zona'] = ''
@@ -315,7 +323,8 @@ def nama_dasar(e):
     pola = re.sub(r'^KKPRL?\s+(?=(?:zona|kawasan)\b)', '', pola, flags=re.I)
     if len(zona) > 60:
         zona = ''
-    if GENERIK.search(pola) or len(pola) > 80:
+    if GENERIK.search(pola) or len(pola) > 80 or len(pola) < 8 or pola[:1].islower() \
+            or re.match(r'(?:sub ?)?(?:zona|kawasan)\b', zona, re.I) or (zona and re.match(r'zona\b', pola, re.I)):
         pola = ''
     nama = f'{pola} - {zona}' if pola and zona and kunci(zona) not in kunci(pola) else (pola or zona)
     return re.sub(r'\s+', ' ', nama)
@@ -367,7 +376,22 @@ class Command(BaseCommand):
                             help='Folder unduhan (dipakai ulang bila berkasnya sudah ada).')
 
     def handle(self, *args, **opsi):
-        diminta = set(opsi['provinsi'] or MATRIKS)
+        transkripsi = json.loads(TRANSKRIPSI.read_text(encoding='utf-8'))
+        diminta = set(opsi['provinsi'] or [*MATRIKS, *transkripsi])
+        for kode in sorted(diminta & set(transkripsi)):
+            provinsi = Provinsi.objects.filter(kode_bps=kode).first()
+            data = transkripsi[kode]
+            self.stdout.write(self.style.MIGRATE_HEADING(f'{provinsi.nama}: transkripsi {data["berkas"]}'))
+            sumber = f'{data["perda"]}, {PENANDA_MATRIKS} (transkripsi lampiran pindaian)'
+            blok = [(MatriksKKPRL(
+                provinsi=provinsi, nama_zona=b['nama_zona'], sub_zona=sub_zona(b['nama_zona'], jenis_kawasan(b['nama_zona'])),
+                kode_zona=b.get('kode_zona', []), diperbolehkan=b['diperbolehkan'], bersyarat=b['bersyarat'],
+                tidak_diperbolehkan=b['tidak_diperbolehkan'], ketentuan_khusus=b.get('ketentuan_khusus', ''),
+                sumber=sumber[:255], halaman=b['halaman'],
+            ), {}) for b in data['blok']]
+            self._simpan(provinsi, blok, sumber)
+        if not diminta & set(MATRIKS):
+            return
         for folder, fid, nama in _isi_folder(FOLDER_DRIVE):
             m = re.match(r'\[(\d{2})00\]', nama)
             if not (folder and m) or m.group(1) not in diminta or m.group(1) not in MATRIKS:
@@ -386,7 +410,19 @@ class Command(BaseCommand):
             with pdfplumber.open(tujuan) as pdf:
                 entri = ekstrak(pdf, awal, akhir)
                 perda = self._perda(pdf, awal, provinsi, cocok[0][-1])
-            self._simpan(provinsi, entri, perda, awal)
+            sumber = f'{perda}, {PENANDA_MATRIKS}'
+            dipakai = Counter(nama_dasar(e) for e in entri)
+            blok = []
+            for e in entri:
+                nama_zona = nama_blok(e, dipakai)
+                blok.append((MatriksKKPRL(
+                    provinsi=provinsi, nama_zona=nama_zona,
+                    sub_zona=sub_zona(f"{nama_zona} {e['zona']}", jenis_kawasan(nama_zona)),
+                    kode_zona=sorted(e['kode_zona']), diperbolehkan=butir(e['boleh']), bersyarat=butir(e['bersyarat']),
+                    tidak_diperbolehkan=butir(e['tidak']), ketentuan_khusus=re.sub(r'\s*\n\s*', ' ', e['khusus']).strip(),
+                    sumber=sumber[:255], halaman=e['halaman'],
+                ), e['kode_zona']))
+            self._simpan(provinsi, blok, sumber)
 
     def _perda(self, pdf, awal, provinsi, berkas):
         for h in [*range(awal - 1, min(awal + 2, len(pdf.pages))), *range(min(3, len(pdf.pages)))]:
@@ -397,28 +433,31 @@ class Command(BaseCommand):
         m = re.search(r'(?:PERDA|NOMOR)\D{0,6}?(\d{1,2})\s+TAHUN\s+(\d{4})', berkas, re.I)
         return f'Perda Provinsi {provinsi.nama} No. {m.group(1)}/{m.group(2)}' if m else f'Perda RTRW {provinsi.nama}'
 
-    def _simpan(self, provinsi, entri, perda, awal):
-        sumber = f'{perda}, {PENANDA_MATRIKS}'
-        dipakai = Counter(nama_dasar(e) for e in entri)
-        blok = []
-        for e in entri:
-            nama = nama_blok(e, dipakai)
-            blok.append((MatriksKKPRL(
-                provinsi=provinsi, nama_zona=nama, sub_zona=sub_zona(f"{nama} {e['zona']}", jenis_kawasan(nama)),
-                kode_zona=sorted(e['kode_zona']), diperbolehkan=butir(e['boleh']), bersyarat=butir(e['bersyarat']),
-                tidak_diperbolehkan=butir(e['tidak']), ketentuan_khusus=re.sub(r'\s*\n\s*', ' ', e['khusus']).strip(),
-                sumber=sumber[:255], halaman=e['halaman'],
-            ), e['kode_zona']))
+    def _simpan(self, provinsi, blok, sumber):
         with transaction.atomic():
             ZonasiRuangLaut.objects.filter(provinsi=provinsi).update(matriks=None, kode_perda='')
             MatriksKKPRL.objects.filter(provinsi=provinsi).delete()
             MatriksKKPRL.objects.bulk_create([m for m, _ in blok])
             tertaut, diperinci = self._tautkan(provinsi, blok)
+            per_jenis = self._tautkan_jenis(provinsi, [m for m, _ in blok])
             aturan = self._ketentuan(provinsi, [m for m, _ in blok], sumber)
         self.stdout.write(self.style.SUCCESS(
-            f'  {len(blok)} blok zona, {sum(len(k) for _, k in blok)} kode zona ({tertaut} tertaut ke poligon), '
-            f'{aturan} ketentuan per jenis investasi, {diperinci} Kawasan Perikanan diperinci; sumber {perda}'
+            f'  {len(blok)} blok zona, {sum(len(m.kode_zona) for m, _ in blok)} kode zona ({tertaut} tertaut ke poligon), '
+            f'{per_jenis} zona lain tertaut menurut jenis zona, {aturan} ketentuan per jenis investasi, '
+            f'{diperinci} Kawasan Perikanan diperinci; sumber {sumber.split(",")[0]}'
         ))
+
+    def _tautkan_jenis(self, provinsi, blok):
+        per_jenis = {}
+        for m in blok:
+            per_jenis.setdefault(m.sub_zona, []).append(m)
+        tunggal = {sub: daftar[0] for sub, daftar in per_jenis.items() if len(daftar) == 1 and sub != 'LAINNYA'}
+        zona = list(ZonasiRuangLaut.objects.filter(
+            provinsi=provinsi, tingkat_acuan='RTRW_PROVINSI', matriks__isnull=True, sub_zona__in=tunggal))
+        for z in zona:
+            z.matriks = tunggal[z.sub_zona]
+        ZonasiRuangLaut.objects.bulk_update(zona, ['matriks'], batch_size=500)
+        return len(zona)
 
     def _tautkan(self, provinsi, blok):
         titik = [(kode, xy[0], xy[1], m) for m, kode_zona in blok for kode, xy in kode_zona.items() if None not in xy]
