@@ -87,8 +87,9 @@ class ZonasiRuangLautViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         tingkat = request.query_params.get('tingkat')
         if tingkat:
             qs = qs.filter(tingkat_acuan=tingkat)
-        if request.query_params.get('ranah') != 'SEMUA':
-            qs = qs.filter(ranah='LAUT')
+        ranah = request.query_params.get('ranah') or 'LAUT'
+        if ranah != 'SEMUA':
+            qs = qs.filter(ranah=ranah)
         kategori = request.query_params.get('kategori')
         return qs.filter(sub_zona=kategori) if kategori else qs
 

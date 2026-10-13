@@ -29,7 +29,7 @@ from .models import (
 )
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
-from .services.konstanta import AMBANG_TERBANGUN_PERSEN, KARAKTER_LOKASI
+from .services.konstanta import AMBANG_TERBANGUN_PERSEN, KARAKTER_LOKASI, SEKTOR_TERSENDIRI_DI_PETA
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
 from .services.profil_investasi import _saring_sumber_utama
@@ -446,7 +446,11 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         ] or ['TINGGI', 'SEDANG']
 
         if kode == 'SEMUA':
-            penyaring = {'skor_kelayakan__sektor__aktif': True}
+            penyaring = {
+                'skor_kelayakan__sektor__aktif': True,
+                'skor_kelayakan__sektor__kode__in': SektorInvestasi.objects.filter(aktif=True)
+                .exclude(kode__in=SEKTOR_TERSENDIRI_DI_PETA).values('kode'),
+            }
         else:
             sektor = None
             if kode:
