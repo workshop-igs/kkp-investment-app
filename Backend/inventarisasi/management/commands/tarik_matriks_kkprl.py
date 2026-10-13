@@ -427,17 +427,22 @@ class Command(BaseCommand):
         with connection.cursor() as c:
             c.execute(
                 """
-                SELECT t.i, z.id FROM unnest(%s::int[], %s::float8[], %s::float8[]) AS t(i, x, y)
+                SELECT t.i, z.id FROM unnest(%s::int[], %s::float8[], %s::float8[], %s::text[]) AS t(i, x, y, sub)
                 CROSS JOIN LATERAL (
                     SELECT DISTINCT ON (z.sumber_data) z.id, z.sumber_data
                     FROM inventarisasi_zonasi_ruang_laut z,
                          (VALUES (ST_SetSRID(ST_Point(t.x, t.y), 4326)), (ST_SetSRID(ST_Point(t.x, -t.y), 4326))) p(g)
                     WHERE z.provinsi_id = %s AND z.tingkat_acuan = 'RTRW_PROVINSI'
                       AND ST_DWithin(z.geometry, p.g, 0.002)
-                    ORDER BY z.sumber_data, ST_Distance(z.geometry, p.g)
+                    ORDER BY z.sumber_data, ST_Intersects(z.geometry, p.g) DESC,
+                             (z.sub_zona = t.sub OR split_part(z.sub_zona, '_', 1) = split_part(t.sub, '_', 1)
+                              OR z.sub_zona || t.sub IN ('PERTAMBANGANENERGI', 'ENERGIPERTAMBANGAN',
+                                                         'MANGROVEEKOSISTEM_PESISIR', 'EKOSISTEM_PESISIRMANGROVE')) DESC,
+                             ST_Distance(z.geometry, p.g)
                 ) z
                 """,
-                [list(range(len(titik))), [t[1] for t in titik], [t[2] for t in titik], provinsi.id],
+                [list(range(len(titik))), [t[1] for t in titik], [t[2] for t in titik], [t[3].sub_zona for t in titik],
+                 provinsi.id],
             )
             per_zona = {}
             for i, zid in c.fetchall():
