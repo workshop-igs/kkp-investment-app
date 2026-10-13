@@ -465,7 +465,7 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
     ANOTASI_SKOR = {
         '_skor_id': 'id', '_skor': 'skor_total', '_kelas': 'kelas', '_lokasi': 'skor_lokasi',
-        '_risiko': 'skor_risiko', '_sesuai': 'kesesuaian_tr',
+        '_risiko': 'skor_risiko', '_sesuai': 'kesesuaian_tr', '_status_tr': 'status_tr',
         '_jarak': 'jarak_infra_km', '_bencana': 'risiko_bencana', '_kkprl': 'jumlah_kkprl',
         '_sosek': 'sumber_sosek', '_ekosistem': 'sensitivitas_ekosistem',
         '_sosial': 'risiko_sosial', '_adat': 'wilayah_adat', '_sumber_sosial': 'sumber_sosial',
@@ -479,7 +479,7 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
     PETA_KOLOM = (
         'nama_zona', 'sub_zona', 'provinsi__nama',
-        '_skor', '_kelas', '_lokasi', '_risiko', '_sesuai', '_jarak',
+        '_skor', '_kelas', '_lokasi', '_risiko', '_sesuai', '_status_tr', '_jarak',
         '_bencana', '_kkprl', '_sosek', '_ekosistem', '_sosial', '_adat',
         '_sumber_sosial', '_sektor_nama', '_sektor_kode', 'persen_terbangun', 'luas_ha',
     )
@@ -498,6 +498,7 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
             'skor_lokasi': bulat(r['_lokasi'], 3),
             'skor_risiko': bulat(r['_risiko'], 3),
             'sesuai_tata_ruang': r['_sesuai'],
+            'status_tata_ruang': r['_status_tr'],
             'jarak_infra_km': r['_jarak'],
             'risiko_bencana': bulat(r['_bencana'], 2),
             'jumlah_kkprl': r['_kkprl'],

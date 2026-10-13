@@ -74,7 +74,8 @@ const PETUNJUK_ADMIN = [
 
 const PEMBARUAN = [
   ['tarik_kkprl_wfs', 'KKPRL terbit dari Portal Satu Data KKP, termasuk klasifikasi jenis investasi (--klasifikasi)'],
-  ['tarik_rtrw_provinsi', 'Zona laut dari geodatabase RTRW Provinsi (folder Google Drive KKP); acuan tata ruang utama, beserta ketentuan kegiatan dari lampiran matriks KKPRL Perda untuk provinsi yang sudah diverifikasi'],
+  ['tarik_rtrw_provinsi', 'Zona laut dari geodatabase RTRW Provinsi (folder Google Drive KKP); acuan tata ruang utama'],
+  ['tarik_matriks_kkprl', 'Matriks kesesuaian kegiatan (diperbolehkan, bersyarat, tidak diperbolehkan) dari lampiran Perda RTRW Provinsi di folder yang sama, ditautkan ke zona lewat kode dan koordinatnya; jalankan setelah tarik_rtrw_provinsi'],
   ['tarik_pola_ruang_wfs, tarik_rzwp3k_wfs', 'Pola ruang RTRW/PKKPRL dan RZWP-3-K'],
   ['tarik_ekosistem_wfs', 'Mangrove Portal Satu Data KKP'],
   ['tarik_ekosistem_sidako', 'Terumbu karang dan padang lamun 2025 dari Sidako Ekosistem KKP'],

@@ -51,6 +51,11 @@ class ZonasiRuangLaut(models.Model):
     geometry = models.MultiPolygonField(srid=4326)
     luas_ha = models.FloatField(default=0)
     persen_terbangun = models.FloatField(default=0, help_text='Bagian luas zona yang tertutup bangunan atau struktur eksisting')
+    matriks = models.ForeignKey(
+        'MatriksKKPRL', on_delete=models.SET_NULL, null=True, blank=True, related_name='zona',
+        help_text='Blok matriks KKPRL Perda yang berlaku bagi zona ini',
+    )
+    kode_perda = models.TextField(blank=True, help_text='Kode zona pada lampiran Perda')
     keterangan = models.TextField(blank=True)
     tahun_penetapan = models.IntegerField(null=True, blank=True)
     sumber_data = models.CharField(max_length=100, default='DJPRL')
@@ -67,6 +72,28 @@ class ZonasiRuangLaut(models.Model):
 
     def __str__(self):
         return f'{self.nama_zona} ({self.get_jenis_zona_display()}) - {self.provinsi.nama}'
+
+
+class MatriksKKPRL(models.Model):
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE, related_name='matriks_kkprl')
+    nama_zona = models.CharField(max_length=255)
+    sub_zona = models.CharField(max_length=30, choices=ZonasiRuangLaut.SUB_ZONA_CHOICES)
+    kode_zona = models.JSONField(default=list)
+    diperbolehkan = models.JSONField(default=list)
+    bersyarat = models.JSONField(default=list)
+    tidak_diperbolehkan = models.JSONField(default=list)
+    ketentuan_khusus = models.TextField(blank=True)
+    sumber = models.CharField(max_length=255)
+    halaman = models.IntegerField(null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'inventarisasi_matriks_kkprl'
+        ordering = ['provinsi', 'halaman', 'id']
+        verbose_name_plural = 'Matriks KKPRL Perda'
+
+    def __str__(self):
+        return f'{self.nama_zona} - {self.provinsi.nama}'
 
 
 class RegulasiTataRuang(models.Model):
