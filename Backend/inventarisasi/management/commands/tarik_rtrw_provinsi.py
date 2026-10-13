@@ -296,6 +296,7 @@ class Command(BaseCommand):
             if 'KKPRL' not in os.path.basename(gdb).upper() and (lapisan := lapisan_pola_ruang(ds))
         ]
         if not calon:
+            self.stdout.write('  Geodatabase tanpa layer Pola Ruang; zona darat pesisir tidak dimuat.')
             return
         tahun, gdb, lapisan = max(calon, key=lambda c: c[0])
         dekat, jauh = (m / 111320 for m in PITA_PESISIR_DARAT_M)

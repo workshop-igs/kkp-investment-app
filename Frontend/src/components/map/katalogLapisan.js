@@ -1,7 +1,15 @@
 import { gayaUnsurRtrl } from '../../utils/simbologiPeta';
 import { warnaKelasRisiko } from '../../utils/simbologiPeta';
 import { KELAS_KELAYAKAN, garisKelasKelayakan, warnaKelasKelayakan } from '../../utils/simbologiPeta';
-import { KATEGORI_ZONA, URUTAN_KATEGORI, gayaKawasan, kategoriZona, warnaJenisInvestasi, warnaZona } from '../../utils/simbologiPeta';
+import {
+  KATEGORI_ZONA,
+  URUTAN_KATEGORI,
+  URUTAN_KATEGORI_DARAT,
+  gayaKawasan,
+  kategoriZona,
+  warnaJenisInvestasi,
+  warnaZona,
+} from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { API_V1_URL } from '../../api/alamat';
 
@@ -135,9 +143,14 @@ const POLA_RUANG = {
       </p>
       <div class="text-xs border-t pt-1">
       <b>Kawasan:</b> ${aman(p.jenis || '-')}<br/>
-      <b>Sub-zona:</b> ${aman(p.sub_zona || '-')}<br/>
+      <b>${p.sumber === 'KKP-RTRW-DARAT' ? 'Peruntukan' : 'Sub-zona'}:</b> ${aman(p.sub_zona || '-')}<br/>
       <b>Instrumen:</b> ${
-        { 'KKP-RTRW': 'Perda RTRW Provinsi', 'KKP-PKKPRL': 'PKKPRL pada RTRW Provinsi', 'KKP-WFS': 'Rencana Zonasi KAW' }[p.sumber] || 'RZWP-3-K'
+        {
+          'KKP-RTRW': 'Perda RTRW Provinsi',
+          'KKP-RTRW-DARAT': 'Pola Ruang darat Perda RTRW Provinsi',
+          'KKP-PKKPRL': 'PKKPRL pada RTRW Provinsi',
+          'KKP-WFS': 'Rencana Zonasi KAW',
+        }[p.sumber] || 'RZWP-3-K'
       }<br/>
       <b>Dasar hukum:</b> ${aman(p.regulasi || '-')}<br/>
       <b>Provinsi:</b> ${aman(p.provinsi || '-')}</div>
@@ -230,7 +243,7 @@ export const LAYER_LOKAL = {
       + 'bersambung membentuk satu area dengan satu penanda pada zona terluas berkelas tertinggi. Zona yang '
       + 'peruntukannya hanya mengizinkan jenis itu dengan syarat paling tinggi berkelas Sesuai. Setiap zona '
       + 'ditampilkan dengan jenis investasi yang skornya paling tinggi; pilih satu jenis untuk melihat '
-      + 'sebaran khusus jenis itu. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
+      + 'sebaran khusus jenis itu. Konservasi & Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
       + 'perbesar peta untuk melihat zona lainnya. Skor menimbang kesesuaian tata ruang, potensi sumber daya, '
       + 'aksesibilitas infrastruktur, kondisi sosial-ekonomi, serta risiko bencana, regulasi, lingkungan, dan '
       + 'sosial. Zonanya nyata: RZWP-3-K, PKKPRL, dan kawasan konservasi dari Portal Satu Data KKP. '
@@ -425,6 +438,19 @@ export const LAYER_LOKAL = {
       + 'lapisan dan dapat bertumpuk; popup tiap zona menyebutkan instrumen dasarnya, '
       + 'dan screening memakai acuan teratas yang tersedia. Rencana Zonasi KAW '
       + 'disajikan pada lapisan tersendiri.',
+  },
+
+  polaruang_darat: {
+    ...POLA_RUANG,
+    params: { tingkat: 'RTRW_PROVINSI', ranah: 'DARAT' },
+    legenda: 'zona_darat',
+    pilihan: { ...POLA_RUANG.pilihan, opsi: URUTAN_KATEGORI_DARAT.map((kode) => [kode, KATEGORI_ZONA[kode].label]) },
+    label: 'Pola Ruang Darat Pesisir (RTRW Provinsi)',
+    keteranganLegenda:
+      'Peruntukan ruang darat dari geodatabase Perda RTRW Provinsi (KKP) pada jalur pesisir 100 m sampai 4 km '
+      + 'dari zona laut. Dipakai untuk jenis investasi yang berlokasi di darat, misalnya tambak garam di Kawasan '
+      + 'Pergaraman, tambak di Kawasan Perikanan, dan unit pengolahan di Kawasan Peruntukan Industri. Sempadan '
+      + 'pantai 100 m tidak dimuat. Provinsi yang geodatabase RTRW-nya tidak memuat Pola Ruang belum tersedia.',
   },
 
   polaruang_kaw: {

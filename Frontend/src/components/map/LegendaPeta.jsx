@@ -5,6 +5,7 @@ import {
   KELAS_KELAYAKAN,
   KELAS_RISIKO,
   URUTAN_KATEGORI,
+  URUTAN_KATEGORI_DARAT,
   URUTAN_KELAS_RISIKO,
 } from '../../utils/simbologiPeta';
 import { GARIS_KAWASAN, KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI, garisKelasKelayakan } from '../../utils/simbologiPeta';
@@ -187,12 +188,12 @@ const LegendaJenis = ({ keterangan }) => (
   </div>
 );
 
-const LegendaLokal = () => (
+const LegendaLokal = ({ urutan = URUTAN_KATEGORI, garis = true }) => (
   <div className="space-y-3">
     <div>
       <p className="text-[11px] font-semibold text-slate-500 mb-1.5">Warna = peruntukan zona</p>
       <ul className="grid grid-cols-1 gap-y-1">
-        {URUTAN_KATEGORI.map((kode) => {
+        {urutan.map((kode) => {
           const k = KATEGORI_ZONA[kode];
           return (
             <li key={kode} className="flex items-start gap-2">
@@ -207,7 +208,7 @@ const LegendaLokal = () => (
       </ul>
     </div>
 
-    <div className="pt-2 border-t border-slate-100">
+    {garis && <div className="pt-2 border-t border-slate-100">
       <p className="text-[11px] font-semibold text-slate-500 mb-1.5">Garis tepi = jenis kawasan</p>
       <ul className="space-y-1">
         {GARIS_KAWASAN.map(({ label, tebal, pola, warna }) => (
@@ -217,7 +218,7 @@ const LegendaLokal = () => (
           </li>
         ))}
       </ul>
-    </div>
+    </div>}
   </div>
 );
 
@@ -394,6 +395,8 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
                 <LegendaJenis keterangan={daftarLokal[id].keteranganLegenda} />
               ) : daftarLokal[id].legenda === 'zona' ? (
                 <LegendaLokal />
+              ) : daftarLokal[id].legenda === 'zona_darat' ? (
+                <LegendaLokal urutan={URUTAN_KATEGORI_DARAT} garis={false} />
               ) : daftarLokal[id].legenda === 'risiko' ? (
                 <LegendaRisiko />
               ) : daftarLokal[id].legenda === 'rtrl' ? (
