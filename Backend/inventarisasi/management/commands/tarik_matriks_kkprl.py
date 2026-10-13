@@ -15,6 +15,7 @@ from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
 
 MATRIKS = {
     '17': (r'PERDA NO 3 POVIBNSI', 114, 153),
+    '18': (r'PERDA LAMPUNG NO 14', 153, 201),
     '31': (r'Nomor 7 Tahun 2024', 429, 454),
     '32': (r'Perda No 9 Tahun 2022', 346, 375),
     '34': (r'Perda DIY Nomor 10', 243, 251),
@@ -103,7 +104,7 @@ def peran(teks):
         return 'x'
     if re.search(r'\blat\b|lintang|\(y\)|\bls\b|\blu\b|\by\b', k):
         return 'y'
-    if re.search(r'rencana pola|rincian pola|pola ruang', k):
+    if re.search(r'rencana pola|rincian pola|pola ruang', k) and not re.search(r'lokasi|provinsi|perairan|objek|luas', k):
         return 'pola'
     if re.search(r'^(zona|sub ?zona|kegiatan|kawasan)\b', k) and not re.search(r'perairan|lokasi|kab', k):
         return 'zona'
@@ -115,7 +116,7 @@ def judul_di_atas(hal, atas):
         return ''
     teks = hal.crop((0, max(0, atas - 120), hal.width, atas)).extract_text() or ''
     for b in reversed([b.strip() for b in teks.split('\n') if b.strip()]):
-        if JUDUL.search(b) and len(b) < 200 and not re.search(r'kode zona|diperbolehkan', b, re.I):
+        if JUDUL.search(b) and len(b) < 120 and '°' not in b and not re.search(r'kode zona|diperbolehkan', b, re.I):
             return b
     return ''
 
@@ -139,7 +140,7 @@ def kepala(tbl, baris):
         terisi = [i for i, c in enumerate(baris[awal]) if c]
         sel = tbl.rows[awal].cells
         if len(terisi) == 1 and sel[terisi[0]] and sel[terisi[0]][2] - sel[terisi[0]][0] > lebar * 0.5 \
-                and JUDUL.search(baris[awal][terisi[0]].strip()):
+                and JUDUL.search(baris[awal][terisi[0]].strip()) and '°' not in baris[awal][terisi[0]]:
             judul = re.sub(r'\s+', ' ', baris[awal][terisi[0]]).strip()
             awal += 1
         else:
@@ -248,7 +249,8 @@ def ekstrak(pdf, awal, akhir):
                         isi[p] = (isi.get(p, '') + '\n' + teks).strip()
                 if not isi or all(re.fullmatch(r'\d{1,2}', v) for v in isi.values()):
                     continue
-                zona, pola = (re.sub(r'^[\d.\s]+$', '', bersih(isi.get(p, '')).replace('\n', ' ')) for p in ('zona', 'pola'))
+                zona, pola = ('' if '°' in isi.get(p, '') else re.sub(r'^[\d.\s]+$', '', bersih(isi.get(p, '')).replace('\n', ' '))
+                              for p in ('zona', 'pola'))
                 daftar = {p: bersih(isi.get(p, '')) for p in (*DAFTAR, 'khusus')}
                 ada_daftar = any(daftar[p] for p in DAFTAR)
                 ada_kode = bool(re.sub(r'\s+', '', isi.get('kode', '')))
