@@ -10,6 +10,7 @@ import {
   KELAS_KELAYAKAN,
   KELAS_RISIKO,
   URUTAN_KATEGORI,
+  URUTAN_KATEGORI_DARAT,
   URUTAN_KELAS_RISIKO,
   URUTAN_RTRL,
   WARNA_JENIS_INVESTASI,
@@ -128,6 +129,8 @@ function itemLegenda(def, osea) {
           label, warna, garis: { tebal, putus: { dashed: [1.4, 0.9], dotted: [0.35, 0.7] }[pola] },
         })),
       ];
+    case 'zona_darat':
+      return kotak(URUTAN_KATEGORI_DARAT, KATEGORI_ZONA);
     case 'risiko':
       return kotak(URUTAN_KELAS_RISIKO, KELAS_RISIKO);
     case 'rtrl':
