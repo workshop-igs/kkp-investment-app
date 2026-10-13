@@ -19,7 +19,7 @@ from analitik.services.konstanta import (
 )
 from analitik.services.laporan_spasial import _arah
 from inti.models import SektorInvestasi
-from inventarisasi.models import ZonasiRuangLaut
+from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
 
 URUTAN_ACUAN = ['RTRW_PROVINSI', 'KAW', 'RTRWN']
 BATAS_SYARAT_RINGKAS = 240
@@ -119,7 +119,7 @@ def _zona_efektif(c, geom, luas_aoi):
     c.execute(
         """
         SELECT z.id, z.nama_zona, z.jenis_zona, z.sub_zona, z.tingkat_acuan, z.sumber_data,
-               z.nomor_regulasi, z.provinsi_id, p.nama,
+               z.nomor_regulasi, z.provinsi_id, p.nama, z.matriks_id, z.kode_perda,
                ST_AsEWKB(ST_Intersection(ST_MakeValid(ST_ClipByBox2D(z.geometry, ST_Expand(a.g, 0.0001))), a.g))
         FROM inventarisasi_zonasi_ruang_laut z
         JOIN inti_provinsi p ON p.id = z.provinsi_id,
@@ -139,7 +139,7 @@ def _zona_efektif(c, geom, luas_aoi):
         if sisa.empty:
             break
         potongan = []
-        for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, ewkb) in baris:
+        for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, matriks_id, kode_perda, ewkb) in baris:
             if tk != tingkat or sd != sumber or (sub in SUB_ZONA_TANPA_RINCIAN) != umum or ewkb is None:
                 continue
             irisan = _geos(ewkb).intersection(sisa)
@@ -161,6 +161,8 @@ def _zona_efektif(c, geom, luas_aoi):
                 'provinsi': prov_nama,
                 'luas_m2': m2,
                 'persen': round(m2 / luas_aoi * 100, 1) if luas_aoi else 0,
+                'matriks_id': matriks_id,
+                'kode_perda': kode_perda,
             })
             potongan.extend(_bagian(irisan))
         if potongan:
@@ -291,9 +293,10 @@ def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
 def _informasi_ruang(c, zona_efektif, semua_aturan, sektor_aktif) -> List[Dict[str, Any]]:
     kelompok: Dict[str, Dict[str, Any]] = {}
     for z in zona_efektif:
-        kunci = f"{z['nama']}|{z['sub_zona']}|{z['tingkat']}"
+        kunci = _kunci_zona(z)
         if kunci in kelompok:
             kelompok[kunci]['persen'] = round(kelompok[kunci]['persen'] + z['persen'], 1)
+            kelompok[kunci]['_kode'].update(filter(None, z['kode_perda'].split(', ')))
             continue
         kegiatan = {kode: [] for kode in LABEL_KETENTUAN}
         sumber, khusus = [], []
@@ -307,7 +310,8 @@ def _informasi_ruang(c, zona_efektif, semua_aturan, sektor_aktif) -> List[Dict[s
                 khusus.append(ket['syarat'])
         kelompok[kunci] = {'nama': z['nama'], 'jenis_label': z['jenis_label'], 'sub_zona_label': z['sub_zona_label'],
                            'persen': z['persen'], 'dasar_zona': ' - '.join(filter(None, [z['sumber_label'], z['regulasi']])),
-                           'sumber_aturan': sumber, 'ketentuan_khusus': khusus, 'kegiatan': kegiatan, 'kkprl_terbit': []}
+                           'sumber_aturan': sumber, 'ketentuan_khusus': khusus, 'kegiatan': kegiatan, 'kkprl_terbit': [],
+                           '_matriks': z['matriks_id'], '_kode': set(filter(None, z['kode_perda'].split(', ')))}
     if not zona_efektif:
         return []
     c.execute(
@@ -321,11 +325,24 @@ def _informasi_ruang(c, zona_efektif, semua_aturan, sektor_aktif) -> List[Dict[s
         GROUP BY 1, 2
         ORDER BY 3 DESC
         """,
-        [[z['id'] for z in zona_efektif], [f"{z['nama']}|{z['sub_zona']}|{z['tingkat']}" for z in zona_efektif]],
+        [[z['id'] for z in zona_efektif], [_kunci_zona(z) for z in zona_efektif]],
     )
     for kunci, jenis, n in c.fetchall():
         kelompok[kunci]['kkprl_terbit'].append({'jenis': jenis, 'jumlah': n})
+    matriks = MatriksKKPRL.objects.in_bulk({g['_matriks'] for g in kelompok.values() if g['_matriks']})
+    for g in kelompok.values():
+        m = matriks.get(g.pop('_matriks'))
+        kode = sorted(g.pop('_kode'))
+        g['perda'] = m and {
+            'nama_zona': m.nama_zona, 'kode_zona': kode, 'sumber': m.sumber, 'diperbolehkan': m.diperbolehkan,
+            'bersyarat': m.bersyarat, 'tidak_diperbolehkan': m.tidak_diperbolehkan,
+            'ketentuan_khusus': m.ketentuan_khusus,
+        }
     return sorted(kelompok.values(), key=lambda g: -g['persen'])
+
+
+def _kunci_zona(z):
+    return f"{z['nama']}|{z['sub_zona']}|{z['tingkat']}|{z['matriks_id'] or ''}"
 
 
 def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any]:

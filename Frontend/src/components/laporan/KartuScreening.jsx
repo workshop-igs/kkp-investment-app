@@ -1,4 +1,5 @@
-import { AlertTriangle, CheckCircle2, CircleHelp, MapPin, XCircle } from 'lucide-react';
+import { useState } from 'react';
+import { AlertTriangle, CheckCircle2, CircleHelp, MapPin, Search, XCircle } from 'lucide-react';
 import { keDesimal, keDMS } from '../../utils/koordinat';
 import { ringkasKkprlZona } from '../../utils/normalisasiAnalisis';
 
@@ -28,6 +29,75 @@ const angka = (v, d = 0) => Number(v || 0).toLocaleString('id-ID', { maximumFrac
 const Judul = ({ children }) => (
   <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 mb-1.5">{children}</div>
 );
+
+const KOLOM_PERDA = [
+  ['diperbolehkan', 'Diperbolehkan', 'DIIZINKAN', 'bg-emerald-50/60'],
+  ['bersyarat', 'Bersyarat', 'BERSYARAT', 'bg-amber-50/60'],
+  ['tidak_diperbolehkan', 'Tidak diperbolehkan', 'TIDAK_DIIZINKAN', 'bg-rose-50/60'],
+];
+const BATAS_BUTIR = 8;
+
+const RincianPerda = ({ perda }) => {
+  const [cari, setCari] = useState('');
+  const [penuh, setPenuh] = useState(false);
+  const kata = cari.trim().toLowerCase();
+  const total = KOLOM_PERDA.reduce((n, [k]) => n + perda[k].length, 0);
+
+  return (
+    <div className="px-3 py-2.5 border-t border-slate-100">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+        <div className="font-semibold text-slate-700">
+          Rincian kegiatan menurut Perda
+          {perda.kode_zona.length > 0 && (
+            <span className="font-normal text-slate-500"> · kode zona {perda.kode_zona.join(', ')}</span>
+          )}
+        </div>
+        <label className="relative flex items-center">
+          <Search className="absolute left-2 w-3 h-3 text-slate-400" />
+          <input
+            type="search"
+            value={cari}
+            onChange={(e) => setCari(e.target.value)}
+            placeholder={`Cari di ${total} kegiatan`}
+            className="w-44 rounded-md border border-slate-200 bg-white py-1 pl-6 pr-2 text-[11px] focus:border-kkp-500 focus:outline-none"
+          />
+        </label>
+      </div>
+      <div className="mt-2 grid gap-2 sm:grid-cols-3">
+        {KOLOM_PERDA.map(([kunci, label, status, latar]) => {
+          const daftar = perda[kunci].filter((b) => !kata || b.toLowerCase().includes(kata));
+          const tampil = penuh || kata ? daftar : daftar.slice(0, BATAS_BUTIR);
+          return (
+            <div key={kunci} className={`rounded-md p-2 ${latar}`}>
+              <div className={`text-[10.5px] font-semibold uppercase tracking-wide ${WARNA_KETENTUAN[status]}`}>
+                {label} <span className="font-normal text-slate-500">({daftar.length})</span>
+              </div>
+              {tampil.length ? (
+                <ul className="mt-1 space-y-1 text-slate-700 leading-snug">
+                  {tampil.map((b) => <li key={b}>{b}</li>)}
+                </ul>
+              ) : (
+                <p className="mt-1 text-slate-400">{kata ? 'Tidak ada yang cocok' : '-'}</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+      {!kata && KOLOM_PERDA.some(([k]) => perda[k].length > BATAS_BUTIR) && (
+        <button type="button" onClick={() => setPenuh(!penuh)} className="mt-1.5 text-[11px] font-medium text-kkp-700 hover:underline">
+          {penuh ? 'Ringkas daftar' : `Tampilkan semua ${total} kegiatan`}
+        </button>
+      )}
+      {perda.ketentuan_khusus && (
+        <details className="mt-1.5 text-[11px] text-slate-600">
+          <summary className="cursor-pointer text-kkp-700">Ketentuan khusus zona ini</summary>
+          <p className="mt-1 leading-relaxed">{perda.ketentuan_khusus}</p>
+        </details>
+      )}
+      <p className="mt-1.5 text-[10.5px] text-slate-400">{perda.sumber}</p>
+    </div>
+  );
+};
 
 const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
@@ -151,6 +221,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
                 ) : (
                   <p className="px-3 py-2 text-slate-500">Ketentuan per jenis investasi belum ditetapkan untuk sub-zona ini.</p>
                 )}
+                {z.perda && <RincianPerda perda={z.perda} />}
                 <dl className="px-3 py-2 border-t border-slate-100 grid grid-cols-[auto,1fr] gap-x-3 gap-y-1 text-[11px]">
                   <dt className="font-semibold text-slate-700">Sumber aturan</dt>
                   <dd className="text-slate-600">{z.sumber_aturan?.join('; ') || 'Belum ditetapkan'}</dd>

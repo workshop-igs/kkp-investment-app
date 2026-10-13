@@ -291,6 +291,7 @@ class SkorKelayakanZona(models.Model):
     )
 
     kesesuaian_tr = models.BooleanField(default=False)
+    status_tr = models.CharField(max_length=16, blank=True, help_text='Ketentuan tata ruang untuk sektor ini')
     potensi_sda = models.FloatField(default=0.5)
     aksesibilitas = models.FloatField(default=0.5)
     kondisi_sosek = models.FloatField(default=0.5)
