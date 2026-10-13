@@ -13,11 +13,9 @@ from django.contrib.gis.gdal.libgdal import lgdal
 from django.contrib.gis.gdal.prototypes import ds as capi
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
-from pypdf import PdfReader
 
-from analitik.models import KetentuanRuang
 from analitik.services.screening_ruang import isi_ketentuan_bawaan
-from inti.models import Provinsi, SektorInvestasi
+from inti.models import Provinsi
 from inventarisasi.klasifikasi import jenis_kawasan, sub_zona
 from inventarisasi.management.commands._geometri import perbaiki_geometri
 from inventarisasi.models import ZonasiRuangLaut
@@ -31,30 +29,6 @@ KATA_LAUT = (
 )
 POLA = re.compile(r'<a href="https://drive\.google\.com/(file/d|drive/folders)/([A-Za-z0-9_-]+)[^"]*"[^>]*>'
                   r'.*?<div class="flip-entry-title">([^<]*)</div>', re.S)
-
-MATRIKS_TERVERIFIKASI = {'52'}
-PENANDA_MATRIKS = 'Lampiran Matriks KKPRL'
-STATUS_KOLOM = ('DIIZINKAN', 'BERSYARAT', 'TIDAK_DIIZINKAN')
-KEGIATAN_INTI = {
-    'PERIKANAN_TANGKAP': ('Penangkapan Pisces/Ikan Bersirip di Laut',),
-    'PERIKANAN_BUDIDAYA': ('Pembesaran Pisces/Ikan Bersirip di Laut',),
-    'PARIWISATA_BAHARI': ('Wisata Selam', 'Wisata Pantai'),
-    'ENERGI_KELAUTAN': ('Pembangkitan Tenaga Listrik',),
-    'PENGOLAHAN_HASIL_LAUT': ('Industri Pembekuan Ikan',),
-    'JASA_MARITIM': ('Aktivitas Pelayanan Kepelabuhan Laut', 'Aktivitas Pelayanan Kepelabuhanan Laut'),
-    'INFRASTRUKTUR_LAUT': ('Konstruksi Bangunan Pelabuhan Bukan Perikanan',
-                           'Konstruksi Bangunan Bukan Pelabuhan Perikanan'),
-    'GARAM': ('Ekstraksi Garam', 'Ekstrasi Garam'),
-    'BIOTEKNOLOGI_KELAUTAN': ('Penelitian dan Pengembangan Bioteknologi',),
-    'KONSERVASI_PESISIR': ('Rehabilitasi/Transplantasi/Restorasi Ekosistem',),
-}
-KODE_ZONA = re.compile(r'\b([A-Z]{1,4})\s*-\s*(\d{2,4})\b')
-KOORDINAT = re.compile(r"(\d{2,3})\D{1,3}?\s*(\d{1,3})'\s*([\d,.]+)\"\s*BT\s+(\d{1,2})\D{1,3}?\s*(\d{1,2})'\s*([\d,.]+)\"\s*LS")
-JUDUL_TABEL = re.compile(r'^(ZONA|KAWASAN) [^/]*\((?!HA\))[A-Z]{1,4}\)')
-AKHIR_TABEL = re.compile(r'^Sumber\s*:')
-KEPALA_KHUSUS = re.compile(r'^(?:(?:KETENTUAN|KHUSUS|DAN/ATAU|TAMBAHAN)\s*)+')
-GLIF = '•�-'
-
 
 def _isi_folder(fid):
     for ke in range(4):
@@ -157,105 +131,8 @@ def atribut(fitur, medan):
     }
 
 
-def bersih(teks):
-    teks = re.sub(rf'(\d)\s*[{GLIF}]\s*(?=\d)', r'\1° ', teks)
-    return re.sub(r'\s+', ' ', re.sub(f'[{GLIF}]', '•', teks)).strip()
-
-
 def kunci(teks):
     return re.sub(r'[^a-z0-9]', '', teks.lower())
-
-
-def status_kegiatan(kolom, jarum):
-    for j in jarum:
-        ada = [STATUS_KOLOM[i] for i in range(3) if kunci(j) in kunci(kolom[i])]
-        if ada:
-            return ada[-1]
-    return None
-
-
-def titik_zona(teks):
-    k, c = KODE_ZONA.search(teks), KOORDINAT.search(teks)
-    if not (k and c):
-        return None
-    bd, bm, bs, ld, lm, ls = c.groups()
-    return f'{k.group(1)}-{k.group(2)}', (
-        int(bd) + int(bm) / 60 + float(bs.replace(',', '.')) / 3600,
-        -(int(ld) + int(lm) / 60 + float(ls.replace(',', '.')) / 3600),
-    )
-
-
-def _baris(potongan):
-    baris = []
-    for y, x, t in sorted(potongan, key=lambda p: (-p[0], p[1])):
-        if baris and baris[-1][0] - y <= 1.5:
-            baris[-1][1].append((x, t))
-        else:
-            baris.append([y, [(x, t)]])
-    return [(y, sorted(isi)) for y, isi in baris]
-
-
-def _tepi_kolom(baris, n, peluru):
-    y0, isi = baris[n]
-    lintang = next((x for x, t in isi if 'LINTANG' in t), None)
-    tidak = next((x for x, t in isi if 'TIDAK' in t), None)
-    bers = next((i for i, (_, t) in enumerate(isi) if 'BERSYARAT' in t), None)
-    khusus = next((x for y, s in baris if y0 - 2 <= y <= y0 + 30 for x, t in s if 'KHUSUS' in t), None)
-    if None in (lintang, tidak, bers, khusus):
-        return None
-    bx = isi[bers - 1][0] if isi[bers][1].strip() == 'BERSYARAT' and bers else isi[bers][0]
-    dip = [x for x, t in isi if 'DIPERBOLEHKAN' in t and lintang < x < bx - 20]
-    if not dip:
-        return None
-    tepi = []
-    for kira, geser in ((min(dip), 35), (bx, 35), (tidak, 35), (khusus, 15)):
-        dekat = [p for p in peluru if kira - geser - 25 <= p <= kira - geser + 40]
-        tepi.append((min(dekat) if dekat else kira - geser) - 2)
-    return tepi
-
-
-def baca_matriks(path):
-    tabel, aktif, perda = {}, None, ''
-    for hal in PdfReader(path).pages:
-        potongan, peluru = [], []
-
-        def lihat(t, cm, tm, *_, potongan=potongan, peluru=peluru):
-            if t.strip():
-                x = cm[0] * tm[4] + cm[2] * tm[5] + cm[4]
-                potongan.append((cm[1] * tm[4] + cm[3] * tm[5] + cm[5], x, t))
-                if re.match(f'[{GLIF}]', t.strip()):
-                    peluru.append(x)
-
-        hal.extract_text(visitor_text=lihat)
-        baris = _baris(potongan)
-        m = re.search(r'PERATURAN DAERAH (PROVINSI .+?) NOMOR (\d+) TAHUN (\d{4})',
-                      ' '.join(t for _, isi in baris for _, t in isi).replace('\n', ' '))
-        if m and not perda:
-            wilayah = re.sub(r'\s+', ' ', m.group(1)).title()
-            perda = f'Perda {wilayah} No. {m.group(2)}/{m.group(3)}'
-        tepi, y_kepala = None, None
-        for n, (y, isi) in enumerate(baris):
-            gabung = re.sub(r'\s+', ' ', ' '.join(t for _, t in isi)).strip()
-            gabung = re.sub(r'\(([A-Z ]{1,8})\)', lambda m: '(' + m.group(1).replace(' ', '') + ')', gabung)
-            if JUDUL_TABEL.match(gabung):
-                aktif = tabel.setdefault(gabung, {'judul': gabung, 'kolom': ['', '', '', ''], 'zona': {}})
-                tepi = None
-            elif 'BERSYARAT' in gabung:
-                tepi, y_kepala = _tepi_kolom(baris, n, peluru), y
-            elif AKHIR_TABEL.match(gabung):
-                aktif = None
-            elif aktif is not None and tepi is not None and y < y_kepala - 9:
-                for i, batas in enumerate(tepi):
-                    akhir = tepi[i + 1] if i < 3 else float('inf')
-                    aktif['kolom'][i] += ' ' + ' '.join(t for x, t in isi if batas <= x < akhir)
-                titik = titik_zona(' '.join(t for x, t in isi if x < tepi[0]))
-                if titik:
-                    aktif['zona'].setdefault(*titik)
-    for t in tabel.values():
-        t['kolom'][3] = KEPALA_KHUSUS.sub('', bersih(t['kolom'][3]))
-        t['sub_zona'] = sub_zona(t['judul'], jenis_kawasan(t['judul']))
-        t['nama'] = re.sub(r'\s*\([A-Z]+\)', '', t['judul'].split(' DI ')[0]).title()
-    return perda, list(tabel.values())
 
 
 class Command(BaseCommand):
@@ -279,23 +156,15 @@ class Command(BaseCommand):
                 continue
             self.stdout.write(self.style.MIGRATE_HEADING(nama))
             akar = os.path.join(opsi['simpan_di'], m.group(1) + '00')
-            matriks = None
             for jalur, id_ in _berkas(fid):
                 gdb = [i for i, b in enumerate(jalur[:-1]) if b.lower().endswith('.gdb')]
-                nama_berkas = jalur[-1].lower()
-                if gdb:
-                    tujuan = os.path.join(akar, *jalur[gdb[-1]:])
-                elif (m.group(1) in MATRIKS_TERVERIFIKASI and matriks is None
-                      and 'matriks' in nama_berkas and nama_berkas.endswith('.pdf')):
-                    tujuan = matriks = os.path.join(akar, jalur[-1])
-                else:
+                if not gdb:
                     continue
+                tujuan = os.path.join(akar, *jalur[gdb[-1]:])
                 if not os.path.exists(tujuan):
                     os.makedirs(os.path.dirname(tujuan), exist_ok=True)
                     _unduh(id_, tujuan)
             self._impor(provinsi, akar)
-            if matriks:
-                self._terapkan_matriks(provinsi, matriks)
         dibuat = isi_ketentuan_bawaan()
         if dibuat:
             self.stdout.write(f'{dibuat} ketentuan ruang bawaan ditambahkan untuk sub-zona baru.')
@@ -396,81 +265,4 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f'  {tersimpan} zona laut tersimpan' + (f', {darat} poligon darat dibuang' if darat else '')
             + (f', {wilayah_adat} poligon wilayah kelola masyarakat hukum adat' if wilayah_adat else '')
-        ))
-
-    def _terapkan_matriks(self, provinsi, path):
-        perda, tabel = baca_matriks(path)
-        if not perda or not tabel:
-            self.stdout.write(self.style.WARNING(f'  {os.path.basename(path)}: matriks KKPRL tidak terbaca, dilewati.'))
-            return
-        acuan = {}
-        for t in tabel:
-            lama = acuan.get(t['sub_zona'])
-            if t['sub_zona'] != 'KONSERVASI' and (lama is None or len(t['zona']) > len(lama['zona'])):
-                acuan[t['sub_zona']] = t
-        sektor = {s.kode: s for s in SektorInvestasi.objects.filter(kode__in=KEGIATAN_INTI)}
-        status = {sub: {k: status_kegiatan(t['kolom'], KEGIATAN_INTI[k]) for k in sektor} for sub, t in acuan.items()}
-        sumber = f'{perda}, {PENANDA_MATRIKS}'
-        label = dict(KetentuanRuang.STATUS_CHOICES)
-        aturan = [
-            KetentuanRuang(
-                sektor=sektor[k], sub_zona=sub, provinsi=provinsi, status=st,
-                syarat=(acuan[sub]['kolom'][3] or 'Diperbolehkan bersyarat menurut matriks KKPRL.')
-                if st == 'BERSYARAT' else '',
-                sumber=f'{sumber} ({acuan[sub]["nama"]})'[:255],
-            )
-            for sub, per_sektor in status.items() for k, st in per_sektor.items() if st
-        ]
-        tangkap, budidaya = status.get('PERIKANAN_TANGKAP'), status.get('PERIKANAN_BUDIDAYA')
-        if tangkap and budidaya:
-            for k in sektor:
-                a, b = tangkap[k], budidaya[k]
-                if a and b:
-                    st = a if a == b else 'BERSYARAT'
-                    aturan.append(KetentuanRuang(
-                        sektor=sektor[k], sub_zona='PERIKANAN', provinsi=provinsi, status=st,
-                        syarat=(f'Kawasan Perikanan pada {perda} terbagi atas zona perikanan tangkap '
-                                f'({label[a].lower()}) dan zona perikanan budi daya ({label[b].lower()}); '
-                                'status pasti mengikuti kode zona di lokasi.') if st == 'BERSYARAT' else '',
-                        sumber=f'{sumber} (Kawasan Perikanan)',
-                    ))
-
-        titik = {k: (xy, t) for t in tabel for k, xy in t['zona'].items()}
-        with transaction.atomic():
-            KetentuanRuang.objects.filter(provinsi=provinsi, sumber__contains=PENANDA_MATRIKS).delete()
-            KetentuanRuang.objects.bulk_create(aturan)
-            with connection.cursor() as c:
-                c.execute(
-                    """
-                    SELECT t.kode, z.id
-                    FROM unnest(%s::text[], %s::float8[], %s::float8[]) AS t(kode, x, y)
-                    CROSS JOIN LATERAL (
-                        SELECT z.id FROM inventarisasi_zonasi_ruang_laut z
-                        WHERE z.provinsi_id = %s AND z.sumber_data = %s
-                          AND ST_DWithin(z.geometry, ST_SetSRID(ST_Point(t.x, t.y), 4326), 0.002)
-                        ORDER BY ST_Distance(z.geometry, ST_SetSRID(ST_Point(t.x, t.y), 4326))
-                        LIMIT 1
-                    ) z
-                    """,
-                    [list(titik), [xy[0] for xy, _ in titik.values()], [xy[1] for xy, _ in titik.values()],
-                     provinsi.id, TANDA],
-                )
-                per_zona = {}
-                for kode, zid in c.fetchall():
-                    per_zona.setdefault(zid, []).append(kode)
-            zona = list(ZonasiRuangLaut.objects.filter(id__in=per_zona))
-            diperinci = 0
-            for z in zona:
-                kode = sorted(per_zona[z.id])
-                jenis = {titik[k][1]['sub_zona'] for k in kode} & {'PERIKANAN_TANGKAP', 'PERIKANAN_BUDIDAYA'}
-                if z.sub_zona == 'PERIKANAN' and len(jenis) == 1:
-                    t = next(titik[k][1] for k in kode if titik[k][1]['sub_zona'] in jenis)
-                    z.sub_zona, z.nama_zona = t['sub_zona'], t['nama']
-                    diperinci += 1
-                z.keterangan = '; '.join(filter(None, [z.keterangan, f'Kode zona Perda: {", ".join(kode)}']))[:2000]
-            ZonasiRuangLaut.objects.bulk_update(zona, ['sub_zona', 'nama_zona', 'keterangan'], batch_size=500)
-        self.stdout.write(self.style.SUCCESS(
-            f'  Matriks KKPRL {perda}: {len(aturan)} ketentuan per jenis investasi; '
-            f'{sum(len(v) for v in per_zona.values())} dari {len(titik)} kode zona tertaut ke poligon; '
-            f'{diperinci} Kawasan Perikanan diperinci menjadi zona tangkap/budi daya'
         ))

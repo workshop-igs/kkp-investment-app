@@ -224,7 +224,8 @@ export const LAYER_LOKAL = {
       + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Hanya zona yang '
       + 'peruntukan tata ruangnya mengizinkan jenis itu, belum memiliki KKPRL terbit di dalamnya, dan belum terbangun: '
       + 'kurang dari 10% luas zona beserta lingkungan 25 m di sekelilingnya tertutup pelabuhan, dermaga, pemecah gelombang, industri, permukiman, bandara, pembangkit, anjungan migas, atau bangunan lain menurut OpenStreetMap dan data infrastruktur KKP. Zona yang '
-      + 'bersambung membentuk satu area dengan satu penanda pada zona terluas berkelas tertinggi. Setiap zona '
+      + 'bersambung membentuk satu area dengan satu penanda pada zona terluas berkelas tertinggi. Zona yang '
+      + 'peruntukannya hanya mengizinkan jenis itu dengan syarat paling tinggi berkelas Sesuai. Setiap zona '
       + 'ditampilkan dengan jenis investasi yang skornya paling tinggi; pilih satu jenis untuk melihat '
       + 'sebaran khusus jenis itu. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
       + 'perbesar peta untuk melihat zona lainnya. Skor menimbang kesesuaian tata ruang, potensi sumber daya, '
@@ -248,7 +249,8 @@ export const LAYER_LOKAL = {
         v === null || v === undefined ? null : Number(v).toFixed(d).replace('.', ',');
 
       const alasan = [];
-      if (p.sesuai_tata_ruang) alasan.push([true, 'Sesuai peruntukan rencana tata ruang laut']);
+      if (p.status_tata_ruang === 'BERSYARAT') alasan.push([false, 'Diizinkan bersyarat oleh rencana tata ruang laut']);
+      else if (p.sesuai_tata_ruang) alasan.push([true, 'Sesuai peruntukan rencana tata ruang laut']);
       else alasan.push([false, 'Belum sesuai peruntukan tata ruang']);
 
       if (p.jarak_infra_km !== null && p.jarak_infra_km !== undefined) {

@@ -416,26 +416,44 @@ export class Kanvas {
     d.setFont(FONT, 'normal');
     d.setFontSize(T.tabel);
     const sel = isi.map((daftar) => (daftar.length ? daftar : ['-']).flatMap((t) => d.splitTextToSize(bersih(t), lebar - 4)));
-    const tinggi = Math.max(...sel.map((b) => b.length)) * 3.2;
-    this.ruang(tinggi + 12);
-    d.setFillColor(...SELANG);
-    d.rect(TEPI + 2, this.y - 3.4, LEBAR - 4, 5.6, 'F');
-    d.setFont(FONT, 'bold');
-    d.setFontSize(5.9);
-    kolom.forEach((k, i) => {
-      d.setTextColor(...(warna[i] || ABU));
-      d.text(bersih(k).toUpperCase(), TEPI + 4 + i * lebar, this.y, { charSpace: 0.12 });
-    });
-    this.y += 2.2;
-    d.setDrawColor(...GARIS);
-    d.setLineWidth(0.3);
-    d.line(TEPI + 2, this.y, TEPI + LEBAR - 2, this.y);
-    this.y += 4;
-    d.setFont(FONT, 'normal');
-    d.setFontSize(T.tabel);
-    d.setTextColor(...GELAP);
-    sel.forEach((b, i) => b.forEach((t, j) => d.text(t, TEPI + 4 + i * lebar, this.y + j * 3.2)));
-    this.y += tinggi + 1;
+    const jumlah = Math.max(...sel.map((b) => b.length));
+    const tinggi = jumlah * 3.2;
+    const kepala = () => {
+      d.setFillColor(...SELANG);
+      d.rect(TEPI + 2, this.y - 3.4, LEBAR - 4, 5.6, 'F');
+      d.setFont(FONT, 'bold');
+      d.setFontSize(5.9);
+      kolom.forEach((k, i) => {
+        d.setTextColor(...(warna[i] || ABU));
+        d.text(bersih(k).toUpperCase(), TEPI + 4 + i * lebar, this.y, { charSpace: 0.12 });
+      });
+      this.y += 2.2;
+      d.setDrawColor(...GARIS);
+      d.setLineWidth(0.3);
+      d.line(TEPI + 2, this.y, TEPI + LEBAR - 2, this.y);
+      this.y += 4;
+      d.setFont(FONT, 'normal');
+      d.setFontSize(T.tabel);
+      d.setTextColor(...GELAP);
+    };
+    if (tinggi + 12 <= HAL_H - ZONA_KOP - ZONA_KAKI - 12) {
+      this.ruang(tinggi + 12);
+      kepala();
+      sel.forEach((b, i) => b.forEach((t, j) => d.text(t, TEPI + 4 + i * lebar, this.y + j * 3.2)));
+      this.y += tinggi + 1;
+      return;
+    }
+    this.ruang(30);
+    kepala();
+    for (let j = 0; j < jumlah; j += 1) {
+      if (this.y + 3.2 > HAL_H - ZONA_KAKI) {
+        this.ruang(HAL_H);
+        kepala();
+      }
+      sel.forEach((b, i) => b[j] && d.text(b[j], TEPI + 4 + i * lebar, this.y));
+      this.y += 3.2;
+    }
+    this.y += 1;
   }
 
   peta(panel) {
@@ -661,6 +679,30 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
             );
           } else {
             k.teks('Ketentuan per jenis investasi belum ditetapkan untuk sub-zona ini.', { ukuran: 6.8 });
+          }
+          if (z.perda) {
+            const p = z.perda;
+            const kunciPerda = `${p.sumber}|${p.nama_zona}`;
+            k.teks(
+              `Rincian kegiatan menurut Perda${p.kode_zona.length ? ` (kode zona ${p.kode_zona.join(', ')})` : ''}`,
+              { tebal: true, warna: GELAP, ukuran: 6.8 }
+            );
+            if (sudahTercetak.has(kunciPerda)) {
+              k.teks('Sama dengan rincian zona sebelumnya di atas.', { ukuran: 6.5 });
+            } else {
+              k.tabelDaftar(
+                [
+                  `Diperbolehkan (${p.diperbolehkan.length})`,
+                  `Bersyarat (${p.bersyarat.length})`,
+                  `Tidak diperbolehkan (${p.tidak_diperbolehkan.length})`,
+                ],
+                [p.diperbolehkan, p.bersyarat, p.tidak_diperbolehkan],
+                [HIJAU_TEKS, AMBER_TEKS, MERAH_TEKS]
+              );
+              if (p.ketentuan_khusus) k.teks(`Ketentuan khusus Perda: ${p.ketentuan_khusus}`, { ukuran: 6.2 });
+              k.teks(`Sumber: ${p.sumber}.`, { ukuran: 6.2 });
+              sudahTercetak.add(kunciPerda);
+            }
           }
           k.teks(
             `Sumber aturan: ${z.sumber_aturan?.join('; ') || 'belum ditetapkan'}. `

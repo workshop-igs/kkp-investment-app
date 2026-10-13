@@ -233,8 +233,9 @@ class Command(BaseCommand):
                 hasil.setdefault(zona_id, []).append((tingkat, sektor_kode))
         return hasil
 
-    def _skor(self, sub_zona, sesuai, sektor_kode, bencana, jarak, potensi, n_kkprl,
+    def _skor(self, sub_zona, status, sektor_kode, bencana, jarak, potensi, n_kkprl,
               ekosistem, luas_zona, sosial, ada_adat, adat_terdata):
+        sesuai = status in BOLEH
         skor_tr = TATA_RUANG_PASS_SCORE if sesuai else TATA_RUANG_FAIL_SCORE
 
         skor_potensi = SPATIAL_DEFAULT_LOCATION['potensi_sda']
@@ -361,12 +362,18 @@ class Command(BaseCommand):
         skor_total = (
             skor_lokasi * BOBOT_SKOR_ZONA['lokasi'] + skor_risiko * BOBOT_SKOR_ZONA['risiko']
         )
+        kelas = kelas_kelayakan(skor_total)
+        if not sesuai:
+            kelas = 'SANGAT_RENDAH'
+        elif status == 'BERSYARAT' and kelas == 'TINGGI':
+            kelas = 'SEDANG'
 
         return {
             'skor_total': round(_batas(skor_total), 4),
             'skor_lokasi': round(_batas(skor_lokasi), 4),
             'skor_risiko': round(_batas(skor_risiko), 4),
-            'kelas': kelas_kelayakan(skor_total),
+            'kelas': kelas,
+            'status_tr': status or '',
             'kelas_risiko': kelas_risiko,
             'kesesuaian_tr': sesuai,
             'potensi_sda': round(skor_potensi, 4),
@@ -427,7 +434,7 @@ class Command(BaseCommand):
                     {'jenis_zona': jenis_zona, 'sub_zona': sub_zona, 'provinsi_id': prov.id},
                 )
                 nilai = self._skor(
-                    sub_zona, ket['status'] in BOLEH, sektor.kode, b, j, p, n, e, luas_zona,
+                    sub_zona, ket['status'], sektor.kode, b, j, p, n, e, luas_zona,
                     sosial.get(zona_id), zona_id in adat, adat_terdata,
                 )
                 baris.append(SkorKelayakanZona(zona_id=zona_id, sektor_id=sektor.id, **nilai))
