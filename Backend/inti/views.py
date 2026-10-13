@@ -119,7 +119,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
         }
         zonasi = {
             r['provinsi_id']: r
-            for r in ZonasiRuangLaut.objects.values('provinsi_id').annotate(
+            for r in ZonasiRuangLaut.objects.filter(ranah='LAUT').values('provinsi_id').annotate(
                 jumlah=Count('id'), luas=Sum('luas_ha')
             )
         }
@@ -380,7 +380,7 @@ def dashboard_stats(request):
         provinsi=Count('provinsi', distinct=True),
     )
     total_kkprl = KKPRL.objects.count()
-    total_zonasi = ZonasiRuangLaut.objects.count()
+    total_zonasi = ZonasiRuangLaut.objects.filter(ranah='LAUT').count()
 
     map_markers = [
         {

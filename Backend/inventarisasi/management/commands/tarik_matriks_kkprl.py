@@ -453,7 +453,7 @@ class Command(BaseCommand):
             per_jenis.setdefault(m.sub_zona, []).append(m)
         tunggal = {sub: daftar[0] for sub, daftar in per_jenis.items() if len(daftar) == 1 and sub != 'LAINNYA'}
         zona = list(ZonasiRuangLaut.objects.filter(
-            provinsi=provinsi, tingkat_acuan='RTRW_PROVINSI', matriks__isnull=True, sub_zona__in=tunggal))
+            provinsi=provinsi, tingkat_acuan='RTRW_PROVINSI', ranah='LAUT', matriks__isnull=True, sub_zona__in=tunggal))
         for z in zona:
             z.matriks = tunggal[z.sub_zona]
         ZonasiRuangLaut.objects.bulk_update(zona, ['matriks'], batch_size=500)
@@ -471,7 +471,7 @@ class Command(BaseCommand):
                     SELECT DISTINCT ON (z.sumber_data) z.id, z.sumber_data
                     FROM inventarisasi_zonasi_ruang_laut z,
                          (VALUES (ST_SetSRID(ST_Point(t.x, t.y), 4326)), (ST_SetSRID(ST_Point(t.x, -t.y), 4326))) p(g)
-                    WHERE z.provinsi_id = %s AND z.tingkat_acuan = 'RTRW_PROVINSI'
+                    WHERE z.provinsi_id = %s AND z.tingkat_acuan = 'RTRW_PROVINSI' AND z.ranah = 'LAUT'
                       AND ST_DWithin(z.geometry, p.g, 0.002)
                     ORDER BY z.sumber_data, ST_Intersects(z.geometry, p.g) DESC,
                              (z.sub_zona = t.sub OR split_part(z.sub_zona, '_', 1) = split_part(t.sub, '_', 1)

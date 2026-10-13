@@ -29,7 +29,7 @@ from .models import (
 )
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
-from .services.konstanta import AMBANG_TERBANGUN_PERSEN
+from .services.konstanta import AMBANG_TERBANGUN_PERSEN, KARAKTER_LOKASI
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
 from .services.profil_investasi import _saring_sumber_utama
@@ -481,7 +481,7 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         'nama_zona', 'sub_zona', 'provinsi__nama',
         '_skor', '_kelas', '_lokasi', '_risiko', '_sesuai', '_status_tr', '_jarak',
         '_bencana', '_kkprl', '_sosek', '_ekosistem', '_sosial', '_adat',
-        '_sumber_sosial', '_sektor_nama', '_sektor_kode', 'persen_terbangun', 'luas_ha',
+        '_sumber_sosial', '_sektor_nama', '_sektor_kode', 'persen_terbangun', 'luas_ha', 'ranah',
     )
 
     def properti_peta(self, r):
@@ -509,6 +509,8 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
             'risiko_sosial': bulat(r['_sosial'], 2),
             'wilayah_adat': r['_adat'],
             'sumber_sosial': r['_sumber_sosial'],
+            'ranah': r['ranah'],
+            'karakter': KARAKTER_LOKASI.get(r['_sektor_kode'], {}).get('uraian'),
         }
 
 

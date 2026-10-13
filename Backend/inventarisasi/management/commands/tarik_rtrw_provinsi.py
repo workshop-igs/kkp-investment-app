@@ -8,15 +8,16 @@ import time
 from ctypes import c_char_p, c_int, c_void_p
 
 import httpx
-from django.contrib.gis.gdal import DataSource, SpatialReference
+from django.contrib.gis.gdal import DataSource, OGRGeometry, SpatialReference
 from django.contrib.gis.gdal.libgdal import lgdal
 from django.contrib.gis.gdal.prototypes import ds as capi
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 
+from analitik.services.konstanta import PITA_PESISIR_DARAT_M, SUMBER_ZONASI_DARAT
 from analitik.services.screening_ruang import isi_ketentuan_bawaan
 from inti.models import Provinsi
-from inventarisasi.klasifikasi import jenis_kawasan, sub_zona
+from inventarisasi.klasifikasi import jenis_kawasan, kawasan_darat, sub_zona
 from inventarisasi.management.commands._geometri import perbaiki_geometri
 from inventarisasi.models import ZonasiRuangLaut
 
@@ -96,17 +97,29 @@ def _tipe_poligon(lapisan):
     return (capi.get_fd_geom_type(lapisan._ldefn) & 0x7FFFFFFF) % 1000 in (3, 6, 10, 12)
 
 
-def lapisan_laut(ds, gdb_laut=False):
-    poligon = [
+def _poligon_rtrw(ds):
+    return [
         lap for lap in ds
         if not lap.name.upper().startswith('T_') and _tipe_poligon(lap)
         and {'JNSRPR', 'NAMOBJ'} & {m.upper() for m in lap.fields}
     ]
-    khusus = [lap for lap in poligon if 'KKPRL' in lap.name.upper()
+
+
+def lapisan_pola_ruang(ds):
+    return [lap for lap in _poligon_rtrw(ds) if re.search(r'(AR_PR|PR_PR)_', lap.name.upper())]
+
+
+def lapisan_laut(ds, gdb_laut=False):
+    khusus = [lap for lap in _poligon_rtrw(ds) if 'KKPRL' in lap.name.upper()
               or (gdb_laut and 'JNSRPR' in {m.upper() for m in lap.fields})]
     if khusus:
         return khusus, False
-    return [lap for lap in poligon if re.search(r'(AR_PR|PR_PR)_', lap.name.upper())], True
+    return lapisan_pola_ruang(ds), True
+
+
+def tahun_gdb(gdb, lapisan):
+    nama = [os.path.basename(gdb), *(lap.name for lap in lapisan)]
+    return max((int(t) for n in nama for t in re.findall(r'(?<!\d)(20[0-4]\d)(?!\d)', n)), default=None)
 
 
 def atribut(fitur, medan):
@@ -131,19 +144,26 @@ def atribut(fitur, medan):
     }
 
 
+def _teks(fitur, medan, kunci_medan):
+    return str(fitur.get(medan[kunci_medan]) or '').strip() if kunci_medan in medan else ''
+
+
 def kunci(teks):
     return re.sub(r'[^a-z0-9]', '', teks.lower())
 
 
 class Command(BaseCommand):
     help = ('Tarik zona laut dari geodatabase RTRW Provinsi (folder Google Drive KKP) ke ZonasiRuangLaut '
-            f'sebagai acuan RTRW Provinsi ({TANDA}).')
+            f'sebagai acuan RTRW Provinsi ({TANDA}), beserta Pola Ruang darat di jalur pesisir '
+            f'({SUMBER_ZONASI_DARAT}) untuk jenis investasi yang berlokasi di darat.')
 
     def add_arguments(self, parser):
         parser.add_argument('--provinsi', action='append', help='Kode BPS provinsi, mis. 33 (boleh berulang).')
         parser.add_argument('--folder', default=FOLDER_DRIVE, help='ID folder Google Drive berisi RTRW per provinsi.')
         parser.add_argument('--simpan-di', default=os.path.join(tempfile.gettempdir(), 'kkp-rtrw'),
                             help='Folder unduhan geodatabase (dipakai ulang bila berkasnya sudah ada).')
+        parser.add_argument('--hanya-darat', action='store_true',
+                            help='Muat ulang Pola Ruang darat pesisir saja; zona laut dan tautan matriksnya tidak disentuh.')
 
     def handle(self, *args, **opsi):
         diminta = set(opsi['provinsi'] or [])
@@ -164,25 +184,27 @@ class Command(BaseCommand):
                 if not os.path.exists(tujuan):
                     os.makedirs(os.path.dirname(tujuan), exist_ok=True)
                     _unduh(id_, tujuan)
-            self._impor(provinsi, akar)
+            pilihan = []
+            for gdb in sorted(glob.glob(os.path.join(akar, '**', '*.gdb'), recursive=True)):
+                if not glob.glob(os.path.join(gdb, '*.gdb')):
+                    ds = DataSource(gdb)
+                    pilihan.append((gdb, ds, *lapisan_laut(ds, 'KKPRL' in os.path.basename(gdb).upper())))
+            if not opsi['hanya_darat']:
+                self._impor(provinsi, pilihan)
+            self._impor_darat(provinsi, pilihan)
         dibuat = isi_ketentuan_bawaan()
         if dibuat:
             self.stdout.write(f'{dibuat} ketentuan ruang bawaan ditambahkan untuk sub-zona baru.')
 
-    def _impor(self, provinsi, akar):
-        baris, pilihan = [], []
-        for gdb in sorted(glob.glob(os.path.join(akar, '**', '*.gdb'), recursive=True)):
-            if not glob.glob(os.path.join(gdb, '*.gdb')):
-                ds = DataSource(gdb)
-                pilihan.append((gdb, ds, *lapisan_laut(ds, 'KKPRL' in os.path.basename(gdb).upper())))
+    def _impor(self, provinsi, pilihan):
+        baris = []
         ada_khusus = any(lapisan and not saring for _, _, lapisan, saring in pilihan)
         for gdb, ds, lapisan, saring in pilihan:
             if saring and ada_khusus:
                 self.stdout.write(f'  {os.path.basename(gdb)}: Pola Ruang campuran tidak dipakai, '
                                   'provinsi ini punya data zona laut khusus.')
                 continue
-            nama = [os.path.basename(gdb), *(lap.name for lap in (lapisan if not saring else ds))]
-            tahun = max((int(t) for n in nama for t in re.findall(r'(?<!\d)(20[0-4]\d)(?!\d)', n)), default=None)
+            tahun = tahun_gdb(gdb, lapisan if not saring else ds)
             if saring and (tahun is None or tahun < TAHUN_INTEGRASI_LAUT):
                 self.stdout.write(f'  {os.path.basename(gdb)}: RTRWP {tahun or "tanpa tahun"} disusun sebelum '
                                   'zonasi laut diintegrasikan ke RTRW, dilewati.')
@@ -266,3 +288,83 @@ class Command(BaseCommand):
             f'  {tersimpan} zona laut tersimpan' + (f', {darat} poligon darat dibuang' if darat else '')
             + (f', {wilayah_adat} poligon wilayah kelola masyarakat hukum adat' if wilayah_adat else '')
         ))
+
+    def _impor_darat(self, provinsi, pilihan):
+        calon = [
+            (tahun_gdb(gdb, lapisan) or 0, gdb, lapisan)
+            for gdb, ds, _, _ in pilihan
+            if 'KKPRL' not in os.path.basename(gdb).upper() and (lapisan := lapisan_pola_ruang(ds))
+        ]
+        if not calon:
+            return
+        tahun, gdb, lapisan = max(calon, key=lambda c: c[0])
+        dekat, jauh = (m / 111320 for m in PITA_PESISIR_DARAT_M)
+        label = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
+        with connection.cursor() as c:
+            c.execute('DROP TABLE IF EXISTS pita_pesisir, darat_mentah')
+            c.execute(
+                """
+                CREATE TEMP TABLE pita_pesisir AS
+                SELECT ST_Subdivide(ST_Difference(ST_Buffer(g, %s, 'quad_segs=2'), ST_Buffer(g, %s, 'quad_segs=2')), 256) AS g
+                FROM (
+                    SELECT ST_Union(ST_SimplifyPreserveTopology(ST_MakeValid(geometry), 0.0003)) AS g
+                    FROM inventarisasi_zonasi_ruang_laut WHERE provinsi_id = %s AND ranah = 'LAUT'
+                ) l
+                WHERE g IS NOT NULL
+                """,
+                [jauh, dekat, provinsi.id],
+            )
+            c.execute('CREATE INDEX ON pita_pesisir USING gist (g)')
+            c.execute('SELECT ST_AsText(ST_SimplifyPreserveTopology(ST_Union(ST_Buffer(g, 0.002)), 0.002)) FROM pita_pesisir')
+            cakupan = c.fetchone()[0]
+            if not cakupan:
+                return
+            c.execute('CREATE TEMP TABLE darat_mentah (sub_zona text, jenis text, nama text, g geometry(MultiPolygon, 4326))')
+            for lap in lapisan:
+                medan = {m.upper(): m for m in lap.fields}
+                ubah = lap.srs is not None and not lap.srs.geographic
+                saring = OGRGeometry(cakupan, srs=4326)
+                if ubah:
+                    saring.transform(lap.srs)
+                lap.spatial_filter = saring
+                baris = []
+                for f in lap:
+                    sub, jenis = kawasan_darat(_teks(f, medan, 'NAMOBJ'), _teks(f, medan, 'JNSRPR'))
+                    geom, _ = perbaiki_geometri(geojson_fitur(f, ubah))
+                    if geom is not None:
+                        nama = ' '.join(filter(None, [label[sub].replace(' (darat)', ''), _teks(f, medan, 'WADMKK')]))
+                        baris.append((sub, jenis, nama[:255], bytes(geom.ewkb)))
+                c.executemany('INSERT INTO darat_mentah VALUES (%s, %s, %s, ST_GeomFromEWKB(%s))', baris)
+                self.stdout.write(f'  {lap.name}: {len(baris)} poligon Pola Ruang di pesisir')
+            c.execute('CREATE INDEX ON darat_mentah USING gist (g)')
+            c.execute(
+                'DELETE FROM darat_mentah m USING inti_provinsi v WHERE v.id = %s '
+                'AND NOT ST_Intersects(v.geometry, ST_PointOnSurface(m.g))',
+                [provinsi.id],
+            )
+            with transaction.atomic():
+                ZonasiRuangLaut.objects.filter(provinsi=provinsi, sumber_data=SUMBER_ZONASI_DARAT).delete()
+                c.execute(
+                    """
+                    INSERT INTO inventarisasi_zonasi_ruang_laut (provinsi_id, tingkat_acuan, nama_zona, jenis_zona,
+                        sub_zona, ranah, nomor_regulasi, geometry, luas_ha, persen_terbangun, kode_perda, keterangan,
+                        tahun_penetapan, sumber_data, created_at, updated_at)
+                    SELECT %s, 'RTRW_PROVINSI', d.nama, d.jenis, d.sub_zona, 'DARAT', %s, ST_Multi(d.g),
+                           ST_Area(d.g::geography) / 10000, 0, '', %s, %s, %s, now(), now()
+                    FROM (
+                        SELECT m.sub_zona, m.jenis, m.nama,
+                               (ST_Dump(ST_Union(ST_CollectionExtract(ST_Intersection(m.g, p.g), 3)))).geom AS g
+                        FROM darat_mentah m JOIN pita_pesisir p ON m.g && p.g AND ST_Intersects(m.g, p.g)
+                        GROUP BY 1, 2, 3
+                    ) d
+                    WHERE GeometryType(d.g) = 'POLYGON' AND ST_Area(d.g::geography) >= 10000
+                    """,
+                    [
+                        provinsi.id, ' '.join(filter(None, ['RTRW Provinsi', provinsi.nama, str(tahun or '')])),
+                        f'Pola Ruang darat {PITA_PESISIR_DARAT_M[0]} m sampai {PITA_PESISIR_DARAT_M[1] // 1000} km '
+                        f'dari zona laut ({os.path.basename(gdb)})', tahun or None, SUMBER_ZONASI_DARAT,
+                    ],
+                )
+                tersimpan = c.rowcount
+            c.execute('DROP TABLE IF EXISTS pita_pesisir, darat_mentah')
+        self.stdout.write(self.style.SUCCESS(f'  {tersimpan} zona darat pesisir tersimpan (Pola Ruang {tahun or "tanpa tahun"})'))
