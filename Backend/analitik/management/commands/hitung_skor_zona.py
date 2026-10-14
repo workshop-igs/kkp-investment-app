@@ -7,30 +7,20 @@ from django.db.models import Count
 from analitik.models import SkorKelayakanZona
 from analitik.services.konstanta import (
     BATAS_JARAK_PANTAI_DERAJAT,
-    BOBOT_RISIKO_LINGKUNGAN,
-    BOBOT_SKOR_ZONA,
-    KM_PER_DERAJAT,
     GMW_TAHUN_AKHIR,
-    kelas_risiko_investasi as hitung_kelas_risiko,
-    risiko_sosial as hitung_risiko_sosial,
-    skor_sosial_ekonomi,
-    EKOSISTEM_LANTAI_CAKUPAN,
-    HAZARD_LINGKUNGAN_WEIGHTS,
-    HAZARD_OPERASIONAL_WEIGHTS,
-    INFRASTRUKTUR_AKSESIBILITAS,
-    KELAS_RISIKO_SCORE,
-    LOCATION_WEIGHTS,
-    REGULASI_PENALTY,
-    RISK_WEIGHTS,
+    KM_PER_DERAJAT,
     SENSITIVITAS_EKOSISTEM,
-    SPATIAL_DEFAULT_LOCATION,
-    SPATIAL_DEFAULT_RISK,
-    TATA_RUANG_FAIL_SCORE,
-    TATA_RUANG_PASS_SCORE,
-    TINGKAT_POTENSI_SCORE,
     kelas_kelayakan,
     rerata_berbobot_berdata,
+    skor_sosial_ekonomi,
 )
+from analitik.services.konstanta import (
+    kelas_risiko_investasi as hitung_kelas_risiko,
+)
+from analitik.services.konstanta import (
+    risiko_sosial as hitung_risiko_sosial,
+)
+from analitik.services.pengaturan import atur
 from analitik.services.screening_ruang import (
     BOLEH,
     SEBARAN_KEDALAMAN,
@@ -41,9 +31,9 @@ from analitik.services.screening_ruang import (
 from inti.models import Provinsi, SektorInvestasi
 
 KELAS_KE_RISIKO = {
-    'RENDAH': KELAS_RISIKO_SCORE['RENDAH'],
-    'SEDANG': KELAS_RISIKO_SCORE['SEDANG'],
-    'TINGGI': KELAS_RISIKO_SCORE['TINGGI'],
+    'RENDAH': atur('KELAS_RISIKO_SCORE')['RENDAH'],
+    'SEDANG': atur('KELAS_RISIKO_SCORE')['SEDANG'],
+    'TINGGI': atur('KELAS_RISIKO_SCORE')['TINGGI'],
 }
 
 
@@ -53,6 +43,8 @@ def _batas(nilai, bawah=0.0, atas=1.0):
 
 class Command(BaseCommand):
     help = 'Hitung skor kelayakan per zona ruang laut untuk peta tematik.'
+
+    stealth_options = ('progres',)
 
     def add_arguments(self, parser):
         parser.add_argument('--provinsi', help='Kode BPS provinsi, mis. 51.')
@@ -100,7 +92,7 @@ class Command(BaseCommand):
             return dict(c.fetchall())
 
     def _aksesibilitas(self, provinsi_id):
-        kategori = [k for k, _, _, _ in INFRASTRUKTUR_AKSESIBILITAS]
+        kategori = [k for k, _, _, _ in atur('INFRASTRUKTUR_AKSESIBILITAS')]
         nilai = ', '.join(['(%s)'] * len(kategori))
         with connection.cursor() as c:
             c.execute(
@@ -301,19 +293,19 @@ class Command(BaseCommand):
     def _skor(self, sub_zona, status, sektor_kode, bencana, jarak, potensi, n_kkprl,
               ekosistem, luas_zona, sosial, ada_adat, adat_terdata):
         sesuai = status in BOLEH
-        skor_tr = TATA_RUANG_PASS_SCORE if sesuai else TATA_RUANG_FAIL_SCORE
+        skor_tr = atur('TATA_RUANG_PASS_SCORE') if sesuai else atur('TATA_RUANG_FAIL_SCORE')
 
-        skor_potensi = SPATIAL_DEFAULT_LOCATION['potensi_sda']
+        skor_potensi = atur('SPATIAL_DEFAULT_LOCATION')['potensi_sda']
         if potensi:
             terbaik = 0.0
             for tingkat, kode_sektor in potensi:
-                dasar = TINGKAT_POTENSI_SCORE.get(tingkat, 0.5)
+                dasar = atur('TINGKAT_POTENSI_SCORE').get(tingkat, 0.5)
                 terbaik = max(terbaik, dasar if kode_sektor == sektor_kode else dasar * 0.8)
             skor_potensi = terbaik
 
         total_bobot = total_nilai = 0.0
         terdekat = None
-        for kategori, bobot, ideal_km, maks_km in INFRASTRUKTUR_AKSESIBILITAS:
+        for kategori, bobot, ideal_km, maks_km in atur('INFRASTRUKTUR_AKSESIBILITAS'):
             km = jarak.get(kategori)
             if km is None:
                 continue
@@ -329,7 +321,7 @@ class Command(BaseCommand):
         skor_akses = (
             _batas(total_nilai / total_bobot)
             if total_bobot
-            else SPATIAL_DEFAULT_LOCATION['aksesibilitas']
+            else atur('SPATIAL_DEFAULT_LOCATION')['aksesibilitas']
         )
 
         skor_sosek = skor_sosial_ekonomi(
@@ -337,13 +329,13 @@ class Command(BaseCommand):
         )
         ada_sosek = skor_sosek is not None
         if not ada_sosek:
-            skor_sosek = SPATIAL_DEFAULT_LOCATION['kondisi_sosek']
+            skor_sosek = atur('SPATIAL_DEFAULT_LOCATION')['kondisi_sosek']
 
         skor_lokasi, _ = rerata_berbobot_berdata({
-            'tata_ruang': (skor_tr, LOCATION_WEIGHTS['tata_ruang'], True),
-            'potensi_sda': (skor_potensi, LOCATION_WEIGHTS['potensi_sda'], bool(potensi)),
-            'aksesibilitas': (skor_akses, LOCATION_WEIGHTS['aksesibilitas'], total_bobot > 0),
-            'sosial_ekonomi': (skor_sosek, LOCATION_WEIGHTS['sosial_ekonomi'], ada_sosek),
+            'tata_ruang': (skor_tr, atur('LOCATION_WEIGHTS')['tata_ruang'], True),
+            'potensi_sda': (skor_potensi, atur('LOCATION_WEIGHTS')['potensi_sda'], bool(potensi)),
+            'aksesibilitas': (skor_akses, atur('LOCATION_WEIGHTS')['aksesibilitas'], total_bobot > 0),
+            'sosial_ekonomi': (skor_sosek, atur('LOCATION_WEIGHTS')['sosial_ekonomi'], ada_sosek),
         })
 
         def tekanan(bobot_map):
@@ -354,10 +346,10 @@ class Command(BaseCommand):
                     continue
                 total_b += bobot
                 total_n += KELAS_KE_RISIKO.get(kelas, 0.4) * bobot
-            return total_n / total_b if total_b else SPATIAL_DEFAULT_RISK['operasional']
+            return total_n / total_b if total_b else atur('SPATIAL_DEFAULT_RISK')['operasional']
 
-        risiko_operasional = tekanan(HAZARD_OPERASIONAL_WEIGHTS)
-        tekanan_bencana = tekanan(HAZARD_LINGKUNGAN_WEIGHTS)
+        risiko_operasional = tekanan(atur('HAZARD_OPERASIONAL_WEIGHTS'))
+        tekanan_bencana = tekanan(atur('HAZARD_LINGKUNGAN_WEIGHTS'))
 
         sensitivitas = None
         ekosistem_rincian = []
@@ -378,21 +370,21 @@ class Command(BaseCommand):
                 )
             nisbah = min(1.0, luas_total / luas_zona) if luas_zona else 1.0
             sensitivitas = _batas(
-                dasar * (EKOSISTEM_LANTAI_CAKUPAN + (1 - EKOSISTEM_LANTAI_CAKUPAN) * nisbah)
+                dasar * (atur('EKOSISTEM_LANTAI_CAKUPAN') + (1 - atur('EKOSISTEM_LANTAI_CAKUPAN')) * nisbah)
             )
 
         risiko_lingkungan, sumber_lingkungan = rerata_berbobot_berdata({
-            'ekosistem': (sensitivitas or 0.0, BOBOT_RISIKO_LINGKUNGAN['ekosistem'], sensitivitas is not None),
-            'bencana': (tekanan_bencana, BOBOT_RISIKO_LINGKUNGAN['bencana'], bool(bencana)),
+            'ekosistem': (sensitivitas or 0.0, atur('BOBOT_RISIKO_LINGKUNGAN')['ekosistem'], sensitivitas is not None),
+            'bencana': (tekanan_bencana, atur('BOBOT_RISIKO_LINGKUNGAN')['bencana'], bool(bencana)),
         })
         if not sumber_lingkungan:
-            risiko_lingkungan = SPATIAL_DEFAULT_RISK['lingkungan']
+            risiko_lingkungan = atur('SPATIAL_DEFAULT_RISK')['lingkungan']
 
-        risiko_regulasi = SPATIAL_DEFAULT_RISK['regulasi']
+        risiko_regulasi = atur('SPATIAL_DEFAULT_RISK')['regulasi']
         if not sesuai:
-            risiko_regulasi += REGULASI_PENALTY['zona_tidak_cocok']
+            risiko_regulasi += atur('REGULASI_PENALTY')['zona_tidak_cocok']
         if n_kkprl:
-            risiko_regulasi += REGULASI_PENALTY['tumpang_tindih_kkprl']
+            risiko_regulasi += atur('REGULASI_PENALTY')['tumpang_tindih_kkprl']
         risiko_regulasi = _batas(risiko_regulasi)
 
         risiko_sosial_nilai, sumber_sosial, _ = hitung_risiko_sosial(
@@ -405,13 +397,13 @@ class Command(BaseCommand):
 
         ada_bencana = bool(bencana)
         skor_risiko, _ = rerata_berbobot_berdata({
-            'pasar': (1.0 - SPATIAL_DEFAULT_RISK['pasar'], RISK_WEIGHTS['pasar'], False),
-            'operasional': (1.0 - risiko_operasional, RISK_WEIGHTS['operasional'], ada_bencana),
-            'regulasi': (1.0 - risiko_regulasi, RISK_WEIGHTS['regulasi'], True),
-            'lingkungan': (1.0 - risiko_lingkungan, RISK_WEIGHTS['lingkungan'], bool(sumber_lingkungan)),
+            'pasar': (1.0 - atur('SPATIAL_DEFAULT_RISK')['pasar'], atur('RISK_WEIGHTS')['pasar'], False),
+            'operasional': (1.0 - risiko_operasional, atur('RISK_WEIGHTS')['operasional'], ada_bencana),
+            'regulasi': (1.0 - risiko_regulasi, atur('RISK_WEIGHTS')['regulasi'], True),
+            'lingkungan': (1.0 - risiko_lingkungan, atur('RISK_WEIGHTS')['lingkungan'], bool(sumber_lingkungan)),
             'sosial': (
                 1.0 - (risiko_sosial_nilai or 0.0),
-                RISK_WEIGHTS['sosial'],
+                atur('RISK_WEIGHTS')['sosial'],
                 risiko_sosial_nilai is not None,
             ),
         })
@@ -425,7 +417,7 @@ class Command(BaseCommand):
         )
 
         skor_total = (
-            skor_lokasi * BOBOT_SKOR_ZONA['lokasi'] + skor_risiko * BOBOT_SKOR_ZONA['risiko']
+            skor_lokasi * atur('BOBOT_SKOR_ZONA')['lokasi'] + skor_risiko * atur('BOBOT_SKOR_ZONA')['risiko']
         )
         kelas = kelas_kelayakan(skor_total)
         if not sesuai:
@@ -555,6 +547,8 @@ class Command(BaseCommand):
                 dilewati += 1
                 continue
 
+            if opsi.get('progres'):
+                opsi['progres'](i, len(daftar), prov.nama)
             t0 = time.time()
             n = self._provinsi(prov, sektor_list)
             total += n

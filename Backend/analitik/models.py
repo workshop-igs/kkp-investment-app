@@ -405,3 +405,89 @@ class RasterOseanografi(models.Model):
 
     def __str__(self):
         return f'{self.get_parameter_display()} — petak {self.id}'
+
+
+class PengaturanAnalisis(models.Model):
+    kunci = models.CharField(max_length=60, unique=True)
+    nilai = models.JSONField()
+    diubah_oleh = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'analitik_pengaturan_analisis'
+        verbose_name_plural = 'Pengaturan Analisis'
+
+    def __str__(self):
+        return self.kunci
+
+
+class StatusHitungUlang(models.Model):
+    berjalan = models.BooleanField(default=False)
+    tahap = models.CharField(max_length=120, blank=True)
+    ke = models.IntegerField(default=0)
+    dari = models.IntegerField(default=0)
+    perlu_lokasi = models.JSONField(null=True, blank=True, help_text='Kosong = tidak perlu; [] = semua provinsi')
+    perlu_skor = models.BooleanField(default=False)
+    versi = models.IntegerField(default=0)
+    diperbarui = models.DateTimeField(null=True, blank=True)
+    mulai = models.DateTimeField(null=True, blank=True)
+    selesai = models.DateTimeField(null=True, blank=True)
+    galat = models.TextField(blank=True)
+
+    class Meta:
+        db_table = 'analitik_status_hitung_ulang'
+        verbose_name_plural = 'Status Hitung Ulang'
+
+
+class ParameterTambahan(models.Model):
+    TIPE_CHOICES = [('AREA', 'Area geospasial'), ('TABEL', 'Tabel per wilayah')]
+    PERAN_CHOICES = [
+        ('GERBANG', 'Gerbang wajib'),
+        ('DINILAI', 'Parameter dinilai'),
+        ('INFORMASI', 'Informasi saja'),
+    ]
+    KONDISI_CHOICES = [('DI_DALAM', 'Sesuai bila di dalam area'), ('DI_LUAR', 'Sesuai bila di luar area')]
+    TINGKAT_CHOICES = [('PROVINSI', 'Provinsi'), ('KABUPATEN', 'Kabupaten/kota')]
+
+    nama = models.CharField(max_length=150)
+    keterangan = models.TextField(blank=True)
+    tipe = models.CharField(max_length=10, choices=TIPE_CHOICES)
+    peran = models.CharField(max_length=10, choices=PERAN_CHOICES)
+    aktif = models.BooleanField(default=True)
+    sektor = models.ManyToManyField(SektorInvestasi, blank=True, help_text='Kosong = semua jenis investasi')
+    provinsi = models.ManyToManyField(Provinsi, blank=True, help_text='Kosong = semua provinsi')
+    kondisi = models.CharField(max_length=10, choices=KONDISI_CHOICES, default='DI_DALAM')
+    tingkat = models.CharField(max_length=10, choices=TINGKAT_CHOICES, default='KABUPATEN')
+    nilai_min = models.FloatField(null=True, blank=True)
+    nilai_maks = models.FloatField(null=True, blank=True)
+    satuan = models.CharField(max_length=40, blank=True)
+    sumber = models.CharField(max_length=255, blank=True)
+    dibuat_oleh = models.ForeignKey('auth.User', on_delete=models.SET_NULL, null=True, blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'analitik_parameter_tambahan'
+        ordering = ['nama']
+        verbose_name_plural = 'Parameter Analisis Tambahan'
+
+    def __str__(self):
+        return self.nama
+
+
+class AreaParameter(models.Model):
+    parameter = models.ForeignKey(ParameterTambahan, on_delete=models.CASCADE, related_name='area')
+    nama = models.CharField(max_length=255, blank=True)
+    geometry = models.MultiPolygonField(srid=4326)
+
+    class Meta:
+        db_table = 'analitik_area_parameter'
+
+
+class NilaiWilayahParameter(models.Model):
+    parameter = models.ForeignKey(ParameterTambahan, on_delete=models.CASCADE, related_name='nilai_wilayah')
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE, null=True, blank=True)
+    kabupaten = models.ForeignKey(KabupatenKota, on_delete=models.CASCADE, null=True, blank=True)
+    nilai = models.FloatField()
+
+    class Meta:
+        db_table = 'analitik_nilai_wilayah_parameter'

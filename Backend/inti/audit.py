@@ -24,6 +24,8 @@ NAMA_SASARAN = {
     'potensi': 'Lokasi potensi',
     'kkprl': 'Izin KKPRL',
     'zonasi': 'Zona ruang laut',
+    'pengaturan-analisis': 'Pengaturan analisis',
+    'parameter-tambahan': 'Parameter analisis tambahan',
 }
 
 
