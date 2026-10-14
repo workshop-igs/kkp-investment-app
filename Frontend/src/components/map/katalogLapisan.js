@@ -233,11 +233,14 @@ export const LAYER_LOKAL = {
       + 'diperbesar. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona ruang laut, atau kawasan Pola Ruang darat '
       + 'RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu, karakter lokasinya cocok (misalnya tambak '
       + 'garam dan unit pengolahan di darat pesisir, budi daya laut di perairan 1 sampai 30 m, OTEC di perairan dalam; '
-      + 'kedalaman dan gelombang bersifat indikatif), tidak beririsan KKPRL terbit, dan tidak tertutup bangunan atau '
-      + 'struktur menurut OpenStreetMap dan data infrastruktur KKP. Sebuah sel masuk bila sedikitnya 75% parameter yang '
+      + 'kedalaman dan gelombang bersifat indikatif), tidak beririsan KKPRL terbit, tidak tertutup bangunan atau '
+      + 'struktur menurut OpenStreetMap dan data infrastruktur KKP, dan berada dalam jarak ideal infrastruktur pendukung '
+      + '(pelabuhan, jalan, listrik, atau kawasan industri). Sebuah sel masuk bila sedikitnya 75% parameter yang '
       + 'terukur di sel itu sangat sesuai: peruntukan diizinkan tanpa syarat, karakter lokasi, risiko tsunami, gelombang '
       + 'ekstrem dan abrasi, serta banjir yang rendah, tidak beririsan ekosistem sensitif, dekat infrastruktur pendukung, '
-      + 'dan di luar wilayah kelola masyarakat hukum adat. Sel yang bersebelahan digabung menjadi satu lokasi. Parameter '
+      + 'dan di luar wilayah kelola masyarakat hukum adat. Setiap wilayah sel yang bersambung ditampilkan sebagai satu '
+      + 'titik dengan batas berupa inti terbaiknya, paling luas 1 km x 1 km (100 ha): persentase tertinggi, lalu paling '
+      + 'dekat infrastruktur. Parameter '
       + 'yang tidak sangat sesuai atau tidak terukur disebut di popup sebagai hal yang perlu dinilai langsung di '
       + 'lapangan. Pada pilihan semua jenis, lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; '
       + 'Konservasi & Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang '
@@ -278,6 +281,9 @@ export const LAYER_LOKAL = {
           <span class="font-bold text-base" style="color:${warna}">${aman(p.persen_sesuai)}%</span>
           <span class="text-slate-500"> parameter terukur sangat sesuai &middot; ${aman(luas)} ha</span>
         </div>
+        ${p.luas_wilayah_ha > p.luas_ha
+          ? `<p class="text-[10px] text-slate-500 mb-1 leading-snug">Inti terbaik dari wilayah sesuai seluas &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha: persentase tertinggi, lalu paling dekat infrastruktur.</p>`
+          : ''}
         ${p.jenis_nama?.length
           ? `<p class="text-[11px] text-slate-700 mb-1 leading-snug"><b>Cocok untuk:</b> ${aman(p.jenis_nama.join(', '))}</p>`
           : ''}
