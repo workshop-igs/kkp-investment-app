@@ -189,6 +189,45 @@ const KarakterLokasi = ({ s }) => (
   </div>
 );
 
+const HASIL_TAMBAHAN = {
+  true: ['Sesuai', 'text-emerald-700'],
+  false: ['Tidak sesuai', 'text-rose-700'],
+  null: ['Tidak terukur', 'text-slate-500'],
+};
+
+const ParameterTambahan = ({ daftar }) => (
+  <div>
+    <Judul>Parameter tambahan dari administrator</Judul>
+    <div className="overflow-x-auto border border-slate-200 rounded-lg">
+      <table className="w-full text-xs text-left">
+        <thead className="bg-slate-50 text-slate-500">
+          <tr>
+            <th className="px-3 py-2 font-semibold">Parameter</th>
+            <th className="px-3 py-2 font-semibold">Peran</th>
+            <th className="px-3 py-2 font-semibold">Hasil</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {daftar.map((t) => {
+            const [label, warna] = HASIL_TAMBAHAN[t.hasil];
+            return (
+              <tr key={t.id} className="align-top">
+                <td className="px-3 py-2">
+                  <div className="font-medium text-slate-800">{t.nama}</div>
+                  <div className="text-[10.5px] text-slate-500">{t.keterangan}</div>
+                  {t.sumber && <div className="text-[10.5px] text-slate-400">{t.sumber}</div>}
+                </td>
+                <td className="px-3 py-2 text-slate-600">{t.peran_label}</td>
+                <td className={`px-3 py-2 font-semibold ${warna}`}>{label}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
 const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
   const { Ikon } = gaya;
@@ -269,6 +308,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
 
       <RincianJenis s={s} />
       {s.karakter && <KarakterLokasi s={s} />}
+      {s.parameter_tambahan?.length > 0 && <ParameterTambahan daftar={s.parameter_tambahan} />}
 
       {s.informasi_ruang?.length > 0 && (
         <div>
