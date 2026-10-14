@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views_admin import (
     AdminDataSourceViewSet,
     AdminLogAktivitasViewSet,
+    AdminPengaturanAnalisisViewSet,
     AdminProyekViewSet,
     AdminSektorViewSet,
     AdminUserViewSet,
@@ -38,6 +39,7 @@ admin_router.register(r'proyek', AdminProyekViewSet, basename='admin-proyek')
 admin_router.register(r'sektor', AdminSektorViewSet, basename='admin-sektor')
 admin_router.register(r'data-sources', AdminDataSourceViewSet, basename='admin-datasources')
 admin_router.register(r'log-aktivitas', AdminLogAktivitasViewSet, basename='admin-log-aktivitas')
+admin_router.register(r'pengaturan-analisis', AdminPengaturanAnalisisViewSet, basename='admin-pengaturan-analisis')
 
 urlpatterns = [
     path('cari/', cari_lokasi, name='cari-lokasi'),

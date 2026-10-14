@@ -6,27 +6,21 @@ from django.db import connection
 
 from analitik.models import KetentuanRuang
 from analitik.services.konstanta import (
-    AMBANG_CAKUPAN_ACUAN,
     AMBANG_IRISAN_KKPRL_M2,
-    AMBANG_KECOCOKAN,
     BATAS_JARAK_PANTAI_DERAJAT,
     EKOSISTEM_PESISIR,
     GMW_TAHUN_AKHIR,
-    INFRASTRUKTUR_AKSESIBILITAS,
     JENIS_ZONA_TERLARANG,
-    JUMLAH_LOKASI_ALTERNATIF,
-    KARAKTER_LOKASI,
     KETENTUAN_DARAT_BAWAAN,
     KM_PER_DERAJAT,
     LABEL_SUMBER_ZONASI,
-    PARAMETER_TAMBAHAN,
     PRIORITAS_SUMBER_ZONASI,
-    RADIUS_LOKASI_ALTERNATIF_KM,
     SEKTOR_SUB_ZONA_COCOK,
     SUB_ZONA_TANPA_RINCIAN,
 )
 from analitik.services.laporan_spasial import _arah
 from analitik.services.oseanografi import statistik as statistik_oseanografi
+from analitik.services.pengaturan import atur
 from inti.models import SektorInvestasi
 from inventarisasi.klasifikasi import KATA_SEKTOR, PENANDA_MATRIKS, rincian_kegiatan, status_rincian, syarat_rincian
 from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
@@ -147,7 +141,7 @@ def _penuhi(syarat, data):
         sebaran = data.get('sebaran_kedalaman')
         if sebaran:
             cocok = sum(n for d, n in sebaran if (bawah is None or d >= bawah) and (atas is None or d <= atas))
-            if cocok < AMBANG_KECOCOKAN * sum(n for _, n in sebaran):
+            if cocok < atur('AMBANG_KECOCOKAN') * sum(n for _, n in sebaran):
                 return False
         elif (bawah is not None and dalam < bawah) or (atas is not None and dangkal > atas):
             return False
@@ -168,7 +162,7 @@ def _penuhi(syarat, data):
 
 
 def cocok_karakter(sektor_kode, data):
-    aturan = KARAKTER_LOKASI.get(sektor_kode)
+    aturan = atur('KARAKTER_LOKASI').get(sektor_kode)
     if aturan is None:
         return True, ''
     pilihan = aturan.get(data['ranah'])
@@ -205,10 +199,10 @@ BENCANA_LOKASI = (
 def parameter_lokasi(sektor_kode, data):
     if not cocok_karakter(sektor_kode, data)[0]:
         return None
-    pilihan = KARAKTER_LOKASI.get(sektor_kode, {}).get(data['ranah'], [{}])
+    pilihan = atur('KARAKTER_LOKASI').get(sektor_kode, {}).get(data['ranah'], [{}])
     syarat = next((s for s in pilihan if _penuhi(s, data)), {})
     nilai = {'Ranah lokasi sesuai jenis investasi': True, **{LABEL_SYARAT[k]: True for k in syarat}}
-    for kunci, batas in PARAMETER_TAMBAHAN.get(sektor_kode, {}).get(data['ranah'], {}).items():
+    for kunci, batas in atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}).items():
         label, sumber = LABEL_TAMBAHAN[kunci]
         nilai[label] = None if data.get(sumber) is None else data[sumber] <= batas
     nilai['Peruntukan tata ruang diizinkan tanpa syarat'] = data.get('status_tr') == 'DIIZINKAN'
@@ -307,7 +301,7 @@ def _nilai(zona_efektif, aturan, cakupan, ada_kkprl) -> str:
     status = [_ketentuan(aturan, z)['status'] for z in zona_efektif]
     if ada_kkprl or 'TIDAK_DIIZINKAN' in status:
         return 'TIDAK_SESUAI'
-    if cakupan < AMBANG_CAKUPAN_ACUAN or not zona_efektif or None in status:
+    if cakupan < atur('AMBANG_CAKUPAN_ACUAN') or not zona_efektif or None in status:
         return 'BELUM_TERVERIFIKASI'
     if 'BERSYARAT' in status:
         return 'SESUAI_BERSYARAT'
@@ -401,8 +395,8 @@ def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
         ORDER BY l.geometry <-> ST_GeomFromEWKT(%s)
         LIMIT %s
         """,
-        [geom.ewkt, sektor.id, geom.ewkt, RADIUS_LOKASI_ALTERNATIF_KM / KM_PER_DERAJAT, geom.ewkt, geom.ewkt,
-         JUMLAH_LOKASI_ALTERNATIF],
+        [geom.ewkt, sektor.id, geom.ewkt, atur('RADIUS_LOKASI_ALTERNATIF_KM') / KM_PER_DERAJAT, geom.ewkt, geom.ewkt,
+         atur('JUMLAH_LOKASI_ALTERNATIF')],
     )
     return [
         {
@@ -434,8 +428,8 @@ def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids):
             'SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung i, '
             'unnest(%s::text[], %s::float8[]) AS k(kategori, batas) '
             'WHERE i.kategori = k.kategori AND ST_DWithin(i.geometry, ST_GeomFromEWKT(%s), k.batas))',
-            [[k for k, _, _, _ in INFRASTRUKTUR_AKSESIBILITAS],
-             [ideal / KM_PER_DERAJAT for _, _, ideal, _ in INFRASTRUKTUR_AKSESIBILITAS], geom.ewkt],
+            [[k for k, _, _, _ in atur('INFRASTRUKTUR_AKSESIBILITAS')],
+             [ideal / KM_PER_DERAJAT for _, _, ideal, _ in atur('INFRASTRUKTUR_AKSESIBILITAS')], geom.ewkt],
         )
         data['dekat_infrastruktur'] = c.fetchone()[0]
     c.execute(
@@ -478,7 +472,7 @@ def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
                 f'{lokasi} yang belum memiliki ketentuan pemanfaatan untuk {sektor_nama}; '
                 f'kesesuaian belum dapat diverifikasi sampai ketentuannya ditetapkan.'
             )
-    if cakupan < AMBANG_CAKUPAN_ACUAN:
+    if cakupan < atur('AMBANG_CAKUPAN_ACUAN'):
         alasan.append(
             f'{round((1 - cakupan) * 100, 1)}% area tidak tercakup acuan tata ruang mana pun '
             f'(RTRW Provinsi, Rencana Zonasi KAW, maupun RTRWN).'
@@ -606,7 +600,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'zona': zona_efektif,
         'informasi_ruang': informasi_ruang,
         'karakter': {
-            'kebutuhan': KARAKTER_LOKASI.get(sektor.kode, {}).get('uraian', ''),
+            'kebutuhan': atur('KARAKTER_LOKASI').get(sektor.kode, {}).get('uraian', ''),
             'terukur': ('Darat; ' if karakter['ranah'] == 'DARAT' else 'Perairan; ') + _ringkas_karakter(karakter),
             'cocok': cocok,
         },

@@ -7,33 +7,21 @@ from django.db.models import Count, Sum
 from inti.geospasial import hitung_luas_geodesik_ha
 
 from .konstanta import (
-    BOBOT_RISIKO_LINGKUNGAN,
-    BOBOT_RISIKO_SOSIAL,
     GMW_AMBANG_TREN_PERSEN,
     GMW_TAHUN_AKHIR,
     GMW_TAHUN_AWAL,
+    SENSITIVITAS_EKOSISTEM,
     SUMBER_EKOSISTEM_UTAMA,
     SUMBER_KARANG,
     SUMBER_LAMUN,
     SUMBER_MANGROVE_GMW,
-    EKOSISTEM_LANTAI_CAKUPAN,
-    SENSITIVITAS_EKOSISTEM,
     rerata_berbobot_berdata,
-    risiko_sosial as hitung_risiko_sosial,
     skor_sosial_ekonomi,
-    AKSESIBILITAS_PELABUHAN_IDEAL_KM,
-    AKSESIBILITAS_PELABUHAN_MAX_KM,
-    AKSESIBILITAS_WEIGHTS,
-    HAZARD_LINGKUNGAN_WEIGHTS,
-    HAZARD_OPERASIONAL_WEIGHTS,
-    INFRASTRUKTUR_AKSESIBILITAS,
-    INFRASTRUKTUR_RADIUS_CARI_KM,
-    REGULASI_PENALTY,
-    SPATIAL_DEFAULT_LOCATION,
-    SPATIAL_DEFAULT_RISK,
-    TENURIAL_LANTAI_SUB_ZONA,
-    TINGKAT_POTENSI_SCORE,
 )
+from .konstanta import (
+    risiko_sosial as hitung_risiko_sosial,
+)
+from .pengaturan import atur
 
 logger = logging.getLogger('analitik')
 
@@ -82,9 +70,9 @@ def _nilai_wilayah(geom) -> Dict[str, Any]:
 
 
 def _nilai_tata_ruang(screening: Dict[str, Any]) -> Dict[str, Any]:
-    risiko = SPATIAL_DEFAULT_RISK['regulasi']
+    risiko = atur('SPATIAL_DEFAULT_RISK')['regulasi']
     if screening['status'] == 'SESUAI':
-        risiko -= REGULASI_PENALTY['zona_tidak_cocok']
+        risiko -= atur('REGULASI_PENALTY')['zona_tidak_cocok']
     catatan = [a for a in screening['alasan'] if 'bersyarat' in a]
     return {
         'kesesuaian': screening['lanjut'],
@@ -151,10 +139,10 @@ def _nilai_bencana(geom) -> Dict[str, Any]:
         return max(kandidat) if kandidat else default
 
     hasil['risiko_operasional'] = _clamp(
-        _gabung(HAZARD_OPERASIONAL_WEIGHTS, SPATIAL_DEFAULT_RISK['operasional'])
+        _gabung(atur('HAZARD_OPERASIONAL_WEIGHTS'), atur('SPATIAL_DEFAULT_RISK')['operasional'])
     )
     hasil['risiko_lingkungan'] = _clamp(
-        _gabung(HAZARD_LINGKUNGAN_WEIGHTS, SPATIAL_DEFAULT_RISK['lingkungan'])
+        _gabung(atur('HAZARD_LINGKUNGAN_WEIGHTS'), atur('SPATIAL_DEFAULT_RISK')['lingkungan'])
     )
     return hasil
 
@@ -244,7 +232,7 @@ def _nilai_ekosistem(geom) -> Dict[str, Any]:
     luas_area = hitung_luas_geodesik_ha(json.loads(geom.geojson)) if geom else 0
     nisbah = min(1.0, luas_total / luas_area) if luas_area else 1.0
     hasil['sensitivitas'] = _clamp(
-        dasar * (EKOSISTEM_LANTAI_CAKUPAN + (1 - EKOSISTEM_LANTAI_CAKUPAN) * nisbah)
+        dasar * (atur('EKOSISTEM_LANTAI_CAKUPAN') + (1 - atur('EKOSISTEM_LANTAI_CAKUPAN')) * nisbah)
     )
     hasil['sumber'] = ', '.join(sorted({r['sumber'] for r in hasil['rincian']}))
     return hasil
@@ -276,7 +264,7 @@ def _nilai_sosial(geom, kabkota, zona_teririsan) -> Dict[str, Any]:
     sub_zona_lantai = ''
     tertinggi = 0.0
     for z in zona_teririsan or []:
-        nilai = TENURIAL_LANTAI_SUB_ZONA.get(z.get('sub_zona'), 0.0)
+        nilai = atur('TENURIAL_LANTAI_SUB_ZONA').get(z.get('sub_zona'), 0.0)
         if nilai > tertinggi:
             tertinggi, sub_zona_lantai = nilai, z['sub_zona']
 
@@ -310,7 +298,7 @@ def _nilai_sosial(geom, kabkota, zona_teririsan) -> Dict[str, Any]:
         'tahun_data': kabkota.tahun_data_sosial if kabkota else None,
         'nilai_kemiskinan': bulat(komponen['kemiskinan']),
         'nilai_tenurial': bulat(komponen['tenurial']),
-        'bobot': dict(BOBOT_RISIKO_SOSIAL),
+        'bobot': dict(atur('BOBOT_RISIKO_SOSIAL')),
     }
     return hasil
 
@@ -341,21 +329,21 @@ def _nilai_peta_risiko(geom) -> Dict[str, Any]:
 
 def _skor_aksesibilitas(potensi) -> float:
     if potensi.jarak_pelabuhan_km is None:
-        jarak_skor = SPATIAL_DEFAULT_LOCATION['aksesibilitas']
-    elif potensi.jarak_pelabuhan_km <= AKSESIBILITAS_PELABUHAN_IDEAL_KM:
+        jarak_skor = atur('SPATIAL_DEFAULT_LOCATION')['aksesibilitas']
+    elif potensi.jarak_pelabuhan_km <= atur('AKSESIBILITAS_PELABUHAN_IDEAL_KM'):
         jarak_skor = 1.0
-    elif potensi.jarak_pelabuhan_km >= AKSESIBILITAS_PELABUHAN_MAX_KM:
+    elif potensi.jarak_pelabuhan_km >= atur('AKSESIBILITAS_PELABUHAN_MAX_KM'):
         jarak_skor = 0.1
     else:
-        rentang = AKSESIBILITAS_PELABUHAN_MAX_KM - AKSESIBILITAS_PELABUHAN_IDEAL_KM
-        posisi = (potensi.jarak_pelabuhan_km - AKSESIBILITAS_PELABUHAN_IDEAL_KM) / rentang
+        rentang = atur('AKSESIBILITAS_PELABUHAN_MAX_KM') - atur('AKSESIBILITAS_PELABUHAN_IDEAL_KM')
+        posisi = (potensi.jarak_pelabuhan_km - atur('AKSESIBILITAS_PELABUHAN_IDEAL_KM')) / rentang
         jarak_skor = 1.0 - posisi * 0.9
 
     return _clamp(
-        jarak_skor * AKSESIBILITAS_WEIGHTS['jarak_pelabuhan']
-        + (1.0 if potensi.akses_jalan else 0.0) * AKSESIBILITAS_WEIGHTS['akses_jalan']
-        + (1.0 if potensi.akses_listrik else 0.0) * AKSESIBILITAS_WEIGHTS['akses_listrik']
-        + (1.0 if potensi.akses_air_bersih else 0.0) * AKSESIBILITAS_WEIGHTS['akses_air']
+        jarak_skor * atur('AKSESIBILITAS_WEIGHTS')['jarak_pelabuhan']
+        + (1.0 if potensi.akses_jalan else 0.0) * atur('AKSESIBILITAS_WEIGHTS')['akses_jalan']
+        + (1.0 if potensi.akses_listrik else 0.0) * atur('AKSESIBILITAS_WEIGHTS')['akses_listrik']
+        + (1.0 if potensi.akses_air_bersih else 0.0) * atur('AKSESIBILITAS_WEIGHTS')['akses_air']
     )
 
 
@@ -377,9 +365,9 @@ def _jarak_infrastruktur(geom) -> Dict[str, Any]:
         k.srid = 4326
         return k
 
-    RADIUS_BERTAHAP = [40.0, 120.0, INFRASTRUKTUR_RADIUS_CARI_KM]
+    RADIUS_BERTAHAP = [40.0, 120.0, atur('INFRASTRUKTUR_RADIUS_CARI_KM')]
 
-    for kategori, bobot, ideal_km, maks_km in INFRASTRUKTUR_AKSESIBILITAS:
+    for kategori, bobot, ideal_km, maks_km in atur('INFRASTRUKTUR_AKSESIBILITAS'):
         terdekat = None
         for radius_km in RADIUS_BERTAHAP:
             terdekat = (
@@ -434,7 +422,7 @@ def _nilai_potensi(geom, sektor_kode: str) -> Dict[str, Any]:
     skor_sda: List[float] = []
     skor_akses: List[float] = []
     for z in dipakai:
-        nilai = TINGKAT_POTENSI_SCORE.get(z.tingkat_potensi, 0.5)
+        nilai = atur('TINGKAT_POTENSI_SCORE').get(z.tingkat_potensi, 0.5)
         if z.skor_kelayakan is not None:
             nilai = (nilai + _clamp(float(z.skor_kelayakan))) / 2.0
         skor_sda.append(nilai)
@@ -461,8 +449,8 @@ def _nilai_sosek(kabkota) -> Optional[float]:
 
 
 def ambil_skor_spasial(geometry: Dict[str, Any], sektor_kode: str, screening: Dict[str, Any]) -> Dict[str, Any]:
-    risiko = dict(SPATIAL_DEFAULT_RISK)
-    lokasi = dict(SPATIAL_DEFAULT_LOCATION)
+    risiko = dict(atur('SPATIAL_DEFAULT_RISK'))
+    lokasi = dict(atur('SPATIAL_DEFAULT_LOCATION'))
     sumber = {k: 'default' for k in list(risiko) + list(lokasi)}
     sumber['tata_ruang'] = 'default'
     catatan: List[str] = []
@@ -546,10 +534,10 @@ def ambil_skor_spasial(geometry: Dict[str, Any], sektor_kode: str, screening: Di
             ada_bencana = sumber.get('lingkungan') == 'BNPB:InaRISK'
             gabungan, dipakai = rerata_berbobot_berdata({
                 'ekosistem': (
-                    eko['sensitivitas'], BOBOT_RISIKO_LINGKUNGAN['ekosistem'], True
+                    eko['sensitivitas'], atur('BOBOT_RISIKO_LINGKUNGAN')['ekosistem'], True
                 ),
                 'bencana': (
-                    tekanan_bencana or 0.0, BOBOT_RISIKO_LINGKUNGAN['bencana'], ada_bencana
+                    tekanan_bencana or 0.0, atur('BOBOT_RISIKO_LINGKUNGAN')['bencana'], ada_bencana
                 ),
             })
             detail['ekosistem'] = {
@@ -559,7 +547,7 @@ def ambil_skor_spasial(geometry: Dict[str, Any], sektor_kode: str, screening: Di
                     else None
                 ),
                 'gabungan': round(gabungan, 4),
-                'bobot': dict(BOBOT_RISIKO_LINGKUNGAN),
+                'bobot': dict(atur('BOBOT_RISIKO_LINGKUNGAN')),
                 'dipakai': dipakai,
                 'rincian': eko['rincian'],
                 'sumber_ekosistem': eko['sumber'],
@@ -729,17 +717,17 @@ def ambil_risiko_ruang(geometry: Dict[str, Any]) -> Dict[str, Any]:
         if ada_eko or ada_bencana:
             gabungan, dipakai = rerata_berbobot_berdata({
                 'ekosistem': (
-                    eko['sensitivitas'] or 0.0, BOBOT_RISIKO_LINGKUNGAN['ekosistem'], ada_eko
+                    eko['sensitivitas'] or 0.0, atur('BOBOT_RISIKO_LINGKUNGAN')['ekosistem'], ada_eko
                 ),
                 'bencana': (
-                    tekanan or 0.0, BOBOT_RISIKO_LINGKUNGAN['bencana'], ada_bencana
+                    tekanan or 0.0, atur('BOBOT_RISIKO_LINGKUNGAN')['bencana'], ada_bencana
                 ),
             })
             hasil['lingkungan'] = {
                 'indeks': round(eko['sensitivitas'], 4) if ada_eko else None,
                 'tekanan_bencana': round(tekanan, 4) if ada_bencana else None,
                 'gabungan': round(gabungan, 4),
-                'bobot': dict(BOBOT_RISIKO_LINGKUNGAN),
+                'bobot': dict(atur('BOBOT_RISIKO_LINGKUNGAN')),
                 'dipakai': dipakai,
                 'rincian': eko['rincian'],
                 'sumber_ekosistem': eko['sumber'],
@@ -752,7 +740,7 @@ def ambil_risiko_ruang(geometry: Dict[str, Any]) -> Dict[str, Any]:
         elif eko.get('tren'):
             hasil['lingkungan'] = {
                 'indeks': None, 'tekanan_bencana': None, 'gabungan': None,
-                'bobot': dict(BOBOT_RISIKO_LINGKUNGAN), 'dipakai': [],
+                'bobot': dict(atur('BOBOT_RISIKO_LINGKUNGAN')), 'dipakai': [],
                 'rincian': [], 'sumber_ekosistem': None, 'tren': eko['tren'],
             }
     except Exception as e:

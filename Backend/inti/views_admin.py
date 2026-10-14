@@ -1,12 +1,16 @@
 from django.contrib.auth.models import User
+from django.core.cache import cache
 from django.db import transaction
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from analitik.models import KetentuanRuang
+from analitik.models import KetentuanRuang, PengaturanAnalisis, StatusHitungUlang
+from analitik.services import pengaturan
+from analitik.services.konstanta import EKOSISTEM_PESISIR
+from analitik.tasks import jadwalkan_hitung_ulang
 from inti.models import (
     LogAktivitas,
     SektorInvestasi,
@@ -72,6 +76,8 @@ class AdminSektorViewSet(viewsets.ModelViewSet):
                         defaults={'status': d['status'], 'syarat': d['syarat'], 'sumber': 'Ditetapkan administrator'},
                     )
             ada = {k.sub_zona: k for k in KetentuanRuang.objects.filter(sektor=sektor, provinsi=None)}
+            cache.clear()
+            jadwalkan_hitung_ulang(lokasi=[], skor=True)
         return Response([
             {'sub_zona': kode, 'label': label, 'status': ada[kode].status if kode in ada else '',
              'syarat': ada[kode].syarat if kode in ada else '', 'sumber': ada[kode].sumber if kode in ada else ''}
@@ -122,3 +128,83 @@ class AdminLogAktivitasViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(
             [{'kode': k, 'label': v} for k, v in LogAktivitas.AKSI_CHOICES]
         )
+
+
+def status_hitung_ulang():
+    s = StatusHitungUlang.objects.filter(pk=1).first()
+    if s is None:
+        return {'berjalan': False, 'menunggu': False, 'tahap': '', 'ke': 0, 'dari': 0, 'mulai': None, 'selesai': None,
+                'galat': ''}
+    return {'berjalan': s.berjalan, 'menunggu': s.perlu_lokasi is not None or s.perlu_skor, 'tahap': s.tahap,
+            'ke': s.ke, 'dari': s.dari, 'mulai': s.mulai, 'selesai': s.selesai, 'galat': s.galat}
+
+
+class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+    lookup_field = 'kunci'
+    lookup_value_regex = '[A-Z_]+'
+
+    @staticmethod
+    def _baris(meta, simpanan):
+        s = simpanan.get(meta['kunci'])
+        return {
+            **meta,
+            'bawaan': pengaturan.BAWAAN[meta['kunci']],
+            'nilai': s.nilai if s else pengaturan.BAWAAN[meta['kunci']],
+            'diubah': s is not None,
+            'diubah_oleh': s.diubah_oleh.get_username() if s and s.diubah_oleh else '',
+            'diubah_pada': s.updated_at if s else None,
+        }
+
+    @staticmethod
+    def _simpanan(**saring):
+        return {p.kunci: p for p in PengaturanAnalisis.objects.filter(**saring).select_related('diubah_oleh')}
+
+    def list(self, request):
+        simpanan = self._simpanan()
+        return Response({
+            'kelompok': [{'kode': k, 'label': label} for k, label in pengaturan.KELOMPOK],
+            'daftar': [self._baris(m, simpanan) for m in pengaturan.DAFTAR],
+            'label_bagian': pengaturan.LABEL_BAGIAN,
+            'sektor': list(SektorInvestasi.objects.order_by('urutan', 'nama').values('kode', 'nama')),
+            'syarat_karakter': pengaturan.SYARAT_KARAKTER,
+            'syarat_tambahan': pengaturan.SYARAT_TAMBAHAN,
+            'ekosistem': EKOSISTEM_PESISIR,
+            'hitung_ulang': status_hitung_ulang(),
+        })
+
+    def update(self, request, kunci=None):
+        if kunci not in pengaturan.TERDAFTAR:
+            raise NotFound('Pengaturan tidak dikenal.')
+        nilai = request.data.get('nilai')
+        try:
+            pengaturan.periksa(kunci, nilai)
+        except pengaturan.NilaiTidakSah as e:
+            raise ValidationError({'detail': str(e)}) from e
+        PengaturanAnalisis.objects.update_or_create(kunci=kunci, defaults={'nilai': nilai, 'diubah_oleh': request.user})
+        return self._setelah(kunci)
+
+    def destroy(self, request, kunci=None):
+        if kunci not in pengaturan.TERDAFTAR:
+            raise NotFound('Pengaturan tidak dikenal.')
+        PengaturanAnalisis.objects.filter(kunci=kunci).delete()
+        return self._setelah(kunci)
+
+    def _setelah(self, kunci):
+        pengaturan.segarkan()
+        cache.clear()
+        dampak = pengaturan.TERDAFTAR[kunci]['dampak']
+        if dampak:
+            jadwalkan_hitung_ulang(lokasi=[] if pengaturan.PETA in dampak else None, skor=pengaturan.SKOR in dampak)
+        return Response({
+            **self._baris(pengaturan.TERDAFTAR[kunci], self._simpanan(kunci=kunci)),
+            'hitung_ulang': status_hitung_ulang(),
+        })
+
+    @action(detail=False, methods=['get', 'post'], url_path='hitung-ulang')
+    def hitung_ulang(self, request):
+        if request.method == 'POST':
+            jadwalkan_hitung_ulang(lokasi=[], skor=True)
+        else:
+            jadwalkan_hitung_ulang()
+        return Response(status_hitung_ulang())

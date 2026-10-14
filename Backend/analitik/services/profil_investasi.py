@@ -8,12 +8,11 @@ from django.utils import timezone
 
 from analitik.models import KetentuanRuang, LokasiPotensial, SkorKelayakanZona
 from analitik.services.konstanta import (
-    AMBANG_TERBANGUN_PERSEN,
-    KARAKTER_LOKASI,
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
 )
 from analitik.services.oseanografi import statistik as statistik_oseanografi
+from analitik.services.pengaturan import atur
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
 from inventarisasi.klasifikasi import KATA_SEKTOR, rincian_kegiatan, status_rincian
 from inventarisasi.models import MatriksKKPRL, RegulasiTataRuang, ZonasiRuangLaut
@@ -266,7 +265,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         **luas.get(sektor.kode, {'sesuai_ha': 0, 'tinggi_ha': 0, 'sedang_ha': 0, 'jumlah_zona_tinggi': 0}),
         'sub_zona_diizinkan': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'DIIZINKAN'),
         'sub_zona_bersyarat': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'BERSYARAT'),
-        'karakter': KARAKTER_LOKASI.get(sektor.kode, {}).get('uraian', ''),
+        'karakter': atur('KARAKTER_LOKASI').get(sektor.kode, {}).get('uraian', ''),
         'rincian_matriks': _rincian_matriks(provinsi, sektor),
         'lokasi': lokasi,
         'peta': [{'kelas': kelas_zona[i], 'geometry': _geojson(g)} for i, g in c.fetchall() if g],
@@ -439,4 +438,4 @@ def skor_sesuai(sektor=None, provinsi=None):
 
 
 def belum_dimanfaatkan(skor):
-    return skor.filter(jumlah_kkprl=0, zona__persen_terbangun__lt=AMBANG_TERBANGUN_PERSEN)
+    return skor.filter(jumlah_kkprl=0, zona__persen_terbangun__lt=atur('AMBANG_TERBANGUN_PERSEN'))
