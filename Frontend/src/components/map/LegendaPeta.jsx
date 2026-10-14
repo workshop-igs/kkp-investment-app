@@ -256,7 +256,7 @@ const LegendaUnsurRtrl = () => (
 );
 
 
-const AMBANG_KELAS = { TINGGI: '≥75% parameter terukur' };
+const AMBANG_KELAS = { TINGGI: '≥75% dari ≥5 parameter terukur' };
 
 const LegendaDisarankan = ({ def }) => (
   <ul className="space-y-1.5">

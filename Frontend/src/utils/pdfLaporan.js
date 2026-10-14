@@ -699,7 +699,8 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         [(LEBAR - 8) * 0.22, (LEBAR - 8) * 0.78]
       );
       if (sc.parameter?.length) {
-        k.teks(`${nf(sc.persen_sangat_sesuai)}% parameter terukur sangat sesuai (ambang Peta Sebaran Wilayah Potensial 75%)`,
+        k.teks(`${nf(sc.persen_sangat_sesuai)}% dari ${sc.parameter.filter((p) => p.nilai !== null).length} parameter terukur sangat sesuai `
+          + '(ambang Peta Sebaran Wilayah Potensial: 75% dari sedikitnya 5 parameter terukur)',
           { tebal: true, warna: GELAP, ukuran: 7 });
         k.tabel(
           ['Parameter', 'Penilaian'],
