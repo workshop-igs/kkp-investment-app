@@ -12,7 +12,7 @@ from django.contrib.gis.gdal import DataSource, OGRGeometry, SpatialReference
 from django.contrib.gis.gdal.libgdal import lgdal
 from django.contrib.gis.gdal.prototypes import ds as capi
 from django.core.management.base import BaseCommand
-from django.db import connection, transaction
+from django.db import DatabaseError, connection, transaction
 
 from analitik.services.konstanta import PITA_PESISIR_DARAT_M, SUMBER_ZONASI_DARAT
 from analitik.services.screening_ruang import isi_ketentuan_bawaan
@@ -191,7 +191,10 @@ class Command(BaseCommand):
                     pilihan.append((gdb, ds, *lapisan_laut(ds, 'KKPRL' in os.path.basename(gdb).upper())))
             if not opsi['hanya_darat']:
                 self._impor(provinsi, pilihan)
-            self._impor_darat(provinsi, pilihan)
+            try:
+                self._impor_darat(provinsi, pilihan)
+            except DatabaseError as e:
+                self.stderr.write(f'  Zona darat pesisir gagal dimuat: {str(e).splitlines()[0][:200]}')
         dibuat = isi_ketentuan_bawaan()
         if dibuat:
             self.stdout.write(f'{dibuat} ketentuan ruang bawaan ditambahkan untuk sub-zona baru.')
@@ -308,7 +311,7 @@ class Command(BaseCommand):
                 CREATE TEMP TABLE pita_pesisir AS
                 SELECT ST_Subdivide(ST_Difference(ST_Buffer(g, %s, 'quad_segs=2'), ST_Buffer(g, %s, 'quad_segs=2')), 256) AS g
                 FROM (
-                    SELECT ST_Union(ST_SimplifyPreserveTopology(ST_MakeValid(geometry), 0.0003)) AS g
+                    SELECT ST_Union(ST_MakeValid(ST_SimplifyPreserveTopology(ST_MakeValid(geometry), 0.0003)), 1e-7) AS g
                     FROM inventarisasi_zonasi_ruang_laut WHERE provinsi_id = %s AND ranah = 'LAUT'
                 ) l
                 WHERE g IS NOT NULL
@@ -354,7 +357,7 @@ class Command(BaseCommand):
                            ST_Area(d.g::geography) / 10000, 0, '', %s, %s, %s, now(), now()
                     FROM (
                         SELECT m.sub_zona, m.jenis, m.nama,
-                               (ST_Dump(ST_Union(ST_CollectionExtract(ST_Intersection(m.g, p.g), 3)))).geom AS g
+                               (ST_Dump(ST_Union(ST_CollectionExtract(ST_Intersection(m.g, p.g, 1e-7), 3), 1e-7))).geom AS g
                         FROM darat_mentah m JOIN pita_pesisir p ON m.g && p.g AND ST_Intersects(m.g, p.g)
                         GROUP BY 1, 2, 3
                     ) d
