@@ -5,9 +5,9 @@ from django.db import transaction
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied
 
-from analitik.models import KetentuanRuang
+from analitik.models import KetentuanRuang, ParameterTambahan
 from analitik.services.konstanta import SUB_ZONA_TANPA_RINCIAN
-from inti.models import LogAktivitas, ProfilPengguna
+from inti.models import LogAktivitas, ProfilPengguna, Provinsi, SektorInvestasi
 from inventarisasi.models import ZonasiRuangLaut
 from ketenagakerjaan.models import MatriksKeahlianSektor
 from pipeline.models import ProyekInvestasi
@@ -157,3 +157,36 @@ class KompetensiSektorSerializer(serializers.ModelSerializer):
         model = MatriksKeahlianSektor
         fields = ['nama_posisi', 'pct_demand', 'prioritas', 'lembaga_pelatihan_rekomendasi',
                   'durasi_pelatihan_bulan', 'estimasi_biaya_per_orang_juta', 'skema_sertifikasi']
+
+
+class ParameterTambahanSerializer(serializers.ModelSerializer):
+    sektor = serializers.SlugRelatedField(
+        many=True, slug_field='kode', queryset=SektorInvestasi.objects.all(), required=False)
+    provinsi = serializers.SlugRelatedField(
+        many=True, slug_field='kode_bps', queryset=Provinsi.objects.all(), required=False)
+    jumlah_area = serializers.SerializerMethodField()
+    jumlah_nilai = serializers.SerializerMethodField()
+
+    class Meta:  # type: ignore
+        model = ParameterTambahan
+        fields = ['id', 'nama', 'keterangan', 'tipe', 'peran', 'aktif', 'sektor', 'provinsi', 'kondisi', 'tingkat',
+                  'nilai_min', 'nilai_maks', 'satuan', 'sumber', 'updated_at', 'jumlah_area', 'jumlah_nilai']
+        read_only_fields = ['updated_at']
+
+    def get_jumlah_area(self, obj):
+        return obj.area.count()
+
+    def get_jumlah_nilai(self, obj):
+        return obj.nilai_wilayah.count()
+
+    def validate(self, data):
+        def ambil(kunci):
+            return data.get(kunci, getattr(self.instance, kunci, None))
+
+        if ambil('tipe') == 'TABEL':
+            bawah, atas = ambil('nilai_min'), ambil('nilai_maks')
+            if bawah is None and atas is None:
+                raise serializers.ValidationError({'nilai_min': 'Isi batas bawah dan/atau batas atas nilai yang sesuai.'})
+            if bawah is not None and atas is not None and bawah > atas:
+                raise serializers.ValidationError({'nilai_maks': 'Batas atas harus lebih besar dari batas bawah.'})
+        return data
