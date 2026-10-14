@@ -106,7 +106,8 @@ def _poligon_rtrw(ds):
 
 
 def lapisan_pola_ruang(ds):
-    return [lap for lap in _poligon_rtrw(ds) if re.search(r'(AR_PR|PR_PR)_', lap.name.upper())]
+    return [lap for lap in _poligon_rtrw(ds)
+            if re.search(r'(AR_PR|PR_PR)_', lap.name.upper()) and 'KKPRL' not in lap.name.upper()]
 
 
 def lapisan_laut(ds, gdb_laut=False):
