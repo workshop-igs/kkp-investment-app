@@ -1,15 +1,22 @@
 import json
+from collections import Counter
 from datetime import date
 
 from django.db import connection
-from django.db.models import Case, Count, IntegerField, Q, Sum, When
+from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
-from analitik.models import KetentuanRuang, SkorKelayakanZona
-from analitik.services.konstanta import AMBANG_TERBANGUN_PERSEN, LABEL_SUMBER_ZONASI, PRIORITAS_SUMBER_ZONASI
+from analitik.models import KetentuanRuang, LokasiPotensial, SkorKelayakanZona
+from analitik.services.konstanta import (
+    AMBANG_TERBANGUN_PERSEN,
+    KARAKTER_LOKASI,
+    LABEL_SUMBER_ZONASI,
+    PRIORITAS_SUMBER_ZONASI,
+)
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
-from inventarisasi.models import RegulasiTataRuang, ZonasiRuangLaut
+from inventarisasi.klasifikasi import KATA_SEKTOR, rincian_kegiatan, status_rincian
+from inventarisasi.models import MatriksKKPRL, RegulasiTataRuang, ZonasiRuangLaut
 from penarikan_data.models import ProduksiPerikananBPS
 
 LABEL_SUB_ZONA = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
@@ -22,6 +29,7 @@ JUMLAH_LOKASI_PRIORITAS = 6
 JUMLAH_UNGGULAN = 4
 JUMLAH_JENIS_UNGGULAN = 3
 JUMLAH_KEAHLIAN = 8
+JUMLAH_RINCIAN = 4
 
 
 def _toleransi(cakupan):
@@ -146,32 +154,6 @@ def _kabupaten_terdekat(c, provinsi_id, x, y):
     return r[0] if r else ''
 
 
-def _catatan_lokasi(s):
-    unggul, batas = [], []
-    if s['jarak_infra_km'] is not None:
-        teks = f"infrastruktur terdekat {s['jarak_infra_km']:.1f} km"
-        (unggul if s['aksesibilitas'] >= 0.6 else batas).append(
-            f'Aksesibilitas baik ({teks})' if s['aksesibilitas'] >= 0.6 else f'Aksesibilitas terbatas ({teks})'
-        )
-    if s['potensi_sda'] >= 0.7:
-        unggul.append('Potensi sumber daya tinggi')
-    if s['risiko_bencana'] <= 0.3:
-        unggul.append('Risiko bencana rendah')
-    elif s['risiko_bencana'] >= 0.6:
-        batas.append('Risiko bencana tinggi')
-    if s['sensitivitas_ekosistem'] is not None and s['sensitivitas_ekosistem'] >= 0.5:
-        batas.append(f"Beririsan dengan ekosistem sensitif ({s['ekosistem_rincian'] or 'ekosistem pesisir'})")
-    if s['risiko_sosial'] >= 0.6:
-        batas.append('Kerentanan sosial tinggi di wilayah sekitar')
-    elif s['risiko_sosial'] <= 0.3:
-        unggul.append('Kerentanan sosial rendah')
-    if s['wilayah_adat']:
-        batas.append('Berada di atau dekat wilayah masyarakat hukum adat')
-    if s['jumlah_kkprl']:
-        batas.append(f"Terdapat {s['jumlah_kkprl']} KKPRL terbit di dalam zona; lokasi investasi harus di luar area KKPRL")
-    return unggul, batas
-
-
 def _luas_jenis(provinsi):
     return {
         r['sektor__kode']: {
@@ -220,46 +202,54 @@ def _oseanografi_provinsi(provinsi):
     return _oseanografi(perairan, PARAMETER_OSEANOGRAFI_PROVINSI)
 
 
+def _rincian_matriks(provinsi, sektor):
+    if sektor.kode not in KATA_SEKTOR:
+        return None
+    semua = list(MatriksKKPRL.objects.filter(provinsi=provinsi))
+    blok, butir = Counter(), {}
+    for m in semua:
+        rincian = rincian_kegiatan(m, sektor.kode)
+        status = status_rincian(rincian)
+        if status:
+            blok[status] += 1
+        for kolom, daftar in rincian.items():
+            butir.setdefault(kolom, Counter()).update(daftar)
+    if not blok:
+        return None
+    return {
+        'blok': dict(blok),
+        'sumber': semua[0].sumber.split(',')[0],
+        **{kolom: [b for b, _ in c.most_common(JUMLAH_RINCIAN)] for kolom, c in butir.items()},
+    }
+
+
 def _rinci_jenis(c, provinsi, sektor, tol, luas):
     from ketenagakerjaan.proyeksi import _matriks
 
     status = {}
-    utama = set()
     for k in KetentuanRuang.objects.filter(Q(provinsi__isnull=True) | Q(provinsi=provinsi), sektor=sektor):
         if k.provinsi_id or k.sub_zona not in status:
             status[k.sub_zona] = k.status
-        if not k.provinsi_id and k.status == 'DIIZINKAN':
-            utama.add(k.sub_zona)
 
     skor = belum_dimanfaatkan(skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG']))
     lokasi = []
-    kandidat = skor.annotate(utama=Case(When(zona__sub_zona__in=utama, then=1), default=0, output_field=IntegerField()))
-    for s in kandidat.order_by('-utama', '-kelas', '-zona__luas_ha', '-skor_total').values(
-        'zona_id', 'zona__nama_zona', 'zona__sub_zona', 'zona__luas_ha', 'skor_total', 'kelas', 'jarak_infra_km',
-        'potensi_sda', 'aksesibilitas', 'risiko_bencana', 'sensitivitas_ekosistem', 'ekosistem_rincian',
-        'risiko_sosial', 'wilayah_adat', 'jumlah_kkprl', 'utama',
+    for lok in LokasiPotensial.objects.filter(sektor=sektor, provinsi=provinsi).order_by(
+        '-persen_sesuai', '-luas_ha'
     )[:JUMLAH_LOKASI_PRIORITAS]:
-        c.execute(
-            'SELECT ST_X(p), ST_Y(p) FROM (SELECT ST_PointOnSurface(geometry) p '
-            'FROM inventarisasi_zonasi_ruang_laut WHERE id = %s) q',
-            [s['zona_id']],
-        )
-        x, y = c.fetchone()
-        unggul, batas = _catatan_lokasi(s)
-        zona_geom = ZonasiRuangLaut.objects.only('geometry').get(pk=s['zona_id']).geometry
+        titik = lok.geometry.point_on_surface
+        r = lok.rincian
         lokasi.append({
-            'nama': s['zona__nama_zona'],
-            'sub_zona_label': LABEL_SUB_ZONA.get(s['zona__sub_zona'], s['zona__sub_zona']),
-            'peruntukan_utama': bool(s['utama']),
-            'kabupaten': _kabupaten_terdekat(c, provinsi.id, x, y),
-            'luas_ha': s['zona__luas_ha'] or 0,
-            'skor': round(s['skor_total'], 3),
-            'kelas': s['kelas'],
-            'jarak_infra_km': s['jarak_infra_km'],
-            'keunggulan': unggul,
-            'pembatas': batas,
-            'titik': [round(x, 5), round(y, 5)],
-            'oseanografi': {k: v['rata2'] for k, v in _oseanografi(zona_geom, PARAMETER_OSEANOGRAFI_LOKASI).items()},
+            'nama': r['nama'],
+            'sub_zona_label': r['sub_zona'],
+            'peruntukan_utama': r['status_tata_ruang'] == 'DIIZINKAN',
+            'kabupaten': _kabupaten_terdekat(c, provinsi.id, titik.x, titik.y),
+            'luas_ha': lok.luas_ha,
+            'luas_wilayah_ha': r.get('luas_wilayah_ha'),
+            'persen_sesuai': lok.persen_sesuai,
+            'keunggulan': [k for k, v in r['parameter'].items() if v == 100 and not k.startswith('Ranah')],
+            'pembatas': [f'Perlu dinilai di lapangan: {k[0].lower()}{k[1:]}' for k in r['perlu_dinilai']],
+            'titik': [round(titik.x, 5), round(titik.y, 5)],
+            'oseanografi': {k: v['rata2'] for k, v in _oseanografi(lok.geometry, PARAMETER_OSEANOGRAFI_LOKASI).items()},
         })
 
     kelas_zona = dict(skor.order_by('-zona__luas_ha').values_list('zona_id', 'kelas')[:BATAS_ZONA_PETA_SEKTOR])
@@ -276,6 +266,8 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         **luas.get(sektor.kode, {'sesuai_ha': 0, 'tinggi_ha': 0, 'sedang_ha': 0, 'jumlah_zona_tinggi': 0}),
         'sub_zona_diizinkan': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'DIIZINKAN'),
         'sub_zona_bersyarat': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'BERSYARAT'),
+        'karakter': KARAKTER_LOKASI.get(sektor.kode, {}).get('uraian', ''),
+        'rincian_matriks': _rincian_matriks(provinsi, sektor),
         'lokasi': lokasi,
         'peta': [{'kelas': kelas_zona[i], 'geometry': _geojson(g)} for i, g in c.fetchall() if g],
         'keahlian': _matriks(sektor.kode)[:JUMLAH_KEAHLIAN],

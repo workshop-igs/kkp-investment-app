@@ -11,7 +11,15 @@ from django.db import connection, transaction
 
 from analitik.models import KetentuanRuang
 from inti.models import Provinsi, SektorInvestasi
-from inventarisasi.klasifikasi import jenis_kawasan, sub_zona
+from inventarisasi.klasifikasi import (
+    KATA_SEKTOR,
+    PENANDA_MATRIKS,
+    jenis_kawasan,
+    rincian_kegiatan,
+    status_rincian,
+    sub_zona,
+    syarat_rincian,
+)
 from inventarisasi.management.commands.tarik_rtrw_provinsi import FOLDER_DRIVE, _isi_folder, _unduh
 from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
 
@@ -33,35 +41,8 @@ MATRIKS = {
     '73': (r'SALINAN PERDA NOMOR 3 TAHUN 2022', 167, 248),
     '82': (r'LAMPIRAN XVIII TABEL KESESUAIAN', 1, 69),
 }
-PENANDA_MATRIKS = 'Lampiran Matriks KKPRL'
 TRANSKRIPSI = Path(__file__).resolve().parents[2] / 'data' / 'matriks_kkprl_transkripsi.json'
 STATUS = ('DIIZINKAN', 'BERSYARAT', 'TIDAK_DIIZINKAN')
-KEGIATAN_INTI = {
-    'PERIKANAN_TANGKAP': ('Penangkapan Pisces/Ikan Bersirip di Laut',),
-    'PERIKANAN_BUDIDAYA': ('Pembesaran Pisces/Ikan Bersirip di Laut',),
-    'PARIWISATA_BAHARI': ('Wisata Selam', 'Wisata Pantai'),
-    'ENERGI_KELAUTAN': ('Pembangkitan Tenaga Listrik',),
-    'PENGOLAHAN_HASIL_LAUT': ('Industri Pembekuan Ikan',),
-    'JASA_MARITIM': ('Aktivitas Pelayanan Kepelabuhan Laut', 'Aktivitas Pelayanan Kepelabuhanan Laut'),
-    'INFRASTRUKTUR_LAUT': ('Konstruksi Bangunan Pelabuhan Bukan Perikanan',
-                           'Konstruksi Bangunan Bukan Pelabuhan Perikanan'),
-    'GARAM': ('Ekstraksi Garam', 'Ekstrasi Garam'),
-    'BIOTEKNOLOGI_KELAUTAN': ('Penelitian dan Pengembangan Bioteknologi',),
-    'KONSERVASI_PESISIR': ('Rehabilitasi/Transplantasi/Restorasi Ekosistem',),
-}
-KATA_SEKTOR = {
-    'PERIKANAN_TANGKAP': r'penangkapan (?:ikan|pisces|krustasea|moluska)|perikanan tangkap',
-    'PERIKANAN_BUDIDAYA': r'budi ?daya|pembesaran|pembenihan|keramba|rumput laut',
-    'PENGOLAHAN_HASIL_LAUT': r'pengolahan (?:ikan|hasil)|pembekuan|industri (?:pengolahan|perikanan)',
-    'PARIWISATA_BAHARI': r'wisata',
-    'JASA_MARITIM': r'kepelabuhan|pelayanan (?:jasa )?(?:pelabuhan|kapal)|tambat|labuh|pemanduan|bongkar muat|angkutan laut',
-    'INFRASTRUKTUR_LAUT': r'pembangunan (?:dermaga|jett?y|pelabuhan|breakwater|pemecah gelombang|tanggul|turap|groin)'
-                          r'|konstruksi bangunan|reklamasi',
-    'ENERGI_KELAUTAN': r'pembangkit|energi|tenaga listrik|otec|turbin',
-    'GARAM': r'garam',
-    'BIOTEKNOLOGI_KELAUTAN': r'bioteknologi|biofarmak',
-    'KONSERVASI_PESISIR': r'rehabilitasi|restorasi|transplantasi|konservasi|penanaman (?:mangrove|bakau|lamun)',
-}
 AWALAN_ZONA = {
     'W': 'Zona Pariwisata', 'PT': 'Zona Perikanan Tangkap', 'PB': 'Zona Perikanan Budi Daya',
     'BD': 'Zona Perikanan Budi Daya', 'PL': 'Zona Pelabuhan Laut', 'PU': 'Zona Pelabuhan Laut',
@@ -354,17 +335,6 @@ def cari_berkas(fid, pola, jalur=()):
     return None
 
 
-def status_sektor(m, kode):
-    kolom = (m.diperbolehkan, m.bersyarat, m.tidak_diperbolehkan)
-    gabung = [kunci(' '.join(k)) for k in kolom]
-    for frasa in KEGIATAN_INTI.get(kode, ()):
-        ada = [STATUS[i] for i in range(3) if kunci(frasa) in gabung[i]]
-        if ada:
-            return ada[-1]
-    pola = re.compile(KATA_SEKTOR[kode])
-    return next((STATUS[i] for i in range(3) if any(pola.search(b.lower()) for b in kolom[i])), None)
-
-
 class Command(BaseCommand):
     help = ('Tarik matriks kesesuaian kegiatan pemanfaatan ruang laut (KKPRL) dari lampiran Perda RTRW Provinsi di '
             'folder Google Drive KKP: daftar kegiatan diperbolehkan, bersyarat, dan tidak diperbolehkan per zona, '
@@ -372,10 +342,22 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--provinsi', action='append', help='Kode BPS provinsi, mis. 31 (boleh berulang).')
+        parser.add_argument('--ketentuan-saja', action='store_true',
+                            help='Turunkan ulang ketentuan per jenis investasi dari matriks tersimpan, tanpa mengunduh.')
         parser.add_argument('--simpan-di', default=os.path.join(tempfile.gettempdir(), 'kkp-rtrw'),
                             help='Folder unduhan (dipakai ulang bila berkasnya sudah ada).')
 
     def handle(self, *args, **opsi):
+        if opsi['ketentuan_saja']:
+            provinsi = Provinsi.objects.filter(matriks_kkprl__isnull=False).distinct()
+            if opsi['provinsi']:
+                provinsi = provinsi.filter(kode_bps__in=opsi['provinsi'])
+            for p in provinsi:
+                blok = list(p.matriks_kkprl.all())
+                with transaction.atomic():
+                    jumlah = self._ketentuan(p, blok, blok[0].sumber)
+                self.stdout.write(f'  {p.nama}: {jumlah} ketentuan per jenis investasi')
+            return
         transkripsi = json.loads(TRANSKRIPSI.read_text(encoding='utf-8'))
         diminta = set(opsi['provinsi'] or [*MATRIKS, *transkripsi])
         for kode in sorted(diminta & set(transkripsi)):
@@ -509,13 +491,13 @@ class Command(BaseCommand):
             if m.sub_zona not in ('KONSERVASI', 'LAINNYA') and (lama is None or len(m.kode_zona) > len(lama.kode_zona)):
                 acuan[m.sub_zona] = m
         sektor = {s.kode: s for s in SektorInvestasi.objects.filter(kode__in=KATA_SEKTOR)}
-        status = {sub: {k: status_sektor(m, k) for k in sektor} for sub, m in acuan.items()}
+        rincian = {sub: {k: rincian_kegiatan(m, k) for k in sektor} for sub, m in acuan.items()}
+        status = {sub: {k: status_rincian(r) for k, r in per_sektor.items()} for sub, per_sektor in rincian.items()}
         label = dict(KetentuanRuang.STATUS_CHOICES)
         aturan = [
             KetentuanRuang(
                 sektor=sektor[k], sub_zona=sub, provinsi=provinsi, status=st,
-                syarat=(acuan[sub].ketentuan_khusus or 'Diperbolehkan bersyarat menurut matriks KKPRL.')
-                if st == 'BERSYARAT' else '',
+                syarat=syarat_rincian(rincian[sub][k], acuan[sub].ketentuan_khusus) if st == 'BERSYARAT' else '',
                 sumber=f'{sumber} ({acuan[sub].nama_zona})'[:255],
             )
             for sub, per_sektor in status.items() for k, st in per_sektor.items() if st

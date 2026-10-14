@@ -102,13 +102,14 @@ class Command(BaseCommand):
     def _provinsi(self, prov):
         zona = {
             z[0]: z for z in _saring_sumber_utama(ZonasiRuangLaut.objects.filter(provinsi=prov), prefiks='')
-            .values_list('id', 'sub_zona', 'jenis_zona', 'ranah', 'nama_zona')
+            .values_list('id', 'sub_zona', 'jenis_zona', 'ranah', 'nama_zona', 'matriks_id')
         }
         status = {
             (zid, s.kode): _ketentuan(
-                self.aturan.get(s.id, {}), {'jenis_zona': jenis, 'sub_zona': sub, 'provinsi_id': prov.id}
+                self.aturan.get(s.id, {}),
+                {'jenis_zona': jenis, 'sub_zona': sub, 'provinsi_id': prov.id, 'matriks_id': matriks_id},
             )['status']
-            for zid, sub, jenis, _, _ in zona.values() for s in self.sektor
+            for zid, sub, jenis, _, _, matriks_id in zona.values() for s in self.sektor
         }
         kandidat = [zid for zid in zona if any(status[(zid, s.kode)] in BOLEH for s in self.sektor)]
         if not kandidat:

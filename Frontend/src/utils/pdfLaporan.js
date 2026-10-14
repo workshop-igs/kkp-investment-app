@@ -661,6 +661,55 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         sc.zona.map((z) => [z.nama, z.sub_zona_label, z.tingkat_label, `${nf(z.persen, 1)}%`, z.ketentuan_label]),
         [(LEBAR - 8) * 0.3, (LEBAR - 8) * 0.22, (LEBAR - 8) * 0.18, (LEBAR - 8) * 0.1, (LEBAR - 8) * 0.2]
       );
+      const rincianJenis = [];
+      sc.zona.forEach((z) => {
+        if (!z.rincian) return;
+        const kunci = JSON.stringify(z.rincian);
+        const ada = rincianJenis.find((r) => r.kunci === kunci);
+        if (ada) ada.nama.push(z.nama);
+        else rincianJenis.push({ kunci, rincian: z.rincian, label: z.ketentuan_label, nama: [z.nama] });
+      });
+      if (rincianJenis.length) {
+        k.teks(`Rincian kegiatan ${sc.sektor_nama.toLowerCase()} menurut matriks Perda`, { tebal: true, warna: GELAP, ukuran: 7.5 });
+        rincianJenis.forEach((r) => {
+          k.teks(`${r.nama.join(', ')}: ${r.label}`, { tebal: true, warna: GELAP, ukuran: 7 });
+          k.tabelDaftar(
+            [`Diperbolehkan (${r.rincian.DIIZINKAN.length})`, `Bersyarat (${r.rincian.BERSYARAT.length})`,
+              `Tidak diperbolehkan (${r.rincian.TIDAK_DIIZINKAN.length})`],
+            [r.rincian.DIIZINKAN, r.rincian.BERSYARAT, r.rincian.TIDAK_DIIZINKAN],
+            [HIJAU_TEKS, AMBER_TEKS, MERAH_TEKS]
+          );
+        });
+        k.teks(
+          'Status jenis investasi di tiap zona diturunkan dari rincian ini: diizinkan bila seluruh rinciannya diperbolehkan, '
+            + 'bersyarat bila sebagian rinciannya dibatasi atau dilarang, dan tidak diizinkan bila seluruhnya dilarang.',
+          { ukuran: 6.2 }
+        );
+      }
+    }
+    if (sc.karakter) {
+      k.teks(`Karakter lokasi ${sc.sektor_nama.toLowerCase()}`, { tebal: true, warna: GELAP, ukuran: 7.5 });
+      k.tabel(
+        ['Aspek', 'Keterangan'],
+        [
+          ['Kebutuhan', sc.karakter.kebutuhan || 'Tidak ada syarat karakter khusus.'],
+          ['Kondisi area', sc.karakter.terukur],
+          ['Kecocokan', sc.karakter.cocok ? 'Cocok' : 'Belum cocok'],
+        ],
+        [(LEBAR - 8) * 0.22, (LEBAR - 8) * 0.78]
+      );
+      if (sc.parameter?.length) {
+        k.teks(`${nf(sc.persen_sangat_sesuai)}% parameter terukur sangat sesuai (ambang Peta Sebaran Wilayah Potensial 75%)`,
+          { tebal: true, warna: GELAP, ukuran: 7 });
+        k.tabel(
+          ['Parameter', 'Penilaian'],
+          sc.parameter.map((p) => [p.label,
+            p.nilai === true ? 'Sangat sesuai' : p.nilai === false ? 'Perlu dinilai di lapangan' : 'Tidak terukur']),
+          [(LEBAR - 8) * 0.65, (LEBAR - 8) * 0.35]
+        );
+      }
+    }
+    if (sc.zona.length) {
       if (sc.informasi_ruang?.length) {
         k.teks('Ketentuan kegiatan pada area analisis', { tebal: true, warna: GELAP, ukuran: 7.5 });
         const sudahTercetak = new Set();
