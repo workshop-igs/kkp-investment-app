@@ -56,6 +56,8 @@ const PANE_PROVINSI = 'batas-provinsi';
 
 const ZOOM_BATAS_DETAIL = 9;
 
+const JARAK_POPUP = { atas: 72 + 16, kanan: 72, bawah: 100 };
+
 const LEBAR_HALO = 2;
 const TEBAL_BATAS = { diam: 1.8, aktif: 3.2 };
 
@@ -396,7 +398,11 @@ const PetaInteraktif = ({
                 onStatus={(st) => catatStatus(id, st)}
                 onEachFeature={(feature, layer) => {
                   const p = feature?.properties || {};
-                  layer.bindPopup(() => LAYER_LOKAL[id].popup(p));
+                  layer.bindPopup(() => LAYER_LOKAL[id].popup(p), {
+                    maxHeight: Math.max(220, window.innerHeight - JARAK_POPUP.atas - JARAK_POPUP.bawah - 40),
+                    autoPanPaddingTopLeft: [16, JARAK_POPUP.atas],
+                    autoPanPaddingBottomRight: [JARAK_POPUP.kanan, JARAK_POPUP.bawah],
+                  });
                   const judul = p.nama || p.pemohon;
                   if (judul) layer.bindTooltip(judul, { sticky: true, className: 'map-tooltip' });
                   layer.on('popupopen', (e) => {
