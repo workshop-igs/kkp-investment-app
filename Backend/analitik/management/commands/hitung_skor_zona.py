@@ -527,7 +527,7 @@ class Command(BaseCommand):
             c.execute('DROP TABLE IF EXISTS darat_terbagi')
             c.execute(
                 'CREATE TEMP TABLE darat_terbagi AS '
-                'SELECT ST_Subdivide(ST_SimplifyPreserveTopology(geometry, 0.0005), 128) AS g '
+                'SELECT ST_Subdivide(ST_MakeValid(ST_SimplifyPreserveTopology(ST_MakeValid(geometry), 0.0005)), 128, 1e-7) AS g '
                 'FROM inti_provinsi WHERE geometry IS NOT NULL'
             )
             c.execute('CREATE INDEX ON darat_terbagi USING gist (g)')
