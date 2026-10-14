@@ -710,6 +710,19 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         );
       }
     }
+    if (sc.parameter_tambahan?.length) {
+      k.teks('Parameter tambahan dari administrator', { tebal: true, warna: GELAP, ukuran: 7.5 });
+      k.tabel(
+        ['Parameter', 'Peran', 'Hasil', 'Keterangan'],
+        sc.parameter_tambahan.map((t) => [
+          t.nama,
+          t.peran_label,
+          t.hasil === true ? 'Sesuai' : t.hasil === false ? 'Tidak sesuai' : 'Tidak terukur',
+          [t.keterangan, t.sumber].filter(Boolean).join('; '),
+        ]),
+        [(LEBAR - 8) * 0.28, (LEBAR - 8) * 0.17, (LEBAR - 8) * 0.15, (LEBAR - 8) * 0.4]
+      );
+    }
     if (sc.zona.length) {
       if (sc.informasi_ruang?.length) {
         k.teks('Ketentuan kegiatan pada area analisis', { tebal: true, warna: GELAP, ukuran: 7.5 });
