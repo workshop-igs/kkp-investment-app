@@ -1,17 +1,20 @@
 import time
 from collections import Counter
+from functools import partial
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
+from django.db.models import Q
 
-from analitik.models import LokasiPotensial
+from analitik.models import LokasiPotensial, NilaiWilayahParameter, ParameterTambahan
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
     KM_PER_DERAJAT,
     SEKTOR_TERSENDIRI_DI_PETA,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
+from analitik.services.parameter_tambahan import sesuai_ambang
 from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
 from analitik.services.screening_ruang import (
@@ -56,6 +59,18 @@ SELECT p.i, ST_AsEWKB(ST_Multi(p.g)), ST_Area(p.g::geography) / 10000, a.id,
        ST_X(ST_PointOnSurface(p.g)), ST_Y(ST_PointOnSurface(p.g))
 FROM p JOIN a ON a.g && p.g AND ST_Intersects(a.g, p.g)
 """
+
+
+def _di_area(i, kena, dalam):
+    return (i in kena) == dalam
+
+
+def _tetap(i, nilai):
+    return nilai
+
+
+def _per_kabupaten(i, per_kab, kabupaten):
+    return per_kab.get(kabupaten.get(i))
 
 
 class Command(BaseCommand):
@@ -255,11 +270,59 @@ class Command(BaseCommand):
             'AND u.geometry && s.kotak AND ST_Intersects(u.geometry, s.kotak)'
         )
         d['banyak'] = banyak
+        d['tambahan'] = self._tambahan(c, prov, d)
         return d
+
+    def _tambahan(self, c, prov, d):
+        hasil, kabupaten = [], None
+        for p in ParameterTambahan.objects.filter(aktif=True, peran__in=['GERBANG', 'DINILAI']).filter(
+            Q(provinsi__isnull=True) | Q(provinsi=prov)
+        ).prefetch_related('sektor').distinct():
+            if p.tipe == 'AREA':
+                kolom = 'titik' if p.kondisi == 'DI_DALAM' else 'kotak'
+                c.execute(
+                    f'SELECT DISTINCT s.id FROM sel s JOIN analitik_area_parameter a ON a.parameter_id = %s '
+                    f'AND a.geometry && s.{kolom} AND ST_Intersects(a.geometry, s.{kolom})',
+                    [p.id],
+                )
+                kena = {r[0] for r in c.fetchall()}
+                if not kena and not p.area.exists():
+                    continue
+                dalam = p.kondisi == 'DI_DALAM'
+                fungsi = partial(_di_area, kena=kena, dalam=dalam)
+            elif p.tingkat == 'PROVINSI':
+                v = NilaiWilayahParameter.objects.filter(parameter=p, provinsi=prov).values_list('nilai', flat=True).first()
+                tetap = None if v is None else sesuai_ambang(p, v)
+                fungsi = partial(_tetap, nilai=tetap)
+            else:
+                if kabupaten is None:
+                    kabupaten = self._kabupaten_sel(c, prov, d)
+                per_kab = {k: sesuai_ambang(p, v) for k, v in NilaiWilayahParameter.objects.filter(
+                    parameter=p, kabupaten__provinsi=prov).values_list('kabupaten_id', 'nilai')}
+                fungsi = partial(_per_kabupaten, per_kab=per_kab, kabupaten=kabupaten)
+            hasil.append((p.nama, p.peran, {s.kode for s in p.sektor.all()}, fungsi))
+        return hasil
+
+    @staticmethod
+    def _kabupaten_sel(c, prov, d):
+        calon = [
+            i for i in range(1, d['banyak'] + 1)
+            if d['zona'][i] and i not in d['kkprl'] and i not in d['bangunan']
+            and (not d['infra_terdata'] or i in d['infra'])
+        ]
+        c.execute(
+            'SELECT s.id, (SELECT k.id FROM inti_kabupaten_kota k WHERE k.provinsi_id = %s AND k.geometry IS NOT NULL '
+            'ORDER BY k.geometry <-> s.titik LIMIT 1) FROM sel s WHERE s.id = ANY(%s)',
+            [prov.id, calon],
+        )
+        return dict(c.fetchall())
 
     def _nilai_sel(self, sektor, zona, status, d):
         karakter = atur('KARAKTER_LOKASI').get(sektor.kode)
         izin = {'LAUT', 'DARAT'} if karakter is None else {'LAUT', 'DARAT'} & set(karakter)
+        berlaku = [t for t in d['tambahan'] if not t[2] or sektor.kode in t[2]]
+        gerbang = [f for _, peran, _, f in berlaku if peran == 'GERBANG']
+        dinilai = [(nama, f) for nama, peran, _, f in berlaku if peran == 'DINILAI']
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
@@ -267,12 +330,13 @@ class Command(BaseCommand):
                 continue
             st = {status[(z, sektor.kode)] for z in zids}
             ranah = {zona[z][3] for z in zids}
-            if not st <= set(BOLEH) or len(ranah) != 1 or not ranah <= izin:
+            if not st <= set(BOLEH) or len(ranah) != 1 or not ranah <= izin or any(f(i) is False for f in gerbang):
                 continue
             kunci = (
                 ranah.pop(), 'BERSYARAT' if 'BERSYARAT' in st else 'DIIZINKAN', d['kedalaman'][i], d['gelombang'][i],
                 d['suhu'][i], d['anomali'][i], d['jarak'][i], d['ekosistem'][i], tuple(sorted((d['bencana'][i] or {}).items())),
                 (i in d['infra']) if d['infra_terdata'] else None, (i in d['adat']) if d['adat_terdata'] else None,
+                tuple((nama, f(i)) for nama, f in dinilai),
             )
             if kunci not in tembolok:
                 tembolok[kunci] = self._nilai(sektor.kode, kunci)
@@ -282,12 +346,13 @@ class Command(BaseCommand):
 
     @staticmethod
     def _nilai(kode, kunci):
-        ranah, status_tr, dalam, gelombang, suhu, anomali, jarak, ekosistem, bencana, infra, adat = kunci
+        ranah, status_tr, dalam, gelombang, suhu, anomali, jarak, ekosistem, bencana, infra, adat, tambahan = kunci
         nilai = parameter_lokasi(kode, {
             'ranah': ranah, 'status_tr': status_tr, 'kedalaman_min': dalam, 'kedalaman_maks': dalam,
             'gelombang': gelombang, 'suhu_min': suhu, 'anomali_suhu': anomali,
             'jarak_pantai_km': (jarak if jarak is not None else 99.0) if ranah == 'LAUT' else None,
             'ekosistem': ekosistem or frozenset(), 'bencana': dict(bencana), 'dekat_infrastruktur': infra, 'adat': adat,
+            'tambahan': dict(tambahan),
         })
         if nilai is None or sum(v is not None for v in nilai.values()) < atur('MINIMAL_PARAMETER_TERUKUR'):
             return None
