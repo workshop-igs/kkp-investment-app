@@ -20,6 +20,7 @@ from analitik.services.konstanta import (
 )
 from analitik.services.laporan_spasial import _arah
 from analitik.services.oseanografi import statistik as statistik_oseanografi
+from analitik.services.parameter_tambahan import nilai_area
 from analitik.services.pengaturan import atur
 from inti.models import SektorInvestasi
 from inventarisasi.klasifikasi import KATA_SEKTOR, PENANDA_MATRIKS, rincian_kegiatan, status_rincian, syarat_rincian
@@ -213,6 +214,7 @@ def parameter_lokasi(sektor_kode, data):
         nilai['Tidak beririsan ekosistem sensitif'] = not set(data.get('ekosistem') or ()) & set(EKOSISTEM_PESISIR)
     nilai['Dekat infrastruktur pendukung'] = data.get('dekat_infrastruktur')
     nilai['Di luar wilayah kelola masyarakat hukum adat'] = None if data.get('adat') is None else not data['adat']
+    nilai.update(data.get('tambahan') or {})
     return nilai
 
 
@@ -413,7 +415,7 @@ def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
     ]
 
 
-def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids):
+def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids, tambahan=None):
     c.execute(
         "SELECT jenis, (ARRAY['RENDAH', 'SEDANG', 'TINGGI'])[MAX(CASE kelas WHEN 'TINGGI' THEN 3 "
         "WHEN 'SEDANG' THEN 2 ELSE 1 END)] FROM analitik_zona_risiko_bencana "
@@ -421,7 +423,7 @@ def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids):
         'GROUP BY jenis',
         [geom.ewkt, geom.ewkt],
     )
-    data = {**karakter, 'status_tr': status_tr, 'bencana': dict(c.fetchall())}
+    data = {**karakter, 'status_tr': status_tr, 'bencana': dict(c.fetchall()), 'tambahan': tambahan}
     c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung)')
     if c.fetchone()[0]:
         c.execute(
@@ -556,9 +558,15 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         karakter = karakter_area(c, geom)
         cocok, alasan_karakter = cocok_karakter(sektor.kode, karakter)
         status = _nilai(zona_efektif, aturan, cakupan, bool(kkprl)) if cocok else 'TIDAK_SESUAI'
+        provinsi_ids = {z['provinsi_id'] for z in zona_efektif}
+        tambahan = nilai_area(c, geom, sektor.kode, provinsi_ids)
+        gerbang_gagal = [t for t in tambahan if t['peran'] == 'GERBANG' and t['hasil'] is False]
+        if gerbang_gagal:
+            status = 'TIDAK_SESUAI'
         lanjut = status in ('SESUAI', 'SESUAI_BERSYARAT')
         parameter = parameter_area(
-            c, geom, sektor.kode, karakter, STATUS_TATA_RUANG.get(status), {z['provinsi_id'] for z in zona_efektif},
+            c, geom, sektor.kode, karakter, STATUS_TATA_RUANG.get(status), provinsi_ids,
+            {t['nama']: t['hasil'] for t in tambahan if t['peran'] == 'DINILAI'},
         )
 
         rekomendasi: Optional[Dict[str, Any]] = None
@@ -607,6 +615,9 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'parameter': [{'label': k, 'nilai': v} for k, v in (parameter or {}).items()],
         'persen_sangat_sesuai': round(persen_sangat_sesuai(parameter)) if parameter else None,
         'kkprl': kkprl,
-        'alasan': [alasan_karakter] * (not cocok) + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl),
+        'parameter_tambahan': tambahan,
+        'alasan': [alasan_karakter] * (not cocok) + [
+            f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
+        ] + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl),
         'rekomendasi': rekomendasi,
     }
