@@ -99,6 +99,96 @@ const RincianPerda = ({ perda }) => {
   );
 };
 
+const TANDA_PARAMETER = {
+  true: ['✓', 'text-emerald-700', 'Sangat sesuai'],
+  false: ['!', 'text-amber-700', 'Perlu dinilai di lapangan'],
+  null: ['?', 'text-slate-400', 'Tidak terukur'],
+};
+
+const RincianJenis = ({ s }) => {
+  const kelompok = [];
+  s.zona.forEach((z) => {
+    if (!z.rincian) return;
+    const kunci = JSON.stringify(z.rincian);
+    const ada = kelompok.find((k) => k.kunci === kunci);
+    if (ada) ada.zona.push(z);
+    else kelompok.push({ kunci, rincian: z.rincian, ketentuan: z.ketentuan, label: z.ketentuan_label, zona: [z] });
+  });
+  if (!kelompok.length) return null;
+  return (
+    <div>
+      <Judul>Rincian kegiatan {s.sektor_nama.toLowerCase()} menurut matriks Perda</Judul>
+      <div className="space-y-2">
+        {kelompok.map((k) => (
+          <div key={k.kunci} className="border border-slate-200 rounded-lg text-xs overflow-hidden">
+            <div className="px-3 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-baseline justify-between gap-x-3">
+              <span className="font-medium text-slate-800">{k.zona.map((z) => z.nama).join(', ')}</span>
+              <span className={`font-semibold ${WARNA_KETENTUAN[k.ketentuan] || 'text-slate-500'}`}>{k.label}</span>
+            </div>
+            <div className="p-2 grid gap-2 sm:grid-cols-3">
+              {LABEL_KEGIATAN.map(([kode, label]) => (
+                <div key={kode} className={`rounded-md p-2 ${KOLOM_PERDA.find((p) => p[2] === kode)[3]}`}>
+                  <div className={`text-[10.5px] font-semibold uppercase tracking-wide ${WARNA_KETENTUAN[kode]}`}>
+                    {label} <span className="font-normal text-slate-500">({k.rincian[kode].length})</span>
+                  </div>
+                  {k.rincian[kode].length ? (
+                    <ul className="mt-1 space-y-1 text-slate-700 leading-snug">
+                      {k.rincian[kode].map((b) => <li key={b}>{b}</li>)}
+                    </ul>
+                  ) : (
+                    <p className="mt-1 text-slate-400">-</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-1 text-[10.5px] text-slate-400">
+        Status jenis investasi di tiap zona diturunkan dari rincian ini: diizinkan bila seluruh rinciannya diperbolehkan,
+        bersyarat bila sebagian rinciannya dibatasi atau dilarang, dan tidak diizinkan bila seluruhnya dilarang.
+      </p>
+    </div>
+  );
+};
+
+const KarakterLokasi = ({ s }) => (
+  <div>
+    <Judul>Karakter lokasi {s.sektor_nama.toLowerCase()}</Judul>
+    <div className="border border-slate-200 rounded-lg text-xs overflow-hidden">
+      <dl className="px-3 py-2 grid grid-cols-[auto,1fr] gap-x-3 gap-y-1">
+        <dt className="font-semibold text-slate-700">Kebutuhan</dt>
+        <dd className="text-slate-600">{s.karakter.kebutuhan || 'Tidak ada syarat karakter khusus.'}</dd>
+        <dt className="font-semibold text-slate-700">Kondisi area</dt>
+        <dd className="text-slate-600">{s.karakter.terukur}</dd>
+        <dt className="font-semibold text-slate-700">Kecocokan</dt>
+        <dd className={`font-semibold ${s.karakter.cocok ? 'text-emerald-700' : 'text-rose-700'}`}>
+          {s.karakter.cocok ? 'Cocok' : 'Belum cocok'}
+        </dd>
+      </dl>
+      {s.parameter?.length > 0 && (
+        <div className="px-3 py-2 border-t border-slate-100">
+          <div className="font-semibold text-slate-700">
+            {angka(s.persen_sangat_sesuai)}% parameter terukur sangat sesuai
+            <span className="font-normal text-slate-500"> · ambang Peta Sebaran Wilayah Potensial 75%</span>
+          </div>
+          <ul className="mt-1 grid gap-x-4 gap-y-0.5 sm:grid-cols-2">
+            {s.parameter.map((p) => {
+              const [tanda, warna, ket] = TANDA_PARAMETER[p.nilai];
+              return (
+                <li key={p.label} className="flex gap-1.5 text-slate-700" title={ket}>
+                  <span className={`font-bold w-3 shrink-0 ${warna}`}>{tanda}</span>
+                  {p.label}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
   const { Ikon } = gaya;
@@ -176,6 +266,9 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
           </div>
         </div>
       )}
+
+      <RincianJenis s={s} />
+      {s.karakter && <KarakterLokasi s={s} />}
 
       {s.informasi_ruang?.length > 0 && (
         <div>
@@ -308,7 +401,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
             {s.rekomendasi.lokasi_alternatif.length ? (
               <ul className="divide-y divide-slate-100 border border-slate-200 rounded-lg">
                 {s.rekomendasi.lokasi_alternatif.map((l) => (
-                  <li key={l.zona_id} className="flex items-start gap-3 px-3 py-2.5">
+                  <li key={l.id ?? l.zona_id} className="flex items-start gap-3 px-3 py-2.5">
                     <MapPin className="w-4 h-4 text-kkp-700 shrink-0 mt-0.5" />
                     <div className="flex-1 min-w-0 text-xs">
                       <div className="font-semibold text-slate-800">{l.nama}</div>
@@ -333,7 +426,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
               </ul>
             ) : (
               <p className="text-xs text-slate-500">
-                Tidak ditemukan lokasi yang sesuai dalam radius 100 km pada data acuan yang tersedia.
+                Tidak ada lokasi potensial {s.sektor_nama.toLowerCase()} pada Peta Sebaran Wilayah Potensial dalam radius 100 km.
               </p>
             )}
           </div>
