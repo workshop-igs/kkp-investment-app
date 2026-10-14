@@ -129,6 +129,7 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
             ikon={LAYER_LOKAL[id].ikon}
             warnaIkon={LAYER_LOKAL[id].warnaIkon}
             zoomPin={LAYER_LOKAL[id].zoomPin}
+            zoomBidang={LAYER_LOKAL[id].zoomBidang}
             onStatus={(st) => catatStatus(id, st)}
             onEachFeature={(feature, layer) => {
               const p = feature?.properties || {};
