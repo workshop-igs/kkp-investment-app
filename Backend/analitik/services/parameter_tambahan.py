@@ -56,15 +56,15 @@ def _tabel(c, p, geom, provinsi_ids):
             'nilai', 'provinsi__nama').first()
     else:
         c.execute(
-            'SELECT n.nilai, k.nama FROM analitik_nilai_wilayah_parameter n '
-            'JOIN inti_kabupaten_kota k ON k.id = n.kabupaten_id '
-            'WHERE n.parameter_id = %s AND k.provinsi_id = ANY(%s) AND k.geometry IS NOT NULL '
-            'ORDER BY k.geometry <-> ST_PointOnSurface(ST_GeomFromEWKT(%s)) LIMIT 1',
-            [p.id, list(provinsi_ids), geom.ewkt],
+            'SELECT n.nilai, k.nama FROM (SELECT id, nama FROM inti_kabupaten_kota '
+            'WHERE provinsi_id = ANY(%s) AND geometry IS NOT NULL '
+            'ORDER BY geometry <-> ST_PointOnSurface(ST_GeomFromEWKT(%s)) LIMIT 1) k '
+            'LEFT JOIN analitik_nilai_wilayah_parameter n ON n.kabupaten_id = k.id AND n.parameter_id = %s',
+            [list(provinsi_ids), geom.ewkt, p.id],
         )
         r = c.fetchone()
-    if not r:
-        return None, 'nilai wilayah ini tidak tercantum pada tabel'
+    if not r or r[0] is None:
+        return None, f'nilai {r[1]} tidak tercantum pada tabel' if r else 'nilai wilayah ini tidak tercantum pada tabel'
     nilai, wilayah = r
     satuan = f' {p.satuan}' if p.satuan else ''
     return sesuai_ambang(p, nilai), f'{wilayah}: {_g(nilai)}{satuan} (syarat {ambang_teks(p)})'
