@@ -1,21 +1,39 @@
+import io
+import json
+import re
+
+import pandas as pd
 from django.contrib.auth.models import User
+from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.cache import cache
-from django.db import transaction
+from django.db import connection, transaction
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
-from analitik.models import KetentuanRuang, PengaturanAnalisis, StatusHitungUlang
+from analitik.models import (
+    AreaParameter,
+    KetentuanRuang,
+    NilaiWilayahParameter,
+    ParameterTambahan,
+    PengaturanAnalisis,
+    StatusHitungUlang,
+)
 from analitik.services import pengaturan
 from analitik.services.konstanta import EKOSISTEM_PESISIR
+from analitik.services.parameter_tambahan import kunci_nama
 from analitik.tasks import jadwalkan_hitung_ulang
 from inti.models import (
+    KabupatenKota,
     LogAktivitas,
+    Provinsi,
     SektorInvestasi,
     SumberData,
 )
+from inventarisasi.models import ZonasiRuangLaut
 from ketenagakerjaan.models import KalibrasiPelatihanSektor, MatriksKeahlianSektor
 from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
 from pipeline.models import ProyekInvestasi
@@ -28,6 +46,7 @@ from .serializers_admin import (
     AdminUserSerializer,
     KetentuanSektorSerializer,
     KompetensiSektorSerializer,
+    ParameterTambahanSerializer,
     TambahAdminSerializer,
 )
 
@@ -208,3 +227,167 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
         else:
             jadwalkan_hitung_ulang()
         return Response(status_hitung_ulang())
+
+
+def _cakupan(p):
+    if not (p.area.exists() if p.tipe == 'AREA' else p.nilai_wilayah.exists()):
+        return set()
+    return set(p.provinsi.values_list('kode_bps', flat=True)) or None
+
+
+def _berpengaruh(p):
+    return p is not None and p.aktif and p.peran != 'INFORMASI'
+
+
+def _picu_parameter(lama, baru, cakupan_lama, cakupan_baru):
+    cache.clear()
+    if not (_berpengaruh(lama) or _berpengaruh(baru)):
+        return
+    cakupan = [c for c in (cakupan_lama, cakupan_baru) if c != 'tidak ada']
+    if any(c is None for c in cakupan):
+        jadwalkan_hitung_ulang(lokasi=[])
+    elif set().union(*cakupan):
+        jadwalkan_hitung_ulang(lokasi=sorted(set().union(*cakupan)))
+
+
+class AdminParameterTambahanViewSet(viewsets.ModelViewSet):
+    queryset = ParameterTambahan.objects.prefetch_related('sektor', 'provinsi')
+    serializer_class = ParameterTambahanSerializer
+    permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        p = serializer.save(dibuat_oleh=self.request.user)
+        _picu_parameter(None, p, 'tidak ada', _cakupan(p))
+
+    def perform_update(self, serializer):
+        lama = ParameterTambahan.objects.get(pk=serializer.instance.pk)
+        cakupan_lama = _cakupan(lama)
+        p = serializer.save()
+        _picu_parameter(lama, p, cakupan_lama, _cakupan(p))
+
+    def perform_destroy(self, instance):
+        cakupan = _cakupan(instance)
+        instance.delete()
+        _picu_parameter(instance, None, cakupan, 'tidak ada')
+
+    @action(detail=True, methods=['get', 'post'])
+    def area(self, request, pk=None):
+        p = self.get_object()
+        if request.method == 'POST':
+            if p.tipe != 'AREA':
+                raise ValidationError({'detail': 'Parameter ini bertipe tabel, bukan area.'})
+            bentuk = []
+            for f in request.data.get('features') or []:
+                g = (f or {}).get('geometry') or {}
+                if g.get('type') not in ('Polygon', 'MultiPolygon'):
+                    continue
+                geom = GEOSGeometry(json.dumps(g), srid=4326)
+                x0, y0, x1, y1 = geom.extent
+                if x0 < 90 or x1 > 145 or y0 < -15 or y1 > 10:
+                    raise ValidationError({'detail': 'Koordinat di luar wilayah Indonesia; pastikan berkas memakai '
+                                                     'derajat WGS84 (EPSG:4326) atau sertakan berkas .prj.'})
+                geom = geom if geom.valid else geom.buffer(0)
+                if geom.geom_type == 'Polygon':
+                    geom = MultiPolygon(geom, srid=4326)
+                if geom.geom_type != 'MultiPolygon' or geom.empty:
+                    continue
+                sifat = {k.lower(): v for k, v in ((f or {}).get('properties') or {}).items()}
+                nama = next((str(sifat[k]) for k in ('nama', 'name', 'namobj', 'keterangan') if sifat.get(k)), '')
+                bentuk.append(AreaParameter(parameter=p, nama=nama[:255], geometry=geom))
+            if not bentuk:
+                raise ValidationError({'detail': 'Berkas tidak memuat poligon area.'})
+            lama = ParameterTambahan.objects.get(pk=p.pk)
+            cakupan_lama = _cakupan(lama)
+            with transaction.atomic():
+                p.area.all().delete()
+                AreaParameter.objects.bulk_create(bentuk)
+                if not p.provinsi.exists():
+                    p.provinsi.set(Provinsi.objects.filter(id__in=ZonasiRuangLaut.objects.filter(
+                        geometry__intersects=MultiPolygon(
+                            [poli for b in bentuk for poli in b.geometry], srid=4326).unary_union,
+                    ).values('provinsi_id')))
+            _picu_parameter(lama, p, cakupan_lama, _cakupan(p))
+        with connection.cursor() as c:
+            c.execute(
+                "SELECT json_build_object('type', 'FeatureCollection', 'features', COALESCE(json_agg(json_build_object("
+                "'type', 'Feature', 'properties', json_build_object('nama', nama), 'geometry', "
+                "ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, 0.0005), 5)::json)), '[]'::json)) "
+                'FROM analitik_area_parameter WHERE parameter_id = %s',
+                [p.id],
+            )
+            geojson = c.fetchone()[0]
+        return Response({'jumlah': p.area.count(), 'provinsi': sorted(_cakupan(p) or []), 'geojson': geojson})
+
+    @action(detail=True, methods=['get', 'post'], parser_classes=[MultiPartParser, FormParser])
+    def tabel(self, request, pk=None):
+        p = self.get_object()
+        hasil = {}
+        if request.method == 'POST':
+            if p.tipe != 'TABEL':
+                raise ValidationError({'detail': 'Parameter ini bertipe area, bukan tabel.'})
+            berkas = request.FILES.get('berkas')
+            if berkas is None:
+                raise ValidationError({'detail': 'Pilih berkas CSV atau Excel.'})
+            try:
+                if berkas.name.lower().endswith(('.xlsx', '.xls')):
+                    df = pd.read_excel(berkas)
+                else:
+                    mentah = berkas.read()
+                    try:
+                        teks = mentah.decode('utf-8-sig')
+                    except UnicodeDecodeError:
+                        teks = mentah.decode('latin-1')
+                    df = pd.read_csv(io.StringIO(teks), sep=None, engine='python', dtype=str)
+            except Exception as e:
+                raise ValidationError({'detail': f'Berkas tidak dapat dibaca: {e}'}) from e
+            hasil = _simpan_tabel(p, df)
+            _picu_parameter(p, p, _cakupan(p), _cakupan(p))
+        baris = p.nilai_wilayah.select_related('provinsi', 'kabupaten').order_by('kabupaten__kode_bps', 'provinsi__kode_bps')
+        return Response({**hasil, 'baris': [
+            {'kode': (b.kabupaten or b.provinsi).kode_bps, 'wilayah': (b.kabupaten or b.provinsi).nama, 'nilai': b.nilai}
+            for b in baris
+        ]})
+
+
+KOLOM_KODE = {'kode', 'kodebps', 'kodewilayah', 'kdkab', 'kdprov', 'idkab', 'idprov'}
+KOLOM_NAMA = {'nama', 'wilayah', 'namawilayah', 'kabupaten', 'kabupatenkota', 'kabkota', 'kota', 'provinsi'}
+KOLOM_NILAI = {'nilai', 'value', 'angka'}
+
+
+def _simpan_tabel(p, df):
+    kolom = {re.sub(r'[^a-z]', '', str(k).lower()): k for k in df.columns}
+    kode = next((kolom[k] for k in kolom if k in KOLOM_KODE), None)
+    nama = next((kolom[k] for k in kolom if k in KOLOM_NAMA), None)
+    nilai = next((kolom[k] for k in kolom if k in KOLOM_NILAI), None) or next(
+        (k for k in df.columns if k not in (kode, nama) and pd.to_numeric(df[k], errors='coerce').notna().any()), None)
+    if nilai is None or (kode is None and nama is None):
+        raise ValidationError({'detail': 'Tabel wajib memuat kolom kode atau nama wilayah, dan kolom nilai.'})
+    kabupaten = p.tingkat == 'KABUPATEN'
+    wilayah = KabupatenKota.objects.all() if kabupaten else Provinsi.objects.all()
+    provinsi = list(p.provinsi.values_list('id', flat=True))
+    if kabupaten and provinsi:
+        wilayah = wilayah.filter(provinsi_id__in=provinsi)
+    per_kode = {w.kode_bps.replace('.', ''): w for w in wilayah}
+    per_nama = {kunci_nama(w.nama): w for w in wilayah}
+    simpan, gagal = {}, []
+    for _, r in df.iterrows():
+        angka = pd.to_numeric(r[nilai].replace(',', '.') if isinstance(r[nilai], str) else r[nilai], errors='coerce')
+        label = str(r[nama] if nama is not None else r[kode])
+        w = None
+        if kode is not None and pd.notna(r[kode]):
+            mentah = r[kode]
+            teks = str(int(mentah)) if isinstance(mentah, float) and mentah.is_integer() else str(mentah)
+            w = per_kode.get(re.sub(r'\D', '', teks))
+        if w is None and nama is not None:
+            w = per_nama.get(kunci_nama(r[nama]))
+        if w is None or pd.isna(angka):
+            gagal.append(label if w is None else f'{label} (nilai bukan angka)')
+            continue
+        simpan[w.id] = NilaiWilayahParameter(
+            parameter=p, nilai=float(angka), **({'kabupaten': w} if kabupaten else {'provinsi': w}))
+    if not simpan:
+        raise ValidationError({'detail': 'Tidak ada baris yang cocok dengan wilayah terdaftar.', 'tidak_cocok': gagal[:50]})
+    with transaction.atomic():
+        p.nilai_wilayah.all().delete()
+        NilaiWilayahParameter.objects.bulk_create(simpan.values())
+    return {'cocok': len(simpan), 'tidak_cocok': gagal[:50], 'jumlah_tidak_cocok': len(gagal)}
