@@ -14,6 +14,7 @@ from analitik.services.konstanta import (
     KARAKTER_LOKASI,
     KM_PER_DERAJAT,
     SEKTOR_TERSENDIRI_DI_PETA,
+    SEL_PER_SISI_INTI_LOKASI,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
 from analitik.services.profil_investasi import _saring_sumber_utama
@@ -41,10 +42,13 @@ FROM (
 ) g
 """
 
-LOKASI = """
-SELECT ST_AsEWKB(ST_Multi(d.g)), ST_Area(d.g::geography) / 10000,
-       ARRAY(SELECT s.id FROM sel s WHERE s.titik && d.g AND ST_Intersects(d.g, s.titik))
-FROM (SELECT (ST_Dump(ST_Union(kotak, 1e-9))).geom AS g FROM sel WHERE id = ANY(%s)) d
+INTI = """
+SELECT q.k, ST_AsEWKB(ST_Multi(q.g)), ST_Area(q.g::geography) / 10000
+FROM (
+    SELECT u.k, ST_Union(s.kotak, 1e-9) AS g
+    FROM unnest(%s::int[], %s::int[]) AS u(k, id) JOIN sel s ON s.id = u.id
+    GROUP BY u.k
+) q
 """
 
 GABUNGAN = """
@@ -225,6 +229,17 @@ class Command(BaseCommand):
                 [kategori, ideal_km / KM_PER_DERAJAT],
             )
         c.execute(
+            'SELECT s.id, (SELECT ST_Distance(i.geometry, s.titik) FROM inventarisasi_infrastruktur_pendukung i '
+            'WHERE i.kategori = ANY(%s) ORDER BY i.geometry <-> s.titik LIMIT 1) FROM sel s WHERE s.id = ANY(%s)',
+            [[k for k, _, _, _ in INFRASTRUKTUR_AKSESIBILITAS], list(d['infra'])],
+        )
+        d['jarak_infra'] = dict(c.fetchall())
+        c.execute(
+            'SELECT id, floor(ST_X(titik) / %s)::int, floor(ST_Y(titik) / %s)::int FROM sel',
+            [UKURAN_SEL_LOKASI_DERAJAT, UKURAN_SEL_LOKASI_DERAJAT],
+        )
+        d['ij'] = {i: (x, y) for i, x, y in c.fetchall()}
+        c.execute(
             "SELECT EXISTS (SELECT 1 FROM inventarisasi_unsur_ruang_laut WHERE kelompok = 'MHA' AND provinsi_id = %s)",
             [prov.id],
         )
@@ -242,7 +257,7 @@ class Command(BaseCommand):
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
-            if not zids or i in d['kkprl'] or i in d['bangunan']:
+            if not zids or i in d['kkprl'] or i in d['bangunan'] or (d['infra_terdata'] and i not in d['infra']):
                 continue
             st = {status[(z, sektor.kode)] for z in zids}
             ranah = {zona[z][3] for z in zids}
@@ -273,17 +288,50 @@ class Command(BaseCommand):
         persen = persen_sangat_sesuai(nilai)
         return (persen, nilai) if persen >= 100 * AMBANG_KECOCOKAN else None
 
+    @staticmethod
+    def _wilayah(lolos, ij):
+        indeks = {ij[i]: i for i in lolos}
+        terlihat, wilayah = set(), []
+        for awal in lolos:
+            if awal in terlihat:
+                continue
+            terlihat.add(awal)
+            antre, anggota = [awal], []
+            while antre:
+                i = antre.pop()
+                anggota.append(i)
+                x, y = ij[i]
+                for tetangga in ((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)):
+                    j = indeks.get(tetangga)
+                    if j is not None and j not in terlihat:
+                        terlihat.add(j)
+                        antre.append(j)
+            wilayah.append(anggota)
+        return wilayah
+
+    @staticmethod
+    def _inti(wilayah, lolos, d):
+        blok = {}
+        for i in wilayah:
+            x, y = d['ij'][i]
+            blok.setdefault((x // SEL_PER_SISI_INTI_LOKASI, y // SEL_PER_SISI_INTI_LOKASI), []).append(i)
+        return max(blok.values(), key=lambda sel: (
+            sum(lolos[i][0] for i in sel) / len(sel),
+            -min(d['jarak_infra'].get(i) or 0 for i in sel),
+            len(sel),
+        ))
+
     def _lokasi(self, c, prov, zona, status, d):
         hasil = []
         for sektor in self.sektor:
             lolos = self._nilai_sel(sektor, zona, status, d)
             if not lolos:
                 continue
-            c.execute(LOKASI, [list(lolos)])
-            for ewkb, luas, anggota in c.fetchall():
-                sel = [i for i in anggota if i in lolos]
-                if sel:
-                    hasil.append(self._satu(prov, sektor, ewkb, luas, sel, lolos, zona, status, d))
+            wilayah = self._wilayah(lolos, d['ij'])
+            inti = [self._inti(w, lolos, d) for w in wilayah]
+            c.execute(INTI, [[k for k, sel in enumerate(inti) for _ in sel], [i for sel in inti for i in sel]])
+            for k, ewkb, luas in c.fetchall():
+                hasil.append(self._satu(prov, sektor, ewkb, luas, inti[k], len(wilayah[k]), lolos, zona, status, d))
         with transaction.atomic():
             LokasiPotensial.objects.filter(provinsi=prov).delete()
             LokasiPotensial.objects.bulk_create(hasil)
@@ -292,7 +340,7 @@ class Command(BaseCommand):
             )
         return hasil
 
-    def _satu(self, prov, sektor, ewkb, luas, sel, lolos, zona, status, d):
+    def _satu(self, prov, sektor, ewkb, luas, sel, sel_wilayah, lolos, zona, status, d):
         bagian = Counter()
         terukur = Counter()
         for i in sel:
@@ -315,6 +363,7 @@ class Command(BaseCommand):
                 'ranah': zona[zona_utama][3],
                 'sektor': sektor.nama,
                 'jumlah_sel': len(sel),
+                'luas_wilayah_ha': round(luas / len(sel) * sel_wilayah),
                 'status_tata_ruang': 'BERSYARAT' if bersyarat else 'DIIZINKAN',
                 'parameter': parameter,
                 'perlu_dinilai': [label for label, v in parameter.items() if v is None or v < 100],
