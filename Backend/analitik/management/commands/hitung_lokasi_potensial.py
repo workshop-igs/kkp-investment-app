@@ -14,6 +14,7 @@ from analitik.services.konstanta import (
     JARAK_ANTAR_LOKASI_KM,
     KARAKTER_LOKASI,
     KM_PER_DERAJAT,
+    MINIMAL_PARAMETER_TERUKUR,
     SEKTOR_TERSENDIRI_DI_PETA,
     SEL_PER_SISI_INTI_LOKASI,
     UKURAN_SEL_LOKASI_DERAJAT,
@@ -287,7 +288,7 @@ class Command(BaseCommand):
             'jarak_pantai_km': (jarak if jarak is not None else 99.0) if ranah == 'LAUT' else None,
             'ekosistem': ekosistem or frozenset(), 'bencana': dict(bencana), 'dekat_infrastruktur': infra, 'adat': adat,
         })
-        if nilai is None:
+        if nilai is None or sum(v is not None for v in nilai.values()) < MINIMAL_PARAMETER_TERUKUR:
             return None
         persen = persen_sangat_sesuai(nilai)
         return (persen, nilai) if persen >= 100 * AMBANG_KECOCOKAN else None

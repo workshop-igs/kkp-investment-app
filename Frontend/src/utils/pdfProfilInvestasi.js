@@ -981,7 +981,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
   const y = dek.slide({
     alis: `Bab ${i + 1}  |  ${b.nama}`,
     judul: `Lokasi Paling Sesuai: ${b.nama}`,
-    sub: `Lokasi potensial dari Peta Sebaran Wilayah Potensial: sedikitnya 75% parameter terukur sangat sesuai${j.karakter ? `, karakter lokasi cocok (${j.karakter})` : ''}${
+    sub: `Lokasi potensial dari Peta Sebaran Wilayah Potensial: sedikitnya 5 parameter terukur dan 75% di antaranya sangat sesuai${j.karakter ? `, karakter lokasi cocok (${j.karakter})` : ''}${
       j.lokasi.length && !j.lokasi.some((l) => l.peruntukan_utama) ? '; seluruhnya diizinkan bersyarat atau hanya untuk rincian kegiatan tertentu menurut matriks Perda' : ''}.`,
     subBaris: 2,
     aksen,

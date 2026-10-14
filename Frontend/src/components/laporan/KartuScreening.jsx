@@ -169,8 +169,8 @@ const KarakterLokasi = ({ s }) => (
       {s.parameter?.length > 0 && (
         <div className="px-3 py-2 border-t border-slate-100">
           <div className="font-semibold text-slate-700">
-            {angka(s.persen_sangat_sesuai)}% parameter terukur sangat sesuai
-            <span className="font-normal text-slate-500"> · ambang Peta Sebaran Wilayah Potensial 75%</span>
+            {angka(s.persen_sangat_sesuai)}% dari {s.parameter.filter((p) => p.nilai !== null).length} parameter terukur sangat sesuai
+            <span className="font-normal text-slate-500"> · ambang Peta Sebaran Wilayah Potensial: 75% dari sedikitnya 5 parameter terukur</span>
           </div>
           <ul className="mt-1 grid gap-x-4 gap-y-0.5 sm:grid-cols-2">
             {s.parameter.map((p) => {
