@@ -240,9 +240,11 @@ export const LAYER_LOKAL = {
       + 'ekstrem dan abrasi, serta banjir yang rendah, tidak beririsan ekosistem sensitif, dekat infrastruktur pendukung, '
       + 'dan di luar wilayah kelola masyarakat hukum adat. Setiap wilayah sel yang bersambung ditampilkan sebagai satu '
       + 'titik dengan batas berupa inti terbaiknya, paling luas 1 km x 1 km (100 ha): persentase tertinggi, lalu paling '
-      + 'dekat infrastruktur. Parameter '
+      + 'dekat infrastruktur. Dalam radius 10 km hanya lokasi terbaik yang ditampilkan, sehingga titik tidak '
+      + 'berdempetan; wilayah sesuai lain di sekitarnya dapat diperiksa lewat Analisis lokasi. Parameter '
       + 'yang tidak sangat sesuai atau tidak terukur disebut di popup sebagai hal yang perlu dinilai langsung di '
       + 'lapangan. Pada pilihan semua jenis, lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; '
+      + 'dalam radius 10 km dipilih yang persentasenya tertinggi, lalu yang cocok untuk paling banyak jenis; '
       + 'Konservasi & Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang '
       + 'tampil adalah lokasi dengan persentase tertinggi; perbesar peta untuk melihat lokasi lainnya. Kriteria '
       + 'finansial proyek (NPV, IRR, payback, ROI) tidak ikut; penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',

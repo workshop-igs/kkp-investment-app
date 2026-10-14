@@ -11,6 +11,7 @@ from analitik.services.konstanta import (
     AMBANG_KECOCOKAN,
     GMW_TAHUN_AKHIR,
     INFRASTRUKTUR_AKSESIBILITAS,
+    JARAK_ANTAR_LOKASI_KM,
     KARAKTER_LOKASI,
     KM_PER_DERAJAT,
     SEKTOR_TERSENDIRI_DI_PETA,
@@ -56,7 +57,8 @@ WITH a AS MATERIALIZED (SELECT id, geometry AS g FROM analitik_lokasi_potensial 
 p AS MATERIALIZED (
     SELECT row_number() OVER () AS i, d.g FROM (SELECT (ST_Dump(ST_Union(a.g, 1e-9))).geom AS g FROM a) d
 )
-SELECT p.i, ST_AsEWKB(ST_Multi(p.g)), ST_Area(p.g::geography) / 10000, a.id
+SELECT p.i, ST_AsEWKB(ST_Multi(p.g)), ST_Area(p.g::geography) / 10000, a.id,
+       ST_X(ST_PointOnSurface(p.g)), ST_Y(ST_PointOnSurface(p.g))
 FROM p JOIN a ON a.g && p.g AND ST_Intersects(a.g, p.g)
 """
 
@@ -65,7 +67,8 @@ class Command(BaseCommand):
     help = (
         'Bentuk lokasi potensial Peta Sebaran Wilayah Potensial Investasi: zona yang peruntukannya mengizinkan '
         'dibagi ke sel 250 m, setiap sel dinilai per parameter terukur, dan sel yang sedikitnya 75% parameternya '
-        'sangat sesuai digabung bila bersebelahan. Jalankan setelah hitung_skor_zona dan tarik_bangunan_eksisting.'
+        'sangat sesuai digabung bila bersebelahan; dalam radius 10 km hanya lokasi terbaik yang disimpan. '
+        'Jalankan setelah hitung_skor_zona dan tarik_bangunan_eksisting.'
     )
 
     def add_arguments(self, parser):
@@ -310,16 +313,29 @@ class Command(BaseCommand):
         return wilayah
 
     @staticmethod
-    def _inti(wilayah, lolos, d):
+    def _mutu(sel, lolos, d):
+        return (
+            sum(lolos[i][0] for i in sel) / len(sel),
+            -min(d['jarak_infra'].get(i) or 0 for i in sel),
+            len(sel),
+        )
+
+    def _inti(self, wilayah, lolos, d):
         blok = {}
         for i in wilayah:
             x, y = d['ij'][i]
             blok.setdefault((x // SEL_PER_SISI_INTI_LOKASI, y // SEL_PER_SISI_INTI_LOKASI), []).append(i)
-        return max(blok.values(), key=lambda sel: (
-            sum(lolos[i][0] for i in sel) / len(sel),
-            -min(d['jarak_infra'].get(i) or 0 for i in sel),
-            len(sel),
-        ))
+        return max(blok.values(), key=lambda sel: self._mutu(sel, lolos, d))
+
+    @staticmethod
+    def _tersebar(calon):
+        batas = (JARAK_ANTAR_LOKASI_KM / KM_PER_DERAJAT) ** 2
+        pusat, hasil = [], []
+        for _, x, y, isi in sorted(calon, key=lambda c: c[0], reverse=True):
+            if all((x - a) ** 2 + (y - b) ** 2 >= batas for a, b in pusat):
+                pusat.append((x, y))
+                hasil.append(isi)
+        return hasil
 
     def _lokasi(self, c, prov, zona, status, d):
         hasil = []
@@ -327,11 +343,19 @@ class Command(BaseCommand):
             lolos = self._nilai_sel(sektor, zona, status, d)
             if not lolos:
                 continue
-            wilayah = self._wilayah(lolos, d['ij'])
-            inti = [self._inti(w, lolos, d) for w in wilayah]
-            c.execute(INTI, [[k for k, sel in enumerate(inti) for _ in sel], [i for sel in inti for i in sel]])
+            calon = []
+            for w in self._wilayah(lolos, d['ij']):
+                sel = self._inti(w, lolos, d)
+                calon.append((
+                    self._mutu(sel, lolos, d),
+                    sum(d['ij'][i][0] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
+                    sum(d['ij'][i][1] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
+                    (sel, len(w)),
+                ))
+            inti = self._tersebar(calon)
+            c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for sel, _ in inti for i in sel]])
             for k, ewkb, luas in c.fetchall():
-                hasil.append(self._satu(prov, sektor, ewkb, luas, inti[k], len(wilayah[k]), lolos, zona, status, d))
+                hasil.append(self._satu(prov, sektor, ewkb, luas, *inti[k], lolos, zona, status, d))
         with transaction.atomic():
             LokasiPotensial.objects.filter(provinsi=prov).delete()
             LokasiPotensial.objects.bulk_create(hasil)
@@ -376,15 +400,16 @@ class Command(BaseCommand):
         per_id = {lok.id: lok for lok in lokasi}
         gabungan = {}
         c.execute(GABUNGAN, [list(per_id)])
-        for i, ewkb, luas, lokasi_id in c.fetchall():
-            g = gabungan.setdefault(i, {'geom': ewkb, 'luas': luas, 'anggota': []})
+        for i, ewkb, luas, lokasi_id, x, y in c.fetchall():
+            g = gabungan.setdefault(i, {'geom': ewkb, 'luas': luas, 'x': x, 'y': y, 'anggota': []})
             g['anggota'].append(per_id[lokasi_id])
-        hasil = []
+        calon = []
         for g in gabungan.values():
             urut = sorted(g['anggota'], key=lambda lok: -lok.persen_sesuai)
-            hasil.append(LokasiPotensial(
+            jenis = list(dict.fromkeys(lok.sektor.kode for lok in urut))
+            calon.append(((urut[0].persen_sesuai, len(jenis), g['luas']), g['x'], g['y'], LokasiPotensial(
                 sektor=None, provinsi=prov, geometry=GEOSGeometry(memoryview(g['geom'])), luas_ha=g['luas'],
-                persen_sesuai=urut[0].persen_sesuai, jenis=list(dict.fromkeys(lok.sektor.kode for lok in urut)),
+                persen_sesuai=urut[0].persen_sesuai, jenis=jenis,
                 rincian={**urut[0].rincian, 'jenis_nama': list(dict.fromkeys(lok.sektor.nama for lok in urut))},
-            ))
-        return hasil
+            )))
+        return self._tersebar(calon)
