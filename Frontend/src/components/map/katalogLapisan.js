@@ -142,7 +142,7 @@ const POLA_RUANG = {
         <span class="font-semibold text-slate-700">${k.label}</span>
       </p>
       <div class="text-xs border-t pt-1">
-      <b>Kawasan:</b> ${aman(p.jenis || '-')}<br/>
+      ${p.jenis === p.sub_zona ? '' : `<b>Kawasan:</b> ${aman(p.jenis || '-')}<br/>`}
       <b>${p.sumber === 'KKP-RTRW-DARAT' ? 'Peruntukan' : 'Sub-zona'}:</b> ${aman(p.sub_zona || '-')}<br/>
       <b>Instrumen:</b> ${
         {
