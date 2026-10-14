@@ -19,6 +19,7 @@ from analitik.services.konstanta import (
     KETENTUAN_DARAT_BAWAAN,
     KM_PER_DERAJAT,
     LABEL_SUMBER_ZONASI,
+    PARAMETER_TAMBAHAN,
     PRIORITAS_SUMBER_ZONASI,
     RADIUS_LOKASI_ALTERNATIF_KM,
     SEKTOR_SUB_ZONA_COCOK,
@@ -189,6 +190,11 @@ LABEL_SYARAT = {
     'ekosistem': 'Ada ekosistem pendukung',
     'tanpa_ekosistem': 'Bebas terumbu karang dan lamun',
 }
+LABEL_TAMBAHAN = {
+    'kedalaman_maks': ('Kedalaman perairan sesuai', 'kedalaman_maks'),
+    'gelombang_maks': ('Tinggi gelombang sesuai', 'gelombang'),
+    'anomali_suhu_maks': ('Tanpa stres panas (anomali suhu rendah)', 'anomali_suhu'),
+}
 BENCANA_LOKASI = (
     ('TSUNAMI', 'Risiko tsunami rendah'),
     ('ABRASI', 'Risiko gelombang ekstrem dan abrasi rendah'),
@@ -202,6 +208,9 @@ def parameter_lokasi(sektor_kode, data):
     pilihan = KARAKTER_LOKASI.get(sektor_kode, {}).get(data['ranah'], [{}])
     syarat = next((s for s in pilihan if _penuhi(s, data)), {})
     nilai = {'Ranah lokasi sesuai jenis investasi': True, **{LABEL_SYARAT[k]: True for k in syarat}}
+    for kunci, batas in PARAMETER_TAMBAHAN.get(sektor_kode, {}).get(data['ranah'], {}).items():
+        label, sumber = LABEL_TAMBAHAN[kunci]
+        nilai[label] = None if data.get(sumber) is None else data[sumber] <= batas
     nilai['Peruntukan tata ruang diizinkan tanpa syarat'] = data.get('status_tr') == 'DIIZINKAN'
     for jenis, label in BENCANA_LOKASI:
         kelas = (data.get('bencana') or {}).get(jenis)
@@ -240,13 +249,14 @@ def karakter_area(c, geom):
     data = {'ranah': 'DARAT' if c.fetchone()[0] else 'LAUT', 'ekosistem': ekosistem_di(c, geom)}
     if data['ranah'] == 'DARAT':
         return data
-    stat = statistik_oseanografi(geom, ['KEDALAMAN', 'GELOMBANG', 'SUHU'])
+    stat = statistik_oseanografi(geom, ['KEDALAMAN', 'GELOMBANG', 'SUHU', 'ANOMALI_SUHU'])
     dalam = stat.get('KEDALAMAN', {})
     if dalam.get('rata2') is not None:
         data['kedalaman_min'], data['kedalaman_maks'] = max(0.0, -dalam['max']), max(0.0, -dalam['min'])
     c.execute(SEBARAN_KEDALAMAN.format(zona='(SELECT 0 AS id, ST_GeomFromEWKT(%s) AS geometry)'), [geom.ewkt])
     data['sebaran_kedalaman'] = [(d, n) for _, d, n in c.fetchall()]
     data['gelombang'] = stat.get('GELOMBANG', {}).get('rata2')
+    data['anomali_suhu'] = stat.get('ANOMALI_SUHU', {}).get('rata2')
     suhu = stat.get('SUHU', {})
     data['suhu_min'] = suhu['min'] if suhu.get('rata2') is not None else None
     c.execute(
