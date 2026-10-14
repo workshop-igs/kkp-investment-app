@@ -10,9 +10,9 @@ from analitik.services.konstanta import (
     AMBANG_IRISAN_KKPRL_M2,
     AMBANG_KECOCOKAN,
     BATAS_JARAK_PANTAI_DERAJAT,
-    BATAS_PERIKSA_LOKASI,
     EKOSISTEM_PESISIR,
     GMW_TAHUN_AKHIR,
+    INFRASTRUKTUR_AKSESIBILITAS,
     JENIS_ZONA_TERLARANG,
     JUMLAH_LOKASI_ALTERNATIF,
     KARAKTER_LOKASI,
@@ -27,6 +27,7 @@ from analitik.services.konstanta import (
 from analitik.services.laporan_spasial import _arah
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from inti.models import SektorInvestasi
+from inventarisasi.klasifikasi import KATA_SEKTOR, PENANDA_MATRIKS, rincian_kegiatan, status_rincian, syarat_rincian
 from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
 
 URUTAN_ACUAN = ['RTRW_PROVINSI', 'KAW', 'RTRWN']
@@ -42,6 +43,7 @@ LABEL_STATUS = {
     'BELUM_TERVERIFIKASI': 'Belum dapat diverifikasi',
 }
 BOLEH = ('DIIZINKAN', 'BERSYARAT')
+STATUS_TATA_RUANG = {'SESUAI': 'DIIZINKAN', 'SESUAI_BERSYARAT': 'BERSYARAT', 'TIDAK_SESUAI': 'TIDAK_DIIZINKAN'}
 
 
 NAMA_TANPA_ARTI = {'', '-', 'TIDAK ADA KETERANGAN', 'TIDAK ADA KETERANGAN TAMBAHAN'}
@@ -258,17 +260,34 @@ def karakter_area(c, geom):
     return data
 
 
-def _aturan_per_sektor() -> Dict[int, Dict[tuple, KetentuanRuang]]:
-    hasil: Dict[int, Dict[tuple, KetentuanRuang]] = {}
+def _aturan_per_sektor(matriks=None) -> Dict[int, Dict[tuple, Any]]:
+    hasil: Dict[int, Dict[tuple, Any]] = {}
     for k in KetentuanRuang.objects.all():
         hasil.setdefault(k.sektor_id, {})[(k.sub_zona, k.provinsi_id)] = k
+    sektor = dict(SektorInvestasi.objects.filter(kode__in=KATA_SEKTOR).values_list('kode', 'id'))
+    blok = MatriksKKPRL.objects.all() if matriks is None else MatriksKKPRL.objects.filter(id__in=matriks)
+    for m in blok:
+        for kode, sid in sektor.items():
+            rincian = rincian_kegiatan(m, kode)
+            status = status_rincian(rincian)
+            if status:
+                hasil.setdefault(sid, {})[('MATRIKS', m.id)] = {
+                    'status': status,
+                    'syarat': syarat_rincian(rincian, m.ketentuan_khusus) if status == 'BERSYARAT' else '',
+                    'sumber': f'{m.sumber} ({m.nama_zona})'[:255],
+                    'rincian': rincian,
+                }
     return hasil
 
 
 def _ketentuan(aturan, zona) -> Dict[str, Any]:
     if zona['jenis_zona'] in JENIS_ZONA_TERLARANG:
         return {'status': 'TIDAK_DIIZINKAN', 'syarat': '', 'sumber': 'UU No. 6/1996 & PP No. 37/2002 (ALKI)'}
-    k = aturan.get((zona['sub_zona'], zona['provinsi_id'])) or aturan.get((zona['sub_zona'], None))
+    k = aturan.get((zona['sub_zona'], zona['provinsi_id']))
+    dari_matriks = aturan.get(('MATRIKS', zona.get('matriks_id')))
+    if dari_matriks and (k is None or PENANDA_MATRIKS in k.sumber):
+        return dari_matriks
+    k = k or aturan.get((zona['sub_zona'], None))
     if k is None:
         return {'status': None, 'syarat': '', 'sumber': ''}
     return {'status': k.status, 'syarat': k.syarat, 'sumber': k.sumber}
@@ -359,70 +378,65 @@ def _kkprl(c, geom) -> List[Dict[str, Any]]:
     ]
 
 
-def _lokasi_alternatif(c, geom, aturan, sektor_kode) -> List[Dict[str, Any]]:
-    sub_boleh = sorted({sub for (sub, _), k in aturan.items() if k.status in BOLEH})
-    if not sub_boleh:
-        return []
-    karakter = KARAKTER_LOKASI.get(sektor_kode)
-    ranah = [r for r in ('LAUT', 'DARAT') if karakter is None or r in karakter]
-    pusat = geom.centroid
+def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
     c.execute(
         """
-        SELECT z.id, z.nama_zona, z.sub_zona, p.nama,
-               ST_AsText(ST_PointOnSurface(ST_ClipByBox2D(
-                   z.geometry, ST_Expand(ST_ClosestPoint(z.geometry, ST_GeomFromEWKT(%s)), 0.005))))
-        FROM inventarisasi_zonasi_ruang_laut z JOIN inti_provinsi p ON p.id = z.provinsi_id
-        WHERE z.sub_zona = ANY(%s) AND z.jenis_zona <> ALL(%s) AND z.ranah = ANY(%s)
-          AND NOT ST_Intersects(z.geometry, ST_GeomFromEWKT(%s))
-        ORDER BY z.geometry <-> ST_GeomFromEWKT(%s)
-        LIMIT 30
+        SELECT l.id, l.rincian->>'nama', l.rincian->>'sub_zona', p.nama, l.persen_sesuai, l.luas_ha,
+               ST_X(q.t), ST_Y(q.t), ST_Distance(q.a::geography, q.t::geography), degrees(ST_Azimuth(q.a, q.t))
+        FROM analitik_lokasi_potensial l
+        JOIN inti_provinsi p ON p.id = l.provinsi_id
+        CROSS JOIN LATERAL (SELECT ST_PointOnSurface(l.geometry) AS t, ST_Centroid(ST_GeomFromEWKT(%s)) AS a) q
+        WHERE l.sektor_id = %s AND ST_DWithin(l.geometry, ST_GeomFromEWKT(%s), %s)
+          AND NOT ST_Intersects(l.geometry, ST_GeomFromEWKT(%s))
+        ORDER BY l.geometry <-> ST_GeomFromEWKT(%s)
+        LIMIT %s
         """,
-        [pusat.ewkt, sub_boleh, list(JENIS_ZONA_TERLARANG), ranah, geom.ewkt, pusat.ewkt],
+        [geom.ewkt, sektor.id, geom.ewkt, RADIUS_LOKASI_ALTERNATIF_KM / KM_PER_DERAJAT, geom.ewkt, geom.ewkt,
+         JUMLAH_LOKASI_ALTERNATIF],
     )
-    hasil, terpakai, diperiksa = [], set(), 0
-    for zid, nama, sub, prov, wkt in c.fetchall():
-        if diperiksa >= BATAS_PERIKSA_LOKASI or not wkt or (nama, sub) in terpakai:
-            continue
-        titik = GEOSGeometry(wkt, srid=4326)
-        kunci_titik = (round(titik.x, 3), round(titik.y, 3))
-        if kunci_titik in terpakai:
-            continue
-        c.execute(
-            'SELECT ST_Distance(ST_GeomFromEWKT(%s)::geography, ST_GeomFromEWKT(%s)::geography), '
-            'degrees(ST_Azimuth(ST_GeomFromEWKT(%s), ST_GeomFromEWKT(%s)))',
-            [pusat.ewkt, titik.ewkt, pusat.ewkt, titik.ewkt],
-        )
-        meter, azimut = c.fetchone()
-        km = float(meter or 0) / 1000.0
-        if km > RADIUS_LOKASI_ALTERNATIF_KM:
-            break
-        diperiksa += 1
-        uji = titik.buffer(0.0005)
-        c.execute(
-            'SELECT EXISTS (SELECT 1 FROM inventarisasi_bangunan_eksisting '
-            'WHERE geometry && ST_GeomFromEWKT(%s) AND ST_Intersects(geometry, ST_GeomFromEWKT(%s)))',
-            [uji.ewkt, uji.ewkt],
-        )
-        if c.fetchone()[0]:
-            continue
-        efektif, cakupan = _zona_efektif(c, uji, _luas(c, uji))
-        status = _nilai(efektif, aturan, cakupan, bool(_kkprl(c, uji)))
-        if status not in ('SESUAI', 'SESUAI_BERSYARAT') or not cocok_karakter(sektor_kode, karakter_area(c, uji))[0]:
-            continue
-        terpakai.update({(nama, sub), kunci_titik})
-        hasil.append({
-            'zona_id': zid,
-            'nama': _nama_zona(nama, sub, prov),
-            'sub_zona_label': LABEL_SUB_ZONA.get(sub, sub),
+    return [
+        {
+            'id': lid,
+            'nama': nama,
+            'sub_zona_label': sub,
             'provinsi': prov,
-            'status_label': LABEL_STATUS[status],
-            'jarak_km': round(km, 1),
+            'status_label': f'{_angka(persen, 0)}% parameter sangat sesuai, ±{_angka(luas, 0)} ha',
+            'jarak_km': round(meter / 1000.0, 1),
             'arah': _arah(float(azimut)) if azimut is not None else '',
-            'titik': [round(titik.x, 6), round(titik.y, 6)],
-        })
-        if len(hasil) >= JUMLAH_LOKASI_ALTERNATIF:
-            break
-    return hasil
+            'titik': [round(x, 6), round(y, 6)],
+        }
+        for lid, nama, sub, prov, persen, luas, x, y, meter, azimut in sorted(c.fetchall(), key=lambda r: r[8])
+    ]
+
+
+def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids):
+    c.execute(
+        "SELECT jenis, (ARRAY['RENDAH', 'SEDANG', 'TINGGI'])[MAX(CASE kelas WHEN 'TINGGI' THEN 3 "
+        "WHEN 'SEDANG' THEN 2 ELSE 1 END)] FROM analitik_zona_risiko_bencana "
+        "WHERE varian = 'RISIKO' AND geometry && ST_GeomFromEWKT(%s) AND ST_Intersects(geometry, ST_GeomFromEWKT(%s)) "
+        'GROUP BY jenis',
+        [geom.ewkt, geom.ewkt],
+    )
+    data = {**karakter, 'status_tr': status_tr, 'bencana': dict(c.fetchall())}
+    c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung)')
+    if c.fetchone()[0]:
+        c.execute(
+            'SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung i, '
+            'unnest(%s::text[], %s::float8[]) AS k(kategori, batas) '
+            'WHERE i.kategori = k.kategori AND ST_DWithin(i.geometry, ST_GeomFromEWKT(%s), k.batas))',
+            [[k for k, _, _, _ in INFRASTRUKTUR_AKSESIBILITAS],
+             [ideal / KM_PER_DERAJAT for _, _, ideal, _ in INFRASTRUKTUR_AKSESIBILITAS], geom.ewkt],
+        )
+        data['dekat_infrastruktur'] = c.fetchone()[0]
+    c.execute(
+        "SELECT EXISTS (SELECT 1 FROM inventarisasi_unsur_ruang_laut WHERE kelompok = 'MHA' AND provinsi_id = ANY(%s)), "
+        "EXISTS (SELECT 1 FROM inventarisasi_unsur_ruang_laut WHERE kelompok = 'MHA' "
+        'AND geometry && ST_GeomFromEWKT(%s) AND ST_Intersects(geometry, ST_GeomFromEWKT(%s)))',
+        [list(provinsi_ids), geom.ewkt, geom.ewkt],
+    )
+    terdata, adat = c.fetchone()
+    data['adat'] = adat if terdata else None
+    return parameter_lokasi(sektor_kode, data)
 
 
 def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
@@ -525,12 +539,11 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
     if sektor is None:
         raise ValueError(f'Jenis investasi "{sektor_kode}" tidak dikenal.')
 
-    semua_aturan = _aturan_per_sektor()
-    aturan = semua_aturan.get(sektor.id, {})
-
     with connection.cursor() as c:
         luas_aoi = _luas(c, geom)
         zona_efektif, cakupan = _zona_efektif(c, geom, luas_aoi)
+        semua_aturan = _aturan_per_sektor({z['matriks_id'] for z in zona_efektif if z['matriks_id']})
+        aturan = semua_aturan.get(sektor.id, {})
         kkprl = _kkprl(c, geom)
         informasi_ruang = _informasi_ruang(
             c, zona_efektif, semua_aturan,
@@ -540,6 +553,9 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         cocok, alasan_karakter = cocok_karakter(sektor.kode, karakter)
         status = _nilai(zona_efektif, aturan, cakupan, bool(kkprl)) if cocok else 'TIDAK_SESUAI'
         lanjut = status in ('SESUAI', 'SESUAI_BERSYARAT')
+        parameter = parameter_area(
+            c, geom, sektor.kode, karakter, STATUS_TATA_RUANG.get(status), {z['provinsi_id'] for z in zona_efektif},
+        )
 
         rekomendasi: Optional[Dict[str, Any]] = None
         if not lanjut:
@@ -551,7 +567,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
                         alternatif.append({'kode': s.kode, 'nama': s.nama, 'status_label': LABEL_STATUS[st]})
             rekomendasi = {
                 'sektor_alternatif': alternatif,
-                'lokasi_alternatif': _lokasi_alternatif(c, geom, aturan, sektor.kode),
+                'lokasi_alternatif': _lokasi_alternatif(c, geom, sektor),
             }
 
     for z in zona_efektif:
@@ -560,6 +576,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         z['ketentuan_label'] = LABEL_KETENTUAN.get(ket['status'], 'Belum ditetapkan')
         z['syarat'] = ket['syarat']
         z['sumber_ketentuan'] = ket['sumber']
+        z['rincian'] = ket.get('rincian')
 
     tingkat_dipakai = []
     for t in URUTAN_ACUAN:
@@ -578,6 +595,13 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'acuan': tingkat_dipakai,
         'zona': zona_efektif,
         'informasi_ruang': informasi_ruang,
+        'karakter': {
+            'kebutuhan': KARAKTER_LOKASI.get(sektor.kode, {}).get('uraian', ''),
+            'terukur': ('Darat; ' if karakter['ranah'] == 'DARAT' else 'Perairan; ') + _ringkas_karakter(karakter),
+            'cocok': cocok,
+        },
+        'parameter': [{'label': k, 'nilai': v} for k, v in (parameter or {}).items()],
+        'persen_sangat_sesuai': round(persen_sangat_sesuai(parameter)) if parameter else None,
         'kkprl': kkprl,
         'alasan': [alasan_karakter] * (not cocok) + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl),
         'rekomendasi': rekomendasi,

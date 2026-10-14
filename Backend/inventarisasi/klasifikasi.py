@@ -1,3 +1,5 @@
+import re
+
 PETA_KAWASAN = [
     ('strategis nasional tertentu', 'KST'),
     ('ksnt', 'KST'),
@@ -116,6 +118,55 @@ def kawasan_darat(namobj, jnsrpr=''):
     if hasil is None:
         hasil = 'DARAT_LINDUNG' if str(jnsrpr).startswith('31') else 'DARAT_LAINNYA'
     return hasil, 'KL' if hasil in SUB_ZONA_DARAT_LINDUNG else 'KB'
+
+
+KATA_SEKTOR = {
+    'PERIKANAN_TANGKAP': r'penangkapan (?:ikan|pisces|krustasea|moluska)|perikanan tangkap',
+    'PERIKANAN_BUDIDAYA': r'budi ?daya|pembesaran|pembenihan|keramba|rumput laut',
+    'PENGOLAHAN_HASIL_LAUT': r'pengolahan (?:ikan|hasil)|pembekuan|industri (?:pengolahan|perikanan)',
+    'PARIWISATA_BAHARI': r'wisata',
+    'JASA_MARITIM': r'kepelabuhan|pelayanan (?:jasa )?(?:pelabuhan|kapal)|tambat|labuh|pemanduan|bongkar muat|angkutan laut',
+    'INFRASTRUKTUR_LAUT': r'pembangunan (?:dermaga|jett?y|pelabuhan|breakwater|pemecah gelombang|tanggul|turap|groin)'
+                          r'|konstruksi bangunan|reklamasi',
+    'ENERGI_KELAUTAN': r'pembangkit|energi|tenaga listrik|otec|turbin',
+    'GARAM': r'garam',
+    'BIOTEKNOLOGI_KELAUTAN': r'bioteknologi|biofarmak',
+    'KONSERVASI_PESISIR': r'rehabilitasi|restorasi|transplantasi|konservasi|penanaman (?:mangrove|bakau|lamun)',
+}
+PENANDA_MATRIKS = 'Lampiran Matriks KKPRL'
+KOLOM_MATRIKS = (('DIIZINKAN', 'diperbolehkan'), ('BERSYARAT', 'bersyarat'), ('TIDAK_DIIZINKAN', 'tidak_diperbolehkan'))
+LARANGAN_UMUM = re.compile(
+    r'kegiatan lain|yang dilarang|tidak sesuai (?:dengan )?(?:peraturan|ketentuan)|merusak|mengurangi nilai|mengg?angg?u'
+)
+SEMUA_KEGIATAN = re.compile(r'^semua\b(?!.*\bkecuali\b)')
+
+
+def rincian_kegiatan(matriks, kode):
+    pola = re.compile(KATA_SEKTOR[kode])
+    return {
+        status: list(dict.fromkeys(
+            k for b in getattr(matriks, kolom) for k in re.split(r'\s*;\s*', b.strip(' ;'))
+            if pola.search(k.lower()) and not LARANGAN_UMUM.search(k.lower())
+        ))
+        for status, kolom in KOLOM_MATRIKS
+    }
+
+
+def status_rincian(rincian):
+    boleh, syarat, larang = (rincian[s] for s, _ in KOLOM_MATRIKS)
+    if any(SEMUA_KEGIATAN.match(b.lower()) for b in larang) or (larang and not boleh and not syarat):
+        return 'TIDAK_DIIZINKAN'
+    if syarat or larang:
+        return 'BERSYARAT'
+    return 'DIIZINKAN' if boleh else None
+
+
+def syarat_rincian(rincian, khusus=''):
+    jumlah = {s: len(rincian[s]) for s, _ in KOLOM_MATRIKS}
+    if jumlah['TIDAK_DIIZINKAN']:
+        return (f"Hanya rincian kegiatan tertentu yang diperbolehkan menurut matriks KKPRL: {jumlah['DIIZINKAN']} "
+                f"diperbolehkan, {jumlah['BERSYARAT']} bersyarat, dan {jumlah['TIDAK_DIIZINKAN']} tidak diperbolehkan.")
+    return khusus or 'Diperbolehkan bersyarat menurut matriks KKPRL.'
 
 
 PETA_UNSUR_RTRL = [
