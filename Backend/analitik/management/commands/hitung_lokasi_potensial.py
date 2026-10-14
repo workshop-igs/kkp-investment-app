@@ -138,7 +138,9 @@ class Command(BaseCommand):
         return Counter(lok.sektor.kode for lok in lokasi)
 
     def _data_sel(self, c, banyak, cakupan, prov):
-        d = {k: [None] * (banyak + 1) for k in ('zona', 'kedalaman', 'gelombang', 'suhu', 'jarak', 'ekosistem', 'bencana')}
+        d = {k: [None] * (banyak + 1) for k in (
+            'zona', 'kedalaman', 'gelombang', 'suhu', 'anomali', 'jarak', 'ekosistem', 'bencana',
+        )}
 
         c.execute(
             """
@@ -161,12 +163,12 @@ class Command(BaseCommand):
                 ST_Clip(o.rast, %s::geometry, true),
                 CASE WHEN o.parameter = 'SUHU' THEN LEAST(2, ST_NumBands(o.rast)) ELSE 1 END
             ) p
-            WHERE o.parameter IN ('KEDALAMAN', 'GELOMBANG', 'SUHU') AND o.cakupan && %s::geometry
+            WHERE o.parameter IN ('KEDALAMAN', 'GELOMBANG', 'SUHU', 'ANOMALI_SUHU') AND o.cakupan && %s::geometry
             """,
             [cakupan, cakupan],
         )
         c.execute('CREATE INDEX ON piksel USING gist (g)')
-        kunci = {'KEDALAMAN': 'kedalaman', 'GELOMBANG': 'gelombang', 'SUHU': 'suhu'}
+        kunci = {'KEDALAMAN': 'kedalaman', 'GELOMBANG': 'gelombang', 'SUHU': 'suhu', 'ANOMALI_SUHU': 'anomali'}
         c.execute(
             'SELECT s.id, p.parameter, p.nilai FROM sel s JOIN piksel p ON p.g && s.titik AND ST_Intersects(p.g, s.titik)'
         )
@@ -270,7 +272,7 @@ class Command(BaseCommand):
                 continue
             kunci = (
                 ranah.pop(), 'BERSYARAT' if 'BERSYARAT' in st else 'DIIZINKAN', d['kedalaman'][i], d['gelombang'][i],
-                d['suhu'][i], d['jarak'][i], d['ekosistem'][i], tuple(sorted((d['bencana'][i] or {}).items())),
+                d['suhu'][i], d['anomali'][i], d['jarak'][i], d['ekosistem'][i], tuple(sorted((d['bencana'][i] or {}).items())),
                 (i in d['infra']) if d['infra_terdata'] else None, (i in d['adat']) if d['adat_terdata'] else None,
             )
             if kunci not in tembolok:
@@ -281,10 +283,10 @@ class Command(BaseCommand):
 
     @staticmethod
     def _nilai(kode, kunci):
-        ranah, status_tr, dalam, gelombang, suhu, jarak, ekosistem, bencana, infra, adat = kunci
+        ranah, status_tr, dalam, gelombang, suhu, anomali, jarak, ekosistem, bencana, infra, adat = kunci
         nilai = parameter_lokasi(kode, {
             'ranah': ranah, 'status_tr': status_tr, 'kedalaman_min': dalam, 'kedalaman_maks': dalam,
-            'gelombang': gelombang, 'suhu_min': suhu,
+            'gelombang': gelombang, 'suhu_min': suhu, 'anomali_suhu': anomali,
             'jarak_pantai_km': (jarak if jarak is not None else 99.0) if ranah == 'LAUT' else None,
             'ekosistem': ekosistem or frozenset(), 'bencana': dict(bencana), 'dekat_infrastruktur': infra, 'adat': adat,
         })

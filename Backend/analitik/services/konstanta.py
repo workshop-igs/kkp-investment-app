@@ -267,6 +267,11 @@ KARAKTER_LOKASI = {
     },
 }
 
+PARAMETER_TAMBAHAN = {
+    kode: {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}}
+    for kode in ('KONSERVASI_PESISIR', 'BIOTEKNOLOGI_KELAUTAN')
+}
+
 JENIS_ZONA_TERLARANG = ['ALKI']
 
 SUB_ZONA_TANPA_RINCIAN = ['LAINNYA', 'BELUM_DIATUR', 'TIDAK_DIBAGI', 'DARAT_LAINNYA']
