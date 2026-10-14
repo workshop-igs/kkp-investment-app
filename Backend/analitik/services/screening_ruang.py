@@ -1,15 +1,17 @@
 import json
 from typing import Any, Dict, List, Optional
 
-from django.contrib.gis.geos import GeometryCollection, GEOSGeometry
+from django.contrib.gis.geos import GeometryCollection, GEOSException, GEOSGeometry
 from django.db import connection
 
 from analitik.models import KetentuanRuang
 from analitik.services.konstanta import (
     AMBANG_CAKUPAN_ACUAN,
     AMBANG_IRISAN_KKPRL_M2,
+    AMBANG_KECOCOKAN,
     BATAS_JARAK_PANTAI_DERAJAT,
     BATAS_PERIKSA_LOKASI,
+    EKOSISTEM_PESISIR,
     GMW_TAHUN_AKHIR,
     JENIS_ZONA_TERLARANG,
     JUMLAH_LOKASI_ALTERNATIF,
@@ -62,6 +64,16 @@ def _geos(ewkb) -> GEOSGeometry:
     return g if g.valid else g.buffer(0)
 
 
+def _overlay(c, operasi, a, b=None) -> GEOSGeometry:
+    try:
+        return a.unary_union if b is None else getattr(a, operasi.lower())(b)
+    except GEOSException:
+        geom = [bytes(g.ewkb) for g in (a, b) if g is not None]
+        masukan = ', '.join(['ST_CollectionExtract(ST_GeomFromEWKB(%s), 3)'] * len(geom))
+        c.execute(f'SELECT ST_AsEWKB(ST_CollectionExtract(ST_{operasi}({masukan}, 1e-9), 3))', geom)
+        return _geos(c.fetchone()[0])
+
+
 def _bagian(geom) -> List[GEOSGeometry]:
     if geom.geom_type == 'GeometryCollection':
         return [b for g in geom for b in _bagian(g)]
@@ -99,6 +111,15 @@ def isi_ketentuan_bawaan() -> int:
     return dibuat
 
 
+SEBARAN_KEDALAMAN = """
+    SELECT z.id, GREATEST(0, -v.value), SUM(v.count)
+    FROM {zona} z
+    JOIN analitik_raster_oseanografi o ON o.parameter = 'KEDALAMAN' AND o.cakupan && z.geometry
+    CROSS JOIN LATERAL ST_ValueCount(ST_Clip(o.rast, z.geometry, true), 1, true) v
+    GROUP BY 1, 2
+"""
+
+
 def _angka(nilai, digit=1):
     return f'{nilai:.{digit}f}'.replace('.', ',')
 
@@ -120,7 +141,12 @@ def _penuhi(syarat, data):
     dangkal, dalam = data.get('kedalaman_min'), data.get('kedalaman_maks')
     if 'kedalaman' in syarat and dalam is not None:
         bawah, atas = syarat['kedalaman']
-        if (bawah is not None and dalam < bawah) or (atas is not None and dangkal > atas):
+        sebaran = data.get('sebaran_kedalaman')
+        if sebaran:
+            cocok = sum(n for d, n in sebaran if (bawah is None or d >= bawah) and (atas is None or d <= atas))
+            if cocok < AMBANG_KECOCOKAN * sum(n for _, n in sebaran):
+                return False
+        elif (bawah is not None and dalam < bawah) or (atas is not None and dangkal > atas):
             return False
     gelombang = data.get('gelombang')
     if gelombang is not None and (gelombang > syarat.get('gelombang_maks', gelombang)
@@ -152,6 +178,44 @@ def cocok_karakter(sektor_kode, data):
                    f"dari ETOPO1 dan WaveWatch III). Yang dibutuhkan: {aturan['uraian']}.")
 
 
+LABEL_SYARAT = {
+    'kedalaman': 'Kedalaman perairan sesuai',
+    'gelombang_maks': 'Tinggi gelombang sesuai',
+    'gelombang_min': 'Tinggi gelombang sesuai',
+    'suhu_min': 'Suhu permukaan laut sesuai',
+    'jarak_pantai_maks_km': 'Jarak ke pantai sesuai',
+    'ekosistem': 'Ada ekosistem pendukung',
+    'tanpa_ekosistem': 'Bebas terumbu karang dan lamun',
+}
+BENCANA_LOKASI = (
+    ('TSUNAMI', 'Risiko tsunami rendah'),
+    ('ABRASI', 'Risiko gelombang ekstrem dan abrasi rendah'),
+    ('BANJIR', 'Risiko banjir rendah'),
+)
+
+
+def parameter_lokasi(sektor_kode, data):
+    if not cocok_karakter(sektor_kode, data)[0]:
+        return None
+    pilihan = KARAKTER_LOKASI.get(sektor_kode, {}).get(data['ranah'], [{}])
+    syarat = next((s for s in pilihan if _penuhi(s, data)), {})
+    nilai = {'Ranah lokasi sesuai jenis investasi': True, **{LABEL_SYARAT[k]: True for k in syarat}}
+    nilai['Peruntukan tata ruang diizinkan tanpa syarat'] = data.get('status_tr') == 'DIIZINKAN'
+    for jenis, label in BENCANA_LOKASI:
+        kelas = (data.get('bencana') or {}).get(jenis)
+        nilai[label] = None if kelas is None else kelas == 'RENDAH'
+    if not any('ekosistem' in s for s in pilihan):
+        nilai['Tidak beririsan ekosistem sensitif'] = not set(data.get('ekosistem') or ()) & set(EKOSISTEM_PESISIR)
+    nilai['Dekat infrastruktur pendukung'] = data.get('dekat_infrastruktur')
+    nilai['Di luar wilayah kelola masyarakat hukum adat'] = None if data.get('adat') is None else not data['adat']
+    return nilai
+
+
+def persen_sangat_sesuai(nilai):
+    terukur = [v for v in nilai.values() if v is not None]
+    return 100 * sum(terukur) / len(terukur)
+
+
 def ekosistem_di(c, geom):
     c.execute(
         """
@@ -178,12 +242,15 @@ def karakter_area(c, geom):
     dalam = stat.get('KEDALAMAN', {})
     if dalam.get('rata2') is not None:
         data['kedalaman_min'], data['kedalaman_maks'] = max(0.0, -dalam['max']), max(0.0, -dalam['min'])
+    c.execute(SEBARAN_KEDALAMAN.format(zona='(SELECT 0 AS id, ST_GeomFromEWKT(%s) AS geometry)'), [geom.ewkt])
+    data['sebaran_kedalaman'] = [(d, n) for _, d, n in c.fetchall()]
     data['gelombang'] = stat.get('GELOMBANG', {}).get('rata2')
     suhu = stat.get('SUHU', {})
     data['suhu_min'] = suhu['min'] if suhu.get('rata2') is not None else None
     c.execute(
-        'SELECT MIN(ST_Distance(v.geometry, a.g)) FROM inti_provinsi v, (SELECT ST_GeomFromEWKT(%s) AS g) a '
-        'WHERE ST_DWithin(v.geometry, a.g, %s)',
+        'SELECT MIN(ST_Distance(COALESCE(v.geometry_tampilan, v.geometry), a.g)) '
+        'FROM inti_provinsi v, (SELECT ST_GeomFromEWKT(%s) AS g) a '
+        'WHERE ST_DWithin(COALESCE(v.geometry_tampilan, v.geometry), a.g, %s)',
         [geom.ewkt, BATAS_JARAK_PANTAI_DERAJAT],
     )
     jarak = c.fetchone()[0]
@@ -245,7 +312,7 @@ def _zona_efektif(c, geom, luas_aoi):
         for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, matriks_id, kode_perda, ewkb) in baris:
             if tk != tingkat or sd != sumber or (sub in SUB_ZONA_TANPA_RINCIAN) != umum or ewkb is None:
                 continue
-            irisan = _geos(ewkb).intersection(sisa)
+            irisan = _overlay(c, 'Intersection', _geos(ewkb), sisa)
             m2 = _luas(c, irisan)
             if m2 < 1.0:
                 continue
@@ -267,9 +334,9 @@ def _zona_efektif(c, geom, luas_aoi):
                 'matriks_id': matriks_id,
                 'kode_perda': kode_perda,
             })
-            potongan.extend(_bagian(irisan))
+            potongan.extend(b for b in _bagian(irisan) if b.geom_type in ('Polygon', 'MultiPolygon'))
         if potongan:
-            sisa = sisa.difference(GeometryCollection(*potongan, srid=4326).unary_union)
+            sisa = _overlay(c, 'Difference', sisa, _overlay(c, 'UnaryUnion', GeometryCollection(*potongan, srid=4326)))
     luas_sisa = _luas(c, sisa)
     cakupan = max(0.0, 1 - luas_sisa / luas_aoi) if luas_aoi else 0.0
     return efektif, cakupan

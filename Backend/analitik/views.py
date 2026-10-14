@@ -4,8 +4,7 @@ import logging
 
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import cache
-from django.db import connection, transaction
-from django.db.models import F
+from django.db import transaction
 from django.http import Http404, HttpResponse, JsonResponse
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
@@ -17,22 +16,19 @@ from rest_framework.views import APIView
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
 from inti.geospasial import hitung_luas_geodesik_ha
-from inti.models import SektorInvestasi
 from inti.peta_bbox import PetaBBoxMixin
-from inventarisasi.models import ZonasiRuangLaut
-from inventarisasi.serializers import ZonasiRuangLautSerializer
 
 from .models import (
     AnalisisKelayakan,
+    LokasiPotensial,
     PetaRisiko,
     ZonaRisikoBencana,
 )
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
-from .services.konstanta import AMBANG_TERBANGUN_PERSEN, KARAKTER_LOKASI, SEKTOR_TERSENDIRI_DI_PETA
+from .services.konstanta import KARAKTER_LOKASI
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
-from .services.profil_investasi import _saring_sumber_utama
 from .services.screening_ruang import screening_ruang
 from .services.skor_spasial import ambil_skor_spasial
 
@@ -378,7 +374,7 @@ class PetaRisikoViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = PetaRisikoSerializer
 
 
-class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
+class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     BATAS_FITUR = 2000
 
     SERTAKAN_TITIK = True
@@ -389,132 +385,26 @@ class SkorZonaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         (2.0, 0.0001, 1800),
     ]
 
-    JARAK_SATU_AREA = 0.0005
+    queryset = LokasiPotensial.objects.select_related('provinsi', 'sektor').all()
 
     def peta_urutan(self, qs, request, batas):
-        terbaik = {}
-        for zona_id, provinsi_id, skor, skor_id in qs.values_list('id', 'provinsi_id', '_skor', '_skor_id'):
-            lama = terbaik.get(zona_id)
-            if lama is None or (skor, -skor_id) > (lama[1], -lama[2]):
-                terbaik[zona_id] = (provinsi_id, skor, skor_id)
-        urut = sorted(terbaik.values(), key=lambda b: -b[1])
-        self._dipangkas = len(urut) > batas
-        self._pemilihan = 'skor tertinggi per provinsi' if self._dipangkas else 'semua'
-        pilihan = [skor_id for _, _, skor_id in urut]
-        if self._dipangkas:
-            per_provinsi = {}
-            for provinsi_id, _, skor_id in urut:
-                per_provinsi.setdefault(provinsi_id, []).append(skor_id)
-            kuota = max(1, batas // len(per_provinsi))
-            pilihan = [s for daftar in per_provinsi.values() for s in daftar[:kuota]]
-        return self._anotasi(self.get_queryset(), {'skor_kelayakan__id__in': pilihan}).order_by(
-            '-_skor', '-luas_ha', 'id'
-        )
-
-    def _bangun_peta(self, request):
-        muatan = super()._bangun_peta(request)
-        if not isinstance(muatan, dict) or not muatan['features']:
-            return muatan
-        with connection.cursor() as c:
-            c.execute(
-                'SELECT id, ST_ClusterDBSCAN(ST_Simplify(geometry, 0.0002), eps := %s, minpoints := 1) OVER () '
-                'FROM inventarisasi_zonasi_ruang_laut WHERE id = ANY(%s)',
-                [self.JARAK_SATU_AREA, [f['id'] for f in muatan['features']]],
-            )
-            area = dict(c.fetchall())
-        anggota = {}
-        for f in muatan['features']:
-            anggota.setdefault(area[f['id']], []).append(f)
-        for daftar in anggota.values():
-            wakil = max(daftar, key=lambda f: (f['properties']['kelas'] == 'TINGGI', f['properties']['luas_ha'] or 0))
-            for f in daftar:
-                f['properties']['zona_dalam_area'] = len(daftar)
-                if f is not wakil:
-                    f['properties'].pop('titik', None)
-        return muatan
-
-    queryset = ZonasiRuangLaut.objects.select_related('provinsi').all()
-    serializer_class = ZonasiRuangLautSerializer
-    filterset_fields = ['provinsi', 'jenis_zona', 'sub_zona']
+        return qs.order_by('-persen_sesuai', '-luas_ha', 'id')
 
     def peta_queryset_tambahan(self, qs, request):
-        kode = (request.query_params.get('sektor') or '').strip().upper()
-        kelas = [
-            k.strip().upper()
-            for k in (request.query_params.get('kelas') or '').split(',')
-            if k.strip()
-        ] or ['TINGGI', 'SEDANG']
+        kode = (request.query_params.get('sektor') or 'SEMUA').strip().upper()
+        return qs.filter(sektor__isnull=True) if kode == 'SEMUA' else qs.filter(sektor__kode=kode)
 
-        if kode == 'SEMUA':
-            penyaring = {
-                'skor_kelayakan__sektor__aktif': True,
-                'skor_kelayakan__sektor__kode__in': SektorInvestasi.objects.filter(aktif=True)
-                .exclude(kode__in=SEKTOR_TERSENDIRI_DI_PETA).values('kode'),
-            }
-        else:
-            sektor = None
-            if kode:
-                sektor = SektorInvestasi.objects.filter(kode=kode, aktif=True).first()
-            if sektor is None:
-                sektor = SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'kode').first()
-            if sektor is None:
-                return qs.none()
-            penyaring = {'skor_kelayakan__sektor_id': sektor.id}
-
-        penyaring['skor_kelayakan__kelas__in'] = kelas
-        penyaring['skor_kelayakan__kesesuaian_tr'] = True
-        penyaring['skor_kelayakan__jumlah_kkprl'] = 0
-        qs = _saring_sumber_utama(qs, prefiks='').filter(persen_terbangun__lt=AMBANG_TERBANGUN_PERSEN)
-        return self._anotasi(qs, penyaring)
-
-    ANOTASI_SKOR = {
-        '_skor_id': 'id', '_skor': 'skor_total', '_kelas': 'kelas', '_lokasi': 'skor_lokasi',
-        '_risiko': 'skor_risiko', '_sesuai': 'kesesuaian_tr', '_status_tr': 'status_tr',
-        '_jarak': 'jarak_infra_km', '_bencana': 'risiko_bencana', '_kkprl': 'jumlah_kkprl',
-        '_sosek': 'sumber_sosek', '_ekosistem': 'sensitivitas_ekosistem',
-        '_sosial': 'risiko_sosial', '_adat': 'wilayah_adat', '_sumber_sosial': 'sumber_sosial',
-        '_sektor_nama': 'sektor__nama', '_sektor_kode': 'sektor__kode',
-    }
-
-    def _anotasi(self, qs, penyaring):
-        return qs.filter(**penyaring).annotate(
-            **{nama: F(f'skor_kelayakan__{medan}') for nama, medan in self.ANOTASI_SKOR.items()}
-        )
-
-    PETA_KOLOM = (
-        'nama_zona', 'sub_zona', 'provinsi__nama',
-        '_skor', '_kelas', '_lokasi', '_risiko', '_sesuai', '_status_tr', '_jarak',
-        '_bencana', '_kkprl', '_sosek', '_ekosistem', '_sosial', '_adat',
-        '_sumber_sosial', '_sektor_nama', '_sektor_kode', 'persen_terbangun', 'luas_ha', 'ranah',
-    )
+    PETA_KOLOM = ('provinsi__nama', 'persen_sesuai', 'jenis', 'rincian', 'luas_ha')
 
     def properti_peta(self, r):
-        bulat = lambda v, n: round(v, n) if v is not None else None  # noqa: E731
         return {
-            'nama': r['nama_zona'],
-            'sub_zona': self.label_peta('sub_zona', r['sub_zona']),
-            'kategori': r['sub_zona'],
+            **r['rincian'],
             'provinsi': r['provinsi__nama'],
-            'sektor': r['_sektor_nama'],
-            'sektor_kode': r['_sektor_kode'],
-            'skor': bulat(r['_skor'], 3),
-            'kelas': r['_kelas'],
-            'skor_lokasi': bulat(r['_lokasi'], 3),
-            'skor_risiko': bulat(r['_risiko'], 3),
-            'sesuai_tata_ruang': r['_sesuai'],
-            'status_tata_ruang': r['_status_tr'],
-            'jarak_infra_km': r['_jarak'],
-            'risiko_bencana': bulat(r['_bencana'], 2),
-            'jumlah_kkprl': r['_kkprl'],
-            'persen_terbangun': bulat(r['persen_terbangun'], 1),
-            'luas_ha': bulat(r['luas_ha'], 1),
-            'sumber_sosek': r['_sosek'],
-            'sensitivitas_ekosistem': bulat(r['_ekosistem'], 2),
-            'risiko_sosial': bulat(r['_sosial'], 2),
-            'wilayah_adat': r['_adat'],
-            'sumber_sosial': r['_sumber_sosial'],
-            'ranah': r['ranah'],
-            'karakter': KARAKTER_LOKASI.get(r['_sektor_kode'], {}).get('uraian'),
+            'sektor_kode': r['jenis'][0],
+            'kelas': 'TINGGI',
+            'persen_sesuai': round(r['persen_sesuai']),
+            'luas_ha': round(r['luas_ha'], 1),
+            'karakter': KARAKTER_LOKASI.get(r['jenis'][0], {}).get('uraian') if len(r['jenis']) == 1 else None,
         }
 
 

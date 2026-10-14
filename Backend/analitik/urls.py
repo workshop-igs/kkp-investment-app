@@ -5,10 +5,10 @@ from .views import (
     AnalisisKelayakanViewSet,
     BahayaBencanaView,
     LaporanSpasialView,
+    LokasiPotensialViewSet,
     PetaRisikoViewSet,
     RunAnalysisView,
     ScreeningRuangView,
-    SkorZonaViewSet,
     StatistikBPSView,
     ZonaRisikoBencanaViewSet,
     oseanografi_keterangan,
@@ -19,7 +19,7 @@ router = DefaultRouter()
 router.register(r'kelayakan', AnalisisKelayakanViewSet)
 router.register(r'peta-risiko', PetaRisikoViewSet)
 router.register(r'zona-risiko', ZonaRisikoBencanaViewSet)
-router.register(r'skor-zona', SkorZonaViewSet, basename='skor-zona')
+router.register(r'lokasi-potensial', LokasiPotensialViewSet, basename='lokasi-potensial')
 
 urlpatterns = [
     path('screening/', ScreeningRuangView.as_view(), name='screening-ruang'),

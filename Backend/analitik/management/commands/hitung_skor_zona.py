@@ -31,7 +31,13 @@ from analitik.services.konstanta import (
     kelas_kelayakan,
     rerata_berbobot_berdata,
 )
-from analitik.services.screening_ruang import BOLEH, _aturan_per_sektor, _ketentuan, cocok_karakter
+from analitik.services.screening_ruang import (
+    BOLEH,
+    SEBARAN_KEDALAMAN,
+    _aturan_per_sektor,
+    _ketentuan,
+    cocok_karakter,
+)
 from inti.models import Provinsi, SektorInvestasi
 
 KELAS_KE_RISIKO = {
@@ -162,7 +168,7 @@ class Command(BaseCommand):
                        SUM((t.s).sum) / NULLIF(SUM((t.s).count), 0)
                 FROM inventarisasi_zonasi_ruang_laut z
                 JOIN analitik_raster_oseanografi o
-                  ON o.parameter IN ('KEDALAMAN', 'GELOMBANG', 'SUHU') AND o.cakupan && z.geometry
+                  ON o.parameter IN ('GELOMBANG', 'SUHU') AND o.cakupan && z.geometry
                 CROSS JOIN LATERAL (
                     SELECT ST_SummaryStats(
                         ST_Clip(o.rast, z.geometry, true),
@@ -175,14 +181,24 @@ class Command(BaseCommand):
                 """,
                 [provinsi_id],
             )
-            for zona_id, parameter, minimum, maksimum, rata2 in c.fetchall():
+            for zona_id, parameter, minimum, _, rata2 in c.fetchall():
                 data = hasil.setdefault(zona_id, {})
-                if parameter == 'KEDALAMAN' and minimum is not None:
-                    data['kedalaman_min'], data['kedalaman_maks'] = max(0.0, -maksimum), max(0.0, -minimum)
-                elif parameter == 'GELOMBANG':
+                if parameter == 'GELOMBANG':
                     data['gelombang'] = rata2
-                elif parameter == 'SUHU':
+                else:
                     data['suhu_min'] = minimum
+            c.execute(
+                SEBARAN_KEDALAMAN.format(
+                    zona="(SELECT id, geometry FROM inventarisasi_zonasi_ruang_laut WHERE provinsi_id = %s AND ranah = 'LAUT')"
+                ),
+                [provinsi_id],
+            )
+            for zona_id, kedalaman, jumlah in c.fetchall():
+                hasil.setdefault(zona_id, {}).setdefault('sebaran_kedalaman', []).append((kedalaman, jumlah))
+            for data in hasil.values():
+                if data.get('sebaran_kedalaman'):
+                    data['kedalaman_min'] = min(d for d, _ in data['sebaran_kedalaman'])
+                    data['kedalaman_maks'] = max(d for d, _ in data['sebaran_kedalaman'])
             c.execute(
                 """
                 WITH z AS MATERIALIZED (

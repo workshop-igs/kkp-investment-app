@@ -144,7 +144,7 @@ function itemLegenda(def, osea) {
     case 'disarankan':
       return [
         ...def.params.kelas.split(',').map((k) => ({ warna: KELAS_KELAYAKAN[k].warna, label: KELAS_KELAYAKAN[k].label, bulat: true })),
-        { warna: KELAS_KELAYAKAN.TINGGI.warna, label: 'Batas zona, tampak setelah peta diperbesar' },
+        { warna: KELAS_KELAYAKAN.TINGGI.warna, label: 'Batas lokasi, tampak setelah peta diperbesar' },
       ];
     case 'gradasi':
       return osea?.parameter?.[def.citra]

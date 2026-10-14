@@ -1,6 +1,6 @@
 import { gayaUnsurRtrl } from '../../utils/simbologiPeta';
 import { warnaKelasRisiko } from '../../utils/simbologiPeta';
-import { KELAS_KELAYAKAN, garisKelasKelayakan, warnaKelasKelayakan } from '../../utils/simbologiPeta';
+import { garisKelasKelayakan, warnaKelasKelayakan } from '../../utils/simbologiPeta';
 import {
   KATEGORI_ZONA,
   URUTAN_KATEGORI,
@@ -12,11 +12,6 @@ import {
 } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { API_V1_URL } from '../../api/alamat';
-
-const catatanAdat = (sumberSosial) => {
-  if (!sumberSosial || sumberSosial === 'NETRAL' || sumberSosial.includes('adat')) return '';
-  return '<p class="text-[10px] text-amber-700 mt-1 leading-snug">Wilayah adat belum terdata di provinsi ini; sisi tenurialnya hanya bersandar pada ketergantungan penduduk pada perikanan.</p>';
-};
 
 const TOMBOL_ANALISIS = `<button type="button" data-analisis-lokasi class="mt-2 w-full rounded-lg bg-[#0056A5] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#004a8f]">
   Analisis lokasi ini
@@ -224,31 +219,30 @@ export const LAYER_LOKAL = {
 
   ...LAPISAN_INFRASTRUKTUR,
   potensi: {
-    url: '/analitik/skor-zona/peta/',
-    urlWilayah: '/analitik/skor-zona/wilayah/',
-    params: { sektor: 'SEMUA', kelas: 'TINGGI,SEDANG' },
+    url: '/analitik/lokasi-potensial/peta/',
+    urlWilayah: '/analitik/lokasi-potensial/wilayah/',
+    params: { sektor: 'SEMUA', kelas: 'TINGGI' },
     semuaJenis: 'Semua jenis investasi',
     label: 'Peta Sebaran Wilayah Potensial Investasi',
     legenda: 'disarankan',
     ikon: 'bintang',
     warnaIkon: (p) => warnaKelasKelayakan(p.kelas),
+    zoomBidang: 12,
     keteranganLegenda:
-      'Zona ruang laut, atau kawasan Pola Ruang darat RTRW Provinsi di pesisir (100 m sampai 4 km dari zona laut), '
-      + 'yang Sangat sesuai (skor 0,70 ke atas) atau Sesuai (0,55 sampai di bawah 0,70) '
-      + 'untuk sedikitnya satu jenis investasi, menurut analisis kelayakan zona terbaru. Hanya zona yang '
-      + 'karakter lokasinya cocok dengan jenis investasinya (misalnya tambak garam dan unit pengolahan di darat pesisir, '
-      + 'budi daya laut di perairan 1 sampai 30 m, OTEC di perairan dalam; kedalaman dan gelombang bersifat indikatif), '
-      + 'peruntukan tata ruangnya mengizinkan jenis itu, belum memiliki KKPRL terbit di dalamnya, dan belum terbangun: '
-      + 'kurang dari 10% luas zona beserta lingkungan 25 m di sekelilingnya tertutup pelabuhan, dermaga, pemecah gelombang, industri, permukiman, bandara, pembangkit, anjungan migas, atau bangunan lain menurut OpenStreetMap dan data infrastruktur KKP. Zona yang '
-      + 'bersambung membentuk satu area dengan satu penanda pada zona terluas berkelas tertinggi. Zona yang '
-      + 'peruntukannya hanya mengizinkan jenis itu dengan syarat paling tinggi berkelas Sesuai. Setiap zona '
-      + 'ditampilkan dengan jenis investasi yang skornya paling tinggi; pilih satu jenis untuk melihat '
-      + 'sebaran khusus jenis itu. Konservasi & Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang tampil adalah zona berskor tertinggi; '
-      + 'perbesar peta untuk melihat zona lainnya. Skor menimbang kesesuaian tata ruang, potensi sumber daya, '
-      + 'aksesibilitas infrastruktur, kondisi sosial-ekonomi, serta risiko bencana, regulasi, lingkungan, dan '
-      + 'sosial. Zonanya nyata: RZWP-3-K, PKKPRL, dan kawasan konservasi dari Portal Satu Data KKP. '
-      + 'Kriteria finansial proyek (NPV, IRR, payback, ROI) tidak ikut karena zona belum punya rencana biaya; '
-      + 'penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
+      'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi; batas lokasinya tampak setelah peta '
+      + 'diperbesar. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona ruang laut, atau kawasan Pola Ruang darat '
+      + 'RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu, karakter lokasinya cocok (misalnya tambak '
+      + 'garam dan unit pengolahan di darat pesisir, budi daya laut di perairan 1 sampai 30 m, OTEC di perairan dalam; '
+      + 'kedalaman dan gelombang bersifat indikatif), tidak beririsan KKPRL terbit, dan tidak tertutup bangunan atau '
+      + 'struktur menurut OpenStreetMap dan data infrastruktur KKP. Sebuah sel masuk bila sedikitnya 75% parameter yang '
+      + 'terukur di sel itu sangat sesuai: peruntukan diizinkan tanpa syarat, karakter lokasi, risiko tsunami, gelombang '
+      + 'ekstrem dan abrasi, serta banjir yang rendah, tidak beririsan ekosistem sensitif, dekat infrastruktur pendukung, '
+      + 'dan di luar wilayah kelola masyarakat hukum adat. Sel yang bersebelahan digabung menjadi satu lokasi. Parameter '
+      + 'yang tidak sangat sesuai atau tidak terukur disebut di popup sebagai hal yang perlu dinilai langsung di '
+      + 'lapangan. Pada pilihan semua jenis, lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; '
+      + 'Konservasi & Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang '
+      + 'tampil adalah lokasi dengan persentase tertinggi; perbesar peta untuk melihat lokasi lainnya. Kriteria '
+      + 'finansial proyek (NPV, IRR, payback, ROI) tidak ikut; penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
     gaya: (f) => {
       const kelas = f && f.properties ? f.properties.kelas : null;
       return {
@@ -261,80 +255,40 @@ export const LAYER_LOKAL = {
     },
     popup: (p) => {
       const warna = warnaKelasKelayakan(p.kelas);
-      const angka = (v, d = 2) =>
-        v === null || v === undefined ? null : Number(v).toFixed(d).replace('.', ',');
-
-      const alasan = [];
+      const luas = Number(p.luas_ha || 0).toLocaleString('id-ID', { maximumFractionDigits: 1 });
       const rencana = p.ranah === 'DARAT' ? 'Pola Ruang darat RTRW Provinsi' : 'rencana tata ruang laut';
-      if (p.status_tata_ruang === 'BERSYARAT') alasan.push([false, `Diizinkan bersyarat oleh ${rencana}`]);
-      else if (p.sesuai_tata_ruang) alasan.push([true, `Sesuai peruntukan ${rencana}`]);
-      else alasan.push([false, 'Belum sesuai peruntukan tata ruang']);
-      if (p.karakter) alasan.push([true, `Karakter lokasi cocok: ${p.karakter}`]);
-
-      if (p.jarak_infra_km !== null && p.jarak_infra_km !== undefined) {
-        const dekat = p.jarak_infra_km <= 25;
-        alasan.push([dekat, `Infrastruktur pendukung ${angka(p.jarak_infra_km, 1)} km`]);
-      }
-      if (p.risiko_bencana !== null && p.risiko_bencana !== undefined) {
-        const aman_bencana = p.risiko_bencana < 0.5;
-        alasan.push([aman_bencana, `Risiko bencana ${angka(p.risiko_bencana)}${aman_bencana ? '' : ' — tergolong tinggi'}`]);
-      }
-      if (p.jumlah_kkprl !== null && p.jumlah_kkprl !== undefined) {
-        alasan.push([
-          p.jumlah_kkprl === 0,
-          p.jumlah_kkprl === 0
-            ? 'Tidak ada izin KKPRL yang tumpang tindih'
-            : `${p.jumlah_kkprl} izin KKPRL tumpang tindih`,
-        ]);
-      }
-      if (p.persen_terbangun !== null && p.persen_terbangun !== undefined) {
-        alasan.push([
-          p.persen_terbangun === 0,
-          p.persen_terbangun === 0
-            ? 'Belum ada bangunan atau struktur tercatat di zona'
-            : `${angka(p.persen_terbangun, 1)}% zona dan sekitarnya sudah terbangun`,
-        ]);
-      }
-      if (p.sensitivitas_ekosistem !== null && p.sensitivitas_ekosistem !== undefined) {
-        const rendah = p.sensitivitas_ekosistem < 0.5;
-        alasan.push([rendah, `Indeks ekosistem ${angka(p.sensitivitas_ekosistem)}${rendah ? '' : ' — ekosistem sensitif'}`]);
-      }
-      if (p.risiko_sosial !== null && p.risiko_sosial !== undefined) {
-        const rendah = p.risiko_sosial < 0.5;
-        alasan.push([rendah, `Risiko sosial ${angka(p.risiko_sosial)}${rendah ? '' : ' — perlu perhatian'}`]);
-      }
-      if (p.wilayah_adat) {
-        alasan.push([false, 'Beririsan wilayah kelola masyarakat hukum adat']);
-      }
-
-      const butir = alasan
-        .map(([baik, teks]) =>
-          `<li class="flex gap-1.5 leading-snug">
-             <span class="${baik ? 'text-emerald-600' : 'text-amber-600'} font-bold shrink-0">${baik ? '&check;' : '!'}</span>
-             <span>${aman(teks)}</span>
-           </li>`)
+      const butir = Object.entries(p.parameter || {})
+        .map(([label, bagian]) => {
+          const [tanda, kelasTanda, ket] = bagian === null
+            ? ['?', 'text-slate-400', ' (tidak terukur)']
+            : bagian >= 100
+              ? ['&check;', 'text-emerald-600', '']
+              : ['!', 'text-amber-600', ` (${bagian}% luas)`];
+          return `<li class="flex gap-1.5 leading-snug">
+             <span class="${kelasTanda} font-bold shrink-0">${tanda}</span>
+             <span>${aman(label)}${ket}</span>
+           </li>`;
+        })
         .join('');
 
       return `<div class="font-sans">
-        <h3 class="font-bold mb-1" style="color:${warna}">${aman(p.nama || (p.ranah === 'DARAT' ? 'Kawasan darat pesisir' : 'Zona ruang laut'))}</h3>
-        <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.sub_zona || '-')} &middot; ${aman(p.provinsi || '-')}</p>
+        <h3 class="font-bold mb-1" style="color:${warna}">Lokasi potensial ${aman(p.sektor || '')}</h3>
+        <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
         <div class="text-xs mb-1.5">
-          <span class="font-bold text-base" style="color:${warna}">${aman(KELAS_KELAYAKAN[p.kelas]?.label || '-')}</span>
-          <span class="text-slate-500"> untuk ${aman(p.sektor || 'jenis terpilih')} &middot; skor ${angka(p.skor) || '-'}</span>
+          <span class="font-bold text-base" style="color:${warna}">${aman(p.persen_sesuai)}%</span>
+          <span class="text-slate-500"> parameter terukur sangat sesuai &middot; ${aman(luas)} ha</span>
         </div>
-        <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Kenapa disarankan</p>
+        ${p.jenis_nama?.length
+          ? `<p class="text-[11px] text-slate-700 mb-1 leading-snug"><b>Cocok untuk:</b> ${aman(p.jenis_nama.join(', '))}</p>`
+          : ''}
+        <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Parameter terukur</p>
         <ul class="text-[11px] space-y-0.5 mb-1">${butir}</ul>
-        <p class="text-[10px] text-slate-500 border-t pt-1">Lokasi ${angka(p.skor_lokasi)} &middot; risiko ${angka(p.skor_risiko)}</p>
-        ${p.zona_dalam_area > 1
-          ? `<p class="text-[10px] text-slate-500 mt-1 leading-snug">Bagian dari satu area potensial berisi ${p.zona_dalam_area} zona bersambung; penanda diletakkan pada zona terluas berkelas tertinggi.</p>`
+        ${p.status_tata_ruang === 'BERSYARAT'
+          ? `<p class="text-[10px] text-amber-700 mt-1 leading-snug">Diizinkan bersyarat oleh ${rencana}; syaratnya tercantum di Analisis lokasi ini.</p>`
           : ''}
-        ${p.sumber_sosek === 'NETRAL'
-          ? '<p class="text-[10px] text-amber-700 mt-1 leading-snug">Kondisi sosial-ekonomi masih nilai netral &mdash; kabupaten/kota penaung zona ini belum berdata.</p>'
-          : ''}
-        ${p.sumber_sosial === 'NETRAL'
-          ? '<p class="text-[10px] text-amber-700 mt-1 leading-snug">Risiko sosial belum berdata untuk zona ini; komponennya dilewati, bukan diisi angka netral.</p>'
-          : ''}
-        ${catatanAdat(p.sumber_sosial)}
+        ${p.perlu_dinilai?.length
+          ? `<p class="text-[10px] text-slate-600 mt-1 leading-snug"><b>Perlu dinilai langsung di lapangan:</b> ${aman(p.perlu_dinilai.join('; '))}, serta parameter yang belum terukur di aplikasi seperti kualitas air dan substrat.</p>`
+          : '<p class="text-[10px] text-slate-600 mt-1 leading-snug">Parameter yang belum terukur di aplikasi, seperti kualitas air dan substrat, tetap perlu dinilai langsung di lapangan.</p>'}
         ${TOMBOL_ANALISIS}
       </div>`;
     },
