@@ -315,8 +315,14 @@ KELAS_KELAYAKAN_ZONA = [
 ]
 
 
+def _atur(kunci):
+    from analitik.services.pengaturan import atur
+
+    return atur(kunci)
+
+
 def kelas_kelayakan(skor: float) -> str:
-    for nama, ambang in KELAS_KELAYAKAN_ZONA:
+    for nama, ambang in _atur('KELAS_KELAYAKAN_ZONA'):
         if skor >= ambang:
             return nama
     return 'SANGAT_RENDAH'
@@ -373,20 +379,21 @@ def skala(nilai, rendah, tinggi):
 def risiko_sosial(
     rasio_dtks=None, rasio_nelayan=None, ada_adat=False, sub_zona='', adat_terdata=False
 ):
-    kemiskinan = skala(rasio_dtks, *SKALA_RASIO_DTKS)
+    kemiskinan = skala(rasio_dtks, *_atur('SKALA_RASIO_DTKS'))
 
-    tenurial = skala(rasio_nelayan, *SKALA_RASIO_NELAYAN)
+    tenurial = skala(rasio_nelayan, *_atur('SKALA_RASIO_NELAYAN'))
     lantai = []
     if ada_adat:
-        lantai.append(TENURIAL_LANTAI_ADAT)
-    if sub_zona in TENURIAL_LANTAI_SUB_ZONA:
-        lantai.append(TENURIAL_LANTAI_SUB_ZONA[sub_zona])
+        lantai.append(_atur('TENURIAL_LANTAI_ADAT'))
+    if sub_zona in _atur('TENURIAL_LANTAI_SUB_ZONA'):
+        lantai.append(_atur('TENURIAL_LANTAI_SUB_ZONA')[sub_zona])
     if lantai:
         tenurial = max([tenurial or 0.0, *lantai])
 
+    bobot = _atur('BOBOT_RISIKO_SOSIAL')
     nilai, dipakai = rerata_berbobot_berdata({
-        'kemiskinan': (kemiskinan or 0.0, BOBOT_RISIKO_SOSIAL['kemiskinan'], kemiskinan is not None),
-        'tenurial': (tenurial or 0.0, BOBOT_RISIKO_SOSIAL['tenurial'], tenurial is not None),
+        'kemiskinan': (kemiskinan or 0.0, bobot['kemiskinan'], kemiskinan is not None),
+        'tenurial': (tenurial or 0.0, bobot['tenurial'], tenurial is not None),
     })
     if adat_terdata and dipakai:
         dipakai = sorted([*dipakai, 'adat'])
@@ -399,8 +406,8 @@ def skor_sosial_ekonomi(jumlah_penduduk=0, pesisir=False):
         return None
     skor = 0.5
     if pesisir:
-        skor += SOSEK_PESISIR_BONUS
-    skor += min(1.0, jumlah_penduduk / SOSEK_PENDUDUK_REFERENSI) * 0.3
+        skor += _atur('SOSEK_PESISIR_BONUS')
+    skor += min(1.0, jumlah_penduduk / _atur('SOSEK_PENDUDUK_REFERENSI')) * 0.3
     return max(0.0, min(1.0, skor))
 
 
@@ -436,18 +443,19 @@ KELAS_RISIKO_LABEL = {
 
 
 def kelas_risiko_investasi(pasar, operasional, regulasi, lingkungan, sosial):
+    bawaan, ambang = _atur('SPATIAL_DEFAULT_RISK'), _atur('RISK_CLASS_THRESHOLDS')
     nilai = [
-        pasar if pasar is not None else SPATIAL_DEFAULT_RISK['pasar'],
-        operasional if operasional is not None else SPATIAL_DEFAULT_RISK['operasional'],
-        regulasi if regulasi is not None else SPATIAL_DEFAULT_RISK['regulasi'],
-        lingkungan if lingkungan is not None else SPATIAL_DEFAULT_RISK['lingkungan'],
-        sosial if sosial is not None else SPATIAL_DEFAULT_RISK['sosial'],
+        pasar if pasar is not None else bawaan['pasar'],
+        operasional if operasional is not None else bawaan['operasional'],
+        regulasi if regulasi is not None else bawaan['regulasi'],
+        lingkungan if lingkungan is not None else bawaan['lingkungan'],
+        sosial if sosial is not None else bawaan['sosial'],
     ]
     rerata = sum(nilai) / len(nilai)
-    if rerata <= RISK_CLASS_THRESHOLDS['sangat_rendah']:
+    if rerata <= ambang['sangat_rendah']:
         return 'SANGAT_RENDAH'
-    if rerata <= RISK_CLASS_THRESHOLDS['rendah']:
+    if rerata <= ambang['rendah']:
         return 'RENDAH'
-    if rerata <= RISK_CLASS_THRESHOLDS['sedang']:
+    if rerata <= ambang['sedang']:
         return 'SEDANG'
     return 'TINGGI'

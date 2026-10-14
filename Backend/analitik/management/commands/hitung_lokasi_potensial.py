@@ -7,18 +7,12 @@ from django.db import connection, transaction
 
 from analitik.models import LokasiPotensial
 from analitik.services.konstanta import (
-    AMBANG_CAKUPAN_ACUAN,
-    AMBANG_KECOCOKAN,
     GMW_TAHUN_AKHIR,
-    INFRASTRUKTUR_AKSESIBILITAS,
-    JARAK_ANTAR_LOKASI_KM,
-    KARAKTER_LOKASI,
     KM_PER_DERAJAT,
-    MINIMAL_PARAMETER_TERUKUR,
     SEKTOR_TERSENDIRI_DI_PETA,
-    SEL_PER_SISI_INTI_LOKASI,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
+from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
 from analitik.services.screening_ruang import (
     BOLEH,
@@ -72,6 +66,8 @@ class Command(BaseCommand):
         'Jalankan setelah hitung_skor_zona dan tarik_bangunan_eksisting.'
     )
 
+    stealth_options = ('progres',)
+
     def add_arguments(self, parser):
         parser.add_argument('--provinsi', help='Kode BPS provinsi, dipisah koma')
 
@@ -90,7 +86,10 @@ class Command(BaseCommand):
             )
             c.execute('CREATE INDEX ON darat_terbagi USING gist (g)')
         total = Counter()
-        for prov in provinsi:
+        daftar = list(provinsi)
+        for i, prov in enumerate(daftar, 1):
+            if opsi.get('progres'):
+                opsi['progres'](i, len(daftar), prov.nama)
             t = time.time()
             jumlah = self._provinsi(prov)
             total.update(jumlah)
@@ -151,7 +150,7 @@ class Command(BaseCommand):
             """
         )
         for i, zids, tertutup in c.fetchall():
-            if tertutup >= AMBANG_CAKUPAN_ACUAN:
+            if tertutup >= atur('AMBANG_CAKUPAN_ACUAN'):
                 d['zona'][i] = zids
 
         c.execute(
@@ -229,7 +228,7 @@ class Command(BaseCommand):
         c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung)')
         d['infra_terdata'] = c.fetchone()[0]
         d['infra'] = set()
-        for kategori, _, ideal_km, _ in INFRASTRUKTUR_AKSESIBILITAS:
+        for kategori, _, ideal_km, _ in atur('INFRASTRUKTUR_AKSESIBILITAS'):
             d['infra'] |= himpunan(
                 'SELECT s.id FROM sel s WHERE EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung i '
                 'WHERE i.kategori = %s AND ST_DWithin(i.geometry, s.titik, %s))',
@@ -238,7 +237,7 @@ class Command(BaseCommand):
         c.execute(
             'SELECT s.id, (SELECT ST_Distance(i.geometry, s.titik) FROM inventarisasi_infrastruktur_pendukung i '
             'WHERE i.kategori = ANY(%s) ORDER BY i.geometry <-> s.titik LIMIT 1) FROM sel s WHERE s.id = ANY(%s)',
-            [[k for k, _, _, _ in INFRASTRUKTUR_AKSESIBILITAS], list(d['infra'])],
+            [[k for k, _, _, _ in atur('INFRASTRUKTUR_AKSESIBILITAS')], list(d['infra'])],
         )
         d['jarak_infra'] = dict(c.fetchall())
         c.execute(
@@ -259,7 +258,7 @@ class Command(BaseCommand):
         return d
 
     def _nilai_sel(self, sektor, zona, status, d):
-        karakter = KARAKTER_LOKASI.get(sektor.kode)
+        karakter = atur('KARAKTER_LOKASI').get(sektor.kode)
         izin = {'LAUT', 'DARAT'} if karakter is None else {'LAUT', 'DARAT'} & set(karakter)
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
@@ -290,10 +289,10 @@ class Command(BaseCommand):
             'jarak_pantai_km': (jarak if jarak is not None else 99.0) if ranah == 'LAUT' else None,
             'ekosistem': ekosistem or frozenset(), 'bencana': dict(bencana), 'dekat_infrastruktur': infra, 'adat': adat,
         })
-        if nilai is None or sum(v is not None for v in nilai.values()) < MINIMAL_PARAMETER_TERUKUR:
+        if nilai is None or sum(v is not None for v in nilai.values()) < atur('MINIMAL_PARAMETER_TERUKUR'):
             return None
         persen = persen_sangat_sesuai(nilai)
-        return (persen, nilai) if persen >= 100 * AMBANG_KECOCOKAN else None
+        return (persen, nilai) if persen >= 100 * atur('AMBANG_KECOCOKAN') else None
 
     @staticmethod
     def _wilayah(lolos, ij):
@@ -328,12 +327,12 @@ class Command(BaseCommand):
         blok = {}
         for i in wilayah:
             x, y = d['ij'][i]
-            blok.setdefault((x // SEL_PER_SISI_INTI_LOKASI, y // SEL_PER_SISI_INTI_LOKASI), []).append(i)
+            blok.setdefault((x // atur('SEL_PER_SISI_INTI_LOKASI'), y // atur('SEL_PER_SISI_INTI_LOKASI')), []).append(i)
         return max(blok.values(), key=lambda sel: self._mutu(sel, lolos, d))
 
     @staticmethod
     def _tersebar(calon):
-        batas = (JARAK_ANTAR_LOKASI_KM / KM_PER_DERAJAT) ** 2
+        batas = (atur('JARAK_ANTAR_LOKASI_KM') / KM_PER_DERAJAT) ** 2
         pusat, hasil = [], []
         for _, x, y, isi in sorted(calon, key=lambda c: c[0], reverse=True):
             if all((x - a) ** 2 + (y - b) ** 2 >= batas for a, b in pusat):

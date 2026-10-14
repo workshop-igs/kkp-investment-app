@@ -4,26 +4,12 @@ from typing import Dict, Tuple
 import numpy as np
 
 from .konstanta import (
-    AMBANG_KONSISTENSI_AHP,
-    BATAS_ATAS_IRR_PERSEN,
-    DECISION_THRESHOLDS,
-    FAKTOR_NORMALISASI_NPV,
-    FINANCIAL_WEIGHTS,
-    KRITERIA_BAWAAN,
-    LOCATION_WEIGHTS,
-    MATRIKS_PERBANDINGAN_BAWAAN,
-    PAYBACK_THRESHOLDS,
-    PRIORITY_THRESHOLDS,
-    PROFIT_RATIO_CEILING,
-    RANDOM_INDEX,
-    RECOMMENDATION_WEIGHTS,
     KELAS_RISIKO_LABEL,
+    KRITERIA_BAWAAN,
+    RANDOM_INDEX,
     kelas_risiko_investasi,
-    RISK_WEIGHTS,
-    ROI_CEILING_PCT,
-    TATA_RUANG_FAIL_SCORE,
-    TATA_RUANG_PASS_SCORE,
 )
+from .pengaturan import atur
 
 logger = logging.getLogger('analitik')
 
@@ -49,11 +35,11 @@ def hitung_bobot_ahp(pairwise_matrix: np.ndarray) -> Tuple[np.ndarray, float, bo
     ri = RANDOM_INDEX.get(n, 1.49)
     cr = ci / ri if ri > 0 else 0.0
 
-    is_consistent = cr < AMBANG_KONSISTENSI_AHP
+    is_consistent = cr < atur('AMBANG_KONSISTENSI_AHP')
 
     if not is_consistent:
         logger.error(
-            f'[AHP] Matriks TIDAK konsisten: CR={cr:.4f} (harus < {AMBANG_KONSISTENSI_AHP}). '
+            f'[AHP] Matriks TIDAK konsisten: CR={cr:.4f} (harus < {atur("AMBANG_KONSISTENSI_AHP")}). '
             f'Bobotnya TIDAK boleh dipakai — pemanggil wajib menolaknya. '
             f'Lihat bobot_dari_matriks().'
         )
@@ -70,7 +56,7 @@ def bobot_dari_matriks(matriks, kriteria, sumber: str) -> Tuple[Dict[str, float]
     if not konsisten:
         raise MatriksTidakKonsisten(
             f'Matriks AHP "{sumber}" tidak konsisten: CR={cr:.4f} '
-            f'(ambang {AMBANG_KONSISTENSI_AHP}). Perbaiki perbandingan '
+            f'(ambang {atur("AMBANG_KONSISTENSI_AHP")}). Perbaiki perbandingan '
             f'berpasangannya sebelum bobotnya dipakai menilai kelayakan.'
         )
     return (
@@ -81,7 +67,7 @@ def bobot_dari_matriks(matriks, kriteria, sumber: str) -> Tuple[Dict[str, float]
 
 def _bobot_default() -> Tuple[Dict[str, float], float]:
     return bobot_dari_matriks(
-        MATRIKS_PERBANDINGAN_BAWAAN, KRITERIA_BAWAAN, 'MATRIKS_PERBANDINGAN_BAWAAN'
+        atur('MATRIKS_PERBANDINGAN_BAWAAN'), KRITERIA_BAWAAN, 'MATRIKS_PERBANDINGAN_BAWAAN'
     )
 
 
@@ -136,27 +122,27 @@ def _bobot_dari_basis_data(sektor_kode: str | None):
 
 def skor_finansial(npv: float, irr: float, payback: float, roi: float, investasi_miliar: float) -> Tuple[float, Dict]:
     if npv > 0:
-        npv_score = min(1.0, npv / (investasi_miliar * 1e9 * FAKTOR_NORMALISASI_NPV))
+        npv_score = min(1.0, npv / (investasi_miliar * 1e9 * atur('FAKTOR_NORMALISASI_NPV')))
     else:
-        npv_score = max(0.0, 0.3 + (npv / (investasi_miliar * 1e9 * FAKTOR_NORMALISASI_NPV)))
+        npv_score = max(0.0, 0.3 + (npv / (investasi_miliar * 1e9 * atur('FAKTOR_NORMALISASI_NPV'))))
 
-    irr_score = min(1.0, max(0.0, irr / BATAS_ATAS_IRR_PERSEN))
+    irr_score = min(1.0, max(0.0, irr / atur('BATAS_ATAS_IRR_PERSEN')))
 
-    if payback <= PAYBACK_THRESHOLDS['excellent']:
+    if payback <= atur('PAYBACK_THRESHOLDS')['excellent']:
         payback_score = 1.0
-    elif payback <= PAYBACK_THRESHOLDS['good']:
+    elif payback <= atur('PAYBACK_THRESHOLDS')['good']:
         payback_score = 0.8
-    elif payback <= PAYBACK_THRESHOLDS['fair']:
+    elif payback <= atur('PAYBACK_THRESHOLDS')['fair']:
         payback_score = 0.5
     else:
         payback_score = max(0.1, 1.0 - payback / 20.0)
 
-    roi_score = min(1.0, max(0.0, roi / ROI_CEILING_PCT))
+    roi_score = min(1.0, max(0.0, roi / atur('ROI_CEILING_PCT')))
 
-    score = (npv_score * FINANCIAL_WEIGHTS['npv'] + 
-             irr_score * FINANCIAL_WEIGHTS['irr'] + 
-             payback_score * FINANCIAL_WEIGHTS['payback'] + 
-             roi_score * FINANCIAL_WEIGHTS['roi'])
+    score = (npv_score * atur('FINANCIAL_WEIGHTS')['npv'] +
+             irr_score * atur('FINANCIAL_WEIGHTS')['irr'] +
+             payback_score * atur('FINANCIAL_WEIGHTS')['payback'] +
+             roi_score * atur('FINANCIAL_WEIGHTS')['roi'])
 
     detail = {
         'npv_score': round(npv_score, 3),
@@ -184,18 +170,18 @@ def skor_risiko_investasi(
         'sosial': 1.0 - risiko_sosial,
     }
 
-    composite = sum(scores[k] * RISK_WEIGHTS[k] for k in scores)
+    composite = sum(scores[k] * atur('RISK_WEIGHTS')[k] for k in scores)
     return round(composite, 4), {k: round(v, 3) for k, v in scores.items()}
 
 
 def skor_lokasi(
     kesesuaian_tr: bool, potensi_sda: float, aksesibilitas: float, kondisi_sosek: float
 ) -> Tuple[float, Dict]:
-    tr_score = TATA_RUANG_PASS_SCORE if kesesuaian_tr else TATA_RUANG_FAIL_SCORE
-    score = (tr_score * LOCATION_WEIGHTS['tata_ruang'] + 
-             potensi_sda * LOCATION_WEIGHTS['potensi_sda'] + 
-             aksesibilitas * LOCATION_WEIGHTS['aksesibilitas'] + 
-             kondisi_sosek * LOCATION_WEIGHTS['sosial_ekonomi'])
+    tr_score = atur('TATA_RUANG_PASS_SCORE') if kesesuaian_tr else atur('TATA_RUANG_FAIL_SCORE')
+    score = (tr_score * atur('LOCATION_WEIGHTS')['tata_ruang'] +
+             potensi_sda * atur('LOCATION_WEIGHTS')['potensi_sda'] +
+             aksesibilitas * atur('LOCATION_WEIGHTS')['aksesibilitas'] +
+             kondisi_sosek * atur('LOCATION_WEIGHTS')['sosial_ekonomi'])
 
     detail = {
         'tata_ruang': round(tr_score, 3),
@@ -211,7 +197,7 @@ def skor_prediksi(prediksi_keuntungan: float, investasi_miliar: float) -> Tuple[
         return 0.5, {'note': 'Tidak ada data investasi'}
 
     ratio = prediksi_keuntungan / (investasi_miliar * 1e9)
-    score = min(1.0, max(0.0, ratio / PROFIT_RATIO_CEILING))
+    score = min(1.0, max(0.0, ratio / atur('PROFIT_RATIO_CEILING')))
 
     return round(score, 4), {
         'profit_ratio': round(ratio, 3),
@@ -220,15 +206,15 @@ def skor_prediksi(prediksi_keuntungan: float, investasi_miliar: float) -> Tuple[
 
 
 def _determine_decision(total_score: float, kesesuaian_tr: bool, npv: float) -> Tuple[str, str]:
-    layak_threshold = DECISION_THRESHOLDS['layak']['min_score']
-    bersyarat_threshold = DECISION_THRESHOLDS['bersyarat']['min_score']
-    
+    layak_threshold = atur('DECISION_THRESHOLDS')['layak']['min_score']
+    bersyarat_threshold = atur('DECISION_THRESHOLDS')['bersyarat']['min_score']
+
     if total_score >= layak_threshold and kesesuaian_tr and npv > 0:
         keputusan = 'LAYAK'
-        prioritas = 'TINGGI' if total_score >= PRIORITY_THRESHOLDS['tinggi'] else 'SEDANG'
+        prioritas = 'TINGGI' if total_score >= atur('PRIORITY_THRESHOLDS')['tinggi'] else 'SEDANG'
     elif total_score >= bersyarat_threshold and (kesesuaian_tr or npv > 0):
         keputusan = 'BERSYARAT'
-        prioritas = 'SEDANG' if total_score >= PRIORITY_THRESHOLDS['sedang_bersyarat'] else 'RENDAH'
+        prioritas = 'SEDANG' if total_score >= atur('PRIORITY_THRESHOLDS')['sedang_bersyarat'] else 'RENDAH'
     else:
         keputusan = 'TIDAK_LAYAK'
         prioritas = 'RENDAH'
@@ -264,8 +250,8 @@ def _rupiah(nilai: float) -> str:
 
 
 def _temuan_keputusan(keputusan: str, skor: float, kesesuaian_tr: bool, npv: float) -> str:
-    batas_layak = DECISION_THRESHOLDS['layak']['min_score']
-    batas_bersyarat = DECISION_THRESHOLDS['bersyarat']['min_score']
+    batas_layak = atur('DECISION_THRESHOLDS')['layak']['min_score']
+    batas_bersyarat = atur('DECISION_THRESHOLDS')['bersyarat']['min_score']
     skor_teks = _angka_id(skor, 2)
 
     if keputusan == 'LAYAK':
@@ -320,8 +306,8 @@ def _temuan_finansial(
     if payback_tercapai is False:
         umur = f'{umur_proyek} tahun umur proyek' if umur_proyek else 'umur proyek'
         temuan.append(f'Modal tidak kembali dalam {umur}; perlu penjadwalan ulang investasi.')
-    elif payback is not None and payback > PAYBACK_THRESHOLDS['fair']:
-        batas = PAYBACK_THRESHOLDS['fair']
+    elif payback is not None and payback > atur('PAYBACK_THRESHOLDS')['fair']:
+        batas = atur('PAYBACK_THRESHOLDS')['fair']
         temuan.append(
             f'Payback {_angka_id(payback)} tahun melewati ambang wajar {batas} tahun.'
         )
@@ -465,10 +451,10 @@ def jalankan_analisis_ahp(
     skor_lok, detail_lok = skor_lokasi(kesesuaian_tr, potensi_sda, aksesibilitas, kondisi_sosek)
     skor_pred, detail_pred = skor_prediksi(prediksi_keuntungan, investasi_miliar)
 
-    skor_rek = (skor_fin * RECOMMENDATION_WEIGHTS['finansial'] + 
-                skor_risk * RECOMMENDATION_WEIGHTS['risiko'] + 
-                skor_lok * RECOMMENDATION_WEIGHTS['lokasi'] + 
-                skor_pred * RECOMMENDATION_WEIGHTS['prediksi'])
+    skor_rek = (skor_fin * atur('RECOMMENDATION_WEIGHTS')['finansial'] +
+                skor_risk * atur('RECOMMENDATION_WEIGHTS')['risiko'] +
+                skor_lok * atur('RECOMMENDATION_WEIGHTS')['lokasi'] +
+                skor_pred * atur('RECOMMENDATION_WEIGHTS')['prediksi'])
 
     aspect_scores = {
         'FINANSIAL': skor_fin,
@@ -515,7 +501,7 @@ def jalankan_analisis_ahp(
     return {
         'skor_ahp_total': round(total_score, 4),
         'consistency_ratio': round(cr, 4),
-        'is_consistent': cr < AMBANG_KONSISTENSI_AHP,
+        'is_consistent': cr < atur('AMBANG_KONSISTENSI_AHP'),
         'keputusan': keputusan,
         'prioritas': prioritas,
         'kelas_risiko': kelas_risiko,

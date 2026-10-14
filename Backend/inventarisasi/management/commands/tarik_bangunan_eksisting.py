@@ -6,7 +6,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 
 from analitik.models import SkorKelayakanZona
-from analitik.services.konstanta import AMBANG_TERBANGUN_PERSEN
+from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
 
 OVERPASS = (
@@ -267,10 +267,10 @@ class Command(BaseCommand):
         with connection.cursor() as c:
             c.execute(
                 'SELECT COUNT(*) FROM inventarisasi_zonasi_ruang_laut WHERE id = ANY(%s) AND persen_terbangun >= %s',
-                [ids, AMBANG_TERBANGUN_PERSEN],
+                [ids, atur('AMBANG_TERBANGUN_PERSEN')],
             )
             terbangun = c.fetchone()[0]
         self.stdout.write(
             f'{len(tersentuh)} zona bersinggungan dengan bangunan; {terbangun} zona terbangun '
-            f'{AMBANG_TERBANGUN_PERSEN}% atau lebih dikeluarkan dari rekomendasi'
+            f'{atur("AMBANG_TERBANGUN_PERSEN")}% atau lebih dikeluarkan dari rekomendasi'
         )

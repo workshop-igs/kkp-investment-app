@@ -3,13 +3,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
-from .konstanta import (
-    BEST_CASE_OPEX_MULTIPLIER,
-    BEST_CASE_REVENUE_MULTIPLIER,
-    SENSITIVITAS_FINANSIAL,
-    WORST_CASE_OPEX_MULTIPLIER,
-    WORST_CASE_REVENUE_MULTIPLIER,
-)
+from .pengaturan import atur
 
 logger = logging.getLogger('analitik')
 
@@ -111,7 +105,7 @@ def _hitung_sensitivitas(
     sensitivitas = {}
     for var_name in ['pendapatan', 'biaya']:
         var_results = []
-        for pct in SENSITIVITAS_FINANSIAL:
+        for pct in atur('SENSITIVITAS_FINANSIAL'):
             pct_pct = pct * 100
             if var_name == 'pendapatan':
                 adj_rev = base_annual_revenue * (1 + pct)
@@ -146,8 +140,8 @@ def _hitung_skenario(
     wacc_val: float,
     years_val: int,
 ) -> Tuple[Dict[str, Any], Dict[str, Any]]:
-    best_rev = base_annual_revenue * BEST_CASE_REVENUE_MULTIPLIER
-    best_opx = base_annual_opex * BEST_CASE_OPEX_MULTIPLIER
+    best_rev = base_annual_revenue * atur('BEST_CASE_REVENUE_MULTIPLIER')
+    best_opx = base_annual_opex * atur('BEST_CASE_OPEX_MULTIPLIER')
     best_npv, best_irr, best_payback, best_roi, best_tercapai = calc_dcf_metrics(
         best_rev, best_opx, capex, rev_growth, opx_growth, wacc_val, years_val
     )
@@ -160,8 +154,8 @@ def _hitung_skenario(
         'roi': best_roi,
     }
 
-    worst_rev = base_annual_revenue * WORST_CASE_REVENUE_MULTIPLIER
-    worst_opx = base_annual_opex * WORST_CASE_OPEX_MULTIPLIER
+    worst_rev = base_annual_revenue * atur('WORST_CASE_REVENUE_MULTIPLIER')
+    worst_opx = base_annual_opex * atur('WORST_CASE_OPEX_MULTIPLIER')
     worst_npv, worst_irr, worst_payback, worst_roi, worst_tercapai = calc_dcf_metrics(
         worst_rev, worst_opx, capex, rev_growth, opx_growth, wacc_val, years_val
     )
