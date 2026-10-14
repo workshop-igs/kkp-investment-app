@@ -357,6 +357,28 @@ class SkorKelayakanZona(models.Model):
         return f'{self.zona_id} / {self.sektor_id}: {self.skor_total:.2f} ({self.kelas})'
 
 
+class LokasiPotensial(models.Model):
+    sektor = models.ForeignKey(
+        SektorInvestasi, on_delete=models.CASCADE, null=True, blank=True,
+        help_text='Kosong = gabungan semua jenis untuk tampilan awal peta',
+    )
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    geometry = models.MultiPolygonField(srid=4326)
+    luas_ha = models.FloatField()
+    persen_sesuai = models.FloatField(help_text='Rata-rata persentase parameter terukur yang sangat sesuai, 0-100')
+    jenis = models.JSONField(default=list, help_text='Kode jenis investasi yang cocok di lokasi ini')
+    rincian = models.JSONField(default=dict, help_text='Ringkasan parameter dan zona untuk popup peta')
+    dihitung_pada = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'analitik_lokasi_potensial'
+        verbose_name_plural = 'Lokasi Potensial'
+        ordering = ['-persen_sesuai']
+
+    def __str__(self):
+        return f'{self.sektor_id or "SEMUA"} / {self.provinsi_id}: {self.luas_ha:.1f} ha ({self.persen_sesuai:.0f}%)'
+
+
 class RasterOseanografi(models.Model):
     PARAMETER_CHOICES = [
         ('KEDALAMAN', 'Kedalaman laut'),

@@ -256,7 +256,7 @@ const LegendaUnsurRtrl = () => (
 );
 
 
-const AMBANG_KELAS = { TINGGI: 'skor ≥0,70', SEDANG: 'skor 0,55–<0,70' };
+const AMBANG_KELAS = { TINGGI: '≥75% parameter terukur' };
 
 const LegendaDisarankan = ({ def }) => (
   <ul className="space-y-1.5">
@@ -276,7 +276,7 @@ const LegendaDisarankan = ({ def }) => (
         className="mt-[3px] w-3.5 h-3.5 rounded-[3px] border shrink-0"
         style={{ backgroundColor: KELAS_KELAYAKAN.TINGGI.warna, borderColor: garisKelasKelayakan('TINGGI'), opacity: 0.85 }}
       />
-      <span className="text-[12px] text-slate-700 leading-snug">Batas zona, tampak setelah peta diperbesar</span>
+      <span className="text-[12px] text-slate-700 leading-snug">Batas lokasi, tampak setelah peta diperbesar</span>
     </li>
   </ul>
 );
