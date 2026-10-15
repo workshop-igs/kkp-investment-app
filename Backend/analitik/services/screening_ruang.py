@@ -135,9 +135,15 @@ def _ringkas_karakter(data):
         bagian.append(f"gelombang {_angka(data['gelombang'])} m")
     if data.get('jarak_pantai_km') is not None:
         bagian.append(f"{_angka(data['jarak_pantai_km'])} km dari pantai")
-    bagian.append('ekosistem ' + (', '.join(sorted(e.replace('_', ' ').lower() for e in data['ekosistem']))
-                                  if data.get('ekosistem') else 'tidak ada'))
+    bagian.append('ekosistem ' + (_nama_ekosistem(data['ekosistem']) if data.get('ekosistem') else 'tidak ada'))
+    sekitar = set(data.get('ekosistem_sekitar') or ()) - set(data.get('ekosistem') or ())
+    if sekitar:
+        bagian.append(f"{_nama_ekosistem(sekitar)} dalam radius {_angka(atur('RADIUS_EKOSISTEM_PENDUKUNG_M'), 0)} m")
     return '; '.join(bagian)
+
+
+def _nama_ekosistem(daftar):
+    return ', '.join(sorted(e.replace('_', ' ').lower() for e in daftar))
 
 
 def _penuhi(syarat, data):
@@ -162,7 +168,8 @@ def _penuhi(syarat, data):
     if jarak is not None and jarak > syarat.get('jarak_pantai_maks_km', jarak):
         return False
     ekosistem = set(data.get('ekosistem') or ())
-    if 'ekosistem' in syarat and not ekosistem & set(syarat['ekosistem']):
+    sekitar = set(data.get('ekosistem_sekitar') or ()) | ekosistem
+    if 'ekosistem' in syarat and not sekitar & set(syarat['ekosistem']):
         return False
     return not ekosistem & set(syarat.get('tanpa_ekosistem', ()))
 
@@ -228,15 +235,15 @@ def persen_sangat_sesuai(nilai):
     return 100 * sum(terukur) / len(terukur)
 
 
-def ekosistem_di(c, geom):
+def ekosistem_di(c, geom, radius=0.0):
     c.execute(
         """
         SELECT DISTINCT jenis FROM inventarisasi_sumber_daya_alam
-        WHERE geometry && ST_GeomFromEWKT(%s) AND ST_Intersects(geometry, ST_GeomFromEWKT(%s))
+        WHERE geometry && ST_Expand(ST_GeomFromEWKT(%s), %s) AND ST_DWithin(geometry, ST_GeomFromEWKT(%s), %s)
           AND (sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG')
                OR (sumber_data = 'GMW-MANGROVE' AND tahun_data = %s))
         """,
-        [geom.ewkt, geom.ewkt, GMW_TAHUN_AKHIR],
+        [geom.ewkt, radius, geom.ewkt, radius, GMW_TAHUN_AKHIR],
     )
     return {r[0] for r in c.fetchall()}
 
@@ -247,7 +254,11 @@ def karakter_area(c, geom):
         'AND ST_Intersects(geometry, ST_PointOnSurface(ST_GeomFromEWKT(%s))))',
         [geom.ewkt, geom.ewkt],
     )
-    data = {'ranah': 'DARAT' if c.fetchone()[0] else 'LAUT', 'ekosistem': ekosistem_di(c, geom)}
+    data = {
+        'ranah': 'DARAT' if c.fetchone()[0] else 'LAUT',
+        'ekosistem': ekosistem_di(c, geom),
+        'ekosistem_sekitar': ekosistem_di(c, geom, atur('RADIUS_EKOSISTEM_PENDUKUNG_M') / 1000 / KM_PER_DERAJAT),
+    }
     if data['ranah'] == 'DARAT':
         return data
     stat = statistik_oseanografi(geom, ['KEDALAMAN', 'GELOMBANG', 'SUHU', 'ANOMALI_SUHU'])
