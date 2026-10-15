@@ -127,24 +127,49 @@ def _persen_area(nilai):
     return '<0,1%' if nilai < 0.1 else f'{_angka(nilai)}%'
 
 
-def _ringkas_karakter(data):
+def _ringkas_karakter(data, sektor_kode):
+    pilihan = atur('KARAKTER_LOKASI').get(sektor_kode, {}).get(data['ranah'], [])
+    kunci = {k for syarat in pilihan for k in syarat} | set(atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}))
     bagian = []
-    if data.get('kedalaman_maks') is not None:
-        dangkal, dalam = _angka(data['kedalaman_min'], 0), _angka(data['kedalaman_maks'], 0)
-        bagian.append(f'kedalaman sekitar {dalam} m' if dangkal == dalam else f'kedalaman {dangkal} sampai {dalam} m')
-    if data.get('gelombang') is not None:
-        bagian.append(f"gelombang {_angka(data['gelombang'])} m")
-    if data.get('jarak_pantai_km') is not None:
+    if kunci & {'kedalaman', 'kedalaman_maks'}:
+        if data.get('kedalaman_maks') is None:
+            bagian.append('kedalaman tidak terukur')
+        else:
+            dangkal, dalam = _angka(data['kedalaman_min'], 0), _angka(data['kedalaman_maks'], 0)
+            bagian.append(f'kedalaman sekitar {dalam} m' if dangkal == dalam else f'kedalaman {dangkal} sampai {dalam} m')
+    if kunci & {'gelombang_maks', 'gelombang_min'}:
+        gelombang = data.get('gelombang')
+        bagian.append('gelombang tidak terukur' if gelombang is None else f'gelombang {_angka(gelombang)} m')
+    if 'suhu_min' in kunci:
+        suhu = data.get('suhu_min')
+        bagian.append('suhu permukaan tidak terukur' if suhu is None else f'suhu permukaan paling rendah {_angka(suhu)} °C')
+    if 'anomali_suhu_maks' in kunci:
+        anomali = data.get('anomali_suhu')
+        bagian.append('anomali suhu tidak terukur' if anomali is None else f'anomali suhu {_angka(anomali)} °C')
+    if 'jarak_pantai_maks_km' in kunci and data.get('jarak_pantai_km') is not None:
         bagian.append(f"{_angka(data['jarak_pantai_km'])} km dari pantai")
-    bagian.append('ekosistem ' + (_nama_ekosistem(data['ekosistem']) if data.get('ekosistem') else 'tidak ada'))
-    sekitar = set(data.get('ekosistem_sekitar') or ()) - set(data.get('ekosistem') or ())
-    if sekitar:
-        bagian.append(f"{_nama_ekosistem(sekitar)} dalam radius {_angka(atur('RADIUS_EKOSISTEM_PENDUKUNG_M'), 0)} m")
+    ada = set(data.get('ekosistem') or ())
+    dicari = {e for syarat in pilihan for e in syarat.get('ekosistem', ())}
+    terlarang = {e for syarat in pilihan for e in syarat.get('tanpa_ekosistem', ())}
+    if dicari:
+        temu = dicari & (ada | set(data.get('ekosistem_sekitar') or ()))
+        radius = _angka(atur('RADIUS_EKOSISTEM_PENDUKUNG_M'), 0)
+        bagian.append(f'{_nama_ekosistem(temu)} di lokasi atau dalam radius {radius} m' if temu
+                      else f'tanpa {_nama_ekosistem(dicari, "atau")} dalam radius {radius} m')
+    if terlarang:
+        bagian.append(f'ada {_nama_ekosistem(terlarang & ada)}' if terlarang & ada
+                      else f'tanpa {_nama_ekosistem(terlarang, "dan")}')
+    if not dicari and pilihan:
+        sensitif = ada & set(EKOSISTEM_PESISIR)
+        bagian.append(f'ekosistem sensitif {_nama_ekosistem(sensitif)}' if sensitif else 'tanpa ekosistem sensitif')
     return '; '.join(bagian)
 
 
-def _nama_ekosistem(daftar):
-    return ', '.join(sorted(e.replace('_', ' ').lower() for e in daftar))
+def _nama_ekosistem(daftar, sambung=None):
+    nama = sorted(e.replace('_', ' ').lower() for e in daftar)
+    if sambung and len(nama) > 1:
+        return f"{', '.join(nama[:-1])} {sambung} {nama[-1]}"
+    return ', '.join(nama)
 
 
 def _penuhi(syarat, data):
@@ -185,7 +210,7 @@ def cocok_karakter(sektor_kode, data):
         return False, f"Lokasi berada di {letak}, sedangkan karakter lokasinya adalah {aturan['uraian']}."
     if any(_penuhi(syarat, data) for syarat in pilihan):
         return True, ''
-    return False, (f"Karakter lokasi belum cocok ({_ringkas_karakter(data)}; kedalaman dan gelombang indikatif "
+    return False, (f"Karakter lokasi belum cocok ({_ringkas_karakter(data, sektor_kode)}; kedalaman dan gelombang indikatif "
                    f"dari ETOPO1 dan WaveWatch III). Yang dibutuhkan: {aturan['uraian']}.")
 
 
@@ -197,6 +222,13 @@ LABEL_SYARAT = {
     'jarak_pantai_maks_km': 'Jarak ke pantai sesuai',
     'ekosistem': 'Ada ekosistem pendukung',
     'tanpa_ekosistem': 'Bebas terumbu karang dan lamun',
+}
+SUMBER_SYARAT = {
+    'kedalaman': 'kedalaman_maks',
+    'gelombang_maks': 'gelombang',
+    'gelombang_min': 'gelombang',
+    'suhu_min': 'suhu_min',
+    'jarak_pantai_maks_km': 'jarak_pantai_km',
 }
 LABEL_TAMBAHAN = {
     'kedalaman_maks': ('Kedalaman perairan sesuai', 'kedalaman_maks'),
@@ -215,7 +247,9 @@ def parameter_lokasi(sektor_kode, data):
         return None
     pilihan = atur('KARAKTER_LOKASI').get(sektor_kode, {}).get(data['ranah'], [{}])
     syarat = next((s for s in pilihan if _penuhi(s, data)), {})
-    nilai = {'Ranah lokasi sesuai jenis investasi': True, **{LABEL_SYARAT[k]: True for k in syarat}}
+    nilai = {'Ranah lokasi sesuai jenis investasi': True, **{
+        LABEL_SYARAT[k]: None if k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None else True for k in syarat
+    }}
     for kunci, batas in atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}).items():
         label, sumber = LABEL_TAMBAHAN[kunci]
         nilai[label] = None if data.get(sumber) is None else data[sumber] <= batas
@@ -626,7 +660,9 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'informasi_ruang': informasi_ruang,
         'karakter': {
             'kebutuhan': atur('KARAKTER_LOKASI').get(sektor.kode, {}).get('uraian', ''),
-            'terukur': ('Darat; ' if karakter['ranah'] == 'DARAT' else 'Perairan; ') + _ringkas_karakter(karakter),
+            'terukur': '; '.join(filter(None, [
+                'Darat' if karakter['ranah'] == 'DARAT' else 'Perairan', _ringkas_karakter(karakter, sektor.kode),
+            ])),
             'cocok': cocok,
         },
         'parameter': [{'label': k, 'nilai': v} for k, v in (parameter or {}).items()],
