@@ -403,7 +403,7 @@ const PetaInteraktif = ({
                     autoPanPaddingTopLeft: [16, JARAK_POPUP.atas],
                     autoPanPaddingBottomRight: [JARAK_POPUP.kanan, JARAK_POPUP.bawah],
                   });
-                  const judul = p.nama || p.pemohon;
+                  const judul = LAYER_LOKAL[id].tooltip?.(p) || p.nama || p.pemohon;
                   if (judul) layer.bindTooltip(judul, { sticky: true, className: 'map-tooltip' });
                   layer.on('popupopen', (e) => {
                     e.popup
