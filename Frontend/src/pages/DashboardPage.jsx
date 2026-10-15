@@ -1,389 +1,288 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
-import { 
-  TrendingUp, Users, MapPin, DollarSign, 
-  Layers, Filter, Download, ArrowUpRight, 
-  RefreshCw, BarChart3, PieChart as PieIcon, 
-  ChevronRight, Compass, 
-  Globe, Building2, Anchor, Maximize2, Minimize2
-} from 'lucide-react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from 'react-leaflet';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import L from 'leaflet';
-import { Bar, Doughnut } from 'react-chartjs-2';
-import { formatNumber, rupiahMiliar, rupiahRingkas } from '../utils/pemformat';
-import {
-  RAMP_BIRU, SERI, TINTA, gayaBatang, opsiDasar, potong, sumbuKategori,
-  sumbuNilai, warnaSeri,
-} from '../utils/temaGrafik';
-import { LABEL_TAHAPAN, TAHAPAN_PROYEK } from '../utils/konstanta';
-
-const TAHAPAN_WARNA = [RAMP_BIRU[1], RAMP_BIRU[2], RAMP_BIRU[3], RAMP_BIRU[4], RAMP_BIRU[6]];
-
-const URUTAN_TAHAPAN = TAHAPAN_PROYEK.map((t) => t.kode);
-const WARNA_TAHAPAN = Object.fromEntries(
-  URUTAN_TAHAPAN.map((kode, i) => [kode, TAHAPAN_WARNA[i]]),
-);
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import { ArrowRight, ArrowUpRight, Download, RefreshCw, X } from 'lucide-react';
 import { api } from '../api/klien';
+import LapisanVektorBBox from '../components/map/LapisanVektorBBox';
+import { LAYER_LOKAL } from '../components/map/katalogLapisan';
+import { buatIkon, lambangSvg } from '../components/map/ikonPeta';
 import { BATAS_INDONESIA } from '../components/map/PetaInteraktif';
+import { Label } from './LandingPage';
+import { IKON_JENIS_INVESTASI, WARNA_JENIS_INVESTASI, warnaJenisInvestasi } from '../utils/simbologiPeta';
+import { LABEL_TAHAPAN, SECTORS, TAHAPAN_PROYEK } from '../utils/konstanta';
+import { formatNumber, rupiahMiliar } from '../utils/pemformat';
 
-const DIAMETER_PENANDA = 15;
+const POTENSI = LAYER_LOKAL.potensi;
+const NAVY = '#002242';
+const BIRU = ['#9ec5f4', '#6da7ec', '#3987e5', '#184f95', '#0d366b'];
+const WARNA_TAHAP = Object.fromEntries(TAHAPAN_PROYEK.map((t, i) => [t.kode, BIRU[i]]));
+const PETA_DASAR = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+const PETA_LABEL = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
+const BATAS_DAFTAR = 10;
+const FOKUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-900';
 
-const SEL_GUGUS_PIKSEL = 44;
+const angka = (n, d = 0) => (n === null || n === undefined || Number.isNaN(n) ? '—' : formatNumber(n, d));
+const jumlah = (daftar, kunci) => daftar.reduce((t, x) => t + (Number(x[kunci]) || 0), 0);
+const namaJenis = (kode) => SECTORS.find((s) => s.id === kode)?.label || kode;
+const ikonProyek = buatIkon('koper', NAVY, 0.8);
 
-const createMarkerIcon = (warna) => {
-  const d = DIAMETER_PENANDA;
-  return L.divIcon({
-    className: 'custom-dashboard-marker',
-    html: `<div style="width:${d}px;height:${d}px;border-radius:50%;background:${warna};border:2.5px solid #ffffff;box-shadow:0 1px 3px rgba(15,23,42,.45)"></div>`,
-    iconSize: [d, d],
-    iconAnchor: [d / 2, d / 2],
-    popupAnchor: [0, -d / 2],
-  });
-};
+const Kartu = ({ className = '', children }) => (
+  <div className={`rounded-2xl border border-slate-200 bg-white ${className}`}>{children}</div>
+);
 
-const createGugusIcon = (jumlah) => {
-  const d = jumlah >= 50 ? 46 : jumlah >= 10 ? 40 : 34;
-  const hrf = jumlah >= 100 ? 11 : 12;
-  return L.divIcon({
-    className: 'custom-dashboard-cluster',
-    html: `<div style="width:${d}px;height:${d}px;border-radius:50%;background:rgba(2,132,199,.92);border:3px solid #ffffff;box-shadow:0 2px 6px rgba(15,23,42,.35);display:flex;align-items:center;justify-content:center;color:#fff;font:700 ${hrf}px/1 ui-sans-serif,system-ui,sans-serif">${jumlah}</div>`,
-    iconSize: [d, d],
-    iconAnchor: [d / 2, d / 2],
-    popupAnchor: [0, -d / 2],
-  });
-};
+const JudulKartu = ({ judul, isi }) => (
+  <div>
+    <h3 className="text-[15px] font-bold text-kkp-900">{judul}</h3>
+    {isi && <p className="mt-0.5 text-xs leading-snug text-slate-500">{isi}</p>}
+  </div>
+);
 
-const gugusPenanda = (map, markers, zoom) => {
-  const sel = new Map();
-  markers.forEach((m) => {
-    if (m.lat === null || m.lat === undefined) return;
-    if (m.lng === null || m.lng === undefined) return;
-    const p = map.project([m.lat, m.lng], zoom);
-    const kunci = `${Math.floor(p.x / SEL_GUGUS_PIKSEL)}:${Math.floor(p.y / SEL_GUGUS_PIKSEL)}`;
-    const isi = sel.get(kunci);
-    if (isi) isi.push(m);
-    else sel.set(kunci, [m]);
-  });
-  return [...sel.values()];
-};
-const LapisanGugus = ({ markers, children }) => {
+const JudulBagian = ({ label, nada, judul, isi }) => (
+  <div className="max-w-3xl">
+    <Label nada={nada}>{label}</Label>
+    <h2 className="mt-4 text-balance text-3xl font-extrabold leading-tight tracking-[-0.03em] text-kkp-900 sm:text-4xl">{judul}</h2>
+    <p className="mt-3 leading-relaxed text-slate-600">{isi}</p>
+  </div>
+);
+
+const Lambang = ({ kode, kecil }) => (
+  <span
+    className={`grid shrink-0 place-items-center rounded-full shadow-sm ${kecil ? 'h-6 w-6' : 'h-8 w-8'}`}
+    style={{ background: warnaJenisInvestasi(kode) }}
+    dangerouslySetInnerHTML={{ __html: lambangSvg(IKON_JENIS_INVESTASI[kode], kecil ? 12 : 15) }}
+    aria-hidden="true"
+  />
+);
+
+const Batang = ({ nilai, maks, warna, dalam }) => (
+  <span className="relative mt-1.5 block h-2 overflow-hidden rounded-full bg-slate-100">
+    <span className="absolute inset-y-0 left-0 rounded-full" style={{ width: `${maks ? (nilai / maks) * 100 : 0}%`, backgroundColor: warna }} />
+    {dalam !== undefined && (
+      <span className="absolute inset-y-0 left-0 rounded-full bg-kkp-hijau" style={{ width: `${maks ? (dalam / maks) * 100 : 0}%` }} />
+    )}
+  </span>
+);
+
+const BarisPilih = ({ aktif, redup, onClick, children }) => (
+  <button
+    type="button"
+    aria-pressed={aktif}
+    onClick={onClick}
+    className={`w-full rounded-xl px-3 py-2 text-left transition ${FOKUS} ${
+      aktif ? 'bg-kkp-100 ring-1 ring-kkp-200' : 'hover:bg-slate-50'
+    } ${redup ? 'opacity-50 hover:opacity-100' : ''}`}
+  >
+    {children}
+  </button>
+);
+
+const Pilihan = ({ nilai, onUbah, kosong, opsi, label }) => (
+  <select
+    aria-label={label}
+    value={nilai}
+    onChange={(e) => onUbah(e.target.value)}
+    className={`rounded-lg border px-3 py-2 text-sm font-medium text-kkp-900 focus:outline-none focus:ring-2 focus:ring-kkp-700 ${
+      nilai ? 'border-kkp-700 bg-kkp-100' : 'border-slate-300 bg-white'
+    }`}
+  >
+    <option value="">{kosong}</option>
+    {opsi.map(([kode, teks]) => <option key={kode} value={kode}>{teks}</option>)}
+  </select>
+);
+
+const KartuAngka = ({ label, nilai, ket, persen }) => (
+  <Kartu className="flex flex-col p-5">
+    <span className="text-[13px] font-semibold text-kkp-900">{label}</span>
+    <span className="mt-auto pt-5 text-2xl font-extrabold tracking-[-0.02em] text-kkp-900 tabular-nums">{nilai}</span>
+    {persen !== undefined && <Batang nilai={persen} maks={100} warna="#3BB273" />}
+    <span className="mt-1.5 text-xs leading-snug text-slate-500">{ket}</span>
+  </Kartu>
+);
+
+const FokusProvinsi = ({ provinsi }) => {
   const map = useMap();
-  const [zoom, setZoom] = useState(() => map.getZoom());
+  const [batas, setBatas] = useState(null);
+  useEffect(() => {
+    let batal = false;
+    api.get('/inti/provinsi/peta/', { params: { ringkas: 1 } })
+      .then(({ data }) => {
+        if (!batal) setBatas(Object.fromEntries(data.features.map((f) => [String(f.properties.id), L.geoJSON(f).getBounds()])));
+      })
+      .catch(() => {});
+    return () => { batal = true; };
+  }, []);
+  useEffect(() => {
+    const b = provinsi ? batas?.[provinsi] : L.latLngBounds(BATAS_INDONESIA);
+    if (b?.isValid()) map.flyToBounds(b, { padding: [24, 24], duration: 0.8 });
+  }, [map, batas, provinsi]);
+  return null;
+};
 
-  useMapEvents({ zoomend: () => setZoom(map.getZoom()) });
-
-  const gugus = useMemo(
-    () => gugusPenanda(map, markers, zoom),
-    [map, markers, zoom],
-  );
-
+const PetaDashboard = ({ jenis, provinsi, proyek }) => {
+  const navigate = useNavigate();
   return (
-    <>
-      {gugus.map((isi) => {
-        if (isi.length === 1) return children(isi[0]);
-
-        const lat = isi.reduce((t, m) => t + m.lat, 0) / isi.length;
-        const lng = isi.reduce((t, m) => t + m.lng, 0) / isi.length;
-        const nilai = isi.reduce((t, m) => t + (m.nilai_investasi_miliar || 0), 0);
-        const kunci = `gugus-${isi.map((m) => m.id).join("-")}`;
-
-        return (
-          <Marker
-            key={kunci}
-            position={[lat, lng]}
-            icon={createGugusIcon(isi.length)}
-            eventHandlers={{
-              click: () => map.flyTo([lat, lng], Math.min(map.getZoom() + 3, 18)),
-            }}
-          >
-            <Popup className="custom-popup" maxWidth={260}>
-              <div className="p-1 font-sans">
-                <p className="font-bold text-sm text-slate-900">
-                  {isi.length} proyek di sekitar sini
-                </p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Total rencana {rupiahMiliar(nilai)}
-                </p>
-                <ul className="mt-2 space-y-1 max-h-32 overflow-y-auto">
-                  {isi.slice(0, 6).map((m) => (
-                    <li key={m.id} className="flex items-center gap-1.5 text-[11px] text-slate-600">
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: WARNA_TAHAPAN[m.status] || "#64748b" }}
-                      />
-                      <span className="truncate">{m.nama}</span>
-                    </li>
-                  ))}
-                </ul>
-                {isi.length > 6 && (
-                  <p className="text-[10px] text-slate-400 mt-1">
-                    +{isi.length - 6} lainnya — perbesar peta untuk melihat semuanya
-                  </p>
-                )}
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </>
+    <MapContainer bounds={BATAS_INDONESIA} scrollWheelZoom={false} minZoom={4} zoomSnap={0.25} className="h-full w-full">
+      <TileLayer url={PETA_DASAR} attribution="&copy; Esri" maxZoom={16} />
+      <TileLayer url={PETA_LABEL} maxZoom={16} />
+      <FokusProvinsi provinsi={provinsi} />
+      <LapisanVektorBBox
+        url={POTENSI.url}
+        params={{ ...POTENSI.params, ...(jenis ? { sektor: jenis } : {}), ...(provinsi ? { provinsi } : {}) }}
+        ikon={POTENSI.ikon}
+        warnaIkon={POTENSI.warnaIkon}
+        warnaTitik={POTENSI.warnaTitik}
+        zoomPin={POTENSI.zoomPin}
+        onEachFeature={(f, layer) => {
+          const p = f.properties || {};
+          layer.bindTooltip(POTENSI.tooltip(p), { sticky: true, className: 'map-tooltip' });
+          layer.bindPopup(() => POTENSI.popup(p), { maxHeight: 400 });
+          layer.on('popupopen', (e) => e.popup.getElement()?.querySelector('[data-analisis-lokasi]')
+            ?.addEventListener('click', () => navigate(`/peta?lokasi=${f.id}`)));
+        }}
+      />
+      {proyek.map((p) => (
+        <Marker key={p.id} position={[p.lat, p.lng]} icon={ikonProyek} zIndexOffset={1000}>
+          <Popup maxWidth={280}>
+            <div className="font-sans">
+              <span className="font-mono text-[10px] font-semibold text-kkp-700">{p.kode_proyek}</span>
+              <h4 className="mt-0.5 text-sm font-bold leading-tight text-kkp-900">{p.nama}</h4>
+              <p className="mt-0.5 text-xs text-slate-500">{p.sektor_nama} · {p.provinsi_nama}</p>
+              <dl className="mt-2 grid grid-cols-2 gap-2 rounded-lg bg-slate-50 p-2 text-xs">
+                <div><dt className="text-[10px] text-slate-400">Tahap</dt><dd className="font-semibold text-slate-800">{LABEL_TAHAPAN[p.status] || p.status}</dd></div>
+                <div><dt className="text-[10px] text-slate-400">Nilai rencana</dt><dd className="font-semibold text-slate-800">{rupiahMiliar(p.nilai_investasi_miliar)}</dd></div>
+              </dl>
+              <Link to={`/pipeline/${p.id}`} className="mt-2 flex items-center justify-center gap-1 rounded-lg bg-kkp-900 px-3 py-1.5 text-xs font-semibold !text-white hover:bg-kkp-800">
+                Buka detail proyek <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+          </Popup>
+        </Marker>
+      ))}
+    </MapContainer>
   );
-};
-
-const MapResizeHandler = ({ pemicu }) => {
-  const map = useMap();
-  useEffect(() => {
-    const t = setTimeout(() => map?.invalidateSize(), 220);
-    return () => clearTimeout(t);
-  }, [map, pemicu]);
-  return null;
-};
-
-const KunciBatasIndonesia = () => {
-  const map = useMap();
-  useEffect(() => {
-    const batas = L.latLngBounds(BATAS_INDONESIA);
-    const atur = () => {
-      map.setMinZoom(map.getBoundsZoom(batas));
-      map.setMaxBounds(batas.pad(0.15));
-    };
-    atur();
-    map.on('resize', atur);
-    return () => {
-      map.off('resize', atur);
-    };
-  }, [map]);
-  return null;
-};
-
-const sumbuRupiah = () => sumbuNilai('Rupiah', (v) => `Rp ${rupiahRingkas(v * 1e9)}`);
-
-const MapBoundsFitter = ({ markers }) => {
-  const map = useMap();
-  useEffect(() => {
-    if (map && markers && markers.length > 0) {
-      try {
-        const bounds = L.latLngBounds(markers.map(m => [m.lat, m.lng]));
-        if (bounds.isValid()) {
-          map.fitBounds(bounds, { padding: [40, 40], maxZoom: 8 });
-        }
-      } catch (e) {
-        console.error("Bounds fit error:", e);
-      }
-    }
-  }, [map, markers]);
-  return null;
 };
 
 const DashboardPage = () => {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [lastRefreshed, setLastRefreshed] = useState(new Date());
+  const [galat, setGalat] = useState(null);
+  const [memuat, setMemuat] = useState(true);
+  const [jenis, setJenis] = useState('');
+  const [provinsi, setProvinsi] = useState('');
+  const [tahap, setTahap] = useState('');
 
-  const [selectedSektor, setSelectedSektor] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedProvinsi, setSelectedProvinsi] = useState('all');
-  const [mapBaseLayer, setMapBaseLayer] = useState('carto');
-  const [layarPenuh, setLayarPenuh] = useState(false);
-  const wadahPetaRef = useRef(null);
-
-  const alihkanLayarPenuh = useCallback(() => {
-    const el = wadahPetaRef.current;
-    if (!el) return;
-    if (!document.fullscreenElement) {
-      el.requestFullscreen?.().catch(() => {});
-    } else {
-      document.exitFullscreen?.();
-    }
-  }, []);
-
-  useEffect(() => {
-    const onChange = () => setLayarPenuh(Boolean(document.fullscreenElement));
-    document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
-
-  const fetchDashboardData = async () => {
-    setLoading(true);
-    setError(null);
+  const muat = useCallback(async () => {
+    setMemuat(true);
+    setGalat(null);
     try {
-      const { data: result } = await api.get('/inti/dashboard/');
-      setData(result);
-      setLastRefreshed(new Date());
+      const { data: hasil } = await api.get('/inti/dashboard/');
+      setData(hasil);
     } catch (err) {
-      console.error("Error fetching dashboard data:", err);
       const kode = err.response?.status;
-      setError(
-        kode === 401 || kode === 403
-          ? 'Sesi Anda tidak lagi berlaku. Masuk kembali untuk melihat dashboard.'
-          : kode
-            ? `Gagal memuat data (${kode}).`
-            : err.message || 'Terjadi kesalahan saat memuat dashboard.'
-      );
+      setGalat(kode === 401 || kode === 403
+        ? 'Sesi Anda tidak lagi berlaku. Masuk kembali untuk melihat dashboard.'
+        : `Data dashboard gagal dimuat${kode ? ` (${kode})` : ''}.`);
     } finally {
-      setLoading(false);
+      setMemuat(false);
     }
-  };
-
-  useEffect(() => {
-    fetchDashboardData();
   }, []);
 
-  const filteredMarkers = useMemo(() => {
-    if (!data?.map_markers) return [];
-    return data.map_markers.filter(m => {
-      const matchSektor = selectedSektor === 'all' || m.sektor_nama === selectedSektor;
-      const matchStatus = selectedStatus === 'all' || m.status === selectedStatus;
-      const matchProv = selectedProvinsi === 'all' || m.provinsi_nama === selectedProvinsi;
-      return matchSektor && matchStatus && matchProv;
-    });
-  }, [data, selectedSektor, selectedStatus, selectedProvinsi]);
+  useEffect(() => { muat(); }, [muat]);
 
-  const dynamicKPI = useMemo(() => {
-    if (!data?.summary) return null;
-    if (selectedSektor === 'all' && selectedStatus === 'all' && selectedProvinsi === 'all') {
-      return data.summary;
-    }
+  const semuaProyek = data?.proyek || [];
+  const semuaPotensi = data?.potensi_wilayah || [];
+  const diProvinsi = (x) => !provinsi || String(x.provinsi_id) === provinsi;
+  const diJenis = (kode) => !jenis || kode === jenis;
 
-    const count = filteredMarkers.length;
-    const totalInvestasi = filteredMarkers.reduce((acc, m) => acc + (m.nilai_investasi_miliar || 0), 0);
-    const totalRealisasi = filteredMarkers.reduce((acc, m) => acc + (m.nilai_realisasi_miliar || 0), 0);
-    const totalLuas = filteredMarkers.reduce((acc, m) => acc + (m.luas_ha || 0), 0);
-    const totalTk = filteredMarkers.reduce((acc, m) => acc + (m.proyeksi_tenaga_kerja || 0), 0);
-    const pctRealisasi = totalInvestasi > 0 ? Math.round((totalRealisasi / totalInvestasi) * 1000) / 10 : 0;
-    
-    return {
-      ...data.summary,
-      total_proyek: count,
-      total_investasi_miliar: Math.round(totalInvestasi * 10) / 10,
-      total_realisasi_miliar: Math.round(totalRealisasi * 10) / 10,
-      pct_realisasi: pctRealisasi,
-      total_luas_ha: Math.round(totalLuas * 10) / 10,
-      total_tenaga_kerja: totalTk
-    };
-  }, [data, filteredMarkers, selectedSektor, selectedStatus, selectedProvinsi]);
+  const proyekTanpaTahap = semuaProyek.filter((p) => diJenis(p.sektor_kode) && diProvinsi(p));
+  const proyek = proyekTanpaTahap.filter((p) => !tahap || p.status === tahap);
 
-  const availableSektors = useMemo(() => {
-    if (!data?.proyek_per_sektor) return [];
-    return data.proyek_per_sektor.map(s => s.sektor_nama).filter(Boolean);
-  }, [data]);
+  const potensi = semuaPotensi.filter((r) => diProvinsi(r) && (jenis ? r.kode === jenis : r.kode === null));
+  const totalLokasi = jumlah(potensi, 'lokasi');
+  const luasLokasi = jumlah(potensi, 'luas_ha');
+  const provinsiLokasi = new Set(potensi.filter((r) => r.lokasi > 0).map((r) => r.provinsi_id)).size;
 
-  const availableProvinces = useMemo(() => {
-    if (!data?.proyek_per_provinsi) return [];
-    return data.proyek_per_provinsi.map(p => p.provinsi_nama).filter(Boolean);
-  }, [data]);
+  const potensiPerJenis = SECTORS.map((s) => ({
+    ...s,
+    lokasi: jumlah(semuaPotensi.filter((r) => r.kode === s.id && diProvinsi(r)), 'lokasi'),
+  }));
+  const maksJenis = Math.max(1, ...potensiPerJenis.map((j) => j.lokasi));
 
-  const sektorBarChartData = useMemo(() => {
-    const sectors = data?.proyek_per_sektor || [];
-    return {
-      labels: sectors.map(s => potong(s.sektor_nama, 26)),
-      namaPenuh: sectors.map(s => s.sektor_nama),
-      datasets: [
-        { label: 'Rencana', data: sectors.map(s => s.total_rencana_miliar), ...gayaBatang(warnaSeri(0)) },
-        { label: 'Realisasi', data: sectors.map(s => s.total_realisasi_miliar), ...gayaBatang(warnaSeri(2)) },
-      ],
-    };
-  }, [data]);
-
-  const sektorDoughnutData = useMemo(() => {
-    const semua = [...(data?.proyek_per_sektor || [])]
-      .sort((a, b) => (b.total_rencana_miliar || 0) - (a.total_rencana_miliar || 0));
-    const utama = semua.slice(0, 6);
-    const sisa = semua.slice(6);
-    const potongan = [...utama];
-    if (sisa.length) {
-      potongan.push({
-        sektor_nama: `Lainnya (${sisa.length} sektor)`,
-        total_rencana_miliar: sisa.reduce((a, s) => a + (s.total_rencana_miliar || 0), 0),
+  const potensiPerProvinsi = useMemo(() => {
+    const kelompok = new Map();
+    semuaPotensi
+      .filter((r) => (jenis ? r.kode === jenis : r.kode === null))
+      .forEach((r) => {
+        const ada = kelompok.get(r.provinsi_id) || { id: String(r.provinsi_id), nama: r.provinsi, lokasi: 0, luas: 0 };
+        ada.lokasi += r.lokasi;
+        ada.luas += r.luas_ha;
+        kelompok.set(r.provinsi_id, ada);
       });
-    }
-    return {
-      labels: potongan.map(s => s.sektor_nama),
-      datasets: [
-        {
-          data: potongan.map(s => s.total_rencana_miliar),
-          backgroundColor: potongan.map((_, i) =>
-            i < 6 ? warnaSeri(i) : '#cbd5e1'),
-          borderWidth: 2,
-          borderColor: TINTA.permukaan,
-          hoverOffset: 6,
-        },
-      ],
-    };
-  }, [data]);
+    return [...kelompok.values()].sort((a, b) => b.lokasi - a.lokasi);
+  }, [semuaPotensi, jenis]);
+  const maksProvinsi = Math.max(1, ...potensiPerProvinsi.map((p) => p.lokasi));
+  const daftarProvinsiPotensi = provinsi && !potensiPerProvinsi.slice(0, BATAS_DAFTAR).some((p) => p.id === provinsi)
+    ? [...potensiPerProvinsi.slice(0, BATAS_DAFTAR - 1), ...potensiPerProvinsi.filter((p) => p.id === provinsi)]
+    : potensiPerProvinsi.slice(0, BATAS_DAFTAR);
 
-  const provinsiBarData = useMemo(() => {
-    const provinces = (data?.proyek_per_provinsi || []).slice(0, 7);
-    return {
-      labels: provinces.map(p => p.provinsi_nama),
-      datasets: [
-        {
-          label: 'Total Investasi',
-          data: provinces.map(p => p.total_rencana_miliar),
-          ...gayaBatang(warnaSeri(0), { barPercentage: 0.78, categoryPercentage: 0.82 }),
-        }
-      ]
-    };
-  }, [data]);
+  const daftarProvinsi = useMemo(() => {
+    const nama = new Map();
+    semuaPotensi.forEach((r) => nama.set(String(r.provinsi_id), r.provinsi));
+    semuaProyek.forEach((p) => p.provinsi_id && nama.set(String(p.provinsi_id), p.provinsi_nama));
+    return [...nama.entries()].sort((a, b) => a[1].localeCompare(b[1], 'id'));
+  }, [semuaPotensi, semuaProyek]);
 
-  const statusChartData = useMemo(() => {
-    const statuses = data?.proyek_per_status || [];
-    return {
-      labels: statuses.map(s => s.label),
-      datasets: [
-        {
-          label: 'Nilai Portofolio',
-          data: statuses.map(s => s.total_miliar),
-          ...gayaBatang(SERI[0]),
-          backgroundColor: TAHAPAN_WARNA,
-          borderColor: TAHAPAN_WARNA,
-        }
-      ]
-    };
-  }, [data]);
+  const rencana = jumlah(proyek, 'nilai_investasi_miliar');
+  const realisasi = jumlah(proyek, 'nilai_realisasi_miliar');
+  const persenRealisasi = rencana > 0 ? (realisasi / rencana) * 100 : 0;
+  const berskor = proyek.filter((p) => p.skor_kelayakan !== null && p.skor_kelayakan !== undefined);
+  const rataSkor = berskor.length ? (jumlah(berskor, 'skor_kelayakan') / berskor.length) * 100 : null;
 
-  const urutanSektor = useMemo(() => {
-    return [...(data?.proyek_per_sektor || [])]
-      .sort((a, b) => (b.total_rencana_miliar || 0) - (a.total_rencana_miliar || 0));
-  }, [data]);
+  const perTahap = TAHAPAN_PROYEK.map((t) => {
+    const isi = proyekTanpaTahap.filter((p) => p.status === t.kode);
+    return { ...t, jumlah: isi.length, nilai: jumlah(isi, 'nilai_investasi_miliar') };
+  });
 
-  const tenagaKerjaChartData = useMemo(() => ({
-    labels: urutanSektor.map(s => potong(s.sektor_nama, 26)),
-    datasets: [
-      {
-        label: 'Serapan tenaga kerja',
-        data: urutanSektor.map(s => s.total_tk),
-        ...gayaBatang(warnaSeri(3)),
-      },
-    ],
-  }), [urutanSektor]);
+  const proyekPerJenis = SECTORS.map((s) => {
+    const isi = semuaProyek.filter((p) => p.sektor_kode === s.id && diProvinsi(p) && (!tahap || p.status === tahap));
+    return { ...s, jumlah: isi.length, rencana: jumlah(isi, 'nilai_investasi_miliar'), realisasi: jumlah(isi, 'nilai_realisasi_miliar') };
+  }).filter((j) => j.jumlah > 0).sort((a, b) => b.rencana - a.rencana);
+  const maksRencanaJenis = Math.max(1, ...proyekPerJenis.map((j) => j.rencana));
 
-  const investasiSektorChartData = useMemo(() => ({
-    labels: urutanSektor.map(s => potong(s.sektor_nama, 26)),
-    datasets: [
-      {
-        label: 'Nilai investasi',
-        data: urutanSektor.map(s => s.total_rencana_miliar),
-        ...gayaBatang(warnaSeri(0)),
-      },
-    ],
-  }), [urutanSektor]);
+  const proyekPerProvinsi = useMemo(() => {
+    const kelompok = new Map();
+    semuaProyek
+      .filter((p) => diJenis(p.sektor_kode) && (!tahap || p.status === tahap))
+      .forEach((p) => {
+        const kunci = String(p.provinsi_id ?? '');
+        const ada = kelompok.get(kunci) || { id: kunci, nama: p.provinsi_nama, jumlah: 0, rencana: 0 };
+        ada.jumlah += 1;
+        ada.rencana += Number(p.nilai_investasi_miliar) || 0;
+        kelompok.set(kunci, ada);
+      });
+    return [...kelompok.values()].sort((a, b) => b.rencana - a.rencana).slice(0, BATAS_DAFTAR);
+  }, [semuaProyek, jenis, tahap]); // eslint-disable-line react-hooks/exhaustive-deps
+  const maksRencanaProvinsi = Math.max(1, ...proyekPerProvinsi.map((p) => p.rencana));
 
-  const handleExportCSV = () => {
-    if (!filteredMarkers.length) return;
+  const adaSaringan = Boolean(jenis || provinsi || tahap);
+  const alih = (setter, nilai, kini) => setter(kini === nilai ? '' : nilai);
+  const namaProvinsi = daftarProvinsi.find(([id]) => id === provinsi)?.[1];
+
+  const eksporCsv = () => {
+    if (!proyek.length) return;
     const sel = (v) => (typeof v === 'number'
       ? v.toLocaleString('id-ID', { useGrouping: false, maximumFractionDigits: 2 })
       : `"${String(v ?? '').replace(/"/g, '""')}"`);
     const baris = [
-      ['Kode Proyek', 'Nama Proyek', 'Investor', 'Sektor', 'Provinsi', 'Tahap', 'Nilai Investasi (Miliar Rp)',
+      ['Kode Proyek', 'Nama Proyek', 'Investor', 'Jenis Investasi', 'Provinsi', 'Tahap', 'Nilai Investasi (Miliar Rp)',
         'Realisasi (Miliar Rp)', 'Luas (Ha)', 'Tenaga Kerja (Orang)', 'Skor Kelayakan (%)'],
-      ...filteredMarkers.map((m) => [
-        m.kode_proyek, m.nama, m.investor, m.sektor_nama, m.provinsi_nama, LABEL_TAHAPAN[m.status] || m.status,
-        m.nilai_investasi_miliar || 0, m.nilai_realisasi_miliar || 0, m.luas_ha || 0, m.proyeksi_tenaga_kerja || 0,
-        m.skor_kelayakan == null ? '' : m.skor_kelayakan * 100,
+      ...proyek.map((p) => [
+        p.kode_proyek, p.nama, p.investor, p.sektor_nama, p.provinsi_nama, LABEL_TAHAPAN[p.status] || p.status,
+        p.nilai_investasi_miliar || 0, p.nilai_realisasi_miliar || 0, p.luas_ha || 0, p.proyeksi_tenaga_kerja || 0,
+        p.skor_kelayakan === null || p.skor_kelayakan === undefined ? '' : p.skor_kelayakan * 100,
       ]),
     ];
-    const isi = `\ufeff${baris.map((r) => r.map(sel).join(';')).join('\r\n')}`;
+    const isi = `﻿${baris.map((r) => r.map(sel).join(';')).join('\r\n')}`;
     const tautan = document.createElement('a');
     tautan.href = URL.createObjectURL(new Blob([isi], { type: 'text/csv;charset=utf-8' }));
     tautan.download = `KKP_Portofolio_Investasi_Nasional_${new Date().toISOString().slice(0, 10)}.csv`;
@@ -392,659 +291,340 @@ const DashboardPage = () => {
   };
 
   return (
-    <div className="pt-24 p-4 lg:p-8 lg:pt-28 h-full overflow-y-auto bg-slate-50 text-slate-800 font-sans">
-      <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-8 pb-16">
-        
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white border border-slate-200/80 p-6 rounded-2xl shadow-sm relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-sky-100/50 via-teal-50/40 to-transparent rounded-full blur-3xl pointer-events-none -mr-20 -mt-20"></div>
-          
-          <div className="relative z-10 space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800 border border-sky-200 flex items-center gap-1">
-                <Globe className="w-3 h-3 text-sky-600 animate-pulse" />
-                Executive Dashboard
-              </span>
-              <span className="text-xs text-slate-400">
-                Update: {lastRefreshed.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB
-              </span>
-            </div>
-            <h1 className="text-2xl lg:text-3xl font-bold text-sky-950 tracking-tight">
-              Dashboard Nasional Portofolio Investasi
+    <div className="h-full overflow-y-auto bg-[#F6F8FB] pt-[72px] text-slate-800">
+      <div className="mx-auto max-w-7xl px-4 pb-20 pt-10 sm:px-6 lg:px-8 2xl:max-w-[1440px]">
+        <header className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <Label>Dashboard nasional</Label>
+            <h1 className="mt-5 text-balance text-4xl font-extrabold leading-[1.05] tracking-[-0.035em] text-kkp-900 sm:text-5xl">
+              Potensi dan proyek investasi ruang laut
             </h1>
-            <p className="text-slate-500 text-sm max-w-2xl">
-              Ikhtisar terpadu kelayakan investasi ruang laut dan sebaran portofolio nasional.
+            <p className="mt-4 max-w-2xl text-lg leading-relaxed text-slate-600">
+              Ringkasan lokasi potensial dari Peta Sebaran Wilayah Potensial dan proyek investasi yang dipantau KKP.
+              Pilih jenis investasi, provinsi, atau tahap proyek; seluruh angka, daftar, dan peta di halaman ini ikut
+              tersaring.
             </p>
           </div>
-
-          <div className="relative z-10 flex flex-wrap items-center gap-2.5">
+          <div className="flex shrink-0 flex-wrap gap-2">
             <button
-              onClick={fetchDashboardData}
-              disabled={loading}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-colors disabled:opacity-50"
-              title="Perbarui Data"
+              type="button"
+              onClick={muat}
+              disabled={memuat}
+              className={`inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-kkp-900 hover:border-kkp-900 disabled:opacity-50 ${FOKUS}`}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-sky-600' : ''}`} />
-              <span>Refresh</span>
+              <RefreshCw className={`h-4 w-4 ${memuat ? 'animate-spin' : ''}`} /> Perbarui
             </button>
-
             <button
-              onClick={handleExportCSV}
-              disabled={!data?.map_markers?.length}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl transition-colors"
+              type="button"
+              onClick={eksporCsv}
+              disabled={!proyek.length}
+              className={`inline-flex items-center gap-2 rounded-md bg-kkp-900 px-4 py-2.5 text-sm font-semibold text-white hover:bg-kkp-800 disabled:opacity-50 ${FOKUS}`}
             >
-              <Download className="w-3.5 h-3.5 text-slate-600" />
-              <span>Ekspor CSV</span>
+              <Download className="h-4 w-4 text-kkp-toska" /> Ekspor CSV proyek
             </button>
-
-            <Link
-              to="/pipeline"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-sky-700 hover:bg-sky-800 rounded-xl transition-all shadow-sm shadow-sky-700/20"
-            >
-              <span>Semua Proyek</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </Link>
-
-            <Link
-              to="/peta"
-              className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-semibold text-white bg-teal-600 hover:bg-teal-700 rounded-xl transition-all shadow-sm shadow-teal-600/20"
-            >
-              <Compass className="w-3.5 h-3.5" />
-              <span>Analisis Baru di Peta</span>
-            </Link>
           </div>
-        </div>
+        </header>
 
-        <div className="bg-white border border-slate-200/80 rounded-xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <Filter className="w-4 h-4 text-sky-600" />
-            <span>Filter Portofolio:</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3 flex-1 justify-end">
-            <select
-              value={selectedSektor}
-              onChange={(e) => setSelectedSektor(e.target.value)}
-              className="bg-slate-50 border border-slate-300 rounded-lg text-xs px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-kkp-700"
-            >
-              <option value="all">Semua Sektor ({availableSektors.length})</option>
-              {availableSektors.map((s, idx) => (
-                <option key={idx} value={s}>{s}</option>
-              ))}
-            </select>
-
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value)}
-              className="bg-slate-50 border border-slate-300 rounded-lg text-xs px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-kkp-700"
-            >
-              <option value="all">Semua Tahap Proyek</option>
-              {TAHAPAN_PROYEK.map((t) => (
-                <option key={t.kode} value={t.kode}>{t.label}</option>
-              ))}
-            </select>
-
-            <select
-              value={selectedProvinsi}
-              onChange={(e) => setSelectedProvinsi(e.target.value)}
-              className="bg-slate-50 border border-slate-300 rounded-lg text-xs px-3 py-2 text-slate-700 font-medium focus:outline-none focus:ring-2 focus:ring-kkp-700"
-            >
-              <option value="all">Seluruh Indonesia (Nasional)</option>
-              {availableProvinces.map((p, idx) => (
-                <option key={idx} value={p}>{p}</option>
-              ))}
-            </select>
-
-            {(selectedSektor !== 'all' || selectedStatus !== 'all' || selectedProvinsi !== 'all') && (
+        <div className="relative z-30 lg:sticky lg:top-3 -mx-4 mt-8 border-y border-slate-200 bg-white/90 px-4 py-3 shadow-sm backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="mr-1 font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-slate-500">Saring</span>
+            <Pilihan label="Jenis investasi" nilai={jenis} onUbah={setJenis} kosong="Semua jenis investasi" opsi={SECTORS.map((s) => [s.id, s.label])} />
+            <Pilihan label="Provinsi" nilai={provinsi} onUbah={setProvinsi} kosong="Seluruh Indonesia" opsi={daftarProvinsi} />
+            <Pilihan label="Tahap proyek" nilai={tahap} onUbah={setTahap} kosong="Semua tahap proyek" opsi={TAHAPAN_PROYEK.map((t) => [t.kode, t.label])} />
+            {adaSaringan && (
               <button
-                onClick={() => {
-                  setSelectedSektor('all');
-                  setSelectedStatus('all');
-                  setSelectedProvinsi('all');
-                }}
-                className="text-xs text-sky-600 hover:text-sky-800 font-medium underline px-1"
+                type="button"
+                onClick={() => { setJenis(''); setProvinsi(''); setTahap(''); }}
+                className={`inline-flex items-center gap-1 rounded-lg px-2 py-2 text-sm font-semibold text-kkp-700 hover:bg-kkp-100 ${FOKUS}`}
               >
-                Reset Filter
+                <X className="h-4 w-4" /> Hapus saringan
               </button>
             )}
           </div>
         </div>
 
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(220px,1fr))] gap-4">
-          
-          <div className="bg-white border border-slate-200/80 shadow-sm p-5 rounded-2xl relative overflow-hidden group hover:border-sky-300 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl -mr-6 -mt-6 group-hover:scale-125 transition-transform"></div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-sky-100 text-sky-700 rounded-xl flex items-center justify-center border border-sky-200 shadow-inner">
-                <DollarSign className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Portofolio</span>
-                <span className="text-xs font-bold text-slate-700">Rencana Investasi</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-sky-950">
-              {rupiahMiliar(dynamicKPI?.total_investasi_miliar || 0)}
-            </div>
-            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>Realisasi:</span>
-              <span className="font-semibold text-emerald-600">{rupiahMiliar(dynamicKPI?.total_realisasi_miliar || 0)}</span>
-            </div>
-          </div>
+        {galat && <p className="mt-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{galat}</p>}
 
-          <div className="bg-white border border-slate-200/80 shadow-sm p-5 rounded-2xl relative overflow-hidden group hover:border-emerald-300 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl -mr-6 -mt-6 group-hover:scale-125 transition-transform"></div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-emerald-100 text-emerald-700 rounded-xl flex items-center justify-center border border-emerald-200 shadow-inner">
-                <TrendingUp className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Capaian</span>
-                <span className="text-xs font-bold text-slate-700">Tingkat Realisasi</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-emerald-950">
-              {dynamicKPI?.pct_realisasi || 0}% <span className="text-xs font-normal text-slate-500">terserap</span>
-            </div>
-            <div className="mt-2 w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-              <div 
-                className="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" 
-                style={{ width: `${Math.min(100, dynamicKPI?.pct_realisasi || 0)}%` }}
-              ></div>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 shadow-sm p-5 rounded-2xl relative overflow-hidden group hover:border-blue-300 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 rounded-full blur-2xl -mr-6 -mt-6 group-hover:scale-125 transition-transform"></div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-blue-100 text-blue-700 rounded-xl flex items-center justify-center border border-blue-200 shadow-inner">
-                <Layers className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Proyek</span>
-                <span className="text-xs font-bold text-slate-700">Total Proyek</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-blue-950">
-              {dynamicKPI?.total_proyek || 0} <span className="text-xs font-normal text-slate-500">proyek</span>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>Tahap Operasi:</span>
-              <span className="font-semibold text-blue-600">
-                {data?.proyek_per_status?.find(s => s.status === 'OPERASI')?.count || 0} proyek
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 shadow-sm p-5 rounded-2xl relative overflow-hidden group hover:border-cyan-300 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-2xl -mr-6 -mt-6 group-hover:scale-125 transition-transform"></div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-cyan-100 text-cyan-700 rounded-xl flex items-center justify-center border border-cyan-200 shadow-inner">
-                <MapPin className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Spasial</span>
-                <span className="text-xs font-bold text-slate-700">Luas Area Laut</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-cyan-950">
-              {formatNumber(dynamicKPI?.total_luas_ha || 0, 1)} <span className="text-xs font-normal text-slate-500">Ha</span>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>Setara:</span>
-              <span className="font-semibold text-cyan-700">
-                {((dynamicKPI?.total_luas_ha || 0) / 100).toFixed(1)} km²
-              </span>
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 shadow-sm p-5 rounded-2xl relative overflow-hidden group hover:border-amber-300 transition-all">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-2xl -mr-6 -mt-6 group-hover:scale-125 transition-transform"></div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 bg-amber-100 text-amber-700 rounded-xl flex items-center justify-center border border-amber-200 shadow-inner">
-                <Users className="w-5 h-5" />
-              </div>
-              <div>
-                <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Sosial</span>
-                <span className="text-xs font-bold text-slate-700">Tenaga Kerja</span>
-              </div>
-            </div>
-            <div className="text-2xl font-bold text-amber-950">
-              {formatNumber(dynamicKPI?.total_tenaga_kerja || 0, 0)} <span className="text-xs font-normal text-slate-500">orang</span>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100">
-              <span>Rata-rata Skor AHP:</span>
-              <span className="font-semibold text-amber-700">
-                {((dynamicKPI?.avg_skor_kelayakan || 0.79) * 100).toFixed(0)}%
-              </span>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-50/50">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Compass className="w-5 h-5 text-sky-600" />
-                <h2 className="font-bold text-lg text-slate-800">
-                  Peta Sebaran Portofolio Investasi Ruang Laut
-                </h2>
-              </div>
-              <p className="text-xs text-slate-500">
-                Klik penanda proyek untuk melihat profil ringkas, status tahapan, dan link evaluasi detail.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="inline-flex rounded-lg border border-slate-300 p-0.5 bg-white text-xs font-medium">
-                <button
-                  type="button"
-                  onClick={() => setMapBaseLayer('carto')}
-                  className={`px-3 py-1.5 rounded-md transition-all ${
-                    mapBaseLayer === 'carto'
-                      ? 'bg-sky-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Peta Terang
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMapBaseLayer('satellite')}
-                  className={`px-3 py-1.5 rounded-md transition-all ${
-                    mapBaseLayer === 'satellite'
-                      ? 'bg-sky-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  Satelit
-                </button>
-              </div>
-
-              <span className="text-xs bg-sky-50 text-sky-700 border border-sky-200 px-3 py-1.5 rounded-lg font-semibold">
-                {filteredMarkers.length} Titik Terpetakan
-              </span>
-            </div>
-          </div>
-
-          <div
-            ref={wadahPetaRef}
-            className={`w-full relative z-0 bg-white ${layarPenuh ? 'h-screen' : 'h-[440px]'}`}
+        <section className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-6">
+          <Link
+            to="/peta?lapisan=potensi"
+            className={`group col-span-2 flex flex-col rounded-2xl bg-kkp-900 p-5 text-white transition-colors hover:bg-kkp-800 ${FOKUS}`}
           >
-            <button
-              type="button"
-              onClick={alihkanLayarPenuh}
-              title={layarPenuh ? 'Keluar dari layar penuh' : 'Lihat peta layar penuh'}
-              className="absolute top-3 right-3 z-[1000] bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-kkp-700 hover:border-kkp-200 transition-all"
-            >
-              {layarPenuh ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-            </button>
-            <MapContainer
-              center={[-2.5, 118.0]}
-              zoom={5}
-              maxBoundsViscosity={1}
-              style={{ height: '100%', width: '100%' }}
-              className="z-0"
-            >
-              {mapBaseLayer === 'carto' ? (
-                <TileLayer
-                  attribution='&copy; Esri &mdash; Sumber: Esri, DeLorme, NAVTEQ'
-                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}"
-                  maxZoom={19}
-                />
-              ) : (
-                <TileLayer
-                  attribution='&copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                  url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                  maxZoom={18}
-                />
-              )}
+            <span className="flex items-start justify-between gap-3">
+              <span className="bg-kkp-toska px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-kkp-900">
+                Lokasi potensial
+              </span>
+              <ArrowUpRight className="h-5 w-5 text-kkp-toska transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" aria-hidden="true" />
+            </span>
+            <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums">
+              {data ? angka(totalLokasi) : '…'}
+            </span>
+            <span className="mt-2 block text-sm leading-snug text-white/80">
+              {jenis ? `untuk ${namaJenis(jenis)}` : 'untuk minimal satu jenis investasi'}
+              {provinsi ? ` di ${namaProvinsi}` : ` di ${angka(provinsiLokasi)} provinsi`}, ±{angka(luasLokasi)} ha
+            </span>
+          </Link>
+          <KartuAngka
+            label="Proyek investasi"
+            nilai={angka(proyek.length)}
+            ket={`${angka(proyek.filter((p) => p.status === 'OPERASI').length)} sudah beroperasi`}
+          />
+          <KartuAngka
+            label="Nilai rencana investasi"
+            nilai={rupiahMiliar(rencana)}
+            ket={`Realisasi ${rupiahMiliar(realisasi)} (${angka(persenRealisasi, 1)}%)`}
+            persen={Math.min(100, persenRealisasi)}
+          />
+          <KartuAngka
+            label="Serapan tenaga kerja"
+            nilai={angka(jumlah(proyek, 'proyeksi_tenaga_kerja'))}
+            ket="orang, proyeksi dari proyek yang tercatat"
+          />
+          <KartuAngka
+            label="Rata-rata skor kelayakan"
+            nilai={rataSkor === null ? '—' : `${angka(rataSkor)}%`}
+            ket={`${angka(jumlah(proyek, 'luas_ha'), 1)} ha area proyek`}
+          />
+        </section>
 
-              <MapResizeHandler pemicu={layarPenuh} />
-              <KunciBatasIndonesia />
-              <MapBoundsFitter markers={filteredMarkers} />
-
-              <LapisanGugus markers={filteredMarkers}>
-                {(marker) => {
-                  const warnaTahap = WARNA_TAHAPAN[marker.status] || '#64748b';
-                  const statusInfo = { label: LABEL_TAHAPAN[marker.status] || marker.status, color: warnaTahap };
-
-                return (
-                  <Marker
-                    key={marker.id}
-                    position={[marker.lat, marker.lng]}
-                    icon={createMarkerIcon(warnaTahap)}
-                  >
-                    <Popup className="custom-popup" maxWidth={320}>
-                      <div className="p-1 space-y-2 font-sans">
-                        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
-                          <span className="text-[10px] font-mono font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                            {marker.kode_proyek || `PRJ-${marker.id}`}
-                          </span>
-                          <span 
-                            className="text-[10px] font-bold px-2 py-0.5 rounded text-white"
-                            style={{ backgroundColor: statusInfo.color }}
-                          >
-                            {statusInfo.label}
-                          </span>
-                        </div>
-
-                        <div>
-                          <h4 className="font-bold text-sm text-slate-900 leading-tight">
-                            {marker.nama}
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {marker.provinsi_nama} {marker.lokasi_detail ? `• ${marker.lokasi_detail}` : ''}
-                          </p>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2 bg-slate-50 p-2 rounded-lg border border-slate-100 text-xs">
-                          <div>
-                            <span className="text-slate-400 block text-[10px]">Nilai Rencana</span>
-                            <span className="font-bold text-slate-800">{rupiahMiliar(marker.nilai_investasi_miliar)}</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[10px]">Luas Area</span>
-                            <span className="font-bold text-slate-800">{marker.luas_ha} Ha</span>
-                          </div>
-                          <div>
-                            <span className="text-slate-400 block text-[10px]">Tenaga Kerja</span>
-                            <span className="font-bold text-amber-700">{marker.proyeksi_tenaga_kerja} org</span>
-                          </div>
-                        </div>
-
-                        <Link
-                          to={`/pipeline/${marker.id}`}
-                          className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-sky-700 hover:bg-sky-800 !text-white rounded-lg text-xs font-semibold transition-colors shadow-sm"
-                        >
-                          <span>Buka Detail Proyek</span>
-                          <ChevronRight className="w-3.5 h-3.5" />
-                        </Link>
-                      </div>
-                    </Popup>
-                  </Marker>
-                  );
-                }}
-              </LapisanGugus>
-
-            </MapContainer>
-          </div>
-
-          <div className="p-3.5 bg-slate-50/80 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-4 flex-wrap">
-              <span className="font-semibold text-slate-700">Tahapan Proyek:</span>
-              {URUTAN_TAHAPAN.map((kode) => (
-                <div key={kode} className="flex items-center gap-1.5">
+        <section className="mt-16 space-y-6">
+          <JudulBagian
+            label="Potensi ruang laut"
+            judul="Di mana peluang investasi berada"
+            isi="Setiap titik adalah lokasi dengan sedikitnya 75% dari 5 atau lebih parameter terukurnya sangat sesuai untuk sebuah jenis investasi, di luar KKPRL terbit dan bangunan. Klik jenis atau provinsi untuk menyaring seluruh halaman."
+          />
+          <div className="grid gap-4 lg:grid-cols-12">
+            <div className="relative isolate h-[460px] overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 lg:col-span-8 lg:h-auto lg:min-h-[520px]">
+              <PetaDashboard jenis={jenis} provinsi={provinsi} proyek={proyek.filter((p) => p.lat !== null && p.lng !== null)} />
+              <div className="pointer-events-none absolute bottom-3 left-3 z-[500] flex flex-wrap items-center gap-x-4 gap-y-1 rounded-xl bg-white/95 px-3 py-2 text-[11px] text-slate-600 shadow">
+                <span className="flex items-center gap-1.5">
                   <span
-                    className="w-3 h-3 rounded-full border border-white"
-                    style={{
-                      backgroundColor: WARNA_TAHAPAN[kode],
-                      boxShadow: '0 0 0 1px rgba(15,23,42,.15)',
-                    }}
+                    className="h-3 w-3 rounded-full border border-white shadow"
+                    style={{ background: `conic-gradient(${WARNA_JENIS_INVESTASI.PERIKANAN_TANGKAP} 0 33%, ${WARNA_JENIS_INVESTASI.PARIWISATA_BAHARI} 0 66%, ${WARNA_JENIS_INVESTASI.BIOTEKNOLOGI_KELAUTAN} 0)` }}
                   />
-                  <span className="text-slate-600">
-                    {LABEL_TAHAPAN[kode]}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="text-slate-500 italic">
-              Data spasial berbasis proyeksi koordinat WGS84 / EPSG:4326
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <div className="lg:col-span-2 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-sky-600" />
-                  Rencana vs Realisasi Investasi per Sektor
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Komparasi alokasi rencana modal investasi dan realisasi aktual.
-                </p>
-              </div>
-            </div>
-            <div className="h-72 w-full">
-              <Bar 
-                data={sektorBarChartData}
-                options={{
-                  ...opsiDasar(),
-                  indexAxis: 'y',
-                  plugins: {
-                    ...opsiDasar().plugins,
-                    tooltip: {
-                      ...opsiDasar().plugins.tooltip,
-                      callbacks: {
-                        title: (item) => sektorBarChartData.namaPenuh?.[item[0].dataIndex]
-                          || item[0].label,
-                        label: (ctx) =>
-                          `${ctx.dataset.label}: ${rupiahMiliar(ctx.raw)}`,
-                      },
-                    },
-                  },
-                  scales: {
-                    x: sumbuRupiah(),
-                    y: sumbuKategori(),
-                  },
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
-            <div>
-              <h3 className="font-bold text-base text-slate-800 flex items-center gap-2 mb-1">
-                <PieIcon className="w-4 h-4 text-teal-600" />
-                Proporsi Portofolio Sektor
-              </h3>
-              <p className="text-xs text-slate-500 mb-4">
-                Porsi pembagian nilai investasi kelautan.
-              </p>
-              <div className="h-56 w-full flex items-center justify-center">
-                <Doughnut 
-                  data={sektorDoughnutData}
-                  options={{
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                      ...opsiDasar().plugins,
-                      tooltip: {
-                        ...opsiDasar().plugins.tooltip,
-                        callbacks: {
-                          label: (ctx) => {
-                            const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
-                            const persen = total ? (ctx.raw / total) * 100 : 0;
-                            return `${ctx.label}: ${rupiahMiliar(ctx.raw)} (${persen.toFixed(1)}%)`;
-                          },
-                        },
-                      },
-                    },
-                    cutout: '68%'
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-              <span>Total Sektor Aktif:</span>
-              <span className="font-bold text-slate-800">{availableSektors.length} Sektor</span>
-            </div>
-          </div>
-
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-base text-slate-800 flex items-center gap-2 mb-1">
-              <Building2 className="w-4 h-4 text-sky-600" />
-              Top 7 Sebaran Wilayah / Provinsi
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Provinsi dengan nilai investasi kelautan tertinggi.
-            </p>
-            <div className="h-64 w-full">
-              <Bar 
-                data={provinsiBarData}
-                options={{
-                  ...opsiDasar(),
-                  indexAxis: 'y',
-                  plugins: {
-                    ...opsiDasar().plugins,
-                    legend: { display: false },
-                    tooltip: {
-                      ...opsiDasar().plugins.tooltip,
-                      callbacks: {
-                        label: (ctx) => rupiahMiliar(ctx.raw),
-                      },
-                    },
-                  },
-                  scales: {
-                    x: sumbuRupiah(),
-                    y: sumbuKategori(),
-                  },
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-            <h3 className="font-bold text-base text-slate-800 flex items-center gap-2 mb-1">
-              <Layers className="w-4 h-4 text-purple-600" />
-              Distribusi per Tahap Proyek
-            </h3>
-            <p className="text-xs text-slate-500 mb-4">
-              Nilai kumulatif proyek di setiap fase perizinan.
-            </p>
-            <div className="h-64 w-full flex items-center justify-center">
-              <Bar
-                data={statusChartData}
-                options={{
-                  ...opsiDasar(),
-                  indexAxis: 'y',
-                  plugins: {
-                    ...opsiDasar().plugins,
-                    legend: { display: false },
-                    tooltip: {
-                      ...opsiDasar().plugins.tooltip,
-                      callbacks: {
-                        label: (ctx) => rupiahMiliar(ctx.raw),
-                      },
-                    },
-                  },
-                  scales: {
-                    x: sumbuRupiah(),
-                    y: sumbuKategori(),
-                  },
-                }}
-              />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-sky-900 via-sky-950 to-slate-900 text-white rounded-2xl p-6 shadow-md flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-teal-500/10 rounded-full blur-3xl -mr-12 -mt-12"></div>
-            
-            <div>
-              <div className="flex items-center justify-between mb-4">
-                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30 flex items-center gap-1.5">
-                  <Anchor className="w-3.5 h-3.5" />
-                  Cadangan Potensi
+                  Lokasi potensial (warna = jenis)
                 </span>
-                <span className="text-xs text-slate-400">Database RTR/RZ</span>
+                <span className="flex items-center gap-1.5">
+                  <span className="grid h-4 w-4 place-items-center rounded bg-kkp-900" dangerouslySetInnerHTML={{ __html: lambangSvg('koper', 10) }} />
+                  Proyek investasi
+                </span>
               </div>
-
-              <h3 className="text-xl font-bold text-white mb-2">
-                Eksplorasi Potensi Ruang Laut Belum Teralokasi
-              </h3>
-              <p className="text-slate-300 text-xs leading-relaxed mb-6">
-                Lokasi potensial dari Peta Sebaran Wilayah Potensial untuk sedikitnya satu jenis investasi: sedikitnya 75% parameter terukurnya sangat sesuai, di luar KKPRL dan bangunan.
-              </p>
-
-              <div className="space-y-3">
-                <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs text-slate-300">Lokasi Potensial:</span>
-                  <span className="font-bold text-teal-300 text-base">
-                    {formatNumber(data?.summary?.potensi?.total_lokasi || 0, 0)} Lokasi
-                  </span>
-                </div>
-                <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs text-slate-300">Sebaran Wilayah:</span>
-                  <span className="font-bold text-sky-300 text-base">
-                    {formatNumber(data?.summary?.potensi?.total_provinsi || 0, 0)} Provinsi
-                  </span>
-                </div>
-                <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs text-slate-300">Luas Lokasi Potensial:</span>
-                  <span className="font-bold text-emerald-300 text-base">
-                    {formatNumber(data?.summary?.potensi?.total_luas_ha || 0, 0)} Hektar
-                  </span>
-                </div>
-              </div>
+              <Link
+                to="/peta?lapisan=potensi"
+                className={`absolute right-3 top-3 z-[500] inline-flex items-center gap-1.5 rounded-lg bg-white/95 px-3 py-2 text-xs font-semibold text-kkp-900 shadow hover:bg-white ${FOKUS}`}
+              >
+                Buka di Peta Spasial <ArrowUpRight className="h-3.5 w-3.5 text-kkp-700" />
+              </Link>
             </div>
 
-            <Link
-              to="/peta?lapisan=potensi"
-              className="mt-6 w-full py-2.5 px-4 bg-teal-500 hover:bg-teal-400 text-slate-950 font-bold rounded-xl text-xs text-center transition-colors shadow-lg shadow-teal-500/20"
-            >
-              Eksplorasi Potensi di Peta Spasial &rarr;
-            </Link>
+            <Kartu className="p-4 lg:col-span-4">
+              <JudulKartu
+                judul="Lokasi potensial per jenis"
+                isi={provinsi ? `Di ${namaProvinsi}. Klik jenis untuk menyaring.` : 'Seluruh Indonesia. Klik jenis untuk menyaring.'}
+              />
+              <ul className="mt-3 space-y-0.5">
+                {potensiPerJenis.map((j) => (
+                  <li key={j.id}>
+                    <BarisPilih aktif={jenis === j.id} redup={Boolean(jenis) && jenis !== j.id} onClick={() => alih(setJenis, j.id, jenis)}>
+                      <span className="flex items-center gap-3">
+                        <Lambang kode={j.id} kecil />
+                        <span className="min-w-0 flex-1">
+                          <span className="flex items-baseline justify-between gap-2">
+                            <span className="truncate text-[13px] font-medium text-slate-700">{j.label}</span>
+                            <span className="text-[13px] font-bold tabular-nums text-kkp-900">{angka(j.lokasi)}</span>
+                          </span>
+                          <Batang nilai={j.lokasi} maks={maksJenis} warna={warnaJenisInvestasi(j.id)} />
+                        </span>
+                      </span>
+                    </BarisPilih>
+                  </li>
+                ))}
+              </ul>
+            </Kartu>
           </div>
 
-        </div>
+          <Kartu className="p-5">
+            <JudulKartu
+              judul="Provinsi dengan lokasi potensial terbanyak"
+              isi={`${jenis ? namaJenis(jenis) : 'Semua jenis investasi'}. Klik provinsi untuk menyaring halaman dan memperbesar peta ke wilayahnya.`}
+            />
+            {daftarProvinsiPotensi.length ? (
+              <ol className="mt-3 grid gap-x-6 gap-y-0.5 md:grid-cols-2">
+                {daftarProvinsiPotensi.map((p) => (
+                  <li key={p.id}>
+                    <BarisPilih aktif={provinsi === p.id} redup={Boolean(provinsi) && provinsi !== p.id} onClick={() => alih(setProvinsi, p.id, provinsi)}>
+                      <span className="flex items-baseline justify-between gap-3">
+                        <span className="text-[13px] font-medium text-slate-700">{p.nama}</span>
+                        <span className="shrink-0 text-xs text-slate-500">
+                          <b className="text-[13px] tabular-nums text-kkp-900">{angka(p.lokasi)}</b> lokasi · ±{angka(p.luas)} ha
+                        </span>
+                      </span>
+                      <Batang nilai={p.lokasi} maks={maksProvinsi} warna={jenis ? warnaJenisInvestasi(jenis) : BIRU[3]} />
+                    </BarisPilih>
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-3 text-sm text-slate-500">{data ? 'Belum ada lokasi potensial untuk saringan ini.' : 'Memuat…'}</p>
+            )}
+          </Kartu>
+        </section>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {[
-            {
-              judul: 'Nilai Investasi per Sektor',
-              catatan: 'Rencana modal investasi yang tercatat pada tiap sektor kelautan.',
-              data: investasiSektorChartData,
-              sumbu: sumbuRupiah(),
-              tip: (ctx) => `Nilai investasi: ${rupiahMiliar(ctx.raw)}`,
-            },
-            {
-              judul: 'Serapan Tenaga Kerja per Sektor',
-              catatan: 'Proyeksi lapangan kerja langsung dari proyek yang terdaftar.',
-              data: tenagaKerjaChartData,
-              sumbu: sumbuNilai('Orang', (v) => v.toLocaleString('id-ID')),
-              tip: (ctx) => `Tenaga kerja: ${ctx.raw.toLocaleString('id-ID')} orang`,
-            },
-          ].map((g) => (
-            <div key={g.judul} className="bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm">
-              <h3 className="font-bold text-base text-slate-800 flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-kkp-700" />
-                {g.judul}
-              </h3>
-              <p className="text-xs text-slate-500 mt-0.5 mb-4">{g.catatan}</p>
-              <div className="h-72 w-full">
-                <Bar
-                  data={g.data}
-                  options={{
-                    ...opsiDasar(),
-                    indexAxis: 'y',
-                    plugins: {
-                      ...opsiDasar().plugins,
-                      legend: { display: false },
-                      tooltip: {
-                        ...opsiDasar().plugins.tooltip,
-                        callbacks: { label: g.tip },
-                      },
-                    },
-                    scales: {
-                      x: g.sumbu,
-                      y: sumbuKategori(),
-                    },
-                  }}
-                />
-              </div>
+        <section className="mt-16 space-y-6">
+          <JudulBagian
+            label="Proyek investasi"
+            nada="hijau"
+            judul="Proyek yang sedang dipantau"
+            isi="Proyek yang disimpan dari analisis kelayakan, dipantau dari perencanaan sampai beroperasi menurut tahapan proyek KPPIP. Klik tahap untuk menyaring."
+          />
+
+          <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {perTahap.map((t, i) => (
+              <li key={t.kode}>
+                <button
+                  type="button"
+                  aria-pressed={tahap === t.kode}
+                  onClick={() => alih(setTahap, t.kode, tahap)}
+                  className={`flex h-full w-full flex-col overflow-hidden rounded-2xl border bg-white text-left transition ${FOKUS} ${
+                    tahap === t.kode ? 'border-kkp-700 ring-1 ring-kkp-700' : 'border-slate-200 hover:border-kkp-900'
+                  } ${tahap && tahap !== t.kode ? 'opacity-60 hover:opacity-100' : ''}`}
+                >
+                  <span className="h-1.5 w-full" style={{ backgroundColor: WARNA_TAHAP[t.kode] }} />
+                  <span className="flex flex-1 flex-col p-4">
+                    <span className="font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-kkp-700">Tahap {i + 1}</span>
+                    <span className="mt-1 text-[15px] font-bold text-kkp-900">{t.label}</span>
+                    <span className="mt-3 text-3xl font-extrabold tracking-[-0.02em] text-kkp-900 tabular-nums">{angka(t.jumlah)}</span>
+                    <span className="text-xs text-slate-500">proyek · {rupiahMiliar(t.nilai)}</span>
+                    <span className="mt-3 text-[11px] leading-snug text-slate-500">{t.desc}</span>
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ol>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Kartu className="p-5">
+              <JudulKartu judul="Nilai rencana dan realisasi per jenis" isi="Batang biru adalah nilai rencana, batang hijau di dalamnya adalah realisasi." />
+              {proyekPerJenis.length ? (
+                <ul className="mt-3 space-y-0.5">
+                  {proyekPerJenis.map((j) => (
+                    <li key={j.id}>
+                      <BarisPilih aktif={jenis === j.id} redup={Boolean(jenis) && jenis !== j.id} onClick={() => alih(setJenis, j.id, jenis)}>
+                        <span className="flex items-center gap-3">
+                          <Lambang kode={j.id} kecil />
+                          <span className="min-w-0 flex-1">
+                            <span className="flex items-baseline justify-between gap-2">
+                              <span className="truncate text-[13px] font-medium text-slate-700">{j.label}</span>
+                              <span className="shrink-0 text-xs text-slate-500">
+                                <b className="text-[13px] text-kkp-900">{rupiahMiliar(j.rencana)}</b> · {angka(j.jumlah)} proyek
+                              </span>
+                            </span>
+                            <Batang nilai={j.rencana} maks={maksRencanaJenis} warna={BIRU[2]} dalam={j.realisasi} />
+                          </span>
+                        </span>
+                      </BarisPilih>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-slate-500">{data ? 'Belum ada proyek untuk saringan ini.' : 'Memuat…'}</p>
+              )}
+            </Kartu>
+
+            <Kartu className="p-5">
+              <JudulKartu judul="Proyek per provinsi" isi="Diurutkan menurut nilai rencana investasi. Klik provinsi untuk menyaring." />
+              {proyekPerProvinsi.length ? (
+                <ul className="mt-3 space-y-0.5">
+                  {proyekPerProvinsi.map((p) => (
+                    <li key={p.id || p.nama}>
+                      <BarisPilih
+                        aktif={provinsi === p.id}
+                        redup={Boolean(provinsi) && provinsi !== p.id}
+                        onClick={() => p.id && alih(setProvinsi, p.id, provinsi)}
+                      >
+                        <span className="flex items-baseline justify-between gap-3">
+                          <span className="truncate text-[13px] font-medium text-slate-700">{p.nama}</span>
+                          <span className="shrink-0 text-xs text-slate-500">
+                            <b className="text-[13px] text-kkp-900">{rupiahMiliar(p.rencana)}</b> · {angka(p.jumlah)} proyek
+                          </span>
+                        </span>
+                        <Batang nilai={p.rencana} maks={maksRencanaProvinsi} warna={BIRU[3]} />
+                      </BarisPilih>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-3 text-sm text-slate-500">{data ? 'Belum ada proyek untuk saringan ini.' : 'Memuat…'}</p>
+              )}
+            </Kartu>
+          </div>
+
+          <Kartu className="overflow-hidden">
+            <div className="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 px-5 py-4">
+              <JudulKartu
+                judul="Proyek dengan nilai rencana terbesar"
+                isi={`${angka(Math.min(proyek.length, BATAS_DAFTAR))} dari ${angka(proyek.length)} proyek sesuai saringan. Klik baris untuk membuka detail proyek.`}
+              />
+              <Link to="/pipeline" className="inline-flex items-center gap-1.5 text-sm font-bold text-kkp-700 hover:underline">
+                Semua proyek investasi <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
-          ))}
-        </div>
-
+            {proyek.length ? (
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[760px] text-left text-sm">
+                  <thead className="bg-slate-50 text-xs text-slate-500">
+                    <tr>
+                      <th className="px-5 py-2.5 font-semibold">Proyek</th>
+                      <th className="px-3 py-2.5 font-semibold">Jenis investasi</th>
+                      <th className="px-3 py-2.5 font-semibold">Provinsi</th>
+                      <th className="px-3 py-2.5 font-semibold">Tahap</th>
+                      <th className="px-3 py-2.5 text-right font-semibold">Nilai rencana</th>
+                      <th className="px-3 py-2.5 text-right font-semibold">Tenaga kerja</th>
+                      <th className="px-5 py-2.5 text-right font-semibold">Skor kelayakan</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {proyek.slice(0, BATAS_DAFTAR).map((p) => (
+                      <tr key={p.id} className="hover:bg-slate-50">
+                        <td className="px-5 py-3">
+                          <Link to={`/pipeline/${p.id}`} className={`block rounded ${FOKUS}`}>
+                            <span className="font-semibold text-kkp-900 hover:underline">{p.nama}</span>
+                            <span className="block text-xs text-slate-500">
+                              <span className="font-mono">{p.kode_proyek}</span>{p.investor ? ` · ${p.investor}` : ''}
+                            </span>
+                          </Link>
+                        </td>
+                        <td className="px-3 py-3">
+                          <span className="flex items-center gap-2 text-slate-700">
+                            {p.sektor_kode && <Lambang kode={p.sektor_kode} kecil />}
+                            {p.sektor_nama}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-slate-700">{p.provinsi_nama}</td>
+                        <td className="px-3 py-3">
+                          <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                            <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: WARNA_TAHAP[p.status] }} />
+                            {LABEL_TAHAPAN[p.status] || p.status}
+                          </span>
+                        </td>
+                        <td className="px-3 py-3 text-right font-semibold tabular-nums text-kkp-900">{rupiahMiliar(p.nilai_investasi_miliar)}</td>
+                        <td className="px-3 py-3 text-right tabular-nums text-slate-700">{angka(p.proyeksi_tenaga_kerja)}</td>
+                        <td className="px-5 py-3 text-right tabular-nums text-slate-700">
+                          {p.skor_kelayakan === null || p.skor_kelayakan === undefined ? '—' : `${angka(p.skor_kelayakan * 100)}%`}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="px-5 py-6 text-sm text-slate-500">
+                {data ? 'Belum ada proyek untuk saringan ini.' : 'Memuat…'}{' '}
+                <Link to="/peta" className="font-semibold text-kkp-700 hover:underline">Mulai analisis lokasi di Peta Spasial</Link>
+              </p>
+            )}
+          </Kartu>
+        </section>
       </div>
     </div>
   );

@@ -479,13 +479,14 @@
       "csv",
       "excel",
       "peta sebaran",
-      "layar penuh",
       "refresh",
-      "eksplorasi potensi",
-      "cadangan",
-      "grafik"
+      "perbarui",
+      "lokasi potensial",
+      "tahap proyek",
+      "saring",
+      "provinsi"
     ],
-    "isi": "Dashboard Nasional merangkum jumlah proyek, nilai rencana dan realisasi, tenaga kerja, luas area, dan rata-rata skor AHP. Filter portofolio menyaring menurut jenis investasi, tahap proyek, dan provinsi, dan semua angka serta peta ikut tersaring. Peta sebaran dapat dibuat layar penuh dan pembesarannya dibatasi pada wilayah Indonesia. Ekspor CSV mengunduh daftar proyek sesuai filter dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah. Kartu Eksplorasi Potensi menghitung lokasi potensial dari Peta Sebaran Wilayah Potensial untuk sedikitnya satu jenis investasi, yaitu lokasi dengan sedikitnya 75% parameter terukur sangat sesuai di luar KKPRL dan bangunan, beserta jumlah provinsi dan luasnya."
+    "isi": "Dashboard Nasional terdiri atas dua bagian. Potensi ruang laut menampilkan jumlah lokasi potensial dari Peta Sebaran Wilayah Potensial (sedikitnya 75% parameter terukur sangat sesuai, di luar KKPRL dan bangunan) beserta jumlah provinsi dan luasnya, peta nasional berisi titik lokasi potensial berwarna jenis dan penanda proyek, jumlah lokasi per jenis investasi, dan provinsi dengan lokasi terbanyak. Proyek investasi menampilkan jumlah proyek, nilai rencana dan realisasi, serapan tenaga kerja, rata-rata skor kelayakan, sebaran proyek pada lima tahap KPPIP, nilai rencana dan realisasi per jenis, proyek per provinsi, dan daftar proyek dengan nilai terbesar yang dapat dibuka detailnya. Saringan jenis investasi, provinsi, dan tahap proyek di bagian atas berlaku untuk seluruh angka, daftar, dan peta; jenis, provinsi, dan tahap juga dapat dipilih dengan mengklik barisnya, dan memilih provinsi memperbesar peta ke wilayah itu. Klik titik lokasi potensial di peta lalu Analisis lokasi ini untuk membukanya di Peta Spasial sebagai area analisis. Ekspor CSV mengunduh daftar proyek sesuai saringan dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah."
   },
   {
     "id": "pipeline",

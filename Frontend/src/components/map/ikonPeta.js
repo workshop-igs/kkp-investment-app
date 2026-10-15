@@ -66,6 +66,10 @@ const LAMBANG = {
   daun:
     '<path d="M5 19.5C5 11 10 5 19.5 4.5 19 14 13 19 5 19.5z"/>' +
     '<path d="M5 19.5 13.5 11"/>',
+
+  koper:
+    '<rect x="3.5" y="7.5" width="17" height="12" rx="2"/>' +
+    '<path d="M9 7.5V5.6A1.6 1.6 0 0 1 10.6 4h2.8A1.6 1.6 0 0 1 15 5.6v1.9M3.5 12.5h17"/>',
 };
 
 export const lambangSvg = (jenis, ukuran) =>
