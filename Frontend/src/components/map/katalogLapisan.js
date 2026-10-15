@@ -230,11 +230,10 @@ export const LAYER_LOKAL = {
     warnaIkon: (p) => warnaJenisInvestasi(p.sektor_kode),
     warnaTitik: (p) => (p.jenis?.length ? p.jenis : [p.sektor_kode]).map(warnaJenisInvestasi),
     zoomPin: 8,
-    zoomBidang: 12,
     keteranganLegenda:
       'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi dan warnanya menunjukkan jenis itu; titik '
       + 'berwarna ganda cocok untuk beberapa jenis. Mulai tingkat provinsi titik menjadi penanda berlambang jenis, '
-      + 'dan batas lokasinya tampak setelah peta diperbesar lagi. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona ruang laut, atau kawasan Pola Ruang darat '
+      + 'dan batas lokasinya baru dimuat sebagai area analisis saat tombol Analisis lokasi ini di popup diklik. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona ruang laut, atau kawasan Pola Ruang darat '
       + 'RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu, karakter lokasinya cocok (misalnya tambak '
       + 'garam dan unit pengolahan di darat pesisir, budi daya laut di perairan 1 sampai 30 m, OTEC di perairan dalam; '
       + 'kedalaman dan gelombang bersifat indikatif; konservasi dan bioteknologi membutuhkan mangrove, lamun, atau terumbu '
@@ -257,10 +256,6 @@ export const LAYER_LOKAL = {
       + 'Konservasi & Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang '
       + 'tampil adalah lokasi dengan persentase tertinggi; perbesar peta untuk melihat lokasi lainnya. Kriteria '
       + 'finansial proyek (NPV, IRR, payback, ROI) tidak ikut; penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
-    gaya: (f) => {
-      const warna = warnaJenisInvestasi(f?.properties?.sektor_kode);
-      return { color: warna, weight: 1.5, fillColor: warna, fillOpacity: 0.35, opacity: 0.95 };
-    },
     popup: (p) => {
       const jenis = p.jenis?.length ? p.jenis : [p.sektor_kode];
       const nama = p.jenis_nama?.length ? p.jenis_nama : [p.sektor || ''];

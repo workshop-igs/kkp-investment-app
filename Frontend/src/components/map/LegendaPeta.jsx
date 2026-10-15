@@ -330,9 +330,8 @@ const LegendaDisarankan = ({ sektor, onPilih }) => {
           />
           Titik berwarna ganda cocok untuk beberapa jenis
         </li>
-        <li className="flex items-center gap-2">
-          <span className="h-3 w-3 shrink-0 rounded-[3px] border" style={{ backgroundColor: `${W.PERIKANAN_BUDIDAYA}59`, borderColor: W.PERIKANAN_BUDIDAYA }} />
-          Batas lokasi tampak setelah peta diperbesar
+        <li className="pl-5">
+          Klik titik lalu Analisis lokasi ini untuk memuat batas lokasinya, atau gambar area sendiri.
         </li>
         <li className="pl-5">
           Skala nasional menampilkan lokasi dengan persentase tertinggi; Konservasi &amp; Rehabilitasi Pesisir tampil bila
