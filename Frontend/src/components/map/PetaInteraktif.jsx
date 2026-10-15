@@ -323,7 +323,14 @@ const PetaInteraktif = ({
   };
 
   useEffect(() => {
-    if (petaSiap && cari.get('mulai') === 'gambar') handleStartDrawing();
+    if (!petaSiap) return;
+    if (cari.get('mulai') === 'gambar') handleStartDrawing();
+    const lokasi = cari.get('lokasi');
+    if (lokasi) {
+      api.get(`${LAYER_LOKAL.potensi.url.replace(/peta\/$/, '')}${encodeURIComponent(lokasi)}/`)
+        .then(({ data }) => drawerRef.current?.loadGeometry(data?.geometry))
+        .catch(() => setError('Batas lokasi potensial tidak dapat dimuat.'));
+    }
   }, [petaSiap]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleFinish = () => drawerRef.current?.finish();

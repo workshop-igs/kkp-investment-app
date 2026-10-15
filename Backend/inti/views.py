@@ -381,14 +381,15 @@ def dashboard_stats(request):
     total_kkprl = KKPRL.objects.count()
     total_zonasi = ZonasiRuangLaut.objects.filter(ranah='LAUT').count()
 
-    map_markers = [
+    proyek = [
         {
             'id': p.id,
             'kode_proyek': p.kode_proyek,
             'nama': p.nama,
             'investor': p.investor,
+            'sektor_kode': p.sektor.kode if p.sektor_id else '',
             'sektor_nama': p.sektor.nama if p.sektor_id else 'Umum',
-            'sektor_warna': getattr(p.sektor, 'warna', '#0ea5e9'),
+            'provinsi_id': p.provinsi_id,
             'provinsi_nama': p.provinsi.nama if p.provinsi_id else 'Perairan nasional',
             'lokasi_detail': p.lokasi_detail,
             'nilai_investasi_miliar': p.nilai_investasi_miliar,
@@ -397,16 +398,26 @@ def dashboard_stats(request):
             'luas_ha': p.luas_ha,
             'skor_kelayakan': p.skor_kelayakan,
             'proyeksi_tenaga_kerja': p.proyeksi_tenaga_kerja,
-            'lat': round(p.titik.y, 6),
-            'lng': round(p.titik.x, 6),
+            'lat': round(p.titik.y, 6) if p.titik else None,
+            'lng': round(p.titik.x, 6) if p.titik else None,
         }
         for p in (
-            ProyekInvestasi.objects.exclude(geometry=None)
-            .select_related('sektor', 'provinsi')
+            ProyekInvestasi.objects.select_related('sektor', 'provinsi')
             .annotate(titik=PointOnSurface('geometry'))
             .defer('geometry', 'analisis_json', 'provinsi__geometry')
+            .order_by('-nilai_investasi_miliar', 'id')
         )
-        if p.titik is not None
+    ]
+    potensi_wilayah = [
+        {
+            'provinsi_id': r['provinsi_id'],
+            'provinsi': r['provinsi__nama'],
+            'kode': r['sektor__kode'],
+            'lokasi': r['lokasi'],
+            'luas_ha': round(float(r['luas'] or 0), 1),
+        }
+        for r in LokasiPotensial.objects.values('provinsi_id', 'provinsi__nama', 'sektor__kode')
+        .annotate(lokasi=Count('id'), luas=Sum('luas_ha')).order_by()
     ]
 
     muatan = {
@@ -432,7 +443,8 @@ def dashboard_stats(request):
             'proyek_per_status': proyek_per_status,
             'proyek_per_sektor': proyek_per_sektor,
             'proyek_per_provinsi': proyek_per_provinsi,
-            'map_markers': map_markers,
+            'proyek': proyek,
+            'potensi_wilayah': potensi_wilayah,
     }
 
     cache.set(kunci_cache, muatan, CACHE_DASHBOARD_DETIK)
