@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, Navigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Briefcase, Database,
-  Map, LogOut, Menu, ShieldCheck, ArrowLeft, ScrollText
+  Map, LogOut, Menu, ShieldCheck, ArrowLeft, ScrollText, SlidersHorizontal, Layers
 } from 'lucide-react';
 import { useAuth } from '../context/KonteksAuth';
 
@@ -34,6 +34,13 @@ const TataLetakAdmin = () => {
         { name: 'Proyek Investasi', path: '/admin/pipeline', icon: Briefcase },
         { name: 'Sektor Investasi', path: '/admin/sectors', icon: Map },
         { name: 'Sumber Data', path: '/admin/data-sources', icon: Database },
+      ],
+    },
+    {
+      judul: 'Analisis',
+      items: [
+        { name: 'Pengaturan Analisis', path: '/admin/pengaturan-analisis', icon: SlidersHorizontal },
+        { name: 'Parameter Tambahan', path: '/admin/parameter-tambahan', icon: Layers },
       ],
     },
     {
