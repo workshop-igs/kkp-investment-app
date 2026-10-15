@@ -582,9 +582,15 @@
       "kompetensi",
       "sumber data",
       "log aktivitas",
-      "realisasi"
+      "realisasi",
+      "pengaturan analisis",
+      "ambang",
+      "bobot",
+      "parameter tambahan",
+      "unggah shp",
+      "hitung ulang"
     ],
-    "isi": "Menu Administrator hanya tampil untuk akun administrator. Isinya ringkasan sistem, kelola pengguna, proyek investasi (termasuk mengisi nilai realisasi dan tahap), sumber data, sektor investasi (rasio tenaga kerja per miliar, ketentuan kegiatan per sub-zona, dan kompetensi yang dibutuhkan), serta log aktivitas yang mencatat masuk, keluar, perubahan data, analisis, dan upaya akses yang ditolak."
+    "isi": "Menu Administrator hanya tampil untuk akun administrator. Isinya ringkasan sistem, kelola pengguna, proyek investasi (termasuk mengisi nilai realisasi dan tahap), sumber data, sektor investasi (rasio tenaga kerja per miliar, ketentuan kegiatan per sub-zona, dan kompetensi yang dibutuhkan), serta log aktivitas yang mencatat masuk, keluar, perubahan data, analisis, dan upaya akses yang ditolak. Menu Pengaturan Analisis memuat seluruh ambang, bobot, dan skor analisis yang dapat diubah tanpa mengubah kode, dikelompokkan menjadi karakter lokasi per jenis investasi (mis. kedalaman, gelombang, dan suhu permukaan laut), aturan Peta Sebaran Wilayah Potensial, analisis area, analisis finansial, skor AHP dan keputusan kelayakan, skor lokasi dan risiko, serta skor kelayakan zona; setiap angka diperiksa rentangnya dan dapat dikembalikan ke nilai bawaan. Menu Parameter Tambahan dipakai untuk menambah parameter analisis sendiri, berupa area geospasial yang diunggah dari Shapefile (.zip), KML, atau GeoJSON (mis. area cadangan perikanan tangkap) atau tabel nilai per provinsi atau kabupaten/kota dari CSV atau Excel, untuk jenis investasi dan provinsi tertentu, dengan peran gerbang wajib, parameter dinilai, atau informasi saja. Perubahan pada kedua menu langsung dipakai analisis area; bila memengaruhi Peta Sebaran Wilayah Potensial atau skor zona, keduanya dihitung ulang otomatis di latar dan progresnya tampil di bagian atas halaman."
   },
   {
     "id": "format-angka",

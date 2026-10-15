@@ -3,6 +3,28 @@ import shp from 'shpjs';
 import { kml } from '@tmcw/togeojson';
 import { DOMParser } from '@xmldom/xmldom';
 
+export async function bacaGeospasial(file) {
+  const nama = file.name.toLowerCase();
+  let geojson;
+  if (nama.endsWith('.zip')) {
+    geojson = await shp(await file.arrayBuffer());
+  } else if (nama.endsWith('.geojson') || nama.endsWith('.json')) {
+    geojson = JSON.parse(await file.text());
+  } else if (nama.endsWith('.kml')) {
+    geojson = kml(new DOMParser().parseFromString(await file.text(), 'text/xml'));
+  } else {
+    throw new Error('Format file tidak didukung. Harap unggah file .zip (Shapefile), .geojson, atau .kml');
+  }
+  const fitur = Array.isArray(geojson) ? geojson.flatMap((g) => g.features || [])
+    : geojson?.type === 'FeatureCollection' ? geojson.features
+      : geojson?.type === 'Feature' ? [geojson]
+        : geojson?.type ? [{ type: 'Feature', properties: {}, geometry: geojson }] : [];
+  if (!fitur.length) throw new Error('Tidak ada data poligon yang ditemukan dalam file ini.');
+  const poligon = fitur.filter((f) => ['Polygon', 'MultiPolygon'].includes(f?.geometry?.type));
+  if (!poligon.length) throw new Error('File tidak mengandung geometri Poligon yang valid.');
+  return { type: 'FeatureCollection', features: poligon };
+}
+
 export default function UnggahGeospasial({ onUploadSuccess, onError, disabled, className, buttonText, icon }) {
   const fileInputRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -15,42 +37,8 @@ export default function UnggahGeospasial({ onUploadSuccess, onError, disabled, c
     onError(null);
 
     try {
-      const fileName = file.name.toLowerCase();
-      let geojson = null;
-
-      if (fileName.endsWith('.zip')) {
-        const arrayBuffer = await file.arrayBuffer();
-        geojson = await shp(arrayBuffer);
-      } else if (fileName.endsWith('.geojson') || fileName.endsWith('.json')) {
-        const text = await file.text();
-        geojson = JSON.parse(text);
-      } else if (fileName.endsWith('.kml')) {
-        const text = await file.text();
-        const doc = new DOMParser().parseFromString(text, 'text/xml');
-        geojson = kml(doc);
-      } else {
-        throw new Error('Format file tidak didukung. Harap unggah file .zip (Shapefile), .geojson, atau .kml');
-      }
-
-      if (!geojson || (geojson.type === 'FeatureCollection' && geojson.features.length === 0)) {
-        throw new Error('Tidak ada data poligon yang ditemukan dalam file ini.');
-      }
-
-      let selectedGeometry = null;
-      if (geojson.type === 'FeatureCollection') {
-        const feature = geojson.features.find(f => f.geometry.type === 'Polygon' || f.geometry.type === 'MultiPolygon');
-        if (feature) selectedGeometry = feature.geometry;
-      } else if (geojson.type === 'Feature' && (geojson.geometry.type === 'Polygon' || geojson.geometry.type === 'MultiPolygon')) {
-        selectedGeometry = geojson.geometry;
-      } else if (geojson.type === 'Polygon' || geojson.type === 'MultiPolygon') {
-        selectedGeometry = geojson;
-      }
-
-      if (!selectedGeometry) {
-        throw new Error('File tidak mengandung geometri Poligon yang valid.');
-      }
-
-      onUploadSuccess(selectedGeometry);
+      const { features } = await bacaGeospasial(file);
+      onUploadSuccess(features[0].geometry);
     } catch (err) {
       console.error(err);
       onError(err.message || 'Gagal memproses file geospasial.');
