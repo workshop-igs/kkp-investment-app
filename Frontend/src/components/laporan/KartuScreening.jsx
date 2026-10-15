@@ -24,8 +24,6 @@ const LABEL_KEGIATAN = [
   ['TIDAK_DIIZINKAN', 'Tidak diperbolehkan'],
 ];
 
-const URUTAN_PEMBATAS = ['TIDAK_DIIZINKAN', 'BERSYARAT', 'DIIZINKAN'];
-
 const KOLOM_PERDA = [
   ['diperbolehkan', 'Diperbolehkan', 'DIIZINKAN'],
   ['bersyarat', 'Bersyarat', 'BERSYARAT'],
@@ -45,7 +43,6 @@ const HASIL_TAMBAHAN = {
 };
 
 const BATAS_SYARAT_TABEL = 240;
-const BATAS_BUTIR = 10;
 
 const angka = (v, d = 0) => Number(v || 0).toLocaleString('id-ID', { maximumFractionDigits: d });
 
@@ -75,36 +72,29 @@ const Tanda = ({ kode, tanda, title }) => (
   </span>
 );
 
-const DaftarButir = ({ butir, batas = BATAS_BUTIR }) => {
-  const [penuh, setPenuh] = useState(false);
-  const tampil = penuh ? butir : butir.slice(0, batas);
-  return (
-    <>
-      <ul className="grid gap-x-5 gap-y-1 sm:grid-cols-2">
-        {tampil.map(([kode, teks]) => (
-          <li key={`${kode}-${teks}`} className="flex gap-2 text-[11.5px] leading-snug text-slate-700">
-            <Tanda kode={kode} />
-            {teks}
-          </li>
-        ))}
-      </ul>
-      {butir.length > batas && (
-        <button type="button" onClick={() => setPenuh(!penuh)} className="mt-1.5 text-[11px] font-medium text-kkp-700 hover:underline">
-          {penuh ? 'Ringkas daftar' : `Tampilkan ${butir.length - batas} lainnya`}
-        </button>
-      )}
-    </>
-  );
-};
-
-const Hitungan = ({ jumlah }) => (
-  <p className="mb-2 flex flex-wrap gap-x-3 text-[11px] text-slate-500">
-    {LABEL_KEGIATAN.map(([kode, label]) => (
-      <span key={kode}>
-        <b className={`tabular-nums ${ketentuan(kode).teks}`}>{jumlah[kode]}</b> {label.toLowerCase()}
-      </span>
+const DaftarStatus = ({ bagian, kosong = 'Tidak ada' }) => (
+  <div className="space-y-3">
+    {bagian.map(([kode, label, butir]) => (
+      <div key={kode}>
+        <Pil kode={kode}>
+          {ketentuan(kode).tanda} {label}
+          <span className="ml-1.5 tabular-nums opacity-70">{butir.length}</span>
+        </Pil>
+        {butir.length ? (
+          <ul className="mt-1.5 gap-x-6 sm:columns-2 xl:columns-3">
+            {butir.map((b) => (
+              <li key={b} className="mb-1 flex break-inside-avoid gap-2 text-[11.5px] leading-snug text-slate-700">
+                <span className={`mt-[5px] h-1.5 w-1.5 shrink-0 rounded-full ${ketentuan(kode).batang}`} />
+                {b}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="mt-1 text-[11.5px] text-slate-400">{kosong}</p>
+        )}
+      </div>
     ))}
-  </p>
+  </div>
 );
 
 const Ringkasan = ({ s }) => {
@@ -224,8 +214,7 @@ const RincianJenis = ({ s }) => {
               <Pil kode={k.ketentuan}>{k.label}</Pil>
             </div>
             <div className="px-3 py-2.5">
-              <Hitungan jumlah={Object.fromEntries(LABEL_KEGIATAN.map(([kode]) => [kode, k.rincian[kode].length]))} />
-              <DaftarButir butir={URUTAN_PEMBATAS.flatMap((kode) => k.rincian[kode].map((b) => [kode, b]))} />
+              <DaftarStatus bagian={LABEL_KEGIATAN.map(([kode, label]) => [kode, label, k.rincian[kode]])} />
             </div>
           </div>
         ))}
@@ -314,12 +303,8 @@ const ParameterTambahan = ({ daftar }) => (
 
 const RincianPerda = ({ perda }) => {
   const [cari, setCari] = useState('');
-  const [tab, setTab] = useState(() => (KOLOM_PERDA.find(([k]) => perda[k].length) || KOLOM_PERDA[0])[0]);
   const kata = cari.trim().toLowerCase();
-  const saring = (k) => perda[k].filter((b) => !kata || b.toLowerCase().includes(kata));
   const total = KOLOM_PERDA.reduce((n, [k]) => n + perda[k].length, 0);
-  const kode = KOLOM_PERDA.find(([k]) => k === tab)[2];
-  const daftar = saring(tab);
 
   return (
     <div>
@@ -341,31 +326,11 @@ const RincianPerda = ({ perda }) => {
           />
         </label>
       </div>
-      <div role="tablist" className="mt-2 flex flex-wrap gap-1.5">
-        {KOLOM_PERDA.map(([k, label, kd]) => {
-          const aktif = tab === k;
-          return (
-            <button
-              key={k}
-              type="button"
-              role="tab"
-              aria-selected={aktif}
-              onClick={() => setTab(k)}
-              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ring-1 ring-inset transition-colors ${
-                aktif ? ketentuan(kd).pil : 'bg-white text-slate-500 ring-slate-200 hover:text-slate-700'
-              }`}
-            >
-              {label} <span className="tabular-nums opacity-70">{saring(k).length}</span>
-            </button>
-          );
-        })}
-      </div>
       <div className="mt-2">
-        {daftar.length ? (
-          <DaftarButir key={`${tab}|${kata}`} butir={daftar.map((b) => [kode, b])} batas={kata ? daftar.length : BATAS_BUTIR} />
-        ) : (
-          <p className="text-slate-400">{kata ? 'Tidak ada yang cocok' : '-'}</p>
-        )}
+        <DaftarStatus
+          kosong={kata ? 'Tidak ada yang cocok' : 'Tidak ada'}
+          bagian={KOLOM_PERDA.map(([k, label, kode]) => [kode, label, perda[k].filter((b) => !kata || b.toLowerCase().includes(kata))])}
+        />
       </div>
       {perda.ketentuan_khusus && (
         <details className="mt-2 text-[11px] text-slate-600">
@@ -378,11 +343,11 @@ const RincianPerda = ({ perda }) => {
   );
 };
 
-const ZonaKetentuan = ({ z, sektor, sama }) => {
+const ZonaKetentuan = ({ z, sektor, sama, terbuka }) => {
   const statusJenis = LABEL_KEGIATAN.find(([kode]) => z.kegiatan[kode].includes(sektor));
   const adaKegiatan = LABEL_KEGIATAN.some(([kode]) => z.kegiatan[kode].length);
   return (
-    <details className="group">
+    <details className="group" open={terbuka}>
       <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
         <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
         <div className="min-w-0 flex-1">
@@ -404,14 +369,14 @@ const ZonaKetentuan = ({ z, sektor, sama }) => {
           <Sub>Jenis investasi</Sub>
           {adaKegiatan ? (
             <div className="space-y-1.5">
-              {LABEL_KEGIATAN.filter(([kode]) => z.kegiatan[kode].length).map(([kode, label]) => (
+              {LABEL_KEGIATAN.map(([kode, label]) => (
                 <div key={kode} className="flex flex-wrap items-center gap-1.5">
                   <span className={`w-44 shrink-0 text-[11px] font-semibold ${ketentuan(kode).teks}`}>
                     {label} ({z.kegiatan[kode].length})
                   </span>
-                  {z.kegiatan[kode].map((n) => (
+                  {z.kegiatan[kode].length ? z.kegiatan[kode].map((n) => (
                     <Pil key={n} kode={kode} className={n === sektor ? 'ring-2' : ''}>{n}</Pil>
-                  ))}
+                  )) : <span className="text-[11px] text-slate-400">Tidak ada</span>}
                 </div>
               ))}
             </div>
@@ -470,7 +435,7 @@ const KetentuanArea = ({ s }) => {
         {s.informasi_ruang.map((z, i) => {
           const k = z.perda && `${z.perda.sumber}|${z.perda.nama_zona}`;
           const sama = k && pertama.get(k) !== z ? pertama.get(k) : null;
-          return <ZonaKetentuan key={`${z.nama}-${z.sub_zona_label}-${i}`} z={z} sektor={s.sektor_nama} sama={sama} />;
+          return <ZonaKetentuan key={`${z.nama}-${z.sub_zona_label}-${i}`} z={z} sektor={s.sektor_nama} sama={sama} terbuka={i === 0} />;
         })}
       </div>
     </section>

@@ -169,6 +169,9 @@ class UnsurRuangLautViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         kelompok = request.query_params.get('kelompok')
         return qs.filter(kelompok=kelompok) if kelompok else qs
 
+    def sertakan_titik(self, request):
+        return request.query_params.get('kelompok') == 'MHA'
+
     PETA_KOLOM = (
         'nama', 'jenis', 'kelompok', 'kode_lapisan', 'keterangan',
         'nomor_regulasi', 'provinsi__nama', 'luas_ha', 'sumber_data',

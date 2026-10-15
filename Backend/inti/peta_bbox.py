@@ -75,6 +75,9 @@ class PetaBBoxMixin:
 
     HANYA_TITIK = False
 
+    def sertakan_titik(self, request):
+        return self.SERTAKAN_TITIK
+
     throttle_scope = 'peta'
 
     BBOX_INDONESIA = (94.5, -11.5, 141.5, 6.5)
@@ -158,7 +161,8 @@ class PetaBBoxMixin:
 
         qs = self.peta_urutan(qs, request, batas)
 
-        if self.SERTAKAN_TITIK or self.HANYA_TITIK:
+        sertakan = self.sertakan_titik(request)
+        if sertakan or self.HANYA_TITIK:
             qs = qs.annotate(titik_wakil=PointOnSurface('geometry'))
 
         if toleransi > 0:
@@ -171,7 +175,7 @@ class PetaBBoxMixin:
         if not self.HANYA_TITIK:
             qs = qs.annotate(geojson_teks=AsGeoJSON(ekspresi, precision=6))
             kolom.append('geojson_teks')
-        if self.SERTAKAN_TITIK or self.HANYA_TITIK:
+        if sertakan or self.HANYA_TITIK:
             kolom.append('titik_wakil')
 
         fitur = []
@@ -181,7 +185,7 @@ class PetaBBoxMixin:
             g = baris.get('geojson_teks')
             titik = baris.get('titik_wakil')
             properti = self.properti_peta(baris)
-            if titik is not None and self.SERTAKAN_TITIK:
+            if titik is not None and sertakan:
                 properti['titik'] = [round(titik.x, 6), round(titik.y, 6)]
 
             if g:
