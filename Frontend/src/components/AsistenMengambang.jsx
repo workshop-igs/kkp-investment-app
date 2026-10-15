@@ -230,7 +230,6 @@ const AsistenMengambang = () => {
         aria-label={buka ? 'Tutup asisten' : 'Buka asisten'}
         aria-expanded={buka}
         title="Asisten KKP"
-        data-tur="asisten"
         className={`fixed right-4 sm:right-6 z-[1500] flex h-14 w-14 items-center justify-center rounded-full bg-kkp-700 text-white shadow-[0_10px_28px_-8px_rgba(0,34,66,0.6)] transition-transform hover:scale-105 hover:bg-kkp-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-900 ${
           diPeta ? 'bottom-[104px]' : 'bottom-6'
         }`}
