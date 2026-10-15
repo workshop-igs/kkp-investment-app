@@ -365,8 +365,14 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     params: { kelompok: 'MHA' },
     label: 'Wilayah Kelola Masyarakat Hukum Adat',
     warnaContoh: '#b45309',
+    ikon: 'rumah',
+    warnaIkon: '#b45309',
+    warnaTitik: () => ['#b45309'],
+    zoomPin: 8,
     keteranganLegenda:
-      'Perairan yang berada di bawah hak kelola masyarakat hukum adat — wilayah '
+      'Setiap wilayah ditandai titik, dan mulai tingkat provinsi berganti menjadi penanda, agar wilayah yang kecil '
+      + 'mudah ditemukan; batas poligonnya tetap tergambar. '
+      + 'Perairan yang berada di bawah hak kelola masyarakat hukum adat — wilayah '
       + 'sasi, penangkapan tradisional, dan kegiatan adat — dari Sidako KKP (2024, lengkap '
       + 'dengan nama MHA dan SK penetapannya) dan Portal Satu Data KKP, ditambah zona RTRW '
       + 'Provinsi Papua yang ditandai berada di wilayah kelola '
