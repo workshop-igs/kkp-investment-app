@@ -28,6 +28,14 @@ DIBALIK = {'KEDALAMAN'}
 
 
 def statistik(geom, parameter):
+    hasil = _statistik(geom, parameter, False)
+    kosong = [k for k in parameter if (hasil.get(k) or {}).get('rata2') is None]
+    if kosong:
+        hasil.update({k: v for k, v in _statistik(geom, kosong, True).items() if v['rata2'] is not None})
+    return hasil
+
+
+def _statistik(geom, parameter, bersinggungan):
     sql = """
         SELECT o.parameter, o.satuan, o.periode, o.sumber, ST_NumBands(o.rast),
                (ST_SummaryStats(c.r, 1, true)).count, (ST_SummaryStats(c.r, 1, true)).sum,
@@ -38,12 +46,12 @@ def statistik(geom, parameter):
                ST_Value(o.rast, ST_NumBands(o.rast), t.titik)
         FROM analitik_raster_oseanografi o
         CROSS JOIN (SELECT ST_GeomFromEWKT(%s) AS g, ST_PointOnSurface(ST_GeomFromEWKT(%s)) AS titik) t
-        CROSS JOIN LATERAL (SELECT ST_Clip(o.rast, t.g, true) AS r) c
+        CROSS JOIN LATERAL (SELECT ST_Clip(o.rast, t.g, true, %s) AS r) c
         WHERE o.cakupan && t.g AND o.parameter = ANY(%s)
     """
     hasil = {}
     with connection.cursor() as c:
-        c.execute(sql, [geom.ewkt, geom.ewkt, list(parameter)])
+        c.execute(sql, [geom.ewkt, geom.ewkt, bersinggungan, list(parameter)])
         for kode, satuan, periode, sumber, pita, n, jml, mn, mx, mn_waktu, mx_waktu, t1, t_mn, t_mx in c.fetchall():
             h = hasil.setdefault(kode, {'satuan': satuan, 'periode': periode, 'sumber': sumber, 'pita': pita,
                                         'n': 0, 'jumlah': 0.0, 'min': [], 'max': [], 'titik': None})
