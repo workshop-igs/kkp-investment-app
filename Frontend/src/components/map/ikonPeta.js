@@ -39,6 +39,54 @@ const LAMBANG = {
 
   bintang:
     '<path d="M12 3.4 14.7 9l6.1.8-4.4 4.3 1.1 6.1L12 17.3 6.5 20.2l1.1-6.1L3.2 9.8 9.3 9z"/>',
+
+  keramba:
+    '<ellipse cx="12" cy="8" rx="8" ry="3"/>' +
+    '<path d="M4 8v7c0 1.7 3.6 3 8 3s8-1.3 8-3V8"/>' +
+    '<path d="M9 10.8v7M15 10.8v7"/>',
+
+  ombak:
+    '<circle cx="12" cy="8.5" r="3.4"/>' +
+    '<path d="M3 17c1.5 0 1.5-1.6 3-1.6s1.5 1.6 3 1.6 1.5-1.6 3-1.6 1.5 1.6 3 1.6 1.5-1.6 3-1.6 1.5 1.6 3 1.6"/>',
+
+  jembatan:
+    '<path d="M2.5 10h19"/>' +
+    '<path d="M5 10v9M19 10v9"/>' +
+    '<path d="M5 19c0-4.4 3.1-7 7-7s7 2.6 7 7"/>',
+
+  kristal:
+    '<path d="M12 3 20 7.5v9L12 21l-8-4.5v-9z"/>' +
+    '<path d="M4 7.5 12 12l8-4.5M12 12v9"/>',
+
+  labu:
+    '<path d="M9.5 3h5"/>' +
+    '<path d="M10.5 3v6.2L5.2 18.4A1.8 1.8 0 0 0 6.8 21h10.4a1.8 1.8 0 0 0 1.6-2.6L13.5 9.2V3"/>' +
+    '<path d="M7.6 15h8.8"/>',
+
+  daun:
+    '<path d="M5 19.5C5 11 10 5 19.5 4.5 19 14 13 19 5 19.5z"/>' +
+    '<path d="M5 19.5 13.5 11"/>',
+};
+
+export const lambangSvg = (jenis, ukuran) =>
+  `<svg width="${ukuran}" height="${ukuran}" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4"` +
+  ` stroke-linecap="round" stroke-linejoin="round">${LAMBANG[jenis] || LAMBANG.simpul}</svg>`;
+
+export const ukuranTitik = (zoom) => Math.min(14, Math.max(11, Math.round(Number(zoom || 5) + 6)));
+
+export const ikonTitik = (warna, ukuran) => {
+  const ruas = 360 / warna.length;
+  const pola = warna.length > 1
+    ? `background-image:conic-gradient(${warna.map((w, i) => `${w} ${i * ruas}deg ${(i + 1) * ruas}deg`).join(',')});`
+    : '';
+  return L.divIcon({
+    html: `<span style="width:${ukuran}px;height:${ukuran}px;background-color:${warna[0]};${pola}--halo:${warna[0]}"></span>`,
+    className: 'titik-peta',
+    iconSize: [ukuran, ukuran],
+    iconAnchor: [ukuran / 2, ukuran / 2],
+    popupAnchor: [0, -ukuran / 2],
+    tooltipAnchor: [0, -ukuran / 2],
+  });
 };
 
 export const skalaIkon = (zoom) =>

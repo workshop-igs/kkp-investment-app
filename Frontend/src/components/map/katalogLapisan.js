@@ -1,7 +1,7 @@
 import { gayaUnsurRtrl } from '../../utils/simbologiPeta';
 import { warnaKelasRisiko } from '../../utils/simbologiPeta';
-import { garisKelasKelayakan, warnaKelasKelayakan } from '../../utils/simbologiPeta';
 import {
+  IKON_JENIS_INVESTASI,
   KATEGORI_ZONA,
   URUTAN_KATEGORI,
   URUTAN_KATEGORI_DARAT,
@@ -12,6 +12,7 @@ import {
 } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { API_V1_URL } from '../../api/alamat';
+import { lambangSvg } from './ikonPeta';
 
 const TOMBOL_ANALISIS = `<button type="button" data-analisis-lokasi class="mt-2 w-full rounded-lg bg-[#0056A5] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#004a8f]">
   Analisis lokasi ini
@@ -225,12 +226,15 @@ export const LAYER_LOKAL = {
     semuaJenis: 'Semua jenis investasi',
     label: 'Peta Sebaran Wilayah Potensial Investasi',
     legenda: 'disarankan',
-    ikon: 'bintang',
-    warnaIkon: (p) => warnaKelasKelayakan(p.kelas),
+    ikon: (p) => IKON_JENIS_INVESTASI[p.sektor_kode] || 'bintang',
+    warnaIkon: (p) => warnaJenisInvestasi(p.sektor_kode),
+    warnaTitik: (p) => (p.jenis?.length ? p.jenis : [p.sektor_kode]).map(warnaJenisInvestasi),
+    zoomPin: 8,
     zoomBidang: 12,
     keteranganLegenda:
-      'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi; batas lokasinya tampak setelah peta '
-      + 'diperbesar. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona ruang laut, atau kawasan Pola Ruang darat '
+      'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi dan warnanya menunjukkan jenis itu; titik '
+      + 'berwarna ganda cocok untuk beberapa jenis. Mulai tingkat provinsi titik menjadi penanda berlambang jenis, '
+      + 'dan batas lokasinya tampak setelah peta diperbesar lagi. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona ruang laut, atau kawasan Pola Ruang darat '
       + 'RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu, karakter lokasinya cocok (misalnya tambak '
       + 'garam dan unit pengolahan di darat pesisir, budi daya laut di perairan 1 sampai 30 m, OTEC di perairan dalam; '
       + 'kedalaman dan gelombang bersifat indikatif), tidak beririsan KKPRL terbit, tidak tertutup bangunan atau '
@@ -253,17 +257,14 @@ export const LAYER_LOKAL = {
       + 'tampil adalah lokasi dengan persentase tertinggi; perbesar peta untuk melihat lokasi lainnya. Kriteria '
       + 'finansial proyek (NPV, IRR, payback, ROI) tidak ikut; penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
     gaya: (f) => {
-      const kelas = f && f.properties ? f.properties.kelas : null;
-      return {
-        color: garisKelasKelayakan(kelas),
-        weight: 1,
-        fillColor: warnaKelasKelayakan(kelas),
-        fillOpacity: 0.55,
-        opacity: 0.9,
-      };
+      const warna = warnaJenisInvestasi(f?.properties?.sektor_kode);
+      return { color: warna, weight: 1.5, fillColor: warna, fillOpacity: 0.35, opacity: 0.95 };
     },
     popup: (p) => {
-      const warna = warnaKelasKelayakan(p.kelas);
+      const jenis = p.jenis?.length ? p.jenis : [p.sektor_kode];
+      const nama = p.jenis_nama?.length ? p.jenis_nama : [p.sektor || ''];
+      const warna = warnaJenisInvestasi(jenis[0]);
+      const persen = Math.max(0, Math.min(100, Number(p.persen_sesuai) || 0));
       const luas = Number(p.luas_ha || 0).toLocaleString('id-ID', { maximumFractionDigits: 1 });
       const rencana = p.ranah === 'DARAT' ? 'Pola Ruang darat RTRW Provinsi' : 'rencana tata ruang laut';
       const butir = Object.entries(p.parameter || {})
@@ -274,33 +275,38 @@ export const LAYER_LOKAL = {
               ? ['&check;', 'text-emerald-600', '']
               : ['!', 'text-amber-600', ` (${bagian}% luas)`];
           return `<li class="flex gap-1.5 leading-snug">
-             <span class="${kelasTanda} font-bold shrink-0">${tanda}</span>
+             <span class="${kelasTanda} font-bold shrink-0 w-3">${tanda}</span>
              <span>${aman(label)}${ket}</span>
            </li>`;
         })
         .join('');
 
-      return `<div class="font-sans">
-        <h3 class="font-bold mb-1" style="color:${warna}">Lokasi potensial ${aman(p.sektor || '')}</h3>
-        <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
-        <div class="text-xs mb-1.5">
-          <span class="font-bold text-base" style="color:${warna}">${aman(p.persen_sesuai)}%</span>
-          <span class="text-slate-500"> parameter terukur sangat sesuai &middot; ${aman(luas)} ha</span>
+      return `<div class="font-sans w-[18.5rem] max-w-full">
+        <div class="flex items-center gap-2.5">
+          <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full shadow-sm" style="background:${warna}">${lambangSvg(IKON_JENIS_INVESTASI[jenis[0]], 18)}</span>
+          <div class="min-w-0">
+            <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Cocok untuk ${nama.length} jenis investasi` : `Lokasi potensial ${aman(nama[0])}`}</h3>
+            <p class="text-[11px] text-slate-500 leading-snug">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
+          </div>
+        </div>
+        ${nama.length > 1
+          ? `<div class="mt-2 flex flex-wrap gap-1">${jenis.map((kode, i) => `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] font-medium text-slate-700"><span class="h-2 w-2 rounded-full" style="background:${warnaJenisInvestasi(kode)}"></span>${aman(nama[i])}</span>`).join('')}</div>`
+          : ''}
+        <div class="mt-2 flex items-center gap-2.5 rounded-lg bg-slate-50 px-2.5 py-1.5">
+          <span class="text-lg font-bold tabular-nums leading-none" style="color:${warna}">${persen}%</span>
+          <div class="min-w-0 flex-1">
+            <div class="h-1.5 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full" style="width:${persen}%;background:${warna}"></div></div>
+            <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">parameter terukur sangat sesuai &middot; ${aman(luas)} ha</p>
+          </div>
         </div>
         ${p.luas_wilayah_ha > p.luas_ha
-          ? `<p class="text-[10px] text-slate-500 mb-1 leading-snug">Inti terbaik dari wilayah sesuai seluas &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha: persentase tertinggi, lalu paling dekat infrastruktur.</p>`
+          ? `<p class="mt-1 text-[10px] text-slate-500 leading-snug">Inti terbaik dari wilayah sesuai seluas &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha: persentase tertinggi, lalu paling dekat infrastruktur.</p>`
           : ''}
-        ${p.jenis_nama?.length
-          ? `<p class="text-[11px] text-slate-700 mb-1 leading-snug"><b>Cocok untuk:</b> ${aman(p.jenis_nama.join(', '))}</p>`
-          : ''}
-        <p class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Parameter terukur</p>
-        <ul class="text-[11px] space-y-0.5 mb-1">${butir}</ul>
+        <ul class="mt-2 text-[11px] space-y-px text-slate-700">${butir}</ul>
         ${p.status_tata_ruang === 'BERSYARAT'
-          ? `<p class="text-[10px] text-amber-700 mt-1 leading-snug">Diizinkan bersyarat oleh ${rencana}; syaratnya tercantum di Analisis lokasi ini.</p>`
+          ? `<p class="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[10.5px] text-amber-800 leading-snug">Diizinkan bersyarat oleh ${rencana}; syaratnya tercantum di Analisis lokasi ini.</p>`
           : ''}
-        ${p.perlu_dinilai?.length
-          ? `<p class="text-[10px] text-slate-600 mt-1 leading-snug"><b>Perlu dinilai langsung di lapangan:</b> ${aman(p.perlu_dinilai.join('; '))}, serta parameter yang belum terukur di aplikasi seperti kualitas air dan substrat.</p>`
-          : '<p class="text-[10px] text-slate-600 mt-1 leading-snug">Parameter yang belum terukur di aplikasi, seperti kualitas air dan substrat, tetap perlu dinilai langsung di lapangan.</p>'}
+        <p class="text-[10px] text-slate-500 mt-1.5 leading-snug">${p.perlu_dinilai?.length ? 'Parameter bertanda ! atau ?, serta' : 'Parameter yang belum terukur di aplikasi, seperti'} kualitas air dan substrat, perlu dinilai langsung di lapangan.</p>
         ${TOMBOL_ANALISIS}
       </div>`;
     },

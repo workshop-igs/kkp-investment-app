@@ -203,6 +203,20 @@ export const ringkasKkprlZona = (daftar) => {
   return total ? `${n(total)} izin (${daftar.map((k) => `${k.jenis} ${n(k.jumlah)}`).join(', ')})` : 'Belum ada';
 };
 
+export const gabungZona = (zona) => {
+  const hasil = new Map();
+  zona.forEach((z) => {
+    const kunci = [z.nama, z.sub_zona_label, z.tingkat_label, z.sumber_label, z.regulasi, z.ketentuan, z.syarat].join('|');
+    const ada = hasil.get(kunci);
+    if (ada) ada.persen += z.persen;
+    else hasil.set(kunci, { ...z, kunci });
+  });
+  return [...hasil.values()].sort((a, b) => b.persen - a.persen);
+};
+
+export const persenArea = (v) =>
+  v < 0.1 ? '<0,1%' : `${Number(v).toLocaleString('id-ID', { maximumFractionDigits: 1 })}%`;
+
 export const itemSerapan = (total, capexIdr) => {
   const rasio = total > 0 && capexIdr > 0 ? total / (capexIdr / 1e9) : null;
   return [
