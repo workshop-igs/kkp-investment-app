@@ -473,6 +473,8 @@
     ],
     "kata_kunci": [
       "dashboard",
+      "komoditas",
+      "produksi perikanan",
       "filter",
       "portofolio",
       "ekspor",
@@ -486,7 +488,7 @@
       "saring",
       "provinsi"
     ],
-    "isi": "Dashboard Nasional terdiri atas dua bagian. Potensi ruang laut menampilkan jumlah lokasi potensial dari Peta Sebaran Wilayah Potensial (sedikitnya 75% parameter terukur sangat sesuai, di luar KKPRL dan bangunan) beserta jumlah provinsi dan luasnya, peta nasional berisi titik lokasi potensial berwarna jenis dan penanda proyek, jumlah lokasi per jenis investasi, dan provinsi dengan lokasi terbanyak. Proyek investasi menampilkan jumlah proyek, nilai rencana dan realisasi, serapan tenaga kerja, rata-rata skor kelayakan, sebaran proyek pada lima tahap KPPIP, nilai rencana dan realisasi per jenis, proyek per provinsi, dan daftar proyek dengan nilai terbesar yang dapat dibuka detailnya. Saringan jenis investasi, provinsi, dan tahap proyek di bagian atas berlaku untuk seluruh angka, daftar, dan peta; jenis, provinsi, dan tahap juga dapat dipilih dengan mengklik barisnya, dan memilih provinsi memperbesar peta ke wilayah itu. Klik titik lokasi potensial di peta lalu Analisis lokasi ini untuk membukanya di Peta Spasial sebagai area analisis. Ekspor CSV mengunduh daftar proyek sesuai saringan dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah."
+    "isi": "Dashboard Nasional terdiri atas dua bagian. Potensi ruang laut menampilkan jumlah lokasi potensial dari Peta Sebaran Wilayah Potensial (sedikitnya 75% parameter terukur sangat sesuai, di luar KKPRL dan bangunan) beserta jumlah provinsi dan luasnya, peta nasional berisi titik lokasi potensial berwarna jenis dan penanda proyek, jumlah lokasi per jenis investasi, dan provinsi dengan lokasi terbanyak. Proyek investasi menampilkan jumlah proyek, nilai rencana dan realisasi, serapan tenaga kerja, rata-rata skor kelayakan, sebaran proyek pada lima tahap KPPIP, nilai rencana dan realisasi per jenis, proyek per provinsi, dan daftar proyek dengan nilai terbesar yang dapat dibuka detailnya. Panel Komoditas perikanan laut & pesisir menampilkan produksi BPS tahun terbaru untuk perikanan tangkap laut (tongkol, cakalang, tuna, udang, dan lainnya) serta budi daya laut dan pesisir (rumput laut, udang, bandeng, kerapu, kakap), dalam volume ton atau nilai rupiah, beserta perubahannya dibanding tahun sebelumnya, rincian per komoditas untuk Indonesia atau provinsi terpilih, dan provinsi penghasil terbesar; ikan air tawar seperti nila, lele, mas, dan patin tidak dihitung. Memilih jenis Perikanan Tangkap atau Perikanan Budidaya menyaring panel ini ke kelompok yang sama. Saringan jenis investasi, provinsi, dan tahap proyek di bagian atas berlaku untuk seluruh angka, daftar, dan peta; jenis, provinsi, dan tahap juga dapat dipilih dengan mengklik barisnya, dan memilih provinsi memperbesar peta ke wilayah itu. Klik titik lokasi potensial di peta lalu Analisis lokasi ini untuk membukanya di Peta Spasial sebagai area analisis. Ekspor CSV mengunduh daftar proyek sesuai saringan dalam format yang langsung terbaca Excel berbahasa Indonesia (pemisah titik koma, desimal koma); kolom nilai dalam miliar rupiah."
   },
   {
     "id": "pipeline",

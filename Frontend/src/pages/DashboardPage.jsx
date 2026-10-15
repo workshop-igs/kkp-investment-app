@@ -25,6 +25,12 @@ const angka = (n, d = 0) => (n === null || n === undefined || Number.isNaN(n) ? 
 const rupiah = (miliar) => `Rp ${rupiahRingkas((Number(miliar) || 0) * 1e9)}`;
 const jumlah = (daftar, kunci) => daftar.reduce((t, x) => t + (Number(x[kunci]) || 0), 0);
 const ikonProyek = buatIkon('koper', NAVY, 0.8);
+const KELOMPOK_KOMODITAS = {
+  TANGKAP_LAUT: { label: 'Tangkap laut', jenis: 'PERIKANAN_TANGKAP' },
+  BUDIDAYA: { label: 'Budi daya laut & pesisir', jenis: 'PERIKANAN_BUDIDAYA' },
+};
+const ton = (v) => (v >= 1e6 ? `${formatNumber(v / 1e6, 2)} jt ton` : v >= 1e3 ? `${formatNumber(v / 1e3, 1)} rb ton` : `${angka(v)} ton`);
+const perubahan = (kini, lalu) => (lalu ? ((kini - lalu) / lalu) * 100 : null);
 
 const Lambang = ({ kode }) => (
   <span
@@ -65,6 +71,28 @@ const Baris = ({ aktif, redup, onClick, children }) => (
   >
     {children}
   </button>
+);
+
+const Perubahan = ({ nilai, banding }) => (nilai === null ? null : (
+  <span className={`text-xs font-semibold tabular-nums ${nilai >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+    {nilai >= 0 ? '▲' : '▼'} {angka(Math.abs(nilai), 1)}% <span className="font-normal text-slate-400">vs {banding}</span>
+  </span>
+));
+
+const Segmen = ({ nilai, onUbah, opsi }) => (
+  <span className="inline-flex rounded-lg bg-slate-100 p-0.5 text-[11px] font-semibold">
+    {opsi.map(([kode, label]) => (
+      <button
+        key={kode}
+        type="button"
+        aria-pressed={nilai === kode}
+        onClick={() => onUbah(kode)}
+        className={`rounded-md px-2.5 py-1 transition ${FOKUS} ${nilai === kode ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+      >
+        {label}
+      </button>
+    ))}
+  </span>
 );
 
 const Kosong = () => <p className="py-6 text-center text-sm text-slate-400">Tidak ada data</p>;
@@ -197,6 +225,7 @@ const DashboardPage = () => {
   const [jenis, setJenis] = useState('');
   const [provinsi, setProvinsi] = useState('');
   const [tahap, setTahap] = useState('');
+  const [ukuranKomoditas, setUkuranKomoditas] = useState('ton');
 
   const muat = useCallback(async () => {
     setMemuat(true);
@@ -273,6 +302,42 @@ const DashboardPage = () => {
     return { ...s, jumlah: isi.length, rencana: jumlah(isi, 'nilai_investasi_miliar'), realisasi: jumlah(isi, 'nilai_realisasi_miliar') };
   }).filter((j) => j.jumlah > 0).sort((a, b) => b.rencana - a.rencana);
   const maksRencana = Math.max(1, ...proyekPerJenis.map((j) => j.rencana));
+
+  const kom = data?.komoditas || { baris: [] };
+  const kelompokAktif = Object.keys(KELOMPOK_KOMODITAS).find((k) => KELOMPOK_KOMODITAS[k].jenis === jenis);
+  const ukurKom = ukuranKomoditas === 'ton' ? 'ton' : 'nilai_juta';
+  const tampilKom = (v) => (ukuranKomoditas === 'ton' ? ton(v) : rupiah(v / 1000));
+  const barisKom = (tahun) => kom.baris.filter((b) => b.tahun === tahun && (!kelompokAktif || b.kelompok === kelompokAktif));
+  const komKini = barisKom(kom.tahun).filter(diProvinsi);
+  const komLalu = barisKom(kom.tahun_banding).filter(diProvinsi);
+  const totalKom = (baris, kelompok) => jumlah(kelompok ? baris.filter((b) => b.kelompok === kelompok) : baris, ukurKom);
+  const kumpulkan = (baris, kunci, awal) => {
+    const kelompok = new Map();
+    baris.forEach((b) => {
+      const k = kunci(b);
+      const ada = kelompok.get(k) || awal(b);
+      ada.nilai += b[ukurKom] || 0;
+      kelompok.set(k, ada);
+    });
+    return [...kelompok.values()].sort((a, b) => b.nilai - a.nilai);
+  };
+  const perKomoditas = kumpulkan(komKini, (b) => `${b.kelompok}:${b.komoditas}`, (b) => ({
+    kunci: `${b.kelompok}:${b.komoditas}`, komoditas: b.komoditas, kelompok: b.kelompok, nilai: 0,
+  }));
+  const maksKomoditas = Math.max(1, ...perKomoditas.map((k) => k.nilai));
+  const komPerProvinsi = kumpulkan(barisKom(kom.tahun), (b) => b.provinsi_id, (b) => ({
+    id: String(b.provinsi_id), nama: b.provinsi, nilai: 0,
+  }));
+  const maksKomProvinsi = Math.max(1, ...komPerProvinsi.map((p) => p.nilai));
+  const komProvinsiTeratas = provinsi && !komPerProvinsi.slice(0, BATAS_PROVINSI).some((p) => p.id === provinsi)
+    ? [...komPerProvinsi.slice(0, BATAS_PROVINSI - 1), ...komPerProvinsi.filter((p) => p.id === provinsi)]
+    : komPerProvinsi.slice(0, BATAS_PROVINSI);
+  const kartuKomoditas = [
+    ...Object.entries(KELOMPOK_KOMODITAS)
+      .filter(([k]) => !kelompokAktif || k === kelompokAktif)
+      .map(([k, { label, jenis: kodeJenis }]) => [label, totalKom(komKini, k), totalKom(komLalu, k), warnaJenisInvestasi(kodeJenis)]),
+    ...(kelompokAktif ? [] : [['Total', totalKom(komKini), totalKom(komLalu), NAVY]]),
+  ];
 
   const adaSaringan = Boolean(jenis || provinsi || tahap);
   const alih = (setter, nilai, kini) => setter(kini === nilai ? '' : nilai);
@@ -484,6 +549,77 @@ const DashboardPage = () => {
           </Panel>
         </div>
 
+
+        <Panel
+          judul="Komoditas perikanan laut & pesisir"
+          kanan={(
+            <span className="flex items-center gap-3">
+              <span className="hidden text-[11px] text-slate-400 sm:inline">BPS {kom.tahun ?? '—'}</span>
+              <Segmen nilai={ukuranKomoditas} onUbah={setUkuranKomoditas} opsi={[['ton', 'Volume'], ['nilai', 'Nilai']]} />
+            </span>
+          )}
+        >
+          {kom.baris.length ? (
+            <div className="grid gap-4 lg:grid-cols-12">
+              <div className="grid content-start gap-2 sm:grid-cols-3 lg:col-span-3 lg:grid-cols-1">
+                {kartuKomoditas.map(([label, kini, lalu, warna]) => (
+                  <div key={label} className="rounded-xl bg-slate-50 px-4 py-3">
+                    <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <span className="h-2 w-2 rounded-full" style={{ backgroundColor: warna }} />
+                      {label}
+                    </p>
+                    <p className="mt-1 text-xl font-bold tracking-tight tabular-nums text-slate-900">{tampilKom(kini)}</p>
+                    <Perubahan nilai={perubahan(kini, lalu)} banding={kom.tahun_banding} />
+                  </div>
+                ))}
+              </div>
+
+              <div className="lg:col-span-5">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+                  Per komoditas{provinsi ? ` · ${namaProvinsi}` : ' · Indonesia'}
+                </p>
+                {perKomoditas.length ? (
+                  <ul>
+                    {perKomoditas.map((k) => (
+                      <li key={k.kunci} className="py-1.5">
+                        <span className="flex items-baseline justify-between gap-2">
+                          <span className="truncate text-[13px] text-slate-700">
+                            {k.komoditas}
+                            <span className="ml-1.5 text-[11px] text-slate-400">{k.kelompok === 'BUDIDAYA' ? 'budi daya' : 'tangkap'}</span>
+                          </span>
+                          <span className="shrink-0 whitespace-nowrap text-[13px] font-semibold tabular-nums text-slate-900">{tampilKom(k.nilai)}</span>
+                        </span>
+                        <Batang nilai={k.nilai} maks={maksKomoditas} warna={warnaJenisInvestasi(KELOMPOK_KOMODITAS[k.kelompok].jenis)} />
+                      </li>
+                    ))}
+                  </ul>
+                ) : <Kosong />}
+              </div>
+
+              <div className="lg:col-span-4">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-slate-400">Provinsi penghasil</p>
+                <ol className="-mx-2">
+                  {komProvinsiTeratas.map((p) => (
+                    <li key={p.id}>
+                      <Baris aktif={provinsi === p.id} redup={Boolean(provinsi) && provinsi !== p.id} onClick={() => alih(setProvinsi, p.id, provinsi)}>
+                        <span className="flex items-baseline justify-between gap-2">
+                          <span className="truncate text-[13px] text-slate-700">
+                            <span className="mr-2 inline-block w-4 text-right text-[11px] tabular-nums text-slate-400">
+                              {komPerProvinsi.findIndex((x) => x.id === p.id) + 1}
+                            </span>
+                            {p.nama}
+                          </span>
+                          <span className="shrink-0 whitespace-nowrap text-[13px] font-semibold tabular-nums text-slate-900">{tampilKom(p.nilai)}</span>
+                        </span>
+                        <Batang nilai={p.nilai} maks={maksKomProvinsi} warna={BIRU[3]} />
+                      </Baris>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            </div>
+          ) : <Kosong />}
+        </Panel>
 
         <Panel
           judul="Proyek terbesar"
