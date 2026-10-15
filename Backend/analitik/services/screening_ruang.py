@@ -156,10 +156,9 @@ def _ringkas_karakter(data, sektor_kode):
         radius = _angka(atur('RADIUS_EKOSISTEM_PENDUKUNG_M'), 0)
         bagian.append(f'{_nama_ekosistem(temu)} di lokasi atau dalam radius {radius} m' if temu
                       else f'tanpa {_nama_ekosistem(dicari, "atau")} dalam radius {radius} m')
-    if terlarang:
-        bagian.append(f'ada {_nama_ekosistem(terlarang & ada)}' if terlarang & ada
-                      else f'tanpa {_nama_ekosistem(terlarang, "dan")}')
-    if not dicari and pilihan:
+    if terlarang & ada:
+        bagian.append(f'ada {_nama_ekosistem(terlarang & ada)}')
+    elif not dicari and pilihan:
         sensitif = ada & set(EKOSISTEM_PESISIR)
         bagian.append(f'ekosistem sensitif {_nama_ekosistem(sensitif)}' if sensitif else 'tanpa ekosistem sensitif')
     return '; '.join(bagian)
@@ -174,21 +173,29 @@ def _nama_ekosistem(daftar, sambung=None):
 
 def _penuhi(syarat, data):
     dangkal, dalam = data.get('kedalaman_min'), data.get('kedalaman_maks')
-    if 'kedalaman' in syarat and dalam is not None:
+    if 'kedalaman' in syarat:
         bawah, atas = syarat['kedalaman']
         sebaran = data.get('sebaran_kedalaman')
-        if sebaran:
+        if dalam is None:
+            if bawah is not None:
+                return False
+        elif sebaran:
             cocok = sum(n for d, n in sebaran if (bawah is None or d >= bawah) and (atas is None or d <= atas))
             if cocok < atur('AMBANG_KECOCOKAN') * sum(n for _, n in sebaran):
                 return False
         elif (bawah is not None and dalam < bawah) or (atas is not None and dangkal > atas):
             return False
     gelombang = data.get('gelombang')
-    if gelombang is not None and (gelombang > syarat.get('gelombang_maks', gelombang)
-                                  or gelombang < syarat.get('gelombang_min', gelombang)):
+    if gelombang is None:
+        if 'gelombang_min' in syarat:
+            return False
+    elif gelombang > syarat.get('gelombang_maks', gelombang) or gelombang < syarat.get('gelombang_min', gelombang):
         return False
     suhu = data.get('suhu_min')
-    if suhu is not None and suhu < syarat.get('suhu_min', suhu):
+    if suhu is None:
+        if 'suhu_min' in syarat:
+            return False
+    elif suhu < syarat.get('suhu_min', suhu):
         return False
     jarak = data.get('jarak_pantai_km')
     if jarak is not None and jarak > syarat.get('jarak_pantai_maks_km', jarak):
@@ -221,7 +228,6 @@ LABEL_SYARAT = {
     'suhu_min': 'Suhu permukaan laut sesuai',
     'jarak_pantai_maks_km': 'Jarak ke pantai sesuai',
     'ekosistem': 'Ada ekosistem pendukung',
-    'tanpa_ekosistem': 'Bebas terumbu karang dan lamun',
 }
 SUMBER_SYARAT = {
     'kedalaman': 'kedalaman_maks',
@@ -248,7 +254,8 @@ def parameter_lokasi(sektor_kode, data):
     pilihan = atur('KARAKTER_LOKASI').get(sektor_kode, {}).get(data['ranah'], [{}])
     syarat = next((s for s in pilihan if _penuhi(s, data)), {})
     nilai = {'Ranah lokasi sesuai jenis investasi': True, **{
-        LABEL_SYARAT[k]: None if k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None else True for k in syarat
+        LABEL_SYARAT[k]: None if k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None else True
+        for k in syarat if k in LABEL_SYARAT
     }}
     for kunci, batas in atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}).items():
         label, sumber = LABEL_TAMBAHAN[kunci]
