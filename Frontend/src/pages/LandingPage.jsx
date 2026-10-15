@@ -550,8 +550,8 @@ const LandingPage = () => {
                 Platform Manajemen Investasi Ruang Laut
               </h1>
               <p className="mt-7 max-w-xl text-lg leading-relaxed text-slate-600">
-                Alat kerja KKP untuk menilai kelayakan ruang laut bagi investasi: kesesuaian lokasi dengan rencana
-                tata ruang laut, tumpang tindih dengan KKPRL yang sudah terbit, dan kelayakan finansialnya.
+                Sistem informasi terpadu untuk mewujudkan investasi ruang laut yang tepat lokasi, sesuai tata ruang,
+                layak secara ekonomi, dan berkelanjutan.
               </p>
               <div className="mt-10 flex flex-wrap gap-3">
                 <TombolUtama to="/peta">Buka Peta Spasial</TombolUtama>
