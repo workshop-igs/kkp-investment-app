@@ -5,90 +5,54 @@ import { useAuth } from '../../context/KonteksAuth';
 const LANGKAH = [
   {
     judul: 'Selamat datang di Peta Spasial',
-    isi: 'Di sini Anda menentukan area proyek, memeriksa kesesuaian ruangnya, lalu menilai kelayakan investasinya. Tur singkat ini menunjukkan setiap alat di peta.',
-  },
-  {
-    pilih: '[data-tur="menu"]',
-    judul: 'Menu utama',
-    isi: 'Beranda kembali ke halaman depan, Peta Spasial adalah halaman ini, dan Profil Investasi menyajikan profil investasi per provinsi beserta PDF-nya. Setelah masuk, Dashboard Nasional merangkum potensi dan proyek seluruh Indonesia, dan Proyek Investasi berisi proyek yang sudah disimpan beserta tahapnya. Akun administrator juga melihat menu Administrator.',
+    isi: 'Temukan dan uji lokasi investasi kelautan dalam 3 langkah:',
+    poin: ['Tentukan area proyek', 'Isi parameter analisis', 'Dapatkan laporan kelayakan'],
   },
   {
     pilih: '[data-tur="legenda"]',
-    judul: 'Legenda peta',
-    isi: 'Arti warna setiap layer yang sedang menyala. Tampilan awal memuat Peta Sebaran Wilayah Potensial Investasi: setiap titik adalah lokasi dengan sedikitnya 5 parameter terukur yang 75% di antaranya sangat sesuai untuk sebuah jenis investasi (di zona peruntukan lain yang hanya mengizinkan bersyarat, seluruh parameter lain wajib terukur dan sangat sesuai). Warna titik menunjukkan jenis investasinya dan titik berwarna ganda cocok untuk beberapa jenis. Klik sebuah jenis di legenda untuk menampilkan lokasinya saja; klik sebuah titik lalu Analisis lokasi ini untuk memuat batas lokasinya sebagai area analisis. Klik judulnya untuk membuka atau menutup legenda.',
+    judul: 'Lokasi potensial',
+    isi: 'Setiap titik di peta adalah lokasi potensial investasi; warnanya menunjukkan jenis investasi. Klik sebuah titik lalu "Analisis lokasi ini".',
   },
   {
     peraga: true,
-    judul: 'Ringkasan provinsi',
-    isi: 'Arahkan kursor ke sebuah provinsi: batasnya menyala dan namanya muncul, seperti contoh di peta. Klik provinsi untuk membuka ringkasannya; dari panel itu profil investasi provinsi dan profil per jenis investasi dapat diunduh sebagai PDF.',
-  },
-  {
-    pilih: '[data-tur="zoom"]',
-    judul: 'Perbesar dan perkecil',
-    isi: 'Mengatur skala peta. Roda gulir tetikus juga bisa dipakai.',
+    judul: 'Info provinsi',
+    isi: 'Klik sebuah provinsi untuk melihat ringkasan dan mengunduh profil investasinya.',
   },
   {
     pilih: '[data-tur="lapisan"]',
-    judul: 'Daftar layer',
-    isi: 'Menyalakan data seperti KKPRL terbit, RTRW Provinsi, Rencana Zonasi KAW, infrastruktur, risiko bencana, dan sebaran wilayah potensial investasi. Pada KKPRL dan layer tata ruang bisa dipilih satu kategori saja, misalnya hanya perikanan tangkap. Klik sebuah zona di peta untuk rinciannya; pada layer tata ruang dan Peta Sebaran Wilayah Potensial Investasi tersedia tombol "Analisis lokasi ini" untuk menjadikan zona itu area proyek.',
+    judul: 'Layer data',
+    isi: 'Nyalakan data tata ruang, KKPRL, infrastruktur, atau risiko bencana. Klik zona di peta untuk rinciannya.',
   },
   {
-    pilih: '[data-tur="basemap"]',
-    judul: 'Peta dasar',
-    isi: 'Mengganti latar peta: Satelit, Jalan, atau Topografi.',
-  },
-  {
-    pilih: '[data-tur="koordinat"]',
-    judul: 'Input koordinat',
-    isi: 'Menuju titik lintang dan bujur tertentu.',
-  },
-  {
-    pilih: '[data-tur="cari"]',
-    judul: 'Cari lokasi',
-    isi: 'Menemukan lokasi berdasarkan nama, misalnya pelabuhan, kawasan, atau provinsi.',
-  },
-  {
-    pilih: '[data-tur="ukur"]',
-    judul: 'Ukur jarak',
-    isi: 'Klik titik-titik di peta untuk mengukur jarak. Klik ganda atau Enter untuk mengakhiri, Esc untuk keluar.',
-  },
-  {
-    pilih: '[data-tur="kompas"]',
-    judul: 'Geser peta',
-    isi: 'Tombol U, S, T, dan B menggeser peta ke utara, selatan, timur, dan barat.',
-  },
-  {
-    pilih: '.leaflet-control-minimap',
-    judul: 'Peta mini',
-    isi: 'Menunjukkan posisi tampilan saat ini di peta yang lebih luas. Tombol di pojoknya menyembunyikan peta mini.',
-  },
-  {
-    pilih: '[data-tur="gambar"]',
-    judul: 'Gambar area proyek',
-    isi: 'Klik titik-titik sudut di peta (minimal 3), lalu tekan Enter, Selesai Menggambar, atau klik titik pertama. Undo menghapus titik terakhir. Menggambar tetap bisa di atas layer yang sedang menyala.',
-  },
-  {
-    pilih: '[data-tur="gambar"] + div',
-    judul: 'Unggah file geospasial',
-    isi: 'Cara lain menentukan area: unggah shapefile (.zip), KML, atau GeoJSON.',
+    pilih: '[data-tur="alat"]',
+    judul: 'Alat peta',
+    isi: 'Zoom, layer, peta dasar, koordinat, cari lokasi, ukur jarak, dan unduh PDF peta.',
   },
   {
     pilih: '[data-aksi-peta]',
-    judul: 'Setelah area terbentuk',
-    isi: 'Periksa batas area di peta, lalu tekan Isi Parameter Analisis. Kembali ke Area memusatkan peta ke area, Upload Ulang mengganti area, dan Reset menghapusnya.',
+    langkah: 1,
+    judul: 'Tentukan area proyek',
+    isi: 'Gambar area langsung di peta, atau unggah file SHP (.zip), KML, maupun GeoJSON.',
   },
   {
-    judul: 'Analisis tiga langkah',
-    isi: '1) Identitas Proyek: nama proyek, jenis investasi, investor, dan lokasi detail; provinsi dan kabupaten/kota terisi otomatis dari area. 2) Analisis Ruang: kesesuaian terhadap rencana tata ruang, tumpang tindih dengan KKPRL terbit, dan tabel kegiatan diperbolehkan, bersyarat, dan tidak diperbolehkan beserta sumber aturannya. Lokasi yang tidak sesuai berhenti di sini, dan sistem menawarkan jenis investasi atau lokasi alternatif. 3) Analisis Finansial: CapEx, pendapatan, OpEx, pertumbuhan, tingkat diskonto, dan umur proyek.',
+    langkah: 2,
+    judul: 'Isi parameter analisis',
+    isi: 'Tekan "Isi Parameter Analisis", lalu lengkapi identitas proyek. Sistem memeriksa kesesuaian ruang, kemudian menghitung kelayakan finansial.',
   },
   {
-    judul: 'Laporan hasil analisis',
-    isi: 'Laporan memuat informasi umum, tata ruang dan perizinan, transportasi dan infrastruktur, sosial dan ketenagakerjaan, risiko lingkungan dan sosial, serta kelayakan investasi, masing-masing dengan sumber dan tahun datanya. Lihat Laporan Lengkap (PDF) mengunduh laporan, dan Simpan ke Proyek Investasi menyimpan proyek.',
+    langkah: 3,
+    judul: 'Lihat laporan',
+    isi: 'Unduh laporan lengkap (PDF) atau simpan ke Proyek Investasi.',
+  },
+  {
+    pilih: '[data-tur="asisten"]',
+    judul: 'Butuh bantuan?',
+    isi: 'Tanyakan apa saja seputar aplikasi ke Asisten KKP.',
   },
   {
     pilih: '[data-tur="ulang-tur"]',
     judul: 'Buka tur lagi',
-    isi: 'Tur ini dapat dibuka kembali kapan saja lewat tombol ini.',
+    isi: 'Tekan tombol ini kapan saja untuk mengulang tur.',
   },
 ];
 
@@ -151,7 +115,7 @@ const areaBebas = (batasBawah) => {
 
 const TurPeta = ({ aktif, setAktif, peraga }) => {
   const { user } = useAuth();
-  const kunci = `kkp-tur-peta:${user?.id ?? 'tamu'}`;
+  const kunci = `kkp-tur-peta-v2:${user?.id ?? 'tamu'}`;
   const [daftar, setDaftar] = useState([]);
   const [i, setI] = useState(0);
   const [kotak, setKotak] = useState(null);
@@ -245,12 +209,29 @@ const TurPeta = ({ aktif, setAktif, peraga }) => {
         className="absolute w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-2xl border border-slate-200 p-5"
         style={posisi ?? { opacity: 0 }}
       >
-        <p className="text-[11px] font-semibold text-kkp-700 tabular-nums">
-          {i + 1} / {daftar.length}
-        </p>
+        {langkah.langkah && (
+          <p className="text-[11px] font-bold uppercase tracking-wide text-sky-600">Langkah {langkah.langkah} dari 3</p>
+        )}
         <h2 id="tur-judul" className="text-base font-bold text-slate-900 mt-1">{langkah.judul}</h2>
         <p className="text-sm text-slate-600 mt-2 leading-relaxed">{langkah.isi}</p>
-        <div className="flex items-center justify-between gap-2 mt-4">
+        {langkah.poin && (
+          <ol className="mt-3 space-y-2">
+            {langkah.poin.map((teks, n) => (
+              <li key={teks} className="flex items-center gap-2.5 text-sm font-medium text-slate-800">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-sky-600 text-xs font-bold text-white">
+                  {n + 1}
+                </span>
+                {teks}
+              </li>
+            ))}
+          </ol>
+        )}
+        <div className="flex gap-1 mt-4" aria-label={`Langkah tur ${i + 1} dari ${daftar.length}`}>
+          {daftar.map((l, n) => (
+            <span key={l.judul} className={`h-1.5 rounded-full transition-all ${n === i ? 'w-5 bg-sky-600' : 'w-1.5 bg-slate-300'}`} />
+          ))}
+        </div>
+        <div className="flex items-center justify-between gap-2 mt-3">
           <button onClick={tutup} className="text-xs font-semibold text-slate-500 hover:text-slate-800">
             {terakhir ? 'Tutup' : 'Lewati tur'}
           </button>
@@ -268,7 +249,7 @@ const TurPeta = ({ aktif, setAktif, peraga }) => {
               onClick={() => (terakhir ? tutup() : setI(i + 1))}
               className="px-4 py-2 text-xs font-bold text-white bg-sky-600 hover:bg-sky-700 rounded-lg"
             >
-              {terakhir ? 'Selesai' : 'Lanjut'}
+              {i === 0 ? 'Mulai' : terakhir ? 'Selesai' : 'Lanjut'}
             </button>
           </div>
         </div>
