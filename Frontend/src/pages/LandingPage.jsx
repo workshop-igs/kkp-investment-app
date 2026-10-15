@@ -118,7 +118,7 @@ const LatarLaut = () => (
 
 const LATAR_LABEL = { toska: 'bg-[#D3F0F8]', hijau: 'bg-[#E2F1CC]', putih: 'bg-white/85' };
 
-export const Label = ({ children, nada = 'toska' }) => (
+const Label = ({ children, nada = 'toska' }) => (
   <span className={`inline-block px-2.5 py-1 font-mono text-xs font-medium uppercase tracking-[0.24em] text-kkp-900 sm:text-[13px] ${LATAR_LABEL[nada]}`}>
     {children}
   </span>
