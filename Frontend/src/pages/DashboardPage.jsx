@@ -962,14 +962,14 @@ const DashboardPage = () => {
                 Eksplorasi Potensi Ruang Laut Belum Teralokasi
               </h3>
               <p className="text-slate-300 text-xs leading-relaxed mb-6">
-                Zona ruang laut berkelas kelayakan tinggi untuk sedikitnya satu jenis investasi, belum memiliki izin KKPRL di dalamnya, dan belum terbangun.
+                Lokasi potensial dari Peta Sebaran Wilayah Potensial untuk sedikitnya satu jenis investasi: sedikitnya 75% parameter terukurnya sangat sesuai, di luar KKPRL dan bangunan.
               </p>
 
               <div className="space-y-3">
                 <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs text-slate-300">Zona Kelayakan Tinggi:</span>
+                  <span className="text-xs text-slate-300">Lokasi Potensial:</span>
                   <span className="font-bold text-teal-300 text-base">
-                    {formatNumber(data?.summary?.potensi?.total_zona || 0, 0)} Zona
+                    {formatNumber(data?.summary?.potensi?.total_lokasi || 0, 0)} Lokasi
                   </span>
                 </div>
                 <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
@@ -979,7 +979,7 @@ const DashboardPage = () => {
                   </span>
                 </div>
                 <div className="bg-white/10 backdrop-blur border border-white/10 p-3 rounded-xl flex items-center justify-between">
-                  <span className="text-xs text-slate-300">Luas Cadangan Laut:</span>
+                  <span className="text-xs text-slate-300">Luas Lokasi Potensial:</span>
                   <span className="font-bold text-emerald-300 text-base">
                     {formatNumber(data?.summary?.potensi?.total_luas_ha || 0, 0)} Hektar
                   </span>
