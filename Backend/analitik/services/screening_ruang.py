@@ -130,7 +130,8 @@ def _persen_area(nilai):
 def _ringkas_karakter(data):
     bagian = []
     if data.get('kedalaman_maks') is not None:
-        bagian.append(f"kedalaman {_angka(data['kedalaman_min'], 0)}-{_angka(data['kedalaman_maks'], 0)} m")
+        dangkal, dalam = _angka(data['kedalaman_min'], 0), _angka(data['kedalaman_maks'], 0)
+        bagian.append(f'kedalaman sekitar {dalam} m' if dangkal == dalam else f'kedalaman {dangkal} sampai {dalam} m')
     if data.get('gelombang') is not None:
         bagian.append(f"gelombang {_angka(data['gelombang'])} m")
     if data.get('jarak_pantai_km') is not None:
