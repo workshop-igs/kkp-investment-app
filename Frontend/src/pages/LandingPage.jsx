@@ -535,7 +535,7 @@ const LandingPage = () => {
   const ringkasanNasional = [
     [angka(ringkas?.kkprl_aktif), 'Izin KKPRL berlaku', '/peta?lapisan=kkprl'],
     [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin', '/peta?lapisan=kkprl'],
-    [angka(ringkas?.proyek), 'Proyek investasi terpantau', '/pipeline'],
+    [angka(ringkas?.zona_tata_ruang), 'Zona tata ruang laut', '/peta?lapisan=polaruang,polaruang_kaw'],
   ];
 
   return (

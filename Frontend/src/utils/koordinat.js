@@ -31,9 +31,10 @@ const belahDua = (teks) => {
   if (jumlahKoma === 1) return teks.split(',');
 
   POLA_ARAH.lastIndex = 0;
+  const besar = teks.toUpperCase();
   const arah = [];
   let m;
-  while ((m = POLA_ARAH.exec(teks)) !== null) {
+  while ((m = POLA_ARAH.exec(besar)) !== null) {
     arah.push({ mulai: m.index + m[0].length - m[1].length, akhir: m.index + m[0].length });
     POLA_ARAH.lastIndex = m.index + m[0].length;
   }
