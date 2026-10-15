@@ -43,6 +43,13 @@ DAFTAR = [
        'proporsi (0-1)', (PETA,), (0, 1)),
     _d('MINIMAL_PARAMETER_TERUKUR', 'peta', 'Jumlah minimal parameter terukur', '', 'parameter', (PETA,),
        (1, 30), bulat=True),
+    _d('WAJIB_LENGKAP_BERSYARAT', 'peta', 'Zona peruntukan lain: seluruh parameter wajib terukur',
+       'Lokasi di zona yang peruntukannya untuk kegiatan lain dan hanya mengizinkan jenis itu bersyarat direkomendasikan '
+       'hanya bila seluruh parameter selain tata ruang terukur.', dampak=(PETA,)),
+    _d('AMBANG_KECOCOKAN_BERSYARAT', 'peta', 'Zona peruntukan lain: ambang parameter sangat sesuai',
+       'Bagian parameter selain tata ruang yang harus sangat sesuai untuk lokasi di zona peruntukan lain yang hanya '
+       'mengizinkan bersyarat; 1 berarti semuanya.',
+       'proporsi (0-1)', (PETA,), (0, 1)),
     _d('JARAK_ANTAR_LOKASI_KM', 'peta', 'Jarak minimal antartitik lokasi',
        'Dalam radius ini hanya lokasi terbaik yang ditampilkan.', 'km', (PETA,), (0, 200)),
     _d('SEL_PER_SISI_INTI_LOKASI', 'peta', 'Ukuran inti lokasi',

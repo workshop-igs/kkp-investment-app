@@ -39,6 +39,7 @@ LABEL_STATUS = {
     'BELUM_TERVERIFIKASI': 'Belum dapat diverifikasi',
 }
 BOLEH = ('DIIZINKAN', 'BERSYARAT')
+LABEL_TATA_RUANG = 'Peruntukan tata ruang diizinkan tanpa syarat'
 STATUS_TATA_RUANG = {'SESUAI': 'DIIZINKAN', 'SESUAI_BERSYARAT': 'BERSYARAT', 'TIDAK_SESUAI': 'TIDAK_DIIZINKAN'}
 
 
@@ -206,7 +207,7 @@ def parameter_lokasi(sektor_kode, data):
     for kunci, batas in atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}).items():
         label, sumber = LABEL_TAMBAHAN[kunci]
         nilai[label] = None if data.get(sumber) is None else data[sumber] <= batas
-    nilai['Peruntukan tata ruang diizinkan tanpa syarat'] = data.get('status_tr') == 'DIIZINKAN'
+    nilai[LABEL_TATA_RUANG] = data.get('status_tr') == 'DIIZINKAN'
     for jenis, label in BENCANA_LOKASI:
         kelas = (data.get('bencana') or {}).get(jenis)
         nilai[label] = None if kelas is None else kelas == 'RENDAH'
