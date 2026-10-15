@@ -10,7 +10,9 @@ from django.db.models import Q
 from analitik.models import LokasiPotensial, NilaiWilayahParameter, ParameterTambahan
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
+    KETENTUAN_DARAT_BAWAAN,
     KM_PER_DERAJAT,
+    SEKTOR_SUB_ZONA_COCOK,
     SEKTOR_TERSENDIRI_DI_PETA,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
@@ -19,6 +21,7 @@ from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
 from analitik.services.screening_ruang import (
     BOLEH,
+    LABEL_TATA_RUANG,
     _aturan_per_sektor,
     _ketentuan,
     parameter_lokasi,
@@ -323,6 +326,8 @@ class Command(BaseCommand):
         berlaku = [t for t in d['tambahan'] if not t[2] or sektor.kode in t[2]]
         gerbang = [f for _, peran, _, f in berlaku if peran == 'GERBANG']
         dinilai = [(nama, f) for nama, peran, _, f in berlaku if peran == 'DINILAI']
+        peruntukan = {*SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, ()), *(
+            sub for sub, st in KETENTUAN_DARAT_BAWAAN.get(sektor.kode, {}).items() if st == 'DIIZINKAN')}
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
@@ -332,11 +337,13 @@ class Command(BaseCommand):
             ranah = {zona[z][3] for z in zids}
             if not st <= set(BOLEH) or len(ranah) != 1 or not ranah <= izin or any(f(i) is False for f in gerbang):
                 continue
+            bersyarat = 'BERSYARAT' in st
             kunci = (
-                ranah.pop(), 'BERSYARAT' if 'BERSYARAT' in st else 'DIIZINKAN', d['kedalaman'][i], d['gelombang'][i],
+                ranah.pop(), 'BERSYARAT' if bersyarat else 'DIIZINKAN', d['kedalaman'][i], d['gelombang'][i],
                 d['suhu'][i], d['anomali'][i], d['jarak'][i], d['ekosistem'][i], tuple(sorted((d['bencana'][i] or {}).items())),
                 (i in d['infra']) if d['infra_terdata'] else None, (i in d['adat']) if d['adat_terdata'] else None,
                 tuple((nama, f(i)) for nama, f in dinilai),
+                bersyarat and any(zona[z][1] not in peruntukan for z in zids),
             )
             if kunci not in tembolok:
                 tembolok[kunci] = self._nilai(sektor.kode, kunci)
@@ -346,7 +353,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _nilai(kode, kunci):
-        ranah, status_tr, dalam, gelombang, suhu, anomali, jarak, ekosistem, bencana, infra, adat, tambahan = kunci
+        ranah, status_tr, dalam, gelombang, suhu, anomali, jarak, ekosistem, bencana, infra, adat, tambahan, ketat = kunci
         nilai = parameter_lokasi(kode, {
             'ranah': ranah, 'status_tr': status_tr, 'kedalaman_min': dalam, 'kedalaman_maks': dalam,
             'gelombang': gelombang, 'suhu_min': suhu, 'anomali_suhu': anomali,
@@ -356,6 +363,12 @@ class Command(BaseCommand):
         })
         if nilai is None or sum(v is not None for v in nilai.values()) < atur('MINIMAL_PARAMETER_TERUKUR'):
             return None
+        if ketat:
+            lain = [v for k, v in nilai.items() if k != LABEL_TATA_RUANG]
+            if atur('WAJIB_LENGKAP_BERSYARAT') and None in lain:
+                return None
+            if sum(v is True for v in lain) < atur('AMBANG_KECOCOKAN_BERSYARAT') * sum(v is not None for v in lain):
+                return None
         persen = persen_sangat_sesuai(nilai)
         return (persen, nilai) if persen >= 100 * atur('AMBANG_KECOCOKAN') else None
 
