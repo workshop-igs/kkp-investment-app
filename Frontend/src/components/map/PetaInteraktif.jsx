@@ -395,7 +395,6 @@ const PetaInteraktif = ({
                 warnaIkon={LAYER_LOKAL[id].warnaIkon}
                 warnaTitik={LAYER_LOKAL[id].warnaTitik}
                 zoomPin={LAYER_LOKAL[id].zoomPin}
-                zoomBidang={LAYER_LOKAL[id].zoomBidang}
                 onStatus={(st) => catatStatus(id, st)}
                 onEachFeature={(feature, layer) => {
                   const p = feature?.properties || {};
