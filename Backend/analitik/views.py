@@ -378,6 +378,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     BATAS_FITUR = 2000
 
     SERTAKAN_TITIK = True
+    permission_classes = [AllowAny]
 
     SKALA = [
         (30.0, 0.0005, 1200),
@@ -386,6 +387,9 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     ]
 
     queryset = LokasiPotensial.objects.select_related('provinsi', 'sektor').all()
+
+    def retrieve(self, request, pk=None):
+        return Response({'geometry': json.loads(self.get_object().geometry.geojson)})
 
     def peta_urutan(self, qs, request, batas):
         return qs.order_by('-persen_sesuai', '-luas_ha', 'id')
