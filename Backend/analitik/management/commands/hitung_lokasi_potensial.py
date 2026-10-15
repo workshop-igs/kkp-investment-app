@@ -156,7 +156,7 @@ class Command(BaseCommand):
 
     def _data_sel(self, c, banyak, cakupan, prov):
         d = {k: [None] * (banyak + 1) for k in (
-            'zona', 'kedalaman', 'gelombang', 'suhu', 'anomali', 'jarak', 'ekosistem', 'bencana',
+            'zona', 'kedalaman', 'gelombang', 'suhu', 'anomali', 'jarak', 'ekosistem', 'sekitar', 'bencana',
         )}
 
         c.execute(
@@ -202,18 +202,19 @@ class Command(BaseCommand):
                 if d['jarak'][i] is None:
                     d['jarak'][i] = 0.0 if km == 0.5 else 1.0
 
-        c.execute(
-            """
-            SELECT s.id, array_agg(DISTINCT e.jenis) FROM sel s JOIN inventarisasi_sumber_daya_alam e
-              ON e.geometry && s.kotak AND ST_Intersects(e.geometry, s.kotak)
-             AND (e.sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG')
-                  OR (e.sumber_data = 'GMW-MANGROVE' AND e.tahun_data = %s))
-            GROUP BY s.id
-            """,
-            [GMW_TAHUN_AKHIR],
-        )
-        for i, jenis in c.fetchall():
-            d['ekosistem'][i] = frozenset(jenis)
+        for kolom, radius in (('ekosistem', 0.0), ('sekitar', atur('RADIUS_EKOSISTEM_PENDUKUNG_M') / 1000 / KM_PER_DERAJAT)):
+            c.execute(
+                """
+                SELECT s.id, array_agg(DISTINCT e.jenis) FROM sel s JOIN inventarisasi_sumber_daya_alam e
+                  ON e.geometry && ST_Expand(s.kotak, %s) AND ST_DWithin(e.geometry, s.kotak, %s)
+                 AND (e.sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG')
+                      OR (e.sumber_data = 'GMW-MANGROVE' AND e.tahun_data = %s))
+                GROUP BY s.id
+                """,
+                [radius, radius, GMW_TAHUN_AKHIR],
+            )
+            for i, jenis in c.fetchall():
+                d[kolom][i] = frozenset(jenis)
 
         c.execute(
             'CREATE TEMP TABLE bencana_sel AS SELECT jenis, kelas, ST_Subdivide(ST_MakeValid(geometry), 256, 1e-9) AS g '
@@ -340,7 +341,7 @@ class Command(BaseCommand):
             bersyarat = 'BERSYARAT' in st
             kunci = (
                 ranah.pop(), 'BERSYARAT' if bersyarat else 'DIIZINKAN', d['kedalaman'][i], d['gelombang'][i],
-                d['suhu'][i], d['anomali'][i], d['jarak'][i], d['ekosistem'][i], tuple(sorted((d['bencana'][i] or {}).items())),
+                d['suhu'][i], d['anomali'][i], d['jarak'][i], d['ekosistem'][i], d['sekitar'][i], tuple(sorted((d['bencana'][i] or {}).items())),
                 (i in d['infra']) if d['infra_terdata'] else None, (i in d['adat']) if d['adat_terdata'] else None,
                 tuple((nama, f(i)) for nama, f in dinilai),
                 bersyarat and any(zona[z][1] not in peruntukan for z in zids),
@@ -353,12 +354,12 @@ class Command(BaseCommand):
 
     @staticmethod
     def _nilai(kode, kunci):
-        ranah, status_tr, dalam, gelombang, suhu, anomali, jarak, ekosistem, bencana, infra, adat, tambahan, ketat = kunci
+        ranah, status_tr, dalam, gelombang, suhu, anomali, jarak, ekosistem, sekitar, bencana, infra, adat, tambahan, ketat = kunci
         nilai = parameter_lokasi(kode, {
             'ranah': ranah, 'status_tr': status_tr, 'kedalaman_min': dalam, 'kedalaman_maks': dalam,
             'gelombang': gelombang, 'suhu_min': suhu, 'anomali_suhu': anomali,
             'jarak_pantai_km': (jarak if jarak is not None else 99.0) if ranah == 'LAUT' else None,
-            'ekosistem': ekosistem or frozenset(), 'bencana': dict(bencana), 'dekat_infrastruktur': infra, 'adat': adat,
+            'ekosistem': ekosistem or frozenset(), 'ekosistem_sekitar': sekitar or frozenset(), 'bencana': dict(bencana), 'dekat_infrastruktur': infra, 'adat': adat,
             'tambahan': dict(tambahan),
         })
         if nilai is None or sum(v is not None for v in nilai.values()) < atur('MINIMAL_PARAMETER_TERUKUR'):

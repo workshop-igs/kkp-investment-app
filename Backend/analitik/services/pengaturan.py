@@ -35,6 +35,11 @@ DAFTAR = [
     _d('KARAKTER_LOKASI', 'karakter', 'Syarat karakter lokasi',
        'Syarat fisik wajib per jenis investasi di perairan dan di darat. Lokasi yang tidak memenuhi satu pun '
        'alternatif syarat dinilai tidak sesuai.', dampak=(PETA, SKOR)),
+    _d('RADIUS_EKOSISTEM_PENDUKUNG_M', 'karakter', 'Radius ekosistem pendukung',
+       'Syarat ekosistem pendukung (mangrove, lamun, terumbu karang) terpenuhi bila ekosistem itu berada di dalam '
+       'lokasi atau dalam radius ini darinya, sehingga area di samping ekosistem dinilai sama dengan lokasi yang '
+       'menyentuhnya. Syarat bebas terumbu karang dan lamun tetap memakai irisan langsung.', 'm', (PETA,),
+       (0, 5000), bulat=True),
     _d('PARAMETER_TAMBAHAN', 'karakter', 'Parameter penilaian tambahan per jenis',
        'Parameter yang ikut dihitung dalam persentase sangat sesuai, tetapi tidak menggugurkan lokasi.',
        dampak=(PETA,)),

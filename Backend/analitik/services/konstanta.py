@@ -236,7 +236,7 @@ KARAKTER_LOKASI = {
         'LAUT': [{'kedalaman': (10, None)}],
     },
     'PARIWISATA_BAHARI': {
-        'uraian': 'perairan paling dalam 30 m dan paling jauh 5 km dari pantai atau berterumbu karang, '
+        'uraian': 'perairan paling dalam 30 m dan paling jauh 5 km dari pantai atau di dekat terumbu karang, '
                   'serta kawasan pariwisata di darat pesisir',
         'LAUT': [{'kedalaman': (None, 30), 'jarak_pantai_maks_km': 5}, {'ekosistem': ['TERUMBU_KARANG']}],
         'DARAT': [{}],
@@ -259,12 +259,14 @@ KARAKTER_LOKASI = {
         ],
     },
     'KONSERVASI_PESISIR': {
-        'uraian': 'pesisir yang memiliki mangrove, lamun, atau terumbu karang, di perairan maupun di darat',
+        'uraian': 'pesisir yang memiliki atau berdekatan dengan mangrove, lamun, atau terumbu karang, di perairan '
+                  'maupun di darat',
         'LAUT': [{'ekosistem': EKOSISTEM_PESISIR}],
         'DARAT': [{'ekosistem': EKOSISTEM_PESISIR}],
     },
     'BIOTEKNOLOGI_KELAUTAN': {
-        'uraian': 'perairan yang memiliki mangrove, lamun, atau terumbu karang sebagai sumber bahan baku hayati',
+        'uraian': 'perairan yang memiliki atau berdekatan dengan mangrove, lamun, atau terumbu karang sebagai sumber '
+                  'bahan baku hayati',
         'LAUT': [{'ekosistem': EKOSISTEM_PESISIR}],
     },
 }
@@ -273,6 +275,8 @@ PARAMETER_TAMBAHAN = {
     kode: {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}}
     for kode in ('KONSERVASI_PESISIR', 'BIOTEKNOLOGI_KELAUTAN')
 }
+
+RADIUS_EKOSISTEM_PENDUKUNG_M = 500
 
 JENIS_ZONA_TERLARANG = ['ALKI']
 
