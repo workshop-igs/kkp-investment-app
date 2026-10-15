@@ -393,6 +393,7 @@ const PetaInteraktif = ({
                 gayaTitik={LAYER_LOKAL[id].titik}
                 ikon={LAYER_LOKAL[id].ikon}
                 warnaIkon={LAYER_LOKAL[id].warnaIkon}
+                warnaTitik={LAYER_LOKAL[id].warnaTitik}
                 zoomPin={LAYER_LOKAL[id].zoomPin}
                 zoomBidang={LAYER_LOKAL[id].zoomBidang}
                 onStatus={(st) => catatStatus(id, st)}
@@ -505,6 +506,7 @@ const PetaInteraktif = ({
           daftarLokal={LAYER_LOKAL}
           layerAktif={activeDataLayers}
           sektorLapisan={sektorLapisan}
+          setSektorLapisan={pilihSektorLapisan}
         />
 
         <PanelDetailProvinsi fitur={provinsiTerpilih} onTutup={() => setProvinsiTerpilih(null)} />

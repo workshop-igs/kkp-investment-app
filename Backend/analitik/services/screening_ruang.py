@@ -123,6 +123,10 @@ def _angka(nilai, digit=1):
     return f'{nilai:.{digit}f}'.replace('.', ',')
 
 
+def _persen_area(nilai):
+    return '<0,1%' if nilai < 0.1 else f'{_angka(nilai)}%'
+
+
 def _ringkas_karakter(data):
     bagian = []
     if data.get('kedalaman_maks') is not None:
@@ -461,7 +465,7 @@ def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
         k['persen'] = round(k['persen'] + z['persen'], 1)
     for z in kelompok.values():
         ket = _ketentuan(aturan, z)
-        lokasi = f"{z['persen']}% area berada di {z['nama']} ({z['sub_zona_label']}, {z['tingkat_label']})"
+        lokasi = f"{_persen_area(z['persen'])} area berada di {z['nama']} ({z['sub_zona_label']}, {z['tingkat_label']})"
         syarat = ket['syarat'] if len(ket['syarat']) <= BATAS_SYARAT_RINGKAS else (
             'Syarat lengkapnya tercantum pada ketentuan khusus zona ini di tabel ketentuan kegiatan.')
         if z['jenis_zona'] in JENIS_ZONA_TERLARANG:
@@ -477,7 +481,7 @@ def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
             )
     if cakupan < atur('AMBANG_CAKUPAN_ACUAN'):
         alasan.append(
-            f'{round((1 - cakupan) * 100, 1)}% area tidak tercakup acuan tata ruang mana pun '
+            f'{_persen_area((1 - cakupan) * 100)} area tidak tercakup acuan tata ruang mana pun '
             f'(RTRW Provinsi, Rencana Zonasi KAW, maupun RTRWN).'
         )
     return alasan
