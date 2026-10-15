@@ -24,6 +24,8 @@ import AdminPipelinePage from './pages/admin/AdminPipelinePage';
 import AdminDataSourcesPage from './pages/admin/AdminDataSourcesPage';
 import AdminSectorsPage from './pages/admin/AdminSectorsPage';
 import AdminLogAktivitasPage from './pages/admin/AdminLogAktivitasPage';
+import AdminPengaturanAnalisisPage from './pages/admin/AdminPengaturanAnalisisPage';
+import AdminParameterTambahanPage from './pages/admin/AdminParameterTambahanPage';
 
 const AppLayout = () => {
   const location = useLocation();
@@ -41,6 +43,8 @@ const AppLayout = () => {
           <Route path="data-sources" element={<AdminDataSourcesPage />} />
           <Route path="sectors" element={<AdminSectorsPage />} />
           <Route path="log-aktivitas" element={<AdminLogAktivitasPage />} />
+          <Route path="pengaturan-analisis" element={<AdminPengaturanAnalisisPage />} />
+          <Route path="parameter-tambahan" element={<AdminParameterTambahanPage />} />
         </Route>
       </Routes>
       </BatasGalat>
