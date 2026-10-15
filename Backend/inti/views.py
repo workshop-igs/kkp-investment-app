@@ -494,17 +494,16 @@ def ringkasan_publik(request):
     from django.db.models import Count, F, Sum
 
     from analitik.models import LokasiPotensial
-    from inventarisasi.models import KKPRL
-    from pipeline.models import ProyekInvestasi
+    from inventarisasi.models import KKPRL, ZonasiRuangLaut
 
-    kunci_cache = f'ringkasan-publik:{_sidik_pipeline()}'
+    kunci_cache = 'ringkasan-publik'
     tersimpan = cache.get(kunci_cache)
     if tersimpan is not None:
         return Response(tersimpan)
 
     kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'))
     muatan = {
-        'proyek': ProyekInvestasi.objects.count(),
+        'zona_tata_ruang': ZonasiRuangLaut.objects.filter(ranah='LAUT').count(),
         'kkprl_aktif': kkprl['jumlah'] or 0,
         'kkprl_luas_ha': round(float(kkprl['luas'] or 0)),
         'lokasi_potensial': LokasiPotensial.objects.filter(sektor=None).count(),
