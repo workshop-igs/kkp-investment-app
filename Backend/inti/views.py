@@ -270,6 +270,38 @@ def _sidik_pipeline() -> str:
 
 CACHE_DASHBOARD_DETIK = 120
 
+KOMODITAS_DASHBOARD = {
+    'TANGKAP_LAUT': {'Tongkol', 'Cakalang', 'Tuna', 'Udang', 'Lainnya'},
+    'BUDIDAYA': {'Rumput Laut', 'Udang', 'Bandeng', 'Kerapu', 'Kakap'},
+}
+
+
+def _komoditas_dashboard():
+    from django.db.models import Max
+
+    from penarikan_data.models import ProduksiPerikananBPS
+
+    terakhir = ProduksiPerikananBPS.objects.aggregate(t=Max('tahun'))['t']
+    if terakhir is None:
+        return {'tahun': None, 'tahun_banding': None, 'baris': []}
+    banding = ProduksiPerikananBPS.objects.filter(tahun__lt=terakhir).aggregate(t=Max('tahun'))['t']
+    baris = [
+        {
+            'provinsi_id': r['provinsi_id'],
+            'provinsi': r['provinsi__nama'],
+            'kelompok': r['kelompok'],
+            'komoditas': r['komoditas'],
+            'tahun': r['tahun'],
+            'ton': round(r['produksi_ton'] or 0, 1),
+            'nilai_juta': round((r['nilai_ribu_rp'] or 0) / 1000, 1),
+        }
+        for r in ProduksiPerikananBPS.objects.filter(tahun__in=[t for t in (terakhir, banding) if t]).values(
+            'provinsi_id', 'provinsi__nama', 'kelompok', 'komoditas', 'tahun', 'produksi_ton', 'nilai_ribu_rp',
+        )
+        if r['komoditas'] in KOMODITAS_DASHBOARD.get(r['kelompok'], ())
+    ]
+    return {'tahun': terakhir, 'tahun_banding': banding, 'baris': baris}
+
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
@@ -445,6 +477,7 @@ def dashboard_stats(request):
             'proyek_per_provinsi': proyek_per_provinsi,
             'proyek': proyek,
             'potensi_wilayah': potensi_wilayah,
+            'komoditas': _komoditas_dashboard(),
     }
 
     cache.set(kunci_cache, muatan, CACHE_DASHBOARD_DETIK)
