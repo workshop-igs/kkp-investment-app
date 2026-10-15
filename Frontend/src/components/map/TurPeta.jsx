@@ -28,14 +28,14 @@ const LANGKAH = [
     isi: 'Mengatur skala peta. Roda gulir tetikus juga bisa dipakai.',
   },
   {
-    pilih: '[data-tur="basemap"]',
-    judul: 'Peta dasar',
-    isi: 'Mengganti latar peta: Satelit, Jalan, atau Topografi.',
-  },
-  {
     pilih: '[data-tur="lapisan"]',
     judul: 'Daftar layer',
     isi: 'Menyalakan data seperti KKPRL terbit, RTRW Provinsi, Rencana Zonasi KAW, infrastruktur, risiko bencana, dan sebaran wilayah potensial investasi. Pada KKPRL dan layer tata ruang bisa dipilih satu kategori saja, misalnya hanya perikanan tangkap. Klik sebuah zona di peta untuk rinciannya; pada layer tata ruang dan Peta Sebaran Wilayah Potensial Investasi tersedia tombol "Analisis lokasi ini" untuk menjadikan zona itu area proyek.',
+  },
+  {
+    pilih: '[data-tur="basemap"]',
+    judul: 'Peta dasar',
+    isi: 'Mengganti latar peta: Satelit, Jalan, atau Topografi.',
   },
   {
     pilih: '[data-tur="koordinat"]',

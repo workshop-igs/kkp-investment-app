@@ -78,9 +78,15 @@ const KontrolPeta = ({
   };
 
   const basemaps = [
-    { id: 'satellite', name: 'Satelit', sumber: 'Esri World Imagery' },
-    { id: 'street', name: 'Jalan', sumber: 'OpenStreetMap' },
-    { id: 'topo', name: 'Topografi', sumber: 'Esri World Topographic Map' },
+    {
+      id: 'satellite', name: 'Satelit', sumber: 'Esri World Imagery',
+      pratinjau: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/9/268/420',
+    },
+    { id: 'street', name: 'Jalan', sumber: 'OpenStreetMap', pratinjau: 'https://tile.openstreetmap.org/9/420/268.png' },
+    {
+      id: 'topo', name: 'Topografi', sumber: 'Esri World Topographic Map',
+      pratinjau: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/9/268/420',
+    },
   ];
 
   const handleExport = async () => {
@@ -118,38 +124,6 @@ const KontrolPeta = ({
 
       <div className="relative">
         <button 
-          data-tur="basemap"
-          onClick={() => bukaPanel('basemap')} 
-          className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
-          title="Basemap Gallery"
-        >
-          <Layers className="w-5 h-5" />
-        </button>
-        
-        {panelAktif === 'basemap' && (
-          <div className="absolute right-full mr-3 bottom-0 bg-white/95 backdrop-blur-md border border-slate-200 rounded-lg shadow-lg w-32 overflow-hidden animate-fade-in border-r-2 border-r-kkp-700">
-            {basemaps.map((bg) => (
-              <button
-                key={bg.id}
-                onClick={() => {
-                  setBasemap(bg.id);
-                  setPanelAktif(null);
-                }}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
-                  currentBasemap === bg.id 
-                    ? 'bg-sky-50 text-sky-700 font-medium border-l-2 border-sky-500' 
-                    : 'text-slate-600 hover:bg-slate-50 hover:text-sky-600'
-                }`}
-              >
-                {bg.name}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="relative">
-        <button 
           data-tur="lapisan"
           onClick={() => bukaPanel('layer')} 
           className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
@@ -170,6 +144,43 @@ const KontrolPeta = ({
             statusLapisan={statusLapisan}
             lapisanAwal={lapisanAwal}
           />
+        )}
+      </div>
+
+      <div className="relative">
+        <button 
+          data-tur="basemap"
+          onClick={() => bukaPanel('basemap')} 
+          className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
+          title="Basemap Gallery"
+        >
+          <Layers className="w-5 h-5" />
+        </button>
+        
+        {panelAktif === 'basemap' && (
+          <div className="absolute right-full mr-3 bottom-0 animate-fade-in rounded-xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur-md">
+            <p className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Peta dasar</p>
+            <div className="flex gap-2">
+              {basemaps.map((bg) => {
+                const aktif = currentBasemap === bg.id;
+                return (
+                  <button
+                    key={bg.id}
+                    type="button"
+                    title={bg.sumber}
+                    onClick={() => {
+                      setBasemap(bg.id);
+                      setPanelAktif(null);
+                    }}
+                    className={`w-24 rounded-lg p-1 text-left transition ${aktif ? 'bg-sky-50 ring-2 ring-sky-500' : 'hover:bg-slate-100'}`}
+                  >
+                    <img src={bg.pratinjau} alt={`Pratinjau peta dasar ${bg.name}`} loading="lazy" className="h-16 w-full rounded-md bg-slate-100 object-cover" />
+                    <span className={`mt-1 block px-0.5 text-xs ${aktif ? 'font-semibold text-sky-700' : 'text-slate-600'}`}>{bg.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
 
