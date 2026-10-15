@@ -277,7 +277,7 @@ def dashboard_stats(request):
     from django.core.cache import cache
     from django.db.models import Avg, Count, Sum
 
-    from analitik.services.profil_investasi import belum_dimanfaatkan, skor_sesuai
+    from analitik.models import LokasiPotensial
     from inventarisasi.models import KKPRL, PotensiInvestasi, ZonasiRuangLaut
     from pipeline.models import ProyekInvestasi
 
@@ -373,9 +373,8 @@ def dashboard_stats(request):
         for p in provinsi_qs
     ]
 
-    peluang = belum_dimanfaatkan(skor_sesuai().filter(kelas='TINGGI'))
-    potensi_agg = ZonasiRuangLaut.objects.filter(id__in=peluang.values('zona_id')).aggregate(
-        zona=Count('id'),
+    potensi_agg = LokasiPotensial.objects.filter(sektor=None).aggregate(
+        lokasi=Count('id'),
         luas=Sum('luas_ha'),
         provinsi=Count('provinsi', distinct=True),
     )
@@ -423,7 +422,7 @@ def dashboard_stats(request):
                 'total_sektor': SektorInvestasi.objects.filter(aktif=True).count(),
                 'potensi': {
                     'total_titik': PotensiInvestasi.objects.count(),
-                    'total_zona': potensi_agg['zona'] or 0,
+                    'total_lokasi': potensi_agg['lokasi'] or 0,
                     'total_provinsi': potensi_agg['provinsi'] or 0,
                     'total_luas_ha': round(float(potensi_agg['luas'] or 0), 1),
                     'total_kkprl': total_kkprl,
@@ -449,7 +448,7 @@ def ringkasan_publik(request):
     from django.core.cache import cache
     from django.db.models import Count, F, Sum
 
-    from analitik.services.profil_investasi import belum_dimanfaatkan, skor_sesuai
+    from analitik.models import LokasiPotensial
     from inventarisasi.models import KKPRL
     from pipeline.models import ProyekInvestasi
 
@@ -459,16 +458,15 @@ def ringkasan_publik(request):
         return Response(tersimpan)
 
     kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'))
-    tinggi = belum_dimanfaatkan(skor_sesuai().filter(kelas='TINGGI'))
     muatan = {
         'proyek': ProyekInvestasi.objects.count(),
         'kkprl_aktif': kkprl['jumlah'] or 0,
         'kkprl_luas_ha': round(float(kkprl['luas'] or 0)),
-        'zona_peluang_tinggi': tinggi.values('zona_id').distinct().count(),
+        'lokasi_potensial': LokasiPotensial.objects.filter(sektor=None).count(),
         'peluang_per_jenis': list(
-            tinggi.values(kode=F('sektor__kode'), nama=F('sektor__nama'))
-            .annotate(zona=Count('zona_id', distinct=True))
-            .order_by('-zona')
+            LokasiPotensial.objects.exclude(sektor=None).values(kode=F('sektor__kode'), nama=F('sektor__nama'))
+            .annotate(lokasi=Count('id'))
+            .order_by('-lokasi')
         ),
     }
     cache.set(kunci_cache, muatan, CACHE_RINGKASAN_PUBLIK_DETIK)
