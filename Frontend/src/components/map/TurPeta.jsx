@@ -15,7 +15,7 @@ const LANGKAH = [
   {
     pilih: '[data-tur="legenda"]',
     judul: 'Legenda peta',
-    isi: 'Arti warna setiap layer yang sedang menyala. Tampilan awal memuat Peta Sebaran Wilayah Potensial Investasi: setiap titik adalah lokasi dengan sedikitnya 5 parameter terukur yang 75% di antaranya sangat sesuai untuk sebuah jenis investasi (di zona peruntukan lain yang hanya mengizinkan bersyarat, seluruh parameter lain wajib terukur dan sangat sesuai). Warna titik menunjukkan jenis investasinya, titik berwarna ganda cocok untuk beberapa jenis, dan batas lokasinya tampak setelah peta diperbesar. Klik sebuah jenis di legenda untuk menampilkan lokasinya saja. Klik judulnya untuk membuka atau menutup legenda.',
+    isi: 'Arti warna setiap layer yang sedang menyala. Tampilan awal memuat Peta Sebaran Wilayah Potensial Investasi: setiap titik adalah lokasi dengan sedikitnya 5 parameter terukur yang 75% di antaranya sangat sesuai untuk sebuah jenis investasi (di zona peruntukan lain yang hanya mengizinkan bersyarat, seluruh parameter lain wajib terukur dan sangat sesuai). Warna titik menunjukkan jenis investasinya dan titik berwarna ganda cocok untuk beberapa jenis. Klik sebuah jenis di legenda untuk menampilkan lokasinya saja; klik sebuah titik lalu Analisis lokasi ini untuk memuat batas lokasinya sebagai area analisis. Klik judulnya untuk membuka atau menutup legenda.',
   },
   {
     peraga: true,

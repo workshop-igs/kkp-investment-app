@@ -377,7 +377,7 @@ class PetaRisikoViewSet(viewsets.ReadOnlyModelViewSet):
 class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     BATAS_FITUR = 2000
 
-    SERTAKAN_TITIK = True
+    HANYA_TITIK = True
     permission_classes = [AllowAny]
 
     SKALA = [

@@ -144,7 +144,7 @@ function itemLegenda(def, osea, sektor) {
       return [
         ...SECTORS.filter((s) => !sektor || sektor === 'SEMUA' || s.id === sektor)
           .map((s) => ({ warna: WARNA_JENIS_INVESTASI[s.id], label: s.label, bulat: true })),
-        { label: 'Titik berwarna ganda cocok untuk beberapa jenis; batas lokasi berwarna jenisnya tampak setelah peta diperbesar.' },
+        { label: 'Titik berwarna ganda cocok untuk beberapa jenis.' },
       ];
     case 'gradasi':
       return osea?.parameter?.[def.citra]

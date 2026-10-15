@@ -11,7 +11,7 @@ const radiusTitikJauh = (zoom) => 2 + Math.max(0, zoom - 4) * 0.75;
 const dalamTampilan = (lapisan, batas) =>
   lapisan.getBounds ? batas.intersects(lapisan.getBounds()) : batas.contains(lapisan.getLatLng());
 
-const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIkon, warnaTitik, params, jeda = 400, onStatus, zoomPin, zoomBidang }) => {
+const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIkon, warnaTitik, params, jeda = 400, onStatus, zoomPin }) => {
   const map = useMap();
   const lapor = useRef(onStatus);
   lapor.current = onStatus;
@@ -137,21 +137,13 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
         buang(entri.get(k));
         entri.delete(k);
       });
-      if (ditambah && map.hasLayer(geo)) {
+      if (ditambah) {
         fitur.forEach((f, i) => entri.get(kunci(f, i))?.bidang?.bringToFront?.());
       }
     };
 
-    const aturBidang = () => {
-      const tampak = !zoomBidang || map.getZoom() >= zoomBidang;
-      if (tampak && !map.hasLayer(geo)) map.addLayer(geo);
-      if (!tampak && map.hasLayer(geo)) map.removeLayer(geo);
-    };
-    aturBidang();
-
     const saatZoom = () => {
       const zoom = map.getZoom();
-      aturBidang();
       if (modePin() !== pinAktif) {
         pinAktif = !pinAktif;
         skalaPin = skalaIkon(zoom);
@@ -262,7 +254,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
       map.removeLayer(grupTitik);
       kabari(null);
     };
-  }, [map, url, kunciParams, jeda, zoomPin, zoomBidang]);
+  }, [map, url, kunciParams, jeda, zoomPin]);
 
   return null;
 };
