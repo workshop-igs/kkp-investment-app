@@ -161,12 +161,19 @@ def status_rincian(rincian):
     return 'DIIZINKAN' if boleh else None
 
 
+def _sebut(daftar, batas=3):
+    return '; '.join(daftar[:batas]) + (f'; dan {len(daftar) - batas} lainnya' if len(daftar) > batas else '')
+
+
 def syarat_rincian(rincian, khusus=''):
-    jumlah = {s: len(rincian[s]) for s, _ in KOLOM_MATRIKS}
-    if jumlah['TIDAK_DIIZINKAN']:
-        return (f"Hanya rincian kegiatan tertentu yang diperbolehkan menurut matriks KKPRL: {jumlah['DIIZINKAN']} "
-                f"diperbolehkan, {jumlah['BERSYARAT']} bersyarat, dan {jumlah['TIDAK_DIIZINKAN']} tidak diperbolehkan.")
-    return khusus or 'Diperbolehkan bersyarat menurut matriks KKPRL.'
+    boleh, syarat, larang = (rincian[s] for s, _ in KOLOM_MATRIKS)
+    if larang:
+        return (f'Hanya rincian kegiatan tertentu yang diperbolehkan menurut matriks KKPRL: {len(boleh)} diperbolehkan, '
+                f'{len(syarat)} bersyarat, dan {len(larang)} tidak diperbolehkan ({_sebut(larang, 2)}).')
+    if boleh:
+        return (f'{len(boleh)} rincian kegiatan diperbolehkan, sedangkan yang bersyarat menurut matriks KKPRL: '
+                f'{_sebut(syarat)}.')
+    return khusus or f'Seluruh {len(syarat)} rincian kegiatan diperbolehkan bersyarat menurut matriks KKPRL.'
 
 
 PETA_UNSUR_RTRL = [

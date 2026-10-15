@@ -3,8 +3,10 @@ import {
   ASPEK_AHP,
   KETERANGAN_SKOR_BAGIAN,
   PENJELASAN_RISIKO,
+  gabungZona,
   pilihKonteksBps,
   itemSerapan,
+  persenArea,
   ringkasKkprlZona,
   skorBagian,
   warnaStatus,
@@ -655,10 +657,11 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         sc.lanjut ? 'dilanjutkan ke Tahap 2' : 'analisis berhenti di Tahap 1'
       }`
     );
+    k.daftar(sc.alasan);
     if (sc.zona.length) {
       k.tabel(
         ['Zona', 'Sub-zona', 'Acuan', 'Porsi', 'Ketentuan'],
-        sc.zona.map((z) => [z.nama, z.sub_zona_label, z.tingkat_label, `${nf(z.persen, 1)}%`, z.ketentuan_label]),
+        gabungZona(sc.zona).map((z) => [z.nama, z.sub_zona_label, z.tingkat_label, persenArea(z.persen), z.ketentuan_label]),
         [(LEBAR - 8) * 0.3, (LEBAR - 8) * 0.22, (LEBAR - 8) * 0.18, (LEBAR - 8) * 0.1, (LEBAR - 8) * 0.2]
       );
       const rincianJenis = [];
@@ -666,13 +669,13 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         if (!z.rincian) return;
         const kunci = JSON.stringify(z.rincian);
         const ada = rincianJenis.find((r) => r.kunci === kunci);
-        if (ada) ada.nama.push(z.nama);
-        else rincianJenis.push({ kunci, rincian: z.rincian, label: z.ketentuan_label, nama: [z.nama] });
+        if (ada) ada.nama.add(z.nama);
+        else rincianJenis.push({ kunci, rincian: z.rincian, label: z.ketentuan_label, nama: new Set([z.nama]) });
       });
       if (rincianJenis.length) {
         k.teks(`Rincian kegiatan ${sc.sektor_nama.toLowerCase()} menurut matriks Perda`, { tebal: true, warna: GELAP, ukuran: 7.5 });
         rincianJenis.forEach((r) => {
-          k.teks(`${r.nama.join(', ')}: ${r.label}`, { tebal: true, warna: GELAP, ukuran: 7 });
+          k.teks(`${[...r.nama].join(', ')}: ${r.label}`, { tebal: true, warna: GELAP, ukuran: 7 });
           k.tabelDaftar(
             [`Diperbolehkan (${r.rincian.DIIZINKAN.length})`, `Bersyarat (${r.rincian.BERSYARAT.length})`,
               `Tidak diperbolehkan (${r.rincian.TIDAK_DIIZINKAN.length})`],
@@ -731,7 +734,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         sc.informasi_ruang.forEach((z) => {
           k.teks(
             `${z.nama} (${z.jenis_label} / ${z.sub_zona_label})`
-              + [z.persen != null && ` - ${nf(z.persen, 1)}% area`, z.dasar_zona && `; zona: ${z.dasar_zona}`]
+              + [z.persen != null && ` - ${persenArea(z.persen)} area`, z.dasar_zona && `; zona: ${z.dasar_zona}`]
                 .filter(Boolean).join(''),
             { tebal: true, warna: GELAP, ukuran: 7 }
           );
@@ -788,7 +791,6 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         [(LEBAR - 8) * 0.4, (LEBAR - 8) * 0.4, (LEBAR - 8) * 0.2]
       );
     }
-    k.daftar(sc.alasan);
     k.tutupKartu('Ketentuan kegiatan diambil dari matriks KKPRL Perda RTRW Provinsi bila tersedia; selain itu dari ketentuan yang dikelola administrator.');
   }
 

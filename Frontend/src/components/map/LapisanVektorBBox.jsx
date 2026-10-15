@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { api } from '../../api/klien';
-import { buatIkon, skalaIkon } from './ikonPeta';
+import { buatIkon, ikonTitik, skalaIkon, ukuranTitik } from './ikonPeta';
 
 const GAYA_TITIK = { radius: 5, color: '#0056A5', weight: 2, fillColor: '#ffffff', fillOpacity: 1 };
 
@@ -11,12 +11,12 @@ const radiusTitikJauh = (zoom) => 2 + Math.max(0, zoom - 4) * 0.75;
 const dalamTampilan = (lapisan, batas) =>
   lapisan.getBounds ? batas.intersects(lapisan.getBounds()) : batas.contains(lapisan.getLatLng());
 
-const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIkon, params, jeda = 400, onStatus, zoomPin, zoomBidang }) => {
+const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIkon, warnaTitik, params, jeda = 400, onStatus, zoomPin, zoomBidang }) => {
   const map = useMap();
   const lapor = useRef(onStatus);
   lapor.current = onStatus;
   const opsi = useRef({});
-  opsi.current = { style, onEachFeature, gayaTitik, ikon, warnaIkon };
+  opsi.current = { style, onEachFeature, gayaTitik, ikon, warnaIkon, warnaTitik };
   const kunciParams = JSON.stringify(params || {});
 
   useEffect(() => {
@@ -25,22 +25,34 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
       const w = opsi.current.warnaIkon;
       return (typeof w === 'function' ? w(p || {}) : w) || '#0056A5';
     };
+    const ikonDari = (p) => {
+      const i = opsi.current.ikon;
+      return typeof i === 'function' ? i(p || {}) : i;
+    };
+    const ikonJauh = (p, ukuran) => ikonTitik(opsi.current.warnaTitik(p || {}), ukuran);
     const modePin = () => !zoomPin || map.getZoom() >= zoomPin;
 
     const pin = new Set();
     const bulat = new Set();
+    const noktah = new Set();
     const entri = new Map();
     let toleransi = null;
     let dimuat = null;
     let statusTerakhir = null;
     let pinAktif = modePin();
     let skalaPin = skalaIkon(map.getZoom());
+    let ukuranNoktah = ukuranTitik(map.getZoom());
     let baru = null;
     let timer = null;
     let pembatal = null;
 
     const buatPenanda = (latlng, p) => {
       if (!opsi.current.ikon) return L.circleMarker(latlng, opsi.current.gayaTitik || GAYA_TITIK);
+      if (!pinAktif && opsi.current.warnaTitik) {
+        const titik = L.marker(latlng, { icon: ikonJauh(p, ukuranNoktah), riseOnHover: true });
+        noktah.add(titik);
+        return titik;
+      }
       if (!pinAktif) {
         const titik = L.circleMarker(latlng, {
           pane: 'markerPane',
@@ -54,7 +66,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
         return titik;
       }
       const penanda = L.marker(latlng, {
-        icon: buatIkon(opsi.current.ikon, warnaDari(p), skalaPin),
+        icon: buatIkon(ikonDari(p), warnaDari(p), skalaPin),
         riseOnHover: true,
       });
       pin.add(penanda);
@@ -96,6 +108,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
         if (!l) return;
         pin.delete(l);
         bulat.delete(l);
+        noktah.delete(l);
       });
       if (e.bidang) geo.removeLayer(e.bidang);
       if (e.titik) grupTitik.removeLayer(e.titik);
@@ -142,6 +155,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
       if (modePin() !== pinAktif) {
         pinAktif = !pinAktif;
         skalaPin = skalaIkon(zoom);
+        ukuranNoktah = ukuranTitik(zoom);
         const batas = map.getBounds();
         const daftar = [...entri.entries()];
         entri.clear();
@@ -155,7 +169,11 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
       }
       if (skalaIkon(zoom) !== skalaPin) {
         skalaPin = skalaIkon(zoom);
-        pin.forEach((p) => p.setIcon(buatIkon(opsi.current.ikon, warnaDari(p.feature?.properties), skalaPin)));
+        pin.forEach((p) => p.setIcon(buatIkon(ikonDari(p.feature?.properties), warnaDari(p.feature?.properties), skalaPin)));
+      }
+      if (ukuranTitik(zoom) !== ukuranNoktah) {
+        ukuranNoktah = ukuranTitik(zoom);
+        noktah.forEach((t) => t.setIcon(ikonJauh(t.feature?.properties, ukuranNoktah)));
       }
       const r = radiusTitikJauh(zoom);
       bulat.forEach((t) => t.setRadius(r));

@@ -1,16 +1,16 @@
 import { useEffect, useState } from 'react';
 import { List, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import {
+  IKON_JENIS_INVESTASI,
   KATEGORI_ZONA,
-  KELAS_KELAYAKAN,
   KELAS_RISIKO,
   URUTAN_KATEGORI,
   URUTAN_KATEGORI_DARAT,
   URUTAN_KELAS_RISIKO,
 } from '../../utils/simbologiPeta';
-import { GARIS_KAWASAN, KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI, garisKelasKelayakan } from '../../utils/simbologiPeta';
+import { GARIS_KAWASAN, KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
-import { buatIkon } from './ikonPeta';
+import { lambangSvg } from './ikonPeta';
 import { api } from '../../api/klien';
 
 const ISTILAH = {
@@ -256,30 +256,92 @@ const LegendaUnsurRtrl = () => (
 );
 
 
-const AMBANG_KELAS = { TINGGI: '≥75% dari ≥5 parameter terukur' };
+const angkaBulat = (v) => Number(v).toLocaleString('id-ID');
 
-const LegendaDisarankan = ({ def }) => (
-  <ul className="space-y-1.5">
-    {def.params.kelas.split(',').map((kode) => (
-      <li key={kode} className="flex items-center gap-2">
-        <span
-          className="w-3.5 shrink-0 flex justify-center"
-          dangerouslySetInnerHTML={{ __html: buatIkon(def.ikon, KELAS_KELAYAKAN[kode].warna, 0.55).options.html }}
-        />
-        <span className="text-[12px] text-slate-700 leading-snug">
-          {KELAS_KELAYAKAN[kode].label} <span className="text-slate-400">({AMBANG_KELAS[kode]})</span>
-        </span>
-      </li>
-    ))}
-    <li className="flex items-start gap-2">
-      <span
-        className="mt-[3px] w-3.5 h-3.5 rounded-[3px] border shrink-0"
-        style={{ backgroundColor: KELAS_KELAYAKAN.TINGGI.warna, borderColor: garisKelasKelayakan('TINGGI'), opacity: 0.85 }}
-      />
-      <span className="text-[12px] text-slate-700 leading-snug">Batas lokasi, tampak setelah peta diperbesar</span>
-    </li>
-  </ul>
-);
+const W = WARNA_JENIS_INVESTASI;
+
+const LegendaDisarankan = ({ sektor, onPilih }) => {
+  const [ringkas, setRingkas] = useState(null);
+  useEffect(() => {
+    let batal = false;
+    api.get('/inti/ringkasan-publik/')
+      .then(({ data }) => { if (!batal) setRingkas(data); })
+      .catch(() => { if (!batal) setRingkas({}); });
+    return () => { batal = true; };
+  }, []);
+  const jumlah = Object.fromEntries((ringkas?.peluang_per_jenis || []).map((j) => [j.kode, j.lokasi]));
+  const terpilih = sektor && sektor !== 'SEMUA' ? sektor : null;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-3 rounded-xl bg-gradient-to-br from-kkp-900 via-kkp-800 to-kkp-700 px-3.5 py-2.5 text-white">
+        {ringkas?.lokasi_potensial != null && (
+          <p className="text-[26px] font-bold leading-none tabular-nums">{angkaBulat(ringkas.lokasi_potensial)}</p>
+        )}
+        <p className="text-[11px] leading-snug text-white/85">
+          <b className="block text-[12px] text-white">lokasi potensial investasi</b>
+          sedikitnya 75% dari ≥5 parameter terukurnya sangat sesuai
+        </p>
+      </div>
+
+      <div>
+        <div className="mb-1 flex items-baseline justify-between gap-2">
+          <p className="text-[11px] font-semibold text-slate-500">Warna = jenis investasi · klik untuk menyaring</p>
+          {terpilih && (
+            <button type="button" onClick={() => onPilih(null)} className="shrink-0 text-[11px] font-semibold text-kkp-700 hover:underline">
+              Semua jenis
+            </button>
+          )}
+        </div>
+        <ul>
+          {SECTORS.map(({ id, label }) => {
+            const aktif = terpilih === id;
+            return (
+              <li key={id}>
+                <button
+                  type="button"
+                  aria-pressed={aktif}
+                  onClick={() => onPilih(aktif ? null : id)}
+                  className={`w-full flex items-center gap-2.5 rounded-lg px-1.5 py-[2px] text-left transition ${
+                    aktif ? 'bg-kkp-100 ring-1 ring-kkp-200' : 'hover:bg-slate-50'
+                  } ${terpilih && !aktif ? 'opacity-45 hover:opacity-100' : ''}`}
+                >
+                  <span
+                    className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-full shadow-sm"
+                    style={{ background: W[id] }}
+                    dangerouslySetInnerHTML={{ __html: lambangSvg(IKON_JENIS_INVESTASI[id], 12) }}
+                  />
+                  <span className="flex-1 min-w-0 text-[12.5px] leading-tight text-slate-700">{label}</span>
+                  <span className="text-[11.5px] font-semibold tabular-nums text-slate-500">
+                    {jumlah[id] != null ? angkaBulat(jumlah[id]) : ''}
+                  </span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <ul className="space-y-1 border-t border-slate-100 pt-2 text-[11px] leading-snug text-slate-500">
+        <li className="flex items-center gap-2">
+          <span
+            className="h-3 w-3 shrink-0 rounded-full border border-white shadow"
+            style={{ background: `conic-gradient(${W.PERIKANAN_TANGKAP} 0 33%, ${W.PARIWISATA_BAHARI} 0 66%, ${W.BIOTEKNOLOGI_KELAUTAN} 0)` }}
+          />
+          Titik berwarna ganda cocok untuk beberapa jenis
+        </li>
+        <li className="flex items-center gap-2">
+          <span className="h-3 w-3 shrink-0 rounded-[3px] border" style={{ backgroundColor: `${W.PERIKANAN_BUDIDAYA}59`, borderColor: W.PERIKANAN_BUDIDAYA }} />
+          Batas lokasi tampak setelah peta diperbesar
+        </li>
+        <li className="pl-5">
+          Skala nasional menampilkan lokasi dengan persentase tertinggi; Konservasi &amp; Rehabilitasi Pesisir tampil bila
+          dipilih.
+        </li>
+      </ul>
+    </div>
+  );
+};
 
 const LegendaRisiko = () => (
   <div>
@@ -307,7 +369,7 @@ const LegendaRisiko = () => (
   </div>
 );
 
-const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektorLapisan = {} }) => {
+const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektorLapisan = {}, setSektorLapisan }) => {
   const [terbuka, setTerbuka] = useState(() => window.innerWidth >= 1024);
   const [dataJson, setDataJson] = useState({});
   const [memuat, setMemuat] = useState({});
@@ -383,14 +445,14 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
               <h4 className="text-xs font-bold text-kkp-800 uppercase tracking-wider mb-2.5 leading-tight">
                 {daftarLokal[id].label}
               </h4>
-              {'sektor' in (daftarLokal[id].params || {}) && (
+              {'sektor' in (daftarLokal[id].params || {}) && daftarLokal[id].legenda !== 'disarankan' && (
                 <p className="-mt-1 mb-2.5 text-[12px] text-slate-600">
                   Jenis investasi:{' '}
                   <b className="text-kkp-900">{namaSektor(sektorLapisan[id] || daftarLokal[id].params.sektor)}</b>
                 </p>
               )}
               {daftarLokal[id].legenda === 'disarankan' ? (
-                <LegendaDisarankan def={daftarLokal[id]} />
+                <LegendaDisarankan sektor={sektorLapisan[id]} onPilih={(kode) => setSektorLapisan?.(id, kode)} />
               ) : daftarLokal[id].legenda === 'jenis' ? (
                 <LegendaJenis keterangan={daftarLokal[id].keteranganLegenda} />
               ) : daftarLokal[id].legenda === 'zona' ? (

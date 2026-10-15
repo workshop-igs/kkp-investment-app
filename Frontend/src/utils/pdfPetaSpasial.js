@@ -7,7 +7,6 @@ import {
   GARIS_KAWASAN,
   KATEGORI_RTRL,
   KATEGORI_ZONA,
-  KELAS_KELAYAKAN,
   KELAS_RISIKO,
   URUTAN_KATEGORI,
   URUTAN_KATEGORI_DARAT,
@@ -120,7 +119,7 @@ const derajat = (v, positif, negatif) => `${angka(Math.abs(v))}° ${v < 0 ? nega
 
 const kotak = (urutan, kamus) => urutan.map((k) => ({ warna: kamus[k].warna, label: kamus[k].label }));
 
-function itemLegenda(def, osea) {
+function itemLegenda(def, osea, sektor) {
   switch (def.legenda) {
     case 'zona':
       return [
@@ -143,8 +142,9 @@ function itemLegenda(def, osea) {
         .map(([k, label]) => ({ warna: WARNA_JENIS_INVESTASI[k], label }));
     case 'disarankan':
       return [
-        ...def.params.kelas.split(',').map((k) => ({ warna: KELAS_KELAYAKAN[k].warna, label: KELAS_KELAYAKAN[k].label, bulat: true })),
-        { warna: KELAS_KELAYAKAN.TINGGI.warna, label: 'Batas lokasi, tampak setelah peta diperbesar' },
+        ...SECTORS.filter((s) => !sektor || sektor === 'SEMUA' || s.id === sektor)
+          .map((s) => ({ warna: WARNA_JENIS_INVESTASI[s.id], label: s.label, bulat: true })),
+        { label: 'Titik berwarna ganda cocok untuk beberapa jenis; batas lokasi berwarna jenisnya tampak setelah peta diperbesar.' },
       ];
     case 'gradasi':
       return osea?.parameter?.[def.citra]
@@ -212,7 +212,7 @@ function susunLegenda(dek, lapisan, osea, x0, y0) {
       y += 3.6;
     }
 
-    itemLegenda(def, osea).forEach((it) => {
+    itemLegenda(def, osea, sektor).forEach((it) => {
       if (it.gradasi) {
         dek.gaya(5.8, C.abu);
         const ket = d.splitTextToSize(bersih(`${it.label || ''} Periode data: ${it.gradasi.periode}.`), LEBAR_LEGENDA);

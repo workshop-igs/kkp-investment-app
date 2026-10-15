@@ -405,6 +405,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
             **r['rincian'],
             'provinsi': r['provinsi__nama'],
             'sektor_kode': r['jenis'][0],
+            'jenis': r['jenis'],
             'kelas': 'TINGGI',
             'persen_sesuai': round(r['persen_sesuai']),
             'luas_ha': round(r['luas_ha'], 1),

@@ -169,16 +169,9 @@ export const URUTAN_KELAS_RISIKO = ['TINGGI', 'SEDANG', 'RENDAH'];
 export const warnaKelasRisiko = (kode) =>
   (KELAS_RISIKO[kode] || { warna: '#94a3b8' }).warna;
 
-export const KELAS_KELAYAKAN = {
-  SEDANG: { label: 'Sesuai', warna: '#84cc16', garis: '#4d7c0f' },
-  TINGGI: { label: 'Sangat sesuai', warna: '#15803d', garis: '#14532d' },
-};
+const WARNA_KELAS_KELAYAKAN = { SEDANG: '#84cc16', TINGGI: '#15803d' };
 
-export const warnaKelasKelayakan = (kode) =>
-  (KELAS_KELAYAKAN[kode] || { warna: '#94a3b8' }).warna;
-
-export const garisKelasKelayakan = (kode) =>
-  (KELAS_KELAYAKAN[kode] || { garis: '#64748b' }).garis;
+export const warnaKelasKelayakan = (kode) => WARNA_KELAS_KELAYAKAN[kode] || '#94a3b8';
 
 
 
@@ -197,3 +190,16 @@ export const WARNA_JENIS_INVESTASI = {
 };
 
 export const warnaJenisInvestasi = (kode) => WARNA_JENIS_INVESTASI[kode] || WARNA_JENIS_INVESTASI.LAINNYA;
+
+export const IKON_JENIS_INVESTASI = {
+  PERIKANAN_TANGKAP: 'ikan',
+  PERIKANAN_BUDIDAYA: 'keramba',
+  PENGOLAHAN_HASIL_LAUT: 'pabrik',
+  PARIWISATA_BAHARI: 'ombak',
+  JASA_MARITIM: 'jangkar',
+  INFRASTRUKTUR_LAUT: 'jembatan',
+  ENERGI_KELAUTAN: 'petir',
+  GARAM: 'kristal',
+  BIOTEKNOLOGI_KELAUTAN: 'labu',
+  KONSERVASI_PESISIR: 'daun',
+};
