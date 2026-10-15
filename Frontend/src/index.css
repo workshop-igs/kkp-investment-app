@@ -243,6 +243,8 @@ body {
   border-radius: 8px;
   box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
   white-space: pre-line;
+  width: max-content;
+  max-width: 280px;
 }
 
 .map-tooltip.leaflet-tooltip-top::before { border-top-color: #dee2e6 !important; }

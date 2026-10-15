@@ -229,6 +229,8 @@ export const LAYER_LOKAL = {
     ikon: (p) => IKON_JENIS_INVESTASI[p.sektor_kode] || 'bintang',
     warnaIkon: (p) => warnaJenisInvestasi(p.sektor_kode),
     warnaTitik: (p) => (p.jenis?.length ? p.jenis : [p.sektor_kode]).map(warnaJenisInvestasi),
+    tooltip: (p) => `Lokasi potensial:
+${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     zoomPin: 8,
     keteranganLegenda:
       'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi dan warnanya menunjukkan jenis itu; titik '
