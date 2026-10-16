@@ -74,8 +74,12 @@ def _nilai_tata_ruang(screening: Dict[str, Any]) -> Dict[str, Any]:
     if screening['status'] == 'SESUAI':
         risiko -= atur('REGULASI_PENALTY')['zona_tidak_cocok']
     catatan = [a for a in screening['alasan'] if 'bersyarat' in a]
+    if screening['status'] == 'BELUM_TERVERIFIKASI':
+        catatan.append('Kesesuaian ruang belum terverifikasi; analisis dilanjutkan dengan label belum terverifikasi.')
     return {
-        'kesesuaian': screening['lanjut'],
+        # Hanya kesesuaian yang terverifikasi yang dihitung lolos tata ruang; area belum terverifikasi boleh lanjut
+        # analisis tetapi tidak dianggap sesuai.
+        'kesesuaian': screening['status'] in ('SESUAI', 'SESUAI_BERSYARAT'),
         'risiko_regulasi': _clamp(risiko),
         'zona_teririsan': [
             {'nama': z['nama'], 'jenis': z['jenis_zona'], 'sub_zona': z['sub_zona'], 'regulasi': z['regulasi']}

@@ -3,6 +3,7 @@ import { AlertTriangle, CheckCircle2, ChevronRight, CircleHelp, MapPin, Search, 
 import { keDesimal, keDMS } from '../../utils/koordinat';
 import { gabungZona, persenArea, ringkasKkprlZona } from '../../utils/normalisasiAnalisis';
 import { catatanSkala, kelengkapanScreening, ringkasKelengkapan } from '../../utils/kelengkapanData';
+import { JENIS_PERINGATAN, fisikScreening, pengecualianScreening, peringatanScreening } from '../../utils/hasilScreening';
 
 const GAYA = {
   SESUAI: { kotak: 'bg-emerald-50 border-emerald-200', teks: 'text-emerald-800', titik: 'bg-emerald-500', Ikon: CheckCircle2 },
@@ -41,6 +42,12 @@ const TANDA_DASAR = {
   true: ['DIIZINKAN', '✓', 'Terpenuhi'],
   false: ['TIDAK_DIIZINKAN', '✕', 'Tidak terpenuhi'],
   null: [null, '?', 'Belum terukur, dianggap terpenuhi'],
+};
+
+const TANDA_FISIK = {
+  true: ['DIIZINKAN', '✓', 'Terpenuhi'],
+  false: ['BERSYARAT', '!', 'Belum terpenuhi: peringatan, tidak menggugurkan'],
+  null: [null, '?', 'Belum terukur'],
 };
 
 const HASIL_TAMBAHAN = {
@@ -109,13 +116,14 @@ const Ringkasan = ({ s }) => {
   const { Ikon } = gaya;
   const acuan = s.acuan.map((a) => `${a.label} ${angka(a.persen, 1)}%`).join(', ');
   const kelengkapan = kelengkapanScreening(s);
+  const fisik = fisikScreening(s);
   const sel = [
     ['Cakupan acuan tata ruang', `${angka(s.cakupan_persen, 1)}%`, acuan || 'Tidak ada acuan', 'text-slate-800'],
-    s.karakter && [
-      'Karakter lokasi',
-      s.karakter.cocok ? 'Cocok' : 'Belum cocok',
-      `untuk ${s.sektor_nama.toLowerCase()}`,
-      s.karakter.cocok ? 'text-emerald-700' : 'text-rose-700',
+    fisik && [
+      'Kecocokan fisik (indikatif)',
+      fisik.label,
+      'peringatan, bukan gerbang',
+      fisik.cocok ? 'text-emerald-700' : 'text-amber-700',
     ],
     s.persen_sangat_sesuai != null && [
       'Parameter dinilai sangat sesuai',
@@ -137,7 +145,7 @@ const Ringkasan = ({ s }) => {
         <Ikon className={`mt-0.5 h-7 w-7 shrink-0 ${gaya.teks}`} />
         <div className="min-w-0">
           <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-            Tahap 1 · Screening kesesuaian ruang
+            Tahap 1 · Kesesuaian ruang (zona, Perda, KKPRL)
           </div>
           <div className={`flex flex-wrap items-center gap-2 text-xl font-bold leading-snug ${gaya.teks}`}>
             {s.status_label}
@@ -152,9 +160,11 @@ const Ringkasan = ({ s }) => {
           </div>
           <p className="mt-0.5 text-xs text-slate-600">
             <span className="font-semibold text-slate-700">{s.sektor_nama}</span> ·{' '}
-            {s.lanjut
-              ? 'lokasi dapat dilanjutkan ke Tahap 2 (parameter finansial).'
-              : 'analisis berhenti di Tahap 1 dan tidak dilanjutkan ke Tahap 2.'}
+            {!s.lanjut
+              ? 'analisis berhenti di Tahap 1 dan tidak dilanjutkan ke Tahap 2.'
+              : s.status === 'BELUM_TERVERIFIKASI'
+                ? 'lokasi tetap dapat dilanjutkan ke Tahap 2 dengan label belum terverifikasi.'
+                : 'lokasi dapat dilanjutkan ke Tahap 2 (parameter finansial).'}
           </p>
         </div>
       </div>
@@ -247,9 +257,14 @@ const RincianJenis = ({ s }) => {
 const KarakterLokasi = ({ s }) => {
   const terukur = s.parameter?.filter((p) => p.nilai !== null).length || 0;
   const kelengkapan = kelengkapanScreening(s);
+  const fisik = fisikScreening(s);
   return (
     <section>
-      <Judul>Karakter lokasi {s.sektor_nama.toLowerCase()}</Judul>
+      <Judul>Kecocokan fisik {s.sektor_nama.toLowerCase()} (indikatif)</Judul>
+      <p className="-mt-1 mb-2 text-[11px] text-slate-400">
+        Kedalaman, gelombang, dan sejenisnya dari data global beresolusi kasar. Hasilnya hanya peringatan dan tidak
+        menentukan kesesuaian ruang; pastikan dengan survei lapangan.
+      </p>
       <div className="rounded-lg border border-slate-200 bg-white text-xs">
         <div className="grid gap-px overflow-hidden rounded-t-lg bg-slate-100 sm:grid-cols-2">
           <div className="bg-white px-3 py-2">
@@ -259,7 +274,7 @@ const KarakterLokasi = ({ s }) => {
           <div className="bg-white px-3 py-2">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[10.5px] font-semibold text-slate-500">Kondisi area</span>
-              <Pil kode={s.karakter.cocok ? 'DIIZINKAN' : 'TIDAK_DIIZINKAN'}>{s.karakter.cocok ? 'Cocok' : 'Belum cocok'}</Pil>
+              <Pil kode={fisik.cocok ? 'DIIZINKAN' : 'BERSYARAT'}>{fisik.label}</Pil>
             </div>
             <p className="mt-0.5 leading-snug text-slate-700">{s.karakter.terukur}</p>
           </div>
@@ -280,14 +295,14 @@ const KarakterLokasi = ({ s }) => {
                 {kelengkapan.indikatif && ' Hasil bersifat indikatif.'}
               </p>
             )}
-            {s.syarat_dasar?.length > 0 && (
+            {fisik.syarat?.length > 0 && (
               <div className="mt-2 rounded-md bg-slate-50 px-2.5 py-2">
                 <div className="text-[10.5px] font-semibold text-slate-600">
-                  Syarat dasar (tidak ikut persentase; wajib terpenuhi agar lolos penyaringan peta)
+                  Kondisi fisik (tidak ikut persentase; yang belum terpenuhi menjadi peringatan)
                 </div>
                 <ul className="mt-1 grid gap-x-5 gap-y-0.5 sm:grid-cols-2">
-                  {s.syarat_dasar.map((d) => {
-                    const [kode, tanda, ket] = TANDA_DASAR[d.nilai];
+                  {fisik.syarat.map((d) => {
+                    const [kode, tanda, ket] = TANDA_FISIK[d.nilai];
                     return (
                       <li key={d.label} className="flex gap-2 leading-snug text-slate-700" title={ket}>
                         <Tanda kode={kode} tanda={tanda} />
@@ -296,7 +311,7 @@ const KarakterLokasi = ({ s }) => {
                     );
                   })}
                 </ul>
-                {s.syarat_dasar.some((d) => d.label === 'Dekat infrastruktur pendukung' && d.nilai === false) && (
+                {fisik.syarat.some((d) => d.label === 'Dekat infrastruktur pendukung' && d.nilai === false) && (
                   <p className="mt-1 text-[10.5px] leading-snug text-slate-500">
                     Jauh dari infrastruktur pendukung tidak memengaruhi kesesuaian ruang, tetapi area seperti ini tidak
                     ditampilkan di Peta Sebaran Lokasi Indikatif.
@@ -317,13 +332,38 @@ const KarakterLokasi = ({ s }) => {
               })}
             </ul>
             <p className="mt-2 text-[10.5px] leading-snug text-slate-400">
-              Ambang Peta Sebaran Lokasi Indikatif Lolos Penyaringan: seluruh syarat dasar terpenuhi dan sedikitnya 75%
+              Ambang Peta Sebaran Lokasi Indikatif Lolos Penyaringan: seluruh kondisi fisik dan pengecualian keras terpenuhi dan sedikitnya 75%
               parameter dinilai yang terukur sangat sesuai; di zona peruntukan lain yang hanya mengizinkan bersyarat
               seluruh parameter dinilai wajib terukur dan sangat sesuai.
             </p>
           </div>
         )}
       </div>
+    </section>
+  );
+};
+
+const PengecualianKeras = ({ s }) => {
+  const daftar = pengecualianScreening(s);
+  if (!daftar.length) return null;
+  return (
+    <section>
+      <Judul>Pengecualian keras (gerbang kesesuaian ruang)</Judul>
+      <p className="-mt-1 mb-2 text-[11px] text-slate-400">
+        Kawasan konservasi dan alur pelayaran dibaca dari seluruh lapisan zonasi sehingga selalu berlaku di atas
+        peruntukan RTRW. Irisan kecil di tepi area ditandai perlu verifikasi batas, bukan langsung menggugurkan.
+      </p>
+      <ul className="grid gap-x-5 gap-y-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs sm:grid-cols-2">
+        {daftar.map((d) => {
+          const [kode, tanda, ket] = TANDA_DASAR[d.nilai];
+          return (
+            <li key={d.label} className="flex gap-2 leading-snug text-slate-700" title={ket}>
+              <Tanda kode={kode} tanda={tanda} />
+              {d.label}
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 };
@@ -531,6 +571,7 @@ const AsalData = ({ s }) => (
 const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
   const zona = gabungZona(s.zona);
+  const peringatan = peringatanScreening(s);
 
   return (
     <div className="space-y-5">
@@ -538,7 +579,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
 
       {s.alasan.length > 0 && (
         <section>
-          <Judul>Dasar keputusan</Judul>
+          <Judul>Dasar keputusan kesesuaian ruang</Judul>
           <ul className="space-y-1.5">
             {s.alasan.map((a, i) => (
               <li key={i} className="flex gap-2.5 text-xs leading-relaxed text-slate-700">
@@ -550,8 +591,25 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
         </section>
       )}
 
+      {peringatan.length > 0 && (
+        <section>
+          <Judul>Peringatan (tidak menggugurkan)</Judul>
+          <ul className="space-y-1.5">
+            {peringatan.map((p, i) => (
+              <li key={i} className="flex items-start gap-2.5 text-xs leading-relaxed text-slate-700">
+                <span className="mt-0.5 shrink-0 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                  {JENIS_PERINGATAN[p.jenis] || 'Peringatan'}
+                </span>
+                <span>{p.teks}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {zona.length > 0 && <KomposisiZona zona={zona} />}
       <RincianJenis s={s} />
+      <PengecualianKeras s={s} />
       {s.karakter && <KarakterLokasi s={s} />}
       {s.parameter_tambahan?.length > 0 && <ParameterTambahan daftar={s.parameter_tambahan} />}
       {s.informasi_ruang?.length > 0 && <KetentuanArea s={s} />}
@@ -566,6 +624,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
                   <th className="px-3 py-2 font-semibold">Nomor izin</th>
                   <th className="px-3 py-2 font-semibold">Kegiatan</th>
                   <th className="px-3 py-2 text-right font-semibold">Irisan (m²)</th>
+                  <th className="px-3 py-2 font-semibold">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-rose-100">
@@ -573,7 +632,10 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
                   <tr key={k.nomor_izin}>
                     <td className="px-3 py-2 font-mono text-[11px] text-slate-700">{k.nomor_izin}</td>
                     <td className="px-3 py-2 text-slate-600">{k.kegiatan}</td>
-                    <td className="px-3 py-2 text-right tabular-nums text-slate-700">{angka(k.luas_m2)}</td>
+                    <td className="px-3 py-2 text-right tabular-nums text-slate-700">
+                      {angka(k.luas_m2)}{k.persen != null && <span className="text-slate-400"> ({persenArea(k.persen)})</span>}
+                    </td>
+                    <td className="px-3 py-2 text-slate-600">{k.gugur === false ? 'Perlu verifikasi batas' : 'Menggugurkan'}</td>
                   </tr>
                 ))}
               </tbody>
