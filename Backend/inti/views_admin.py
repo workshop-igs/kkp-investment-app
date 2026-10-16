@@ -1,14 +1,16 @@
 import io
 import json
 import re
+from datetime import timedelta
 
 import pandas as pd
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.cache import cache
 from django.db import connection, transaction
+from django.utils import timezone
 from rest_framework import status, viewsets
-from rest_framework.decorators import action
+from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser
@@ -38,6 +40,7 @@ from ketenagakerjaan.models import KalibrasiPelatihanSektor, MatriksKeahlianSekt
 from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
 from pipeline.models import ProyekInvestasi
 
+from .kesehatan import periksa_semua
 from .serializers import SektorInvestasiSerializer, SumberDataSerializer
 from .serializers_admin import (
     SUB_ZONA_BERKETENTUAN,
@@ -61,6 +64,48 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(AdminUserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+    def destroy(self, request, *args, **kwargs):
+        sasaran = self.get_object()
+        if sasaran.pk == request.user.pk:
+            raise ValidationError({'detail': 'Anda tidak dapat menghapus akun Anda sendiri.'})
+        if sasaran.is_superuser and not request.user.is_superuser:
+            raise ValidationError({'detail': 'Akun superadmin hanya dapat dihapus oleh superadmin.'})
+        # Proyek dan log aktivitas tetap tersimpan: relasinya ke akun di-set kosong (SET_NULL).
+        sasaran.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+# Pengguna dihitung aktif bila ada permintaan darinya (termasuk denyut tiap menit dari tab yang terbuka)
+# dalam rentang ini.
+RENTANG_AKTIF_MENIT = 3
+
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def status_sistem(request):
+    kunci = 'admin:status-sistem'
+    kesehatan = cache.get(kunci)
+    if kesehatan is None:
+        kesehatan = periksa_semua()
+        cache.set(kunci, kesehatan, 15)
+    sekarang = timezone.now()
+    pengguna = User.objects.all()
+    return Response({
+        'pengguna': {
+            'terdaftar': pengguna.count(),
+            'nonaktif': pengguna.filter(is_active=False).count(),
+            'aktif_sekarang': pengguna.filter(
+                profil__terakhir_aktif__gte=sekarang - timedelta(minutes=RENTANG_AKTIF_MENIT)
+            ).count(),
+            'aktif_hari_ini': pengguna.filter(
+                profil__terakhir_aktif__gte=sekarang - timedelta(hours=24)
+            ).count(),
+            'rentang_aktif_menit': RENTANG_AKTIF_MENIT,
+        },
+        'kesehatan': kesehatan,
+        'diperiksa_pada': sekarang,
+    })
 
 
 class AdminProyekViewSet(viewsets.ModelViewSet):

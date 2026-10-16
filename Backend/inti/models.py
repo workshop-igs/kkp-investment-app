@@ -93,6 +93,9 @@ class ProfilPengguna(models.Model):
         Provinsi, on_delete=models.SET_NULL, null=True, blank=True, help_text='Provinsi wilayah kerja'
     )
     telepon = models.CharField(max_length=20, blank=True)
+    terakhir_aktif = models.DateTimeField(
+        null=True, blank=True, db_index=True, help_text='Permintaan terakhir dari akun ini (diperbarui paling sering per menit)'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
