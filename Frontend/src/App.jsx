@@ -21,7 +21,6 @@ import TataLetakAdmin from './layouts/TataLetakAdmin';
 import AdminDashboardPage from './pages/admin/AdminDashboardPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminPipelinePage from './pages/admin/AdminPipelinePage';
-import AdminDataSourcesPage from './pages/admin/AdminDataSourcesPage';
 import AdminSectorsPage from './pages/admin/AdminSectorsPage';
 import AdminLogAktivitasPage from './pages/admin/AdminLogAktivitasPage';
 import AdminPengaturanAnalisisPage from './pages/admin/AdminPengaturanAnalisisPage';
@@ -40,7 +39,6 @@ const AppLayout = () => {
           <Route index element={<AdminDashboardPage />} />
           <Route path="users" element={<AdminUsersPage />} />
           <Route path="pipeline" element={<AdminPipelinePage />} />
-          <Route path="data-sources" element={<AdminDataSourcesPage />} />
           <Route path="sectors" element={<AdminSectorsPage />} />
           <Route path="log-aktivitas" element={<AdminLogAktivitasPage />} />
           <Route path="pengaturan-analisis" element={<AdminPengaturanAnalisisPage />} />

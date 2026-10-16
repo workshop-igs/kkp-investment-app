@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, Navigate, Link } from 'react-router-dom';
 import {
-  LayoutDashboard, Users, Briefcase, Database,
+  LayoutDashboard, Users, Briefcase,
   Map, LogOut, Menu, ShieldCheck, ArrowLeft, ScrollText, SlidersHorizontal, Layers
 } from 'lucide-react';
 import { useAuth } from '../context/KonteksAuth';
@@ -33,7 +33,6 @@ const TataLetakAdmin = () => {
       items: [
         { name: 'Proyek Investasi', path: '/admin/pipeline', icon: Briefcase },
         { name: 'Sektor Investasi', path: '/admin/sectors', icon: Map },
-        { name: 'Sumber Data', path: '/admin/data-sources', icon: Database },
       ],
     },
     {

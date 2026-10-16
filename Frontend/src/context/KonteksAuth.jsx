@@ -40,6 +40,22 @@ export const PenyediaAuth = ({ children }) => {
       .catch(() => {});
   }, []);
 
+  // Denyut tiap menit selama tab terlihat, agar dashboard admin dapat menghitung pengguna yang sedang aktif.
+  const idPengguna = user?.id;
+  useEffect(() => {
+    if (!idPengguna) return undefined;
+    const denyut = () => {
+      if (document.visibilityState === 'visible') api.get('/inti/auth/denyut/').catch(() => {});
+    };
+    denyut();
+    const t = setInterval(denyut, 60_000);
+    document.addEventListener('visibilitychange', denyut);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', denyut);
+    };
+  }, [idPengguna]);
+
   const muatProfil = async () => {
     const { data } = await api.get('/inti/auth/me/');
     if (!data.authenticated) {

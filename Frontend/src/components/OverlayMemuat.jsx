@@ -19,7 +19,6 @@ const NAMA_HALAMAN = [
   ['/register', 'Pendaftaran'],
   ['/admin/users', 'Manajemen Pengguna'],
   ['/admin/pipeline', 'Proyek Investasi'],
-  ['/admin/data-sources', 'Sumber Data'],
   ['/admin/sectors', 'Sektor Investasi'],
   ['/admin/log-aktivitas', 'Log Aktivitas'],
   ['/admin', 'Dashboard Admin'],

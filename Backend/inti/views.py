@@ -860,6 +860,13 @@ AKSI_RIWAYAT = ('MASUK', 'KELUAR', 'DAFTAR', 'UBAH', 'HAPUS', 'ANALISIS', 'DITOL
 
 @api_view(['GET'])
 @permission_classes([permissions.IsAuthenticated])
+def denyut_api(request):
+    """Denyut dari tab yang terbuka; JejakAktivitasMiddleware mencatat akun sebagai aktif."""
+    return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@api_view(['GET'])
+@permission_classes([permissions.IsAuthenticated])
 def aktivitas_saya_api(request):
     from django.db.models import Q
 
