@@ -102,7 +102,7 @@ const AsistenMengambang = () => {
           role="dialog"
           aria-label="Asisten KKP"
           className={`fixed right-4 sm:right-6 z-[1500] flex w-[calc(100vw-2rem)] sm:w-[380px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_18px_48px_-12px_rgba(0,34,66,0.45)] ${
-            diPeta ? 'bottom-[172px] h-[min(520px,calc(100vh-17rem))]' : 'bottom-24 h-[min(520px,calc(100vh-11rem))]'
+            diPeta ? 'bottom-24 h-[min(520px,calc(100vh-14rem))]' : 'bottom-24 h-[min(520px,calc(100vh-11rem))]'
           }`}
         >
           <header className="flex items-center justify-between gap-3 bg-kkp-700 px-4 py-3 text-white">
@@ -231,8 +231,9 @@ const AsistenMengambang = () => {
         aria-expanded={buka}
         title="Asisten KKP"
         data-tur="asisten"
-        className={`fixed right-4 sm:right-6 z-[1500] flex h-14 w-14 items-center justify-center rounded-full bg-kkp-700 text-white shadow-[0_10px_28px_-8px_rgba(0,34,66,0.6)] transition-transform hover:scale-105 hover:bg-kkp-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-900 ${
-          diPeta ? 'bottom-[104px]' : 'bottom-6'
+        className={`fixed bottom-6 z-[1500] flex h-14 w-14 items-center justify-center rounded-full bg-kkp-700 text-white shadow-[0_10px_28px_-8px_rgba(0,34,66,0.6)] transition-transform hover:scale-105 hover:bg-kkp-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-kkp-900 ${
+          // Di peta, kolom kanan dipakai tombol alat & kompas: robot di sebelah kiri kompas agar tidak menutupinya.
+          diPeta ? 'right-[104px]' : 'right-4 sm:right-6'
         }`}
       >
         {buka ? <X className="h-6 w-6" /> : <Bot className="h-7 w-7" />}

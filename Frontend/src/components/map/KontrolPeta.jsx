@@ -107,10 +107,12 @@ const KontrolPeta = ({
 
   return (
     <>
+      {/* Kolom dibatasi di atas kompas; di layar pendek jarak & padding dirapatkan agar tetap muat. */}
+      <div className="pointer-events-none absolute right-6 top-4 bottom-[104px] z-[1100] flex items-center">
       <div
         ref={refKontrol}
         data-tur="alat"
-        className="absolute right-6 top-1/2 -translate-y-1/2 z-[1100] flex flex-col gap-4"
+        className="pointer-events-auto flex flex-col gap-4 [@media(max-height:760px)]:gap-2 [@media(max-height:760px)]:[&>button]:p-2 [@media(max-height:760px)]:[&>div>button]:p-2"
       >
         
         <div data-tur="zoom" className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-1 shadow-sm flex flex-col">
@@ -260,6 +262,7 @@ const KontrolPeta = ({
         </button>
       )}
 
+      </div>
       </div>
 
       <PenandaTujuan tujuan={tujuan} onTutup={() => setTujuan(null)} />
