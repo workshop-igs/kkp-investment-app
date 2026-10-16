@@ -386,6 +386,10 @@ class RasterOseanografi(models.Model):
         ('ANOMALI_SUHU', 'Anomali suhu permukaan laut'),
         ('KLOROFIL', 'Klorofil-a'),
         ('GELOMBANG', 'Tinggi gelombang signifikan'),
+        ('PERIODE_GLB', 'Periode puncak gelombang'),
+        ('KD490', 'Kekeruhan perairan (Kd490)'),
+        ('CURAH_HUJAN', 'Curah hujan bulanan'),
+        ('BULAN_KERING', 'Jumlah bulan kering setahun'),
     ]
 
     parameter = models.CharField(max_length=15, choices=PARAMETER_CHOICES, db_index=True)

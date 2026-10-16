@@ -225,40 +225,41 @@ export const LAYER_LOKAL = {
     urlWilayah: '/analitik/lokasi-potensial/wilayah/',
     params: { sektor: 'SEMUA', kelas: 'TINGGI' },
     semuaJenis: 'Semua jenis investasi',
-    label: 'Peta Sebaran Wilayah Potensial Investasi',
+    label: 'Peta Sebaran Lokasi Indikatif Lolos Penyaringan',
     legenda: 'disarankan',
     ikon: (p) => IKON_JENIS_INVESTASI[p.sektor_kode] || 'bintang',
     warnaIkon: (p) => warnaJenisInvestasi(p.sektor_kode),
     warnaTitik: (p) => (p.jenis?.length ? p.jenis : [p.sektor_kode]).map(warnaJenisInvestasi),
-    tooltip: (p) => `Lokasi potensial:
+    tooltip: (p) => `Lokasi indikatif lolos penyaringan:
 ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     zoomPin: 8,
     keteranganLegenda:
-      'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi dan warnanya menunjukkan jenis itu; titik '
-      + 'berwarna ganda cocok untuk beberapa jenis. Mulai tingkat provinsi titik menjadi penanda berlambang jenis, '
-      + 'dan batas lokasinya baru dimuat sebagai area analisis saat tombol Analisis lokasi ini di popup diklik. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona ruang laut, atau kawasan Pola Ruang darat '
-      + 'RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu, karakter lokasinya cocok (misalnya tambak '
-      + 'garam dan unit pengolahan di darat pesisir, budi daya laut di perairan 1 sampai 30 m, OTEC di perairan dalam; '
-      + 'kedalaman dan gelombang bersifat indikatif; konservasi dan bioteknologi membutuhkan mangrove, lamun, atau terumbu '
-      + 'karang di lokasi atau dalam radius 500 m), tidak beririsan KKPRL terbit, tidak tertutup bangunan atau '
-      + 'struktur menurut OpenStreetMap dan data infrastruktur KKP, dan berada dalam jarak ideal infrastruktur pendukung '
-      + '(pelabuhan, jalan, listrik, atau kawasan industri). Sebuah sel masuk bila sedikitnya 5 parameternya '
-      + 'terukur dan sedikitnya 75% di antaranya sangat sesuai: peruntukan diizinkan tanpa syarat, karakter lokasi, risiko tsunami, gelombang '
-      + 'ekstrem dan abrasi, serta banjir yang rendah, tidak beririsan ekosistem sensitif, dekat infrastruktur pendukung, '
-      + 'dan di luar wilayah kelola masyarakat hukum adat; untuk konservasi dan bioteknologi di perairan juga '
-      + 'kedalaman paling dalam 30 m, gelombang paling tinggi 1,5 m, dan tanpa stres panas (anomali suhu di bawah '
-      + '1 °C, ambang NOAA Coral Reef Watch), ambang usulan yang menunggu tinjauan KKP. Di zona yang peruntukannya untuk '
-      + 'kegiatan lain dan hanya mengizinkan jenis itu secara bersyarat, seluruh parameter selain tata ruang wajib '
-      + 'terukur dan sangat sesuai. Setiap wilayah sel yang bersambung ditampilkan sebagai satu '
-      + 'titik dengan batas berupa inti terbaiknya, paling luas 1 km x 1 km (100 ha): persentase tertinggi, lalu paling '
-      + 'dekat infrastruktur. Dalam radius 10 km hanya lokasi terbaik yang ditampilkan, sehingga titik tidak '
-      + 'berdempetan; wilayah sesuai lain di sekitarnya dapat diperiksa lewat Analisis lokasi. Parameter '
-      + 'yang tidak sangat sesuai atau tidak terukur disebut di popup sebagai hal yang perlu dinilai langsung di '
-      + 'lapangan. Pada pilihan semua jenis, lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; '
-      + 'dalam radius 10 km dipilih yang persentasenya tertinggi, lalu yang cocok untuk paling banyak jenis; '
-      + 'Konservasi & Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang '
-      + 'tampil adalah lokasi dengan persentase tertinggi; perbesar peta untuk melihat lokasi lainnya. Kriteria '
-      + 'finansial proyek (NPV, IRR, payback, ROI) tidak ikut; penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
+      'Setiap titik adalah lokasi indikatif yang lolos penyaringan awal untuk sebuah jenis investasi; warnanya '
+      + 'menunjukkan jenis itu dan titik berwarna ganda cocok untuk beberapa jenis. Ini bukan rekomendasi pasti dan '
+      + 'bukan pengganti Persetujuan KKPRL. Mulai tingkat provinsi titik menjadi penanda berlambang jenis, dan batas '
+      + 'lokasinya dimuat sebagai area analisis saat tombol Analisis lokasi ini di popup diklik; analisis itu memakai '
+      + 'aturan yang sama sehingga hasilnya sama dengan popup. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona '
+      + 'ruang laut, atau kawasan Pola Ruang darat RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu. '
+      + 'Sel harus memenuhi seluruh SYARAT DASAR: karakter lokasi cocok (misalnya budi daya laut di perairan 1 sampai '
+      + '30 m, tambak garam di darat pesisir; kedalaman dan gelombang bersifat indikatif), dekat infrastruktur '
+      + 'pendukung, serta lolos pengecualian keras: di luar kawasan konservasi (kecuali jenis konservasi), tidak '
+      + 'menempati mangrove, lamun, atau terumbu karang bagi jenis yang dapat merusaknya, di luar jarak aman kabel, pipa, '
+      + 'dan alur pelayaran, tidak beririsan KKPRL terbit, dan tidak tertutup bangunan. Syarat dasar ini pasti '
+      + 'terpenuhi pada setiap titik sehingga tidak ikut persentase. Persentase dihitung dari PARAMETER DINILAI: '
+      + 'peruntukan diizinkan tanpa syarat, risiko tsunami, gelombang ekstrem dan abrasi, serta banjir yang rendah, di '
+      + 'luar wilayah kelola masyarakat hukum adat, dan kriteria per jenis dari data publik (misalnya suhu, klorofil-a, '
+      + 'kekeruhan, dan gelombang tertinggi untuk budi daya laut; kesuburan perairan untuk perikanan tangkap; kejernihan '
+      + 'air dan kedekatan terumbu karang untuk wisata bahari; curah hujan dan panjang musim kemarau untuk garam). '
+      + 'Ambang kriteria per jenis adalah usulan dari pustaka kesesuaian lokasi yang menunggu tinjauan KKP. Sebuah sel '
+      + 'masuk bila parameter dinilainya cukup terukur dan sedikitnya 75% di antaranya sangat sesuai; di zona yang '
+      + 'peruntukannya untuk kegiatan lain dan hanya mengizinkan jenis itu bersyarat, seluruh parameter dinilai wajib '
+      + 'terukur dan sangat sesuai. Setiap wilayah sel yang bersambung ditampilkan sebagai satu titik dengan batas '
+      + 'berupa inti terbaiknya, paling luas 1 km x 1 km (100 ha). Dalam radius 10 km hanya lokasi terbaik yang '
+      + 'ditampilkan; wilayah sesuai lain di sekitarnya dapat diperiksa lewat Analisis lokasi. Pada pilihan semua jenis, '
+      + 'lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; Konservasi & Rehabilitasi Pesisir hanya '
+      + 'tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang tampil adalah lokasi dengan persentase '
+      + 'tertinggi; perbesar peta untuk melihat lokasi lainnya. Kriteria finansial (NPV, IRR, payback) tidak ikut; '
+      + 'penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
     popup: (p) => {
       const jenis = p.jenis?.length ? p.jenis : [p.sektor_kode];
       const nama = p.jenis_nama?.length ? p.jenis_nama : [p.sektor || ''];
@@ -279,6 +280,18 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
            </li>`;
         })
         .join('');
+      // Lokasi hasil hitungan sebelum syarat dasar dipisah belum memiliki syarat_dasar; bloknya tidak ditampilkan.
+      const dasar = Object.entries(p.syarat_dasar || {});
+      const dasarKosong = dasar.filter(([, v]) => v === null).map(([label]) => label);
+      const blokDasar = dasar.length
+        ? `<div class="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5">
+            <p class="text-[10.5px] font-semibold text-emerald-800">&check; Syarat dasar terpenuhi (${dasar.length - dasarKosong.length} dari ${dasar.length})</p>
+            <p class="mt-0.5 text-[10px] leading-snug text-emerald-900/80">${dasar.filter(([, v]) => v !== null).map(([label]) => aman(label)).join(' &middot; ')}</p>
+            ${dasarKosong.length
+              ? `<p class="mt-0.5 text-[10px] leading-snug text-amber-700">? Belum terukur, dianggap terpenuhi: ${dasarKosong.map((l) => aman(l.charAt(0).toLowerCase() + l.slice(1))).join(', ')}</p>`
+              : ''}
+          </div>`
+        : '';
       const nilaiParameter = Object.values(p.parameter || {});
       const kelengkapan = kelengkapanScreening({
         parameter: nilaiParameter.map((v) => ({ nilai: v === null ? null : true })),
@@ -288,7 +301,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         <div class="flex items-center gap-2.5">
           <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full shadow-sm" style="background:${warna}">${lambangSvg(IKON_JENIS_INVESTASI[jenis[0]], 18)}</span>
           <div class="min-w-0">
-            <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Cocok untuk ${nama.length} jenis investasi` : `Lokasi potensial ${aman(nama[0])}`}</h3>
+            <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Lolos penyaringan untuk ${nama.length} jenis investasi` : `Lokasi indikatif ${aman(nama[0])}`}</h3>
             <p class="text-[11px] text-slate-500 leading-snug">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
           </div>
         </div>
@@ -299,13 +312,15 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           <span class="text-lg font-bold tabular-nums leading-none" style="color:${warna}">${persen}%</span>
           <div class="min-w-0 flex-1">
             <div class="h-1.5 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full" style="width:${persen}%;background:${warna}"></div></div>
-            <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">parameter terukur sangat sesuai &middot; ${aman(luas)} ha</p>
+            <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">parameter dinilai sangat sesuai &middot; ${aman(luas)} ha</p>
           </div>
         </div>
         ${p.luas_wilayah_ha > p.luas_ha
           ? `<p class="mt-1 text-[10px] text-slate-500 leading-snug">Inti terbaik dari wilayah sesuai seluas &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha: persentase tertinggi, lalu paling dekat infrastruktur.</p>`
           : ''}
-        <ul class="mt-2 text-[11px] space-y-px text-slate-700">${butir}</ul>
+        ${blokDasar}
+        <p class="mt-2 text-[10.5px] font-semibold text-slate-600">Parameter dinilai</p>
+        <ul class="mt-0.5 text-[11px] space-y-px text-slate-700">${butir}</ul>
         ${kelengkapan
           ? `<p class="mt-1 text-[10.5px] leading-snug ${kelengkapan.indikatif ? 'font-semibold text-amber-700' : 'text-slate-500'}">Data tersedia untuk ${kelengkapan.terukur} dari ${kelengkapan.total} parameter${kelengkapan.indikatif ? ' &middot; <span class="rounded bg-amber-500 px-1 text-[9.5px] font-bold uppercase text-white">Indikatif</span>' : ''}</p>`
           : ''}

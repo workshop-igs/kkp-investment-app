@@ -389,7 +389,10 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     queryset = LokasiPotensial.objects.select_related('provinsi', 'sektor').all()
 
     def retrieve(self, request, pk=None):
-        return Response({'geometry': json.loads(self.get_object().geometry.geojson)})
+        lok = self.get_object()
+        # Jenis investasi ikut dikirim agar "Analisis lokasi ini" menilai lokasi dengan jenis yang sama seperti peta.
+        sektor = lok.sektor.kode if lok.sektor_id else (lok.jenis[0] if lok.jenis else None)
+        return Response({'geometry': json.loads(lok.geometry.geojson), 'sektor_kode': sektor})
 
     def peta_urutan(self, qs, request, batas):
         return qs.order_by('-persen_sesuai', '-luas_ha', 'id')

@@ -208,7 +208,7 @@ const AdminParameterTambahanPage = () => {
             <h1 className="text-2xl font-bold text-slate-900 font-syne">Parameter Analisis Tambahan</h1>
             <p className="text-slate-500 text-sm mt-1">
               Tambahkan area khusus (mis. area cadangan perikanan tangkap) atau nilai per wilayah sebagai parameter analisis area,
-              Peta Sebaran Wilayah Potensial, dan laporan.
+              Peta Sebaran Lokasi Indikatif Lolos Penyaringan, dan laporan.
             </p>
           </div>
         </div>

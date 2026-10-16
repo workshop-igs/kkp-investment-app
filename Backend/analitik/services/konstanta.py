@@ -203,7 +203,9 @@ KETENTUAN_DARAT_BAWAAN = {
 SEKTOR_TERSENDIRI_DI_PETA = ['KONSERVASI_PESISIR']
 
 AMBANG_KECOCOKAN = 0.75
-MINIMAL_PARAMETER_TERUKUR = 5
+# Dihitung dari parameter yang dinilai saja; syarat dasar (ranah, karakter, infrastruktur, pengecualian) yang
+# pasti terpenuhi pada lokasi yang lolos tidak lagi ikut dihitung.
+MINIMAL_PARAMETER_TERUKUR = 3
 # Hasil screening berlabel "indikatif" bila parameter terukurnya kurang dari bagian ini (atau kurang dari
 # MINIMAL_PARAMETER_TERUKUR).
 AMBANG_KELENGKAPAN_DATA = 0.75
@@ -254,10 +256,11 @@ KARAKTER_LOKASI = {
     },
     'ENERGI_KELAUTAN': {
         'uraian': 'perairan untuk OTEC (sedalam 500 m atau lebih, suhu permukaan minimum 25 °C), energi gelombang '
-                  '(tinggi gelombang 1 m atau lebih), atau PLTS terapung (5-50 m, gelombang di bawah 1,5 m)',
+                  '(tinggi gelombang 1 m atau lebih dan daya gelombang 10 kW/m atau lebih), atau PLTS terapung '
+                  '(5-50 m, gelombang di bawah 1,5 m)',
         'LAUT': [
             {'kedalaman': (500, None), 'suhu_min': 25},
-            {'gelombang_min': 1.0},
+            {'gelombang_min': 1.0, 'daya_gelombang_min': 10},
             {'kedalaman': (5, 50), 'gelombang_maks': 1.5},
         ],
     },
@@ -274,10 +277,44 @@ KARAKTER_LOKASI = {
     },
 }
 
+# Parameter dinilai per jenis investasi (ikut persentase sangat sesuai, tidak menggugurkan). Seluruhnya dari data
+# publik; ambangnya usulan berdasarkan pustaka kesesuaian lokasi dan menunggu tinjauan KKP. Parameter yang
+# datanya belum pernah ditarik ke aplikasi dilewati, bukan dihitung "tidak terukur".
 PARAMETER_TAMBAHAN = {
-    kode: {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}}
-    for kode in ('KONSERVASI_PESISIR', 'BIOTEKNOLOGI_KELAUTAN')
+    'PERIKANAN_BUDIDAYA': {'LAUT': {
+        'suhu_rata_min': 26, 'suhu_rata_maks': 32, 'anomali_suhu_maks': 1.0, 'klorofil_min': 0.2, 'klorofil_maks': 10,
+        'kd490_maks': 0.4, 'gelombang_tertinggi_maks': 2.5,
+    }},
+    'PERIKANAN_TANGKAP': {'LAUT': {'klorofil_min': 0.2}},
+    'PARIWISATA_BAHARI': {'LAUT': {
+        'kd490_maks': 0.15, 'jarak_karang_maks_km': 2, 'anomali_suhu_maks': 1.0, 'gelombang_tertinggi_maks': 2.5,
+    }},
+    'JASA_MARITIM': {'LAUT': {'gelombang_tertinggi_maks': 2.5}},
+    'GARAM': {'DARAT': {'curah_hujan_maks': 1300, 'bulan_kering_min': 4}},
+    'KONSERVASI_PESISIR': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
+    'BIOTEKNOLOGI_KELAUTAN': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
 }
+# Bulan dengan curah hujan di bawah ini dihitung bulan kering (pustaka tambak garam: < 100 mm/bulan).
+AMBANG_BULAN_KERING_MM = 100
+
+# Pengecualian keras, berlaku sama di Peta Sebaran dan screening.
+# Ekosistem sensitif yang tidak boleh ditempati tiap jenis investasi. Jenis yang membutuhkan ekosistem
+# (pariwisata, konservasi, bioteknologi) dan perikanan tangkap tidak dikecualikan.
+EKOSISTEM_TERLARANG_SEKTOR = {
+    'PERIKANAN_BUDIDAYA': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],
+    'ENERGI_KELAUTAN': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],
+    'JASA_MARITIM': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],
+    'INFRASTRUKTUR_LAUT': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],
+    'GARAM': ['MANGROVE'],
+    'PENGOLAHAN_HASIL_LAUT': ['MANGROVE'],
+}
+# Kawasan konservasi (jenis zona ZL atau sub-zona konservasi dari sumber mana pun) hanya terbuka bagi jenis ini.
+SEKTOR_BOLEH_DI_KAWASAN_KONSERVASI = ['KONSERVASI_PESISIR']
+# Jarak aman dari unsur garis RTRL; usulan, sesuaikan dengan ketentuan Kemenhub/KKP yang berlaku.
+BUFFER_UNSUR_TERLARANG_M = {'KABEL': 500.0, 'PIPA': 500.0, 'ALUR_PELAYARAN': 500.0}
+# Screening area: irisan pengecualian di bawah bagian ini dicatat sebagai peringatan, tidak menggugurkan
+# (batas peta tata ruang 1:50.000-1:250.000 dapat bergeser puluhan hingga ratusan meter).
+AMBANG_IRISAN_PENGECUALIAN_PERSEN = 1.0
 
 RADIUS_EKOSISTEM_PENDUKUNG_M = 500
 

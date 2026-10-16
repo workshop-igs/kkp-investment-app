@@ -13,6 +13,7 @@ from django.db import transaction
 
 from analitik.models import RasterOseanografi
 from analitik.services.konstanta import BULAN
+from analitik.services.pengaturan import atur
 
 ERDDAP = 'https://upwell.pfeg.noaa.gov/erddap/griddap'
 COASTWATCH = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap'
@@ -65,6 +66,26 @@ PARAMETER = {
         'tambahan': '[(0.0)]', 'resolusi': 0.5,
         'sumber': 'NOAA WaveWatch III (0,5°), tinggi gelombang signifikan, sampel tiap 40 jam selama 12 bulan',
     },
+    'PERIODE_GLB': {
+        'dataset': 'NWW3_Global_Best', 'variabel': 'Tper', 'satuan': 's', 'waktu_tahunan': 40,
+        'tambahan': '[(0.0)]', 'resolusi': 0.5,
+        'sumber': 'NOAA WaveWatch III (0,5°), periode puncak gelombang, sampel tiap 40 jam selama 12 bulan',
+    },
+    'KD490': {
+        'server': COASTWATCH, 'dataset': 'erdMH1kd490mday_R2022NRT', 'variabel': 'Kd_490', 'satuan': '1/m',
+        'waktu': '[last-11:1:last]', 'resolusi': 1 / 24, 'langkah': 3, 'bulanan': True,
+        'sumber': 'NASA MODIS-Aqua koefisien atenuasi Kd490 bulanan (R2022) via NOAA ERDDAP, 12 bulan terakhir',
+    },
+    'CURAH_HUJAN': {
+        'server': COASTWATCH, 'dataset': 'chirps20GlobalMonthlyP05', 'variabel': 'precip', 'satuan': 'mm/bulan',
+        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'bulanan': True, 'per_bulan': True,
+        'sumber': 'CHIRPS v2.0 curah hujan bulanan (0,05°, dicuplik 0,1°) via NOAA ERDDAP, 12 bulan terakhir',
+    },
+}
+
+# Diturunkan dari raster CURAH_HUJAN yang sama, tidak diunduh terpisah.
+BULAN_KERING = {
+    'satuan': 'bulan', 'sumber': 'Dihitung dari CHIRPS v2.0: jumlah bulan bercurah hujan di bawah ambang bulan kering',
 }
 
 
@@ -87,7 +108,7 @@ def _unduh(url, percobaan=6):
 def _grid(teks, variabel):
     baca = csv.reader(io.StringIO(teks))
     kepala = next(baca)
-    next(baca)
+    satuan = next(baca)
     i_lat, i_lon, i_nilai = kepala.index('latitude'), kepala.index('longitude'), kepala.index(variabel)
     i_waktu = kepala.index('time') if 'time' in kepala else None
     sel, waktu = {}, set()
@@ -101,7 +122,7 @@ def _grid(teks, variabel):
         if math.isnan(v):
             continue
         sel.setdefault((float(b[i_lat]), float(b[i_lon])), []).append(v)
-    return sel, waktu
+    return sel, waktu, satuan[i_nilai] if i_nilai < len(satuan) else ''
 
 
 def _raster(sel, resolusi, pita, kosong_bila=None):
@@ -131,8 +152,8 @@ def _raster(sel, resolusi, pita, kosong_bila=None):
 
 
 class Command(BaseCommand):
-    help = ('Tarik kondisi oseanografi (kedalaman, suhu permukaan dan anomalinya, klorofil-a, gelombang) dari NOAA '
-            'ERDDAP ke raster lokal.')
+    help = ('Tarik kondisi oseanografi (kedalaman, suhu permukaan dan anomalinya, klorofil-a, kekeruhan Kd490, tinggi '
+            'dan periode gelombang) serta curah hujan CHIRPS dari NOAA ERDDAP ke raster lokal.')
 
     def add_arguments(self, parser):
         parser.add_argument('--parameter', choices=list(PARAMETER), action='append',
@@ -181,9 +202,18 @@ class Command(BaseCommand):
             teks = _unduh(url)
             if teks:
                 break
-        sel, waktu = _grid(teks, p['variabel'])
+        sel, waktu, satuan = _grid(teks, p['variabel'])
+        if p.get('per_bulan') and 'day' in satuan.lower():
+            # Sebagian dataset bulanan ERDDAP menyimpan laju harian (mm/hari); ubah ke total bulanan.
+            sel = {k: [x * 30.44 for x in v] for k, v in sel.items()}
         rast, cakupan = _raster(sel, p['resolusi'] * langkah, [np.mean, np.min, np.max])
+        periode = _periode(waktu, p.get('bulanan'))
         with transaction.atomic():
             RasterOseanografi.objects.filter(parameter=kode).delete()
-            self._simpan(kode, p, rast, cakupan, _periode(waktu, p.get('bulanan')))
+            self._simpan(kode, p, rast, cakupan, periode)
+            if kode == 'CURAH_HUJAN':
+                ambang = atur('AMBANG_BULAN_KERING_MM')
+                kering, cakupan = _raster(sel, p['resolusi'] * langkah, [lambda a: float((a < ambang).sum())])
+                RasterOseanografi.objects.filter(parameter='BULAN_KERING').delete()
+                self._simpan('BULAN_KERING', BULAN_KERING, kering, cakupan, periode)
         return 1

@@ -980,8 +980,8 @@ function lokasiSesuai(dek, o, b, i, citra) {
   const aksen = aksenBab(b);
   const y = dek.slide({
     alis: `Bab ${i + 1}  |  ${b.nama}`,
-    judul: `Lokasi Paling Sesuai: ${b.nama}`,
-    sub: `Lokasi potensial dari Peta Sebaran Wilayah Potensial: sedikitnya 5 parameter terukur dan 75% di antaranya sangat sesuai${j.karakter ? `, karakter lokasi cocok (${j.karakter})` : ''}${
+    judul: `Lokasi Indikatif Lolos Penyaringan: ${b.nama}`,
+    sub: `Lokasi indikatif dari Peta Sebaran Lokasi Indikatif Lolos Penyaringan: syarat dasar terpenuhi dan sedikitnya 75% parameter dinilai sangat sesuai${j.karakter ? `, karakter lokasi cocok (${j.karakter})` : ''}${
       j.lokasi.length && !j.lokasi.some((l) => l.peruntukan_utama) ? '; seluruhnya diizinkan bersyarat atau hanya untuk rincian kegiatan tertentu menurut matriks Perda' : ''}.`,
     subBaris: 2,
     aksen,
@@ -999,14 +999,14 @@ function lokasiSesuai(dek, o, b, i, citra) {
   dek.legenda(TEPI + 5, y + tinggiPeta + 8.4, lebarPeta, [
     { label: 'Kelas kelayakan tinggi', warna: warnaKelasKelayakan('TINGGI') },
     { label: 'Kelas kelayakan sedang', warna: warnaKelasKelayakan('SEDANG') },
-    { label: 'Nomor lokasi potensial', warna: aksen },
+    { label: 'Nomor lokasi indikatif', warna: aksen },
   ]);
 
   const x = TEPI + lebarPeta + 11;
   const lebar = W - TEPI - x;
   let yy = dek.kartu(x, y, lebar, BAWAH - y, { judul: 'Lokasi prioritas', ikon: 'lokasi', aksen });
   if (!j.lokasi.length) {
-    dek.tanda(x + 5, yy, lebar - 10, `Belum ada lokasi potensial ${j.nama.toLowerCase()} di provinsi ini pada Peta Sebaran Wilayah Potensial.`);
+    dek.tanda(x + 5, yy, lebar - 10, `Belum ada lokasi indikatif ${j.nama.toLowerCase()} di provinsi ini pada Peta Sebaran Lokasi Indikatif Lolos Penyaringan.`);
     return;
   }
   const d = dek.doc;
@@ -1050,7 +1050,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
       d.line(x + 5, yy - 3.4, x + lebar - 5, yy - 3.4);
     }
   });
-  dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial aplikasi (sel 250 m; tata ruang dan matriks KKPRL Perda, karakter lokasi, KKPRL, bangunan, infrastruktur, ekosistem, InaRISK); latar zona menurut kelas kelayakan; oseanografi NOAA${b.komoditas ? `; kesesuaian dinilai pada tingkat jenis ${j.nama.toLowerCase()}, belum syarat biofisik khusus ${b.nama.toLowerCase()}` : ''}; ${ATRIBUSI_CITRA}.`);
+  dek.sumber(`Sumber: Peta Sebaran Lokasi Indikatif Lolos Penyaringan aplikasi (sel 250 m; tata ruang dan matriks KKPRL Perda, karakter lokasi, pengecualian konservasi/ekosistem/kabel-pipa-alur/KKPRL/bangunan, infrastruktur, InaRISK, kriteria data publik per jenis); hasil indikatif, bukan pengganti Persetujuan KKPRL; latar zona menurut kelas kelayakan; oseanografi NOAA${b.komoditas ? `; kesesuaian dinilai pada tingkat jenis ${j.nama.toLowerCase()}, belum syarat biofisik khusus ${b.nama.toLowerCase()}` : ''}; ${ATRIBUSI_CITRA}.`);
 }
 
 function finansialPasar(dek, o, b, i) {
@@ -1179,7 +1179,7 @@ function kesimpulanBab(dek, o, b, i) {
   dek.centang(TEPI + 5, yy, lebar - 10, [
     k && `Potensi: produksi ${k.tahun} ${angka(k.produksi_ton)} ton${senilai(k)}, ${angka(k.pangsa_nasional_persen, 1)}% produksi nasional.`,
     k && pertumbuhanTeks(k),
-    `Ruang: ${angka(j.sesuai_ha)} ha zona sesuai untuk ${j.nama.toLowerCase()}, ${angka(j.tinggi_ha)} ha berkelas kelayakan tinggi${j.lokasi[0] ? `; lokasi potensial teratas ${namaRapi(j.lokasi[0].nama, 36)} (${j.lokasi[0].kabupaten})` : ''}.`,
+    `Ruang: ${angka(j.sesuai_ha)} ha zona sesuai untuk ${j.nama.toLowerCase()}, ${angka(j.tinggi_ha)} ha berkelas kelayakan tinggi${j.lokasi[0] ? `; lokasi indikatif teratas ${namaRapi(j.lokasi[0].nama, 36)} (${j.lokasi[0].kabupaten})` : ''}.`,
     j.rincian_matriks && `Matriks ${j.rincian_matriks.sumber}: ${j.nama.toLowerCase()} hanya diizinkan untuk rincian kegiatan tertentu atau bersyarat di ${angka(j.rincian_matriks.blok.BERSYARAT || 0)} blok zona.`,
     k && hargaTeks(k),
     tpt?.nilai != null && `Tenaga kerja: pengangguran terbuka provinsi ${angka(tpt.nilai, 2)}% (${tpt.tahun}); setiap Rp1 miliar investasi menyerap sekitar ${angka(j.rasio_tk_per_miliar, 1)} tenaga kerja.`,

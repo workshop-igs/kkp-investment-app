@@ -279,8 +279,8 @@ const LegendaDisarankan = ({ sektor, onPilih }) => {
           <p className="text-[26px] font-bold leading-none tabular-nums">{angkaBulat(ringkas.lokasi_potensial)}</p>
         )}
         <p className="text-[11px] leading-snug text-white/85">
-          <b className="block text-[12px] text-white">lokasi potensial investasi</b>
-          sedikitnya 75% dari ≥5 parameter terukurnya sangat sesuai
+          <b className="block text-[12px] text-white">lokasi indikatif lolos penyaringan</b>
+          syarat dasar terpenuhi dan sedikitnya 75% parameter dinilai sangat sesuai
         </p>
       </div>
 
