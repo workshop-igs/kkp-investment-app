@@ -2,9 +2,10 @@ import logging
 from datetime import timedelta
 
 from celery import shared_task
+from celery.signals import worker_ready
 from django.core.cache import cache
 from django.core.management import call_command
-from django.db import transaction
+from django.db import connection, transaction
 from django.utils import timezone
 
 from analitik.models import StatusHitungUlang
@@ -73,3 +74,21 @@ def hitung_ulang():
         StatusHitungUlang.objects.filter(pk=1).update(
             berjalan=False, selesai=timezone.now(), tahap='', ke=0, dari=0,
         )
+
+
+@worker_ready.connect
+def lanjutkan_hitung_ulang(**_):
+    """Hitung ulang yang terputus karena pekerja dimatikan (deploy, restart VPS) dijadwalkan ulang saat pekerja menyala.
+
+    Hanya ada satu pekerja, sehingga status "berjalan" saat pekerja baru menyala pasti sisa proses yang terputus;
+    tanpa ini tombol hitung ulang baru bisa dipakai lagi setelah status dianggap macet (45 menit).
+    """
+    try:
+        if StatusHitungUlang.objects.filter(pk=1, berjalan=True).update(berjalan=False, tahap='', ke=0, dari=0):
+            logger.warning('[HITUNG ULANG] Proses sebelumnya terputus saat pekerja dimulai ulang; dijadwalkan ulang.')
+        jadwalkan_hitung_ulang()
+    except Exception:
+        logger.exception('[HITUNG ULANG] Gagal memeriksa hitung ulang yang terputus')
+    finally:
+        # Koneksi dibuka di proses induk sebelum proses anak dibuat; jangan diwariskan.
+        connection.close()
