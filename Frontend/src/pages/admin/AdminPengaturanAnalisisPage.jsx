@@ -1,34 +1,181 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Plus, RefreshCw, RotateCcw, Save, SlidersHorizontal, Trash2 } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  AlertTriangle, Check, CheckCircle2, Loader2, Plus, RefreshCw, RotateCcw, Save, SlidersHorizontal, Trash2,
+} from 'lucide-react';
 import { api } from '../../api/klien';
 
 const URL = '/inti/admin/pengaturan-analisis/';
 
 const waktu = (iso) => (iso ? new Date(iso).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }) : '');
 
+const TAHAP_HITUNG = [
+  { kunci: 'Menyiapkan', label: 'Menyiapkan' },
+  { kunci: 'Lokasi indikatif', label: 'Peta Sebaran Lokasi Indikatif' },
+  { kunci: 'Skor kelayakan zona', label: 'Skor kelayakan zona' },
+];
+
+const durasi = (detik) => {
+  const d = Math.max(0, Math.round(detik));
+  if (d < 60) return `${d} dtk`;
+  const m = Math.floor(d / 60);
+  if (m < 60) return `${m} mnt ${d % 60} dtk`;
+  return `${Math.floor(m / 60)} jam ${m % 60} mnt`;
+};
+
+const useDetik = (aktif) => {
+  const [sekarang, setSekarang] = useState(Date.now());
+  useEffect(() => {
+    if (!aktif) return undefined;
+    const t = setInterval(() => setSekarang(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, [aktif]);
+  return sekarang;
+};
+
+const Putar = () => (
+  <span className="relative grid h-11 w-11 shrink-0 place-items-center">
+    <span className="absolute inset-0 rounded-full border-4 border-sky-100" />
+    <span className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-sky-600 border-r-sky-600" />
+    <RefreshCw className="h-4 w-4 text-sky-700" />
+  </span>
+);
+
 export const StatusHitungUlang = ({ status, onMulai }) => {
+  const berjalan = !!status?.berjalan;
+  const menunggu = !!status?.menunggu && !berjalan;
+  const sekarang = useDetik(berjalan || menunggu);
+  const [baruSelesai, setBaruSelesai] = useState(false);
+  const [memulai, setMemulai] = useState(false);
+  const tadiBerjalan = useRef(false);
+
+  useEffect(() => {
+    if (tadiBerjalan.current && !berjalan && !menunggu) {
+      setBaruSelesai(true);
+      const t = setTimeout(() => setBaruSelesai(false), 10000);
+      tadiBerjalan.current = false;
+      return () => clearTimeout(t);
+    }
+    if (berjalan || menunggu) tadiBerjalan.current = true;
+    return undefined;
+  }, [berjalan, menunggu]);
+
   if (!status) return null;
-  const { berjalan, menunggu, tahap, ke, dari, selesai, galat } = status;
-  return (
-    <div className={`rounded-xl border px-4 py-3 text-sm flex flex-wrap items-center justify-between gap-3 ${
-      galat ? 'bg-rose-50 border-rose-200 text-rose-800'
-        : berjalan || menunggu ? 'bg-amber-50 border-amber-200 text-amber-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
-    }`}>
-      <div>
-        <div className="font-semibold">
-          {berjalan ? 'Peta Sebaran dan skor sedang dihitung ulang di latar'
-            : menunggu ? 'Hitung ulang menunggu antrean'
-              : 'Peta Sebaran dan skor sudah memakai pengaturan terbaru'}
-        </div>
-        <div className="text-xs mt-0.5">
-          {berjalan && tahap ? `${tahap}${dari ? ` (${ke}/${dari})` : ''}` : selesai ? `Terakhir selesai ${waktu(selesai)}` : ''}
-          {galat && ` · Galat terakhir: ${galat}`}
+  const { tahap = '', ke = 0, dari = 0, mulai, selesai, galat } = status;
+
+  const mulaiKlik = async () => {
+    setMemulai(true);
+    try {
+      await onMulai();
+    } finally {
+      setMemulai(false);
+    }
+  };
+
+  if (berjalan || menunggu) {
+    const [namaTahap, wilayah] = tahap.includes(': ') ? tahap.split(': ') : [tahap || 'Menyiapkan', ''];
+    const indeks = Math.max(0, TAHAP_HITUNG.findIndex((t) => t.kunci === namaTahap));
+    const persen = dari ? Math.min(100, Math.round((ke / dari) * 100)) : null;
+    const lewat = mulai ? (sekarang - new Date(mulai).getTime()) / 1000 : 0;
+    const sisa = dari && ke > 0 && ke < dari ? (lewat / ke) * (dari - ke) : null;
+    return (
+      <div role="status" aria-live="polite" className="rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white px-4 py-4 text-sm shadow-sm">
+        <div className="flex items-start gap-3">
+          <Putar />
+          <div className="min-w-0 flex-1">
+            <div className="font-semibold text-slate-900">
+              {menunggu ? 'Hitung ulang menunggu antrean' : 'Menghitung ulang Peta Sebaran dan skor zona'}
+              <span className="ml-1 inline-flex gap-0.5 align-middle" aria-hidden="true">
+                {[0, 1, 2].map((i) => (
+                  <span key={i} className="h-1 w-1 animate-bounce rounded-full bg-sky-600" style={{ animationDelay: `${i * 150}ms` }} />
+                ))}
+              </span>
+            </div>
+            <div className="mt-0.5 text-xs text-slate-600">
+              {menunggu
+                ? 'Proses akan mulai begitu pekerja latar siap.'
+                : (
+                  <>
+                    {TAHAP_HITUNG[indeks]?.label || namaTahap}
+                    {wilayah && <> · sedang memproses <b className="text-slate-800">{wilayah}</b></>}
+                  </>
+                )}
+            </div>
+
+            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-sky-100" role="progressbar"
+              aria-valuemin={0} aria-valuemax={100} aria-valuenow={persen ?? undefined}>
+              {persen === null ? (
+                <div className="hitung-tak-tentu h-full w-2/5 rounded-full bg-sky-500" />
+              ) : (
+                <div className="hitung-garis h-full rounded-full bg-sky-600 transition-[width] duration-700 ease-out"
+                  style={{ width: `${Math.max(persen, 3)}%` }} />
+              )}
+            </div>
+            <div className="mt-1.5 flex flex-wrap justify-between gap-x-4 gap-y-1 text-[11px] text-slate-500">
+              <span>
+                {persen === null ? 'Menyiapkan data…' : <><b className="text-slate-700">{persen}%</b> · provinsi {ke} dari {dari}</>}
+              </span>
+              <span>
+                {mulai && <>Berjalan {durasi(lewat)}</>}
+                {sisa !== null && <> · perkiraan sisa ±{durasi(sisa)}</>}
+              </span>
+            </div>
+
+            <ol className="mt-3 flex flex-wrap items-center gap-2 text-[11px]">
+              {TAHAP_HITUNG.map((t, i) => {
+                const lalu = i < indeks;
+                const kini = i === indeks && !menunggu;
+                return (
+                  <li key={t.kunci} className="flex items-center gap-2">
+                    <span className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 font-medium ${
+                      lalu ? 'bg-emerald-100 text-emerald-800' : kini ? 'bg-sky-600 text-white' : 'bg-slate-100 text-slate-500'
+                    }`}>
+                      {lalu ? <Check className="h-3 w-3" /> : kini ? <Loader2 className="h-3 w-3 animate-spin" /> : <span className="h-1.5 w-1.5 rounded-full bg-current" />}
+                      {t.label}
+                    </span>
+                    {i < TAHAP_HITUNG.length - 1 && <span className="h-px w-4 bg-slate-300" aria-hidden="true" />}
+                  </li>
+                );
+              })}
+            </ol>
+            <p className="mt-3 text-[11px] text-slate-400">
+              Proses berjalan di server; halaman ini boleh ditinggalkan dan progres diperbarui otomatis.
+            </p>
+          </div>
         </div>
       </div>
-      {onMulai && !berjalan && (
-        <button type="button" onClick={onMulai}
-          className="px-3 py-1.5 rounded-lg bg-white border border-current/20 text-xs font-semibold hover:bg-white/70 flex items-center gap-1.5">
-          <RefreshCw className="w-3.5 h-3.5" /> Hitung ulang sekarang
+    );
+  }
+
+  const gagal = !!galat;
+  return (
+    <div className={`rounded-xl border px-4 py-3 text-sm flex flex-wrap items-center justify-between gap-3 ${
+      gagal ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+    } ${baruSelesai ? 'animate-fade-in ring-2 ring-emerald-300' : ''}`}>
+      <div className="flex items-center gap-3">
+        <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-full ${gagal ? 'bg-rose-100' : 'bg-emerald-100'}`}>
+          {gagal ? <AlertTriangle className="h-4 w-4" /> : (
+            <span className="relative grid place-items-center">
+              {baruSelesai && <span className="absolute h-7 w-7 animate-ping rounded-full bg-emerald-300 opacity-60" />}
+              <CheckCircle2 className="relative h-5 w-5" />
+            </span>
+          )}
+        </span>
+        <div>
+          <div className="font-semibold">
+            {gagal ? 'Hitung ulang terakhir gagal'
+              : baruSelesai ? 'Selesai! Peta Sebaran dan skor sudah diperbarui'
+                : 'Peta Sebaran dan skor sudah memakai pengaturan terbaru'}
+          </div>
+          <div className="text-xs mt-0.5">
+            {selesai ? `Terakhir selesai ${waktu(selesai)}` : ''}
+            {gagal && ` · Galat: ${galat}`}
+          </div>
+        </div>
+      </div>
+      {onMulai && (
+        <button type="button" onClick={mulaiKlik} disabled={memulai}
+          className="px-3 py-1.5 rounded-lg bg-white border border-current/20 text-xs font-semibold hover:bg-white/70 flex items-center gap-1.5 disabled:opacity-60">
+          <RefreshCw className={`w-3.5 h-3.5 ${memulai ? 'animate-spin' : ''}`} /> {memulai ? 'Memulai…' : 'Hitung ulang sekarang'}
         </button>
       )}
     </div>
@@ -40,9 +187,10 @@ export const useStatusHitungUlang = (awal) => {
   useEffect(() => setStatus(awal), [awal]);
   useEffect(() => {
     if (!status?.berjalan && !status?.menunggu) return undefined;
+    // Diperiksa tiap 5 detik selama berjalan agar bilah progres bergerak mulus.
     const t = setInterval(() => {
       api.get(`${URL}hitung-ulang/`).then(({ data }) => setStatus(data)).catch(() => {});
-    }, 15000);
+    }, 5000);
     return () => clearInterval(t);
   }, [status?.berjalan, status?.menunggu]);
   const mulai = () => api.post(`${URL}hitung-ulang/`).then(({ data }) => setStatus(data));
