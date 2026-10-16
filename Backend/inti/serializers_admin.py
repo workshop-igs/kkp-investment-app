@@ -18,7 +18,8 @@ SUB_ZONA_BERKETENTUAN = [(k, v) for k, v in ZonasiRuangLaut.SUB_ZONA_CHOICES if 
 class AdminProfilPenggunaSerializer(serializers.ModelSerializer):
     class Meta:  # type: ignore
         model = ProfilPengguna
-        fields = ['instansi', 'telepon', 'provinsi']
+        fields = ['instansi', 'telepon', 'provinsi', 'terakhir_aktif']
+        read_only_fields = ['terakhir_aktif']
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
@@ -33,10 +34,19 @@ class AdminUserSerializer(serializers.ModelSerializer):
             'is_active', 'is_staff', 'is_superuser', 'date_joined',
             'profil', 'role_display', 'provinsi_nama'
         ]
-        read_only_fields = ['is_staff', 'is_superuser', 'date_joined']
+        read_only_fields = ['username', 'is_staff', 'is_superuser', 'date_joined']
 
     def get_role_display(self, obj):
         return 'Administrator' if obj.is_staff else 'Pengguna KKP'
+
+    def validate_email(self, nilai):
+        nilai = nilai.strip().lower()
+        lain = User.objects.filter(email__iexact=nilai)
+        if self.instance is not None:
+            lain = lain.exclude(pk=self.instance.pk)
+        if nilai and lain.exists():
+            raise serializers.ValidationError('Surel ini sudah dipakai akun lain.')
+        return nilai
 
     def validate(self, attrs):
         diminta = sorted({'is_staff', 'is_superuser'} & set(self.initial_data))

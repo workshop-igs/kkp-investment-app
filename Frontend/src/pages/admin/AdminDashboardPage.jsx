@@ -2,18 +2,28 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Activity, AlertTriangle, ArrowUpRight, Briefcase, CheckCircle2,
-  Database, ShieldAlert, Users,
+  ShieldAlert, UserCheck, Users, XOctagon,
 } from 'lucide-react';
 import { api, ambilDaftar } from '../../api/klien';
 import { formatNumber, rupiahMiliar } from '../../utils/pemformat';
 
-const Kartu = ({ judul, nilai, catatan, icon: Icon, warna }) => (
+const SELANG_STATUS_MS = 30_000;
+
+const Kartu = ({ judul, nilai, catatan, icon: Icon, warna, langsung }) => (
   <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
     <div className={`p-3.5 rounded-xl shrink-0 ${warna}`}>
       <Icon className="w-6 h-6" />
     </div>
     <div className="min-w-0">
-      <p className="text-sm font-medium text-slate-500 leading-tight">{judul}</p>
+      <p className="text-sm font-medium text-slate-500 leading-tight flex items-center gap-1.5">
+        {langsung && (
+          <span className="relative flex h-2 w-2" title="Diperbarui otomatis">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
+        )}
+        {judul}
+      </p>
       <h3 className="text-xl xl:text-2xl font-bold text-slate-900 mt-1 tabular-nums whitespace-nowrap">
         {nilai}
       </h3>
@@ -42,11 +52,100 @@ const Panel = ({ judul, keterangan, tautan, tautanTeks, children }) => (
   </div>
 );
 
-const tanggalPendek = (iso) => {
-  if (!iso) return 'belum pernah';
-  const d = new Date(iso);
-  const bln = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-  return `${d.getDate()} ${bln[d.getMonth()]} ${d.getFullYear()}`;
+const TEMA_KONDISI = {
+  hijau: {
+    judul: 'Aplikasi berjalan normal',
+    sub: 'Seluruh pemeriksaan dalam batas wajar.',
+    kotak: 'bg-emerald-50 border-emerald-200',
+    ikon: 'bg-emerald-500 text-white',
+    teks: 'text-emerald-900',
+    titik: 'bg-emerald-500',
+    Ikon: CheckCircle2,
+  },
+  kuning: {
+    judul: 'Ada peringatan',
+    sub: 'Aplikasi masih berjalan, tetapi ada yang perlu diperhatikan.',
+    kotak: 'bg-amber-50 border-amber-200',
+    ikon: 'bg-amber-500 text-white',
+    teks: 'text-amber-900',
+    titik: 'bg-amber-500',
+    Ikon: AlertTriangle,
+  },
+  merah: {
+    judul: 'Ada masalah',
+    sub: 'Sebagian fungsi aplikasi terganggu dan perlu segera ditangani.',
+    kotak: 'bg-rose-50 border-rose-200',
+    ikon: 'bg-rose-600 text-white',
+    teks: 'text-rose-900',
+    titik: 'bg-rose-600',
+    Ikon: XOctagon,
+  },
+};
+
+const jamDetik = (d) => d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+const KondisiAplikasi = ({ status, gagal, diperbarui }) => {
+  const kesehatan = gagal
+    ? {
+      status: 'merah',
+      pemeriksaan: [{
+        nama: 'Server aplikasi',
+        status: 'merah',
+        nilai: 'tidak merespons',
+        keterangan: 'Server tidak menjawab pemeriksaan kondisi; aplikasi mungkin sedang mati atau koneksi terputus.',
+      }],
+    }
+    : status?.kesehatan;
+  if (!kesehatan) {
+    return (
+      <div className="bg-white rounded-2xl border border-slate-200 px-6 py-5 text-sm text-slate-400 animate-pulse">
+        Memeriksa kondisi aplikasi…
+      </div>
+    );
+  }
+  const tema = TEMA_KONDISI[kesehatan.status] || TEMA_KONDISI.kuning;
+  const masalah = kesehatan.pemeriksaan.filter((c) => c.status !== 'hijau')
+    .sort((a, b) => (a.status === 'merah' ? -1 : 1) - (b.status === 'merah' ? -1 : 1));
+  return (
+    <section className={`rounded-2xl border shadow-sm overflow-hidden ${tema.kotak}`} aria-live="polite">
+      <div className="px-6 py-5 flex items-start gap-4">
+        <div className={`p-3 rounded-xl shrink-0 ${tema.ikon}`}>
+          <tema.Ikon className="w-6 h-6" />
+        </div>
+        <div className={`min-w-0 flex-1 ${tema.teks}`}>
+          <p className="text-[11px] font-bold uppercase tracking-wider opacity-70">Kondisi Aplikasi</p>
+          <h2 className="text-lg font-bold mt-0.5">{tema.judul}</h2>
+          <p className="text-sm opacity-80">{tema.sub}</p>
+          {masalah.length > 0 && (
+            <ul className="mt-3 space-y-2">
+              {masalah.map((c) => (
+                <li key={c.nama} className="flex items-start gap-2.5 text-sm">
+                  <span className={`mt-1.5 h-2 w-2 rounded-full shrink-0 ${TEMA_KONDISI[c.status].titik}`} />
+                  <span>
+                    <b>{c.nama}</b> ({c.nilai}): {c.keterangan}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+      <div className="bg-white/70 border-t border-black/5 px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-3">
+        {kesehatan.pemeriksaan.map((c) => (
+          <div key={c.nama} className="min-w-0" title={c.keterangan || 'Normal'}>
+            <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-600">
+              <span className={`h-2 w-2 rounded-full shrink-0 ${TEMA_KONDISI[c.status].titik}`} />
+              {c.nama}
+            </p>
+            <p className="text-sm text-slate-900 tabular-nums truncate mt-0.5">{c.nilai}</p>
+          </div>
+        ))}
+      </div>
+      <p className="px-6 pb-3 bg-white/70 text-[11px] text-slate-400">
+        Diperiksa otomatis tiap 30 detik{diperbarui ? ` · terakhir ${jamDetik(diperbarui)}` : ''}
+      </p>
+    </section>
+  );
 };
 
 const jamPendek = (iso) => {
@@ -67,32 +166,41 @@ const WARNA_AKSI = {
 };
 
 const PETUNJUK_ADMIN = [
-  'Manajemen Pengguna: menambah administrator dan mengatur akses pengguna.',
+  'Kondisi Aplikasi: hijau berarti normal, kuning berarti ada peringatan, merah berarti ada masalah. Untuk kuning dan merah, penyebabnya tertulis di panel.',
+  'Manajemen Pengguna: menambah administrator, mengubah data profil pengguna, menonaktifkan, dan menghapus akun.',
   'Sektor Investasi: menambah jenis investasi baru, lalu melalui tombol daftar-periksa pada barisnya menetapkan ketentuan pemanfaatan per sub-zona dan kompetensi tenaga kerja yang dibutuhkan. Tanpa ketentuan, hasil screening jenis itu berstatus belum terverifikasi.',
-  'Sumber Data dan Log Aktivitas: memantau sinkronisasi data dan jejak aktivitas pengguna.',
-];
-
-const PEMBARUAN = [
-  ['tarik_kkprl_wfs', 'KKPRL terbit dari Portal Satu Data KKP, termasuk klasifikasi jenis investasi (--klasifikasi)'],
-  ['tarik_rtrw_provinsi', 'Zona laut dari geodatabase RTRW Provinsi (folder Google Drive KKP); acuan tata ruang utama'],
-  ['tarik_matriks_kkprl', 'Matriks kesesuaian kegiatan (diperbolehkan, bersyarat, tidak diperbolehkan) dari lampiran Perda RTRW Provinsi di folder yang sama, ditautkan ke zona lewat kode dan koordinatnya; jalankan setelah tarik_rtrw_provinsi'],
-  ['tarik_pola_ruang_wfs, tarik_rzwp3k_wfs', 'Pola ruang RTRW/PKKPRL dan RZWP-3-K'],
-  ['tarik_ekosistem_wfs', 'Mangrove Portal Satu Data KKP'],
-  ['tarik_ekosistem_sidako', 'Terumbu karang dan padang lamun 2025 dari Sidako Ekosistem KKP'],
-  ['tarik_oseanografi', 'Kedalaman laut, suhu permukaan dan anomalinya (NOAA Coral Reef Watch, juga ditayangkan Sidako KKP), klorofil-a, dan gelombang dari NOAA'],
-  ['tarik_risiko_bencana', 'Indeks risiko bencana pesisir BNPB InaRISK'],
-  ['tarik_statistik_bps', 'Pengangguran BPS per provinsi dan per kabupaten/kota'],
-  ['hitung_skor_zona', 'Menghitung ulang skor kelayakan zona setelah data di atas diperbarui'],
-  ['tarik_bangunan_eksisting', 'Bangunan dan struktur eksisting (pelabuhan, dermaga, industri, permukiman, bandara, anjungan migas) dari OpenStreetMap dan infrastruktur KKP; zona yang 10% atau lebih luasnya (beserta lingkungan 25 m) sudah terbangun tidak direkomendasikan. Jalankan setelah hitung_skor_zona'],
+  'Log Aktivitas: memantau jejak aktivitas pengguna, termasuk upaya akses yang ditolak.',
 ];
 
 const AdminDashboardPage = () => {
   const [ringkas, setRingkas] = useState(null);
   const [perStatus, setPerStatus] = useState([]);
-  const [sumber, setSumber] = useState([]);
   const [pengguna, setPengguna] = useState([]);
   const [log, setLog] = useState([]);
   const [memuat, setMemuat] = useState(true);
+  const [status, setStatus] = useState(null);
+  const [statusGagal, setStatusGagal] = useState(false);
+  const [statusPada, setStatusPada] = useState(null);
+
+  useEffect(() => {
+    let hidup = true;
+    const periksa = () => {
+      api.get('/inti/admin/status-sistem/')
+        .then(({ data }) => {
+          if (!hidup) return;
+          setStatus(data);
+          setStatusGagal(false);
+        })
+        .catch(() => hidup && setStatusGagal(true))
+        .finally(() => hidup && setStatusPada(new Date()));
+    };
+    periksa();
+    const t = setInterval(periksa, SELANG_STATUS_MS);
+    return () => {
+      hidup = false;
+      clearInterval(t);
+    };
+  }, []);
 
   useEffect(() => {
     const ambil = async () => {
@@ -101,7 +209,6 @@ const AdminDashboardPage = () => {
           setRingkas(data.summary || null);
           setPerStatus(data.proyek_per_status || []);
         }),
-        api.get('/inti/admin/data-sources/').then(({ data }) => setSumber(ambilDaftar(data))),
         api.get('/inti/admin/users/').then(({ data }) => setPengguna(ambilDaftar(data))),
         api.get('/inti/admin/log-aktivitas/').then(({ data }) => setLog(ambilDaftar(data).slice(0, 8))),
       ];
@@ -115,8 +222,6 @@ const AdminDashboardPage = () => {
     return <div className="p-8 text-center text-slate-500 animate-pulse">Memuat ikhtisar platform…</div>;
   }
 
-  const perluSinkron = sumber.filter((s) => s.perlu_disinkronkan);
-  const sumberBermasalah = sumber.filter((s) => s.status === 'ERROR' || s.status === 'INACTIVE');
   const ditolak = log.filter((l) => l.aksi === 'DITOLAK');
 
   const peran = pengguna.reduce((akum, u) => {
@@ -124,7 +229,8 @@ const AdminDashboardPage = () => {
     akum[nama] = (akum[nama] || 0) + 1;
     return akum;
   }, {});
-  const takAktif = pengguna.filter((u) => !u.is_active).length;
+  const takAktif = status?.pengguna?.nonaktif ?? pengguna.filter((u) => !u.is_active).length;
+  const jumlahPengguna = status?.pengguna?.terdaftar ?? pengguna.length;
 
   const totalTahap = perStatus.reduce((a, s) => a + (s.count || 0), 0) || 1;
 
@@ -133,43 +239,51 @@ const AdminDashboardPage = () => {
       <div>
         <h1 className="text-2xl font-bold text-slate-900 font-syne">Panel Administrasi Platform</h1>
         <p className="text-slate-500 text-sm mt-1">
-          Keadaan sistem, kesegaran data, dan tata kelola akses — Modul Manajemen Investasi Ruang
+          Kondisi aplikasi, pengguna, dan tata kelola akses — Modul Manajemen Investasi Ruang
           Laut, Kementerian Kelautan dan Perikanan.
         </p>
       </div>
 
-      {(perluSinkron.length > 0 || sumberBermasalah.length > 0 || ditolak.length > 0) && (
+      <KondisiAplikasi status={status} gagal={statusGagal} diperbarui={statusPada} />
+
+      {ditolak.length > 0 && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl px-5 py-4">
           <div className="flex items-start gap-3">
             <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div className="text-sm text-amber-900 space-y-1">
               <p className="font-bold">Perlu perhatian</p>
-              {perluSinkron.length > 0 && (
-                <p>
-                  {perluSinkron.length} sumber data telah melewati selang pembaruannya:{' '}
-                  <span className="font-semibold">{perluSinkron.map((s) => s.nama).join(', ')}</span>
-                </p>
-              )}
-              {sumberBermasalah.length > 0 && (
-                <p>
-                  {sumberBermasalah.length} sumber data berstatus tidak aktif atau bergalat:{' '}
-                  <span className="font-semibold">{sumberBermasalah.map((s) => s.kode).join(', ')}</span>
-                </p>
-              )}
-              {ditolak.length > 0 && (
-                <p>
-                  {ditolak.length} upaya akses ditolak pada aktivitas terkini —{' '}
-                  <Link to="/admin/log-aktivitas" className="underline font-semibold">
-                    periksa jejak audit
-                  </Link>
-                </p>
-              )}
+              <p>
+                {ditolak.length} upaya akses ditolak pada aktivitas terkini —{' '}
+                <Link to="/admin/log-aktivitas" className="underline font-semibold">
+                  periksa jejak audit
+                </Link>
+              </p>
             </div>
           </div>
         </div>
       )}
 
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(230px,1fr))] gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <Kartu
+          judul="Pengguna Terdaftar"
+          nilai={formatNumber(jumlahPengguna, 0)}
+          catatan={takAktif > 0 ? `${takAktif} akun nonaktif` : 'Seluruh akun aktif'}
+          icon={Users}
+          warna="bg-amber-100 text-amber-600"
+        />
+        <Kartu
+          judul="Pengguna Aktif Sekarang"
+          nilai={status ? formatNumber(status.pengguna.aktif_sekarang, 0) : '–'}
+          catatan={status
+            ? `Dalam ${status.pengguna.rentang_aktif_menit} menit terakhir · ${status.pengguna.aktif_hari_ini} aktif hari ini`
+            : 'Memuat…'}
+          icon={UserCheck}
+          warna="bg-emerald-100 text-emerald-600"
+          langsung
+        />
+      </div>
+
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(260px,1fr))] gap-6">
         <Kartu
           judul="Proyek Terpantau"
           nilai={formatNumber(ringkas?.total_proyek || 0, 0)}
@@ -189,14 +303,7 @@ const AdminDashboardPage = () => {
           nilai={formatNumber(ringkas?.total_tenaga_kerja || 0, 0)}
           catatan="Proyeksi dari proyek terpantau"
           icon={CheckCircle2}
-          warna="bg-emerald-100 text-emerald-600"
-        />
-        <Kartu
-          judul="Akun Terdaftar"
-          nilai={formatNumber(pengguna.length, 0)}
-          catatan={takAktif > 0 ? `${takAktif} akun nonaktif` : 'Seluruh akun aktif'}
-          icon={Users}
-          warna="bg-amber-100 text-amber-600"
+          warna="bg-teal-100 text-teal-600"
         />
       </div>
 
@@ -253,67 +360,6 @@ const AdminDashboardPage = () => {
       </div>
 
       <Panel
-        judul="Kesegaran Sumber Data Eksternal"
-        keterangan="Penarikan dari portal KKP, BPS, dan BNPB beserta selang pembaruannya"
-        tautan="/admin/data-sources"
-        tautanTeks="Kelola sumber data"
-      >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
-              <tr>
-                <th className="px-6 py-3">Sumber</th>
-                <th className="px-6 py-3">Jenis</th>
-                <th className="px-6 py-3">Terakhir Ditarik</th>
-                <th className="px-6 py-3 text-center">Selang</th>
-                <th className="px-6 py-3 text-center">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {sumber.map((s) => (
-                <tr key={s.id} className={s.perlu_disinkronkan ? 'bg-amber-50/60' : 'hover:bg-slate-50/50'}>
-                  <td className="px-6 py-3">
-                    <div className="font-semibold text-slate-900">{s.nama}</div>
-                    <div className="font-mono text-[10px] text-slate-400">{s.kode}</div>
-                  </td>
-                  <td className="px-6 py-3 text-slate-500 text-xs">{s.tipe}</td>
-                  <td className="px-6 py-3 text-slate-600 text-xs">
-                    {tanggalPendek(s.last_sync)}
-                    {s.perlu_disinkronkan && (
-                      <span className="ml-2 text-amber-700 font-semibold">jatuh tempo</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-3 text-center text-slate-500 text-xs tabular-nums">
-                    {s.sync_interval_days} hari
-                  </td>
-                  <td className="px-6 py-3 text-center">
-                    <span
-                      className={`px-2.5 py-1 text-[11px] font-bold rounded-full ${
-                        s.status === 'ACTIVE'
-                          ? 'bg-emerald-100 text-emerald-700'
-                          : s.status === 'ERROR'
-                            ? 'bg-rose-100 text-rose-700'
-                            : 'bg-slate-100 text-slate-500'
-                      }`}
-                    >
-                      {s.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-              {sumber.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-6 py-8 text-center text-slate-400 text-sm">
-                    Belum ada sumber data terdaftar.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </Panel>
-
-      <Panel
         judul="Aktivitas Terkini"
         keterangan="Delapan kejadian terakhir; upaya yang ditolak ikut tercatat"
         tautan="/admin/log-aktivitas"
@@ -354,33 +400,6 @@ const AdminDashboardPage = () => {
           {PETUNJUK_ADMIN.map((t) => <li key={t}>{t}</li>)}
         </ul>
       </Panel>
-
-      <Panel judul="Pembaruan Data" keterangan="Perintah teknis, dijalankan di server dengan manage.py">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <tbody className="divide-y divide-slate-100">
-              {PEMBARUAN.map(([perintah, isi]) => (
-                <tr key={perintah} className="align-top">
-                  <td className="px-6 py-2.5 font-mono text-xs text-slate-800">{perintah}</td>
-                  <td className="pr-6 py-2.5 text-slate-600">{isi}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </Panel>
-
-      {(ringkas?.potensi?.total_titik ?? 0) === 0 && (
-        <div className="flex items-start gap-3 text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
-          <Database className="w-4 h-4 shrink-0 mt-0.5 text-slate-400" />
-          <p className="leading-relaxed">
-            Tabel lokasi potensi investasi kosong. Lapisan <b>Peta Sebaran Wilayah Potensial Investasi</b> di
-            peta tidak bergantung padanya — ia disusun dari 280.280 skor kelayakan zona yang
-            dihitung <span className="font-mono">hitung_skor_zona</span> atas 28.028 zona RZWP-3-K
-            nyata untuk sepuluh sektor.
-          </p>
-        </div>
-      )}
     </div>
   );
 };

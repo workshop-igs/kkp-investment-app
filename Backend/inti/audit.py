@@ -1,6 +1,10 @@
 import logging
+from datetime import timedelta
 
 logger = logging.getLogger('inti')
+
+# Jeda minimum antar-pembaruan ProfilPengguna.terakhir_aktif per akun.
+JEDA_TANDA_AKTIF_DETIK = 60
 
 METODE_DICATAT = frozenset({'POST', 'PUT', 'PATCH', 'DELETE'})
 
@@ -50,6 +54,32 @@ def _sasaran(jalur):
     return f'{nama} #{nomor}' if nomor else nama
 
 
+def tandai_aktif(request):
+    """Catat waktu permintaan terakhir akun untuk hitungan pengguna aktif di dashboard admin."""
+    pengguna = getattr(request, 'user', None)
+    if not (pengguna and pengguna.is_authenticated):
+        return
+    from django.core.cache import cache
+    from django.db.models import Q
+    from django.utils import timezone
+
+    from inti.models import ProfilPengguna
+
+    kunci = f'aktif:{pengguna.pk}'
+    if cache.get(kunci):
+        return
+    cache.set(kunci, 1, JEDA_TANDA_AKTIF_DETIK)
+    sekarang = timezone.now()
+    batas = sekarang - timedelta(seconds=JEDA_TANDA_AKTIF_DETIK)
+    diubah = (
+        ProfilPengguna.objects.filter(user_id=pengguna.pk)
+        .filter(Q(terakhir_aktif__isnull=True) | Q(terakhir_aktif__lt=batas))
+        .update(terakhir_aktif=sekarang)
+    )
+    if not diubah:
+        ProfilPengguna.objects.get_or_create(user_id=pengguna.pk, defaults={'terakhir_aktif': sekarang})
+
+
 class JejakAktivitasMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -60,6 +90,10 @@ class JejakAktivitasMiddleware:
             self._catat(request, response)
         except Exception as e:
             logger.error(f'[AUDIT] Gagal mencatat aktivitas: {type(e).__name__}: {e}')
+        try:
+            tandai_aktif(request)
+        except Exception as e:
+            logger.warning(f'[AUDIT] Gagal menandai pengguna aktif: {type(e).__name__}: {e}')
         return response
 
     def _catat(self, request, response):

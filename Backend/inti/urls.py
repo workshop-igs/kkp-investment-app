@@ -9,6 +9,7 @@ from .views_admin import (
     AdminProyekViewSet,
     AdminSektorViewSet,
     AdminUserViewSet,
+    status_sistem,
 )
 from .asisten import daftar_alat, obrolan, pakai_alat
 from .pencarian import cari_lokasi
@@ -20,6 +21,7 @@ from .views import (
     aktivitas_saya_api,
     auth_config,
     dashboard_stats,
+    denyut_api,
     ganti_sandi_api,
     login_api,
     logout_api,
@@ -57,6 +59,8 @@ urlpatterns = [
     path('auth/aktivitas/', aktivitas_saya_api, name='auth-aktivitas'),
     path('auth/config/', auth_config, name='auth-config'),
     path('auth/logout/', logout_api, name='auth-logout'),
+    path('auth/denyut/', denyut_api, name='auth-denyut'),
+    path('admin/status-sistem/', status_sistem, name='admin-status-sistem'),
     path('admin/', include(admin_router.urls)),
     path('', include(router.urls)),
 ]
