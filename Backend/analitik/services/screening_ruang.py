@@ -18,6 +18,8 @@ from analitik.services.konstanta import (
     SEKTOR_SUB_ZONA_COCOK,
     SUB_ZONA_TANPA_RINCIAN,
 )
+from analitik.services.asal_data import asal_data, catatan_skala, kelengkapan
+from analitik.services.konstanta import BULAN
 from analitik.services.laporan_spasial import _arah
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.parameter_tambahan import nilai_area
@@ -304,6 +306,9 @@ def karakter_area(c, geom):
     if data['ranah'] == 'DARAT':
         return data
     stat = statistik_oseanografi(geom, ['KEDALAMAN', 'GELOMBANG', 'SUHU', 'ANOMALI_SUHU'])
+    data['oseanografi'] = {
+        k: {'sumber': v.get('sumber'), 'periode': v.get('periode')} for k, v in stat.items() if v.get('rata2') is not None
+    }
     dalam = stat.get('KEDALAMAN', {})
     if dalam.get('rata2') is not None:
         data['kedalaman_min'], data['kedalaman_maks'] = max(0.0, -dalam['max']), max(0.0, -dalam['min'])
@@ -373,6 +378,7 @@ def _zona_efektif(c, geom, luas_aoi):
         """
         SELECT z.id, z.nama_zona, z.jenis_zona, z.sub_zona, z.tingkat_acuan, z.sumber_data,
                z.nomor_regulasi, z.provinsi_id, p.nama, z.matriks_id, z.kode_perda,
+               z.tahun_penetapan, z.updated_at,
                ST_AsEWKB(ST_Intersection(ST_MakeValid(ST_ClipByBox2D(z.geometry, ST_Expand(a.g, 0.0001))), a.g))
         FROM inventarisasi_zonasi_ruang_laut z
         JOIN inti_provinsi p ON p.id = z.provinsi_id,
@@ -392,7 +398,8 @@ def _zona_efektif(c, geom, luas_aoi):
         if sisa.empty:
             break
         potongan = []
-        for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, matriks_id, kode_perda, ewkb) in baris:
+        for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, matriks_id, kode_perda,
+             tahun_penetapan, diperbarui, ewkb) in baris:
             if tk != tingkat or sd != sumber or (sub in SUB_ZONA_TANPA_RINCIAN) != umum or ewkb is None:
                 continue
             irisan = _overlay(c, 'Intersection', _geos(ewkb), sisa)
@@ -416,6 +423,8 @@ def _zona_efektif(c, geom, luas_aoi):
                 'persen': round(m2 / luas_aoi * 100, 1) if luas_aoi else 0,
                 'matriks_id': matriks_id,
                 'kode_perda': kode_perda,
+                'tahun_penetapan': tahun_penetapan,
+                'diperbarui': f'{BULAN[diperbarui.month - 1]} {diperbarui.year}' if diperbarui else None,
             })
             potongan.extend(b for b in _bagian(irisan) if b.geom_type in ('Polygon', 'MultiPolygon'))
         if potongan:
@@ -680,4 +689,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
             f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
         ] + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl),
         'rekomendasi': rekomendasi,
+        'kelengkapan': kelengkapan(parameter),
+        'asal_data': asal_data(zona_efektif, karakter, tambahan),
+        'catatan_skala': catatan_skala(zona_efektif, karakter),
     }
