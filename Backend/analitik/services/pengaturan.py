@@ -33,8 +33,9 @@ SKOR_0_1 = dict(batas=(0, 1))
 
 DAFTAR = [
     _d('KARAKTER_LOKASI', 'karakter', 'Syarat karakter lokasi',
-       'Syarat fisik wajib per jenis investasi di perairan dan di darat. Lokasi yang tidak memenuhi satu pun '
-       'alternatif syarat dinilai tidak sesuai.', dampak=(PETA, SKOR)),
+       'Syarat fisik per jenis investasi di perairan dan di darat. Peta Sebaran hanya menampilkan lokasi yang '
+       'memenuhi salah satu alternatif syarat; pada screening area syarat ini menjadi kecocokan fisik indikatif '
+       '(peringatan), bukan gerbang kesesuaian ruang.', dampak=(PETA, SKOR)),
     _d('RADIUS_EKOSISTEM_PENDUKUNG_M', 'karakter', 'Radius ekosistem pendukung',
        'Syarat ekosistem pendukung (mangrove, lamun, terumbu karang) terpenuhi bila ekosistem itu berada di dalam '
        'lokasi atau dalam radius ini darinya, sehingga area di samping ekosistem dinilai sama dengan lokasi yang '
@@ -48,9 +49,18 @@ DAFTAR = [
        'Pengecualian keras: lokasi tidak boleh berada dalam jarak ini dari kabel bawah laut, pipa bawah laut, dan '
        'alur pelayaran pada Rencana Tata Ruang Laut.', 'm', (PETA,), (0, 20000)),
     _d('AMBANG_IRISAN_PENGECUALIAN_PERSEN', 'analisis_area', 'Toleransi irisan pengecualian pada screening',
-       'Pada screening area, irisan dengan kawasan konservasi, ekosistem sensitif, atau jarak aman kabel/pipa/alur '
-       'yang lebih kecil dari bagian ini dicatat sebagai peringatan dan tidak menggugurkan area.', '%', (),
-       (0, 100)),
+       'Pada screening area, irisan dengan kawasan konservasi, alur pelayaran/ALKI, ekosistem sensitif, atau jarak '
+       'aman kabel/pipa/alur yang lebih kecil dari bagian ini ditandai perlu verifikasi batas dan tidak '
+       'menggugurkan area.', '%', (), (0, 100)),
+    _d('AMBANG_IRISAN_TEPI_PERSEN', 'analisis_area', 'Toleransi irisan tepi zona pada screening',
+       'Zona yang tidak mengizinkan jenis investasi (atau belum memiliki ketentuan) dan KKPRL terbit yang hanya '
+       'mengiris area lebih kecil dari bagian ini ditandai perlu verifikasi batas, bukan langsung menggugurkan; '
+       'batas peta tata ruang skala 1:50.000-1:250.000 dapat bergeser puluhan hingga ratusan meter.', '%', (),
+       (0, 50)),
+    _d('LUAS_AREA_MIN_HA', 'analisis_area', 'Luas area paling kecil',
+       'Area yang digambar atau diunggah harus seluas ini atau lebih.', 'ha', (), (0, 100)),
+    _d('LUAS_AREA_MAKS_HA', 'analisis_area', 'Luas area paling besar',
+       'Area yang lebih luas ditolak; pecah menjadi beberapa area proyek.', 'ha', (), (1, 10000000)),
     _d('AMBANG_BULAN_KERING_MM', 'karakter', 'Batas curah hujan bulan kering',
        'Bulan dengan curah hujan di bawah ini dihitung bulan kering (parameter tambak garam).', 'mm/bulan', (PETA,),
        (0, 500)),

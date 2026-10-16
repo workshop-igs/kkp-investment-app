@@ -175,44 +175,44 @@ def _nama_ekosistem(daftar, sambung=None):
     return ', '.join(nama)
 
 
-def _penuhi(syarat, data):
+def _rinci(syarat, data):
+    """Terpenuhi atau tidaknya setiap butir satu alternatif syarat karakter lokasi."""
+    hasil = {}
     dangkal, dalam = data.get('kedalaman_min'), data.get('kedalaman_maks')
     if 'kedalaman' in syarat:
         bawah, atas = syarat['kedalaman']
         sebaran = data.get('sebaran_kedalaman')
         if dalam is None:
-            if bawah is not None:
-                return False
+            hasil['kedalaman'] = bawah is None
         elif sebaran:
             cocok = sum(n for d, n in sebaran if (bawah is None or d >= bawah) and (atas is None or d <= atas))
-            if cocok < atur('AMBANG_KECOCOKAN') * sum(n for _, n in sebaran):
-                return False
-        elif (bawah is not None and dalam < bawah) or (atas is not None and dangkal > atas):
-            return False
+            hasil['kedalaman'] = cocok >= atur('AMBANG_KECOCOKAN') * sum(n for _, n in sebaran)
+        else:
+            hasil['kedalaman'] = not ((bawah is not None and dalam < bawah) or (atas is not None and dangkal > atas))
     if 'daya_gelombang_min' in syarat and 'PERIODE_GLB' in data.get('tersedia', ()):
         daya = data.get('daya_gelombang')
-        if daya is None or daya < syarat['daya_gelombang_min']:
-            return False
+        hasil['daya_gelombang_min'] = daya is not None and daya >= syarat['daya_gelombang_min']
     gelombang = data.get('gelombang')
-    if gelombang is None:
-        if 'gelombang_min' in syarat:
-            return False
-    elif gelombang > syarat.get('gelombang_maks', gelombang) or gelombang < syarat.get('gelombang_min', gelombang):
-        return False
-    suhu = data.get('suhu_min')
-    if suhu is None:
-        if 'suhu_min' in syarat:
-            return False
-    elif suhu < syarat.get('suhu_min', suhu):
-        return False
+    if 'gelombang_maks' in syarat:
+        hasil['gelombang_maks'] = gelombang is None or gelombang <= syarat['gelombang_maks']
+    if 'gelombang_min' in syarat:
+        hasil['gelombang_min'] = gelombang is not None and gelombang >= syarat['gelombang_min']
+    if 'suhu_min' in syarat:
+        suhu = data.get('suhu_min')
+        hasil['suhu_min'] = suhu is not None and suhu >= syarat['suhu_min']
     jarak = data.get('jarak_pantai_km')
-    if jarak is not None and jarak > syarat.get('jarak_pantai_maks_km', jarak):
-        return False
+    if 'jarak_pantai_maks_km' in syarat:
+        hasil['jarak_pantai_maks_km'] = jarak is None or jarak <= syarat['jarak_pantai_maks_km']
     ekosistem = set(data.get('ekosistem') or ())
-    sekitar = set(data.get('ekosistem_sekitar') or ()) | ekosistem
-    if 'ekosistem' in syarat and not sekitar & set(syarat['ekosistem']):
-        return False
-    return not ekosistem & set(syarat.get('tanpa_ekosistem', ()))
+    if 'ekosistem' in syarat:
+        hasil['ekosistem'] = bool((set(data.get('ekosistem_sekitar') or ()) | ekosistem) & set(syarat['ekosistem']))
+    if 'tanpa_ekosistem' in syarat:
+        hasil['tanpa_ekosistem'] = not ekosistem & set(syarat['tanpa_ekosistem'])
+    return hasil
+
+
+def _penuhi(syarat, data):
+    return all(_rinci(syarat, data).values())
 
 
 def cocok_karakter(sektor_kode, data):
@@ -250,6 +250,8 @@ SUMBER_SYARAT = {
 RASTER_SYARAT = {'daya_gelombang_min': 'PERIODE_GLB'}
 LABEL_RANAH = 'Ranah lokasi sesuai jenis investasi'
 LABEL_INFRASTRUKTUR = 'Dekat infrastruktur pendukung'
+# Butir syarat dasar yang bersifat fisik: pada screening dipisah sebagai kecocokan fisik (peringatan).
+LABEL_FISIK = {LABEL_RANAH, LABEL_INFRASTRUKTUR, *LABEL_SYARAT.values()}
 # kunci PARAMETER_TAMBAHAN -> (label, kunci data, arah ambang, raster sumber atau None)
 LABEL_TAMBAHAN = {
     'kedalaman_maks': ('Kedalaman perairan sesuai', 'kedalaman_maks', 'maks', 'KEDALAMAN'),
@@ -277,22 +279,30 @@ def _syarat_berlaku(kunci, data):
     return raster is None or raster in data.get('tersedia', ())
 
 
-def parameter_lokasi(sektor_kode, data):
+def parameter_lokasi(sektor_kode, data, saring_fisik=True):
     """Penilaian lokasi untuk satu jenis investasi, sama untuk Peta Sebaran dan screening.
 
-    Mengembalikan (syarat_dasar, dinilai), atau None bila karakter lokasi tidak cocok. Syarat dasar menyaring
-    lokasi (ranah, karakter fisik, pengecualian keras, infrastruktur) sehingga pada lokasi yang lolos semuanya
-    terpenuhi; karena itu tidak ikut persentase. Parameter dinilai membedakan mutu lokasi: True sangat sesuai,
-    False perlu dinilai di lapangan, None tidak terukur di lokasi itu.
+    Mengembalikan (syarat_dasar, dinilai). Syarat dasar menyaring lokasi (ranah, karakter fisik, pengecualian keras,
+    infrastruktur) sehingga pada lokasi peta yang lolos semuanya terpenuhi; karena itu tidak ikut persentase.
+    Parameter dinilai membedakan mutu lokasi: True sangat sesuai, False perlu dinilai di lapangan, None tidak
+    terukur di lokasi itu. Dengan saring_fisik (Peta Sebaran) lokasi yang karakter fisiknya tidak cocok
+    menghasilkan None; tanpa itu (screening) butir fisik yang tidak terpenuhi bernilai False sebagai peringatan.
     """
-    if not cocok_karakter(sektor_kode, data)[0]:
+    aturan = atur('KARAKTER_LOKASI').get(sektor_kode)
+    if saring_fisik and not cocok_karakter(sektor_kode, data)[0]:
         return None
-    pilihan = atur('KARAKTER_LOKASI').get(sektor_kode, {}).get(data['ranah'], [{}])
-    syarat = next((s for s in pilihan if _penuhi(s, data)), {})
-    dasar = {LABEL_RANAH: True}
+    ranah_cocok = aturan is None or data['ranah'] in aturan
+    pilihan = (aturan or {}).get(data['ranah'], [{}])
+    syarat = next((s for s in pilihan if _penuhi(s, data)), None)
+    if syarat is None:
+        # Tidak ada alternatif yang terpenuhi: tampilkan alternatif yang paling banyak butirnya terpenuhi.
+        syarat = max(pilihan, key=lambda s: sum(_rinci(s, data).values()))
+    rinci = _rinci(syarat, data)
+    dasar = {LABEL_RANAH: ranah_cocok}
     for k in syarat:
         if k in LABEL_SYARAT and _syarat_berlaku(k, data):
-            dasar[LABEL_SYARAT[k]] = None if k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None else True
+            terukur = not (k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None)
+            dasar[LABEL_SYARAT[k]] = rinci.get(k, True) if terukur else None
     for kode, nilai in (data.get('pengecualian') or {}).items():
         dasar[pengecualian.LABEL[kode]] = nilai
     if 'dekat_infrastruktur' in data:
@@ -445,15 +455,30 @@ def _ketentuan(aturan, zona) -> Dict[str, Any]:
     return {'status': k.status, 'syarat': k.syarat, 'sumber': k.sumber}
 
 
-def _nilai(zona_efektif, aturan, cakupan, ada_kkprl) -> str:
-    status = [_ketentuan(aturan, z)['status'] for z in zona_efektif]
-    if ada_kkprl or 'TIDAK_DIIZINKAN' in status:
-        return 'TIDAK_SESUAI'
-    if cakupan < atur('AMBANG_CAKUPAN_ACUAN') or not zona_efektif or None in status:
-        return 'BELUM_TERVERIFIKASI'
-    if 'BERSYARAT' in status:
-        return 'SESUAI_BERSYARAT'
-    return 'SESUAI'
+def _nilai(zona_efektif, aturan, cakupan, luas_aoi, kkprl_gugur=False):
+    """Status kesesuaian ruang (gerbang hukum) beserta zona yang hanya teriris kecil di tepi area.
+
+    Zona yang tidak mengizinkan atau belum memiliki ketentuan, tetapi seluruhnya mengiris kurang dari toleransi tepi,
+    tidak menggugurkan area: zona itu dikembalikan sebagai butir "perlu verifikasi batas" dan statusnya paling
+    tinggi sesuai bersyarat.
+    """
+    per_zona: Dict[tuple, Dict[str, Any]] = {}
+    for z in zona_efektif:
+        st = _ketentuan(aturan, z)['status']
+        k = per_zona.setdefault((st, z['nama']), {'nama': z['nama'], 'status': st, 'persen': 0.0})
+        k['persen'] += z['luas_m2'] / luas_aoi * 100 if luas_aoi else 0.0
+    masalah = [k for k in per_zona.values() if k['status'] in ('TIDAK_DIIZINKAN', None)]
+    tepi = masalah if 0 < sum(k['persen'] for k in masalah) < atur('AMBANG_IRISAN_TEPI_PERSEN') else []
+    status = {k['status'] for k in per_zona.values() if k not in tepi}
+    if kkprl_gugur or 'TIDAK_DIIZINKAN' in status:
+        hasil = 'TIDAK_SESUAI'
+    elif cakupan < atur('AMBANG_CAKUPAN_ACUAN') or not zona_efektif or None in status:
+        hasil = 'BELUM_TERVERIFIKASI'
+    elif 'BERSYARAT' in status or tepi:
+        hasil = 'SESUAI_BERSYARAT'
+    else:
+        hasil = 'SESUAI'
+    return hasil, [{**k, 'persen': round(k['persen'], 2)} for k in tepi]
 
 
 def _zona_efektif(c, geom, luas_aoi):
@@ -593,25 +618,45 @@ def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids, tamb
     )
     terdata, adat = c.fetchone()
     data['adat'] = adat if terdata else None
-    return parameter_lokasi(sektor_kode, data)
+    return parameter_lokasi(sektor_kode, data, saring_fisik=False)
 
 
-def _alasan_pengecualian(kena, sektor_nama) -> List[str]:
-    alasan = []
+def _alasan_pengecualian(kena, sektor_nama):
+    """(alasan gugur, peringatan perlu verifikasi batas) dari pengecualian keras yang mengenai area."""
+    gugur, batas = [], []
     for k in kena:
         porsi = f"{_persen_area(k['persen'])} area ({_angka(k['luas_m2'] / 10000, 2)} ha)"
         if k['gugur']:
-            alasan.append(f"{porsi} berada di {k['keterangan']}, yang dikecualikan untuk {sektor_nama}.")
+            gugur.append(f"{porsi} berada di {k['keterangan']}, yang dikecualikan untuk {sektor_nama}.")
         else:
-            alasan.append(
-                f"{porsi} menyentuh {k['keterangan']}; irisan sekecil ini belum menggugurkan area, tetapi bagian itu "
-                f"harus dikeluarkan dari rencana tapak."
+            batas.append(
+                f"{porsi} menyentuh {k['keterangan']}. Irisan sekecil ini belum menggugurkan area: perlu verifikasi "
+                f"batas, dan bagian itu dikeluarkan dari rencana tapak bila terbukti masuk."
             )
-    return alasan
+    return gugur, batas
 
 
-def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
+def _peringatan_tepi(tepi, kkprl_tepi, sektor_nama) -> List[str]:
+    hasil = []
+    for t in tepi:
+        sifat = ('tidak mengizinkan' if t['status'] == 'TIDAK_DIIZINKAN'
+                 else 'belum memiliki ketentuan pemanfaatan untuk')
+        hasil.append(
+            f"{_persen_area(t['persen'])} area menyentuh {t['nama']} yang {sifat} {sektor_nama}. Irisan di tepi "
+            f"sekecil ini dapat berasal dari ketelitian batas peta tata ruang: perlu verifikasi batas, dan bagian itu "
+            f"dikeluarkan dari rencana tapak bila terbukti masuk."
+        )
+    for k in kkprl_tepi:
+        hasil.append(
+            f"{_persen_area(k['persen'])} area ({_angka(k['luas_m2'], 0)} m²) menyentuh KKPRL terbit {k['nomor_izin']}: "
+            f"perlu verifikasi batas terhadap izin tersebut sebelum pengajuan."
+        )
+    return hasil
+
+
+def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl, tepi=()) -> List[str]:
     alasan = []
+    nama_tepi = {t['nama'] for t in tepi}
     if kkprl:
         nomor = ', '.join(k['nomor_izin'] for k in kkprl[:5])
         lebih = f' dan {len(kkprl) - 5} lainnya' if len(kkprl) > 5 else ''
@@ -625,6 +670,8 @@ def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
         k['persen'] = round(k['persen'] + z['persen'], 1)
     for z in kelompok.values():
         ket = _ketentuan(aturan, z)
+        if z['nama'] in nama_tepi and ket['status'] in ('TIDAK_DIIZINKAN', None):
+            continue
         lokasi = f"{_persen_area(z['persen'])} area berada di {z['nama']} ({z['sub_zona_label']}, {z['tingkat_label']})"
         syarat = ket['syarat'] if len(ket['syarat']) <= BATAS_SYARAT_RINGKAS else (
             'Syarat lengkapnya tercantum pada ketentuan khusus zona ini di tabel ketentuan kegiatan.')
@@ -702,6 +749,15 @@ def _kunci_zona(z):
     return f"{z['nama']}|{z['sub_zona']}|{z['tingkat']}|{z['matriks_id'] or ''}"
 
 
+def periksa_luas(luas_ha: float) -> None:
+    kecil, besar = atur('LUAS_AREA_MIN_HA'), atur('LUAS_AREA_MAKS_HA')
+    if luas_ha < kecil:
+        raise ValueError(f'Luas area {_angka(luas_ha, 4)} ha terlalu kecil; paling kecil {_angka(kecil, 2)} ha.')
+    if luas_ha > besar:
+        raise ValueError(
+            f'Luas area {_angka(luas_ha, 0)} ha melebihi batas {_angka(besar, 0)} ha; pecah menjadi beberapa area proyek.')
+
+
 def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any]:
     geom = GEOSGeometry(json.dumps(geometry), srid=4326)
     if not geom.valid:
@@ -712,6 +768,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
 
     with connection.cursor() as c:
         luas_aoi = _luas(c, geom)
+        periksa_luas(luas_aoi / 10000)
         irisan = pengecualian.irisan_area(c, geom)
         kena = pengecualian.nilai_area(irisan, sektor.kode, luas_aoi)
         zona_efektif, cakupan = _zona_efektif(c, geom, luas_aoi)
@@ -723,8 +780,14 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
             list(SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama')),
         )
         karakter = karakter_area(c, geom)
+        # Kecocokan fisik bersifat indikatif: menjadi peringatan, bukan gerbang kesesuaian ruang.
         cocok, alasan_karakter = cocok_karakter(sektor.kode, karakter)
-        status = _nilai(zona_efektif, aturan, cakupan, bool(kkprl)) if cocok else 'TIDAK_SESUAI'
+        toleransi = atur('AMBANG_IRISAN_TEPI_PERSEN')
+        for k in kkprl:
+            k['persen'] = round(k['luas_m2'] / luas_aoi * 100, 2) if luas_aoi else 0.0
+            k['gugur'] = k['persen'] >= toleransi
+        kkprl_gugur = [k for k in kkprl if k['gugur']]
+        status, tepi = _nilai(zona_efektif, aturan, cakupan, luas_aoi, bool(kkprl_gugur))
         if any(k['gugur'] for k in kena):
             status = 'TIDAK_SESUAI'
         provinsi_ids = {z['provinsi_id'] for z in zona_efektif}
@@ -732,23 +795,33 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         gerbang_gagal = [t for t in tambahan if t['peran'] == 'GERBANG' and t['hasil'] is False]
         if gerbang_gagal:
             status = 'TIDAK_SESUAI'
-        lanjut = status in ('SESUAI', 'SESUAI_BERSYARAT')
-        penilaian = parameter_area(
+        kkprl_tepi = [k for k in kkprl if not k['gugur']]
+        if status == 'SESUAI' and (kkprl_tepi or any(not k['gugur'] for k in kena)):
+            status = 'SESUAI_BERSYARAT'
+        # Belum terverifikasi tetap boleh lanjut dengan label; hanya tidak sesuai yang menghentikan analisis.
+        lanjut = status != 'TIDAK_SESUAI'
+        dasar, parameter = parameter_area(
             c, geom, sektor.kode, karakter, STATUS_TATA_RUANG.get(status), provinsi_ids,
             {t['nama']: t['hasil'] for t in tambahan if t['peran'] == 'DINILAI'},
-            pengecualian.bebas(sektor.kode, kena, kkprl),
+            pengecualian.bebas(sektor.kode, kena, kkprl_gugur),
         )
-        dasar, parameter = penilaian if penilaian else ({}, None)
+        fisik = {k: v for k, v in dasar.items() if k in LABEL_FISIK}
+        dasar = {k: v for k, v in dasar.items() if k not in LABEL_FISIK}
 
         rekomendasi: Optional[Dict[str, Any]] = None
         if not lanjut:
             alternatif = []
-            if not kkprl:
+            if not kkprl_gugur:
                 for s in SektorInvestasi.objects.filter(aktif=True).exclude(id=sektor.id).order_by('urutan', 'nama'):
-                    st = _nilai(zona_efektif, semua_aturan.get(s.id, {}), cakupan, False)
+                    st = _nilai(zona_efektif, semua_aturan.get(s.id, {}), cakupan, luas_aoi)[0]
                     gugur = any(k['gugur'] for k in pengecualian.nilai_area(irisan, s.kode, luas_aoi))
-                    if st in ('SESUAI', 'SESUAI_BERSYARAT') and not gugur and cocok_karakter(s.kode, karakter)[0]:
-                        alternatif.append({'kode': s.kode, 'nama': s.nama, 'status_label': LABEL_STATUS[st]})
+                    if st in ('SESUAI', 'SESUAI_BERSYARAT') and not gugur:
+                        fisik_cocok = cocok_karakter(s.kode, karakter)[0]
+                        alternatif.append({
+                            'kode': s.kode, 'nama': s.nama, 'fisik_cocok': fisik_cocok,
+                            'status_label': LABEL_STATUS[st] + ('' if fisik_cocok else ', fisik perlu dicek'),
+                        })
+                alternatif.sort(key=lambda a: not a['fisik_cocok'])
             rekomendasi = {
                 'sektor_alternatif': alternatif,
                 'lokasi_alternatif': _lokasi_alternatif(c, geom, sektor),
@@ -761,6 +834,27 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         z['syarat'] = ket['syarat']
         z['sumber_ketentuan'] = ket['sumber']
         z['rincian'] = ket.get('rincian')
+
+    karakter_ringkas = {
+        'kebutuhan': atur('KARAKTER_LOKASI').get(sektor.kode, {}).get('uraian', ''),
+        'terukur': '; '.join(filter(None, [
+            'Darat' if karakter['ranah'] == 'DARAT' else 'Perairan', _ringkas_karakter(karakter, sektor.kode),
+        ])),
+        'cocok': cocok,
+    }
+    alasan_gugur, batas_pengecualian = _alasan_pengecualian(kena, sektor.nama)
+    peringatan = []
+    if not cocok:
+        peringatan.append({'jenis': 'FISIK', 'teks': (
+            f'{alasan_karakter} Kecocokan fisik bersifat indikatif dan tidak menentukan kesesuaian ruang; '
+            f'pastikan dengan survei lapangan.')})
+    peringatan += [{'jenis': 'BATAS', 'teks': t} for t in
+                   _peringatan_tepi(tepi, kkprl_tepi, sektor.nama) + batas_pengecualian]
+    if status == 'BELUM_TERVERIFIKASI':
+        peringatan.append({'jenis': 'BELUM_TERVERIFIKASI', 'teks': (
+            'Kesesuaian ruang belum dapat diverifikasi dengan acuan yang tersedia. Analisis tetap dapat dilanjutkan '
+            'dengan label belum terverifikasi; konfirmasikan ketentuan ruangnya ke DKP provinsi atau KKP sebelum '
+            'pengajuan KKPRL.')})
 
     tingkat_dipakai = []
     for t in URUTAN_ACUAN:
@@ -779,22 +873,27 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'acuan': tingkat_dipakai,
         'zona': zona_efektif,
         'informasi_ruang': informasi_ruang,
-        'karakter': {
-            'kebutuhan': atur('KARAKTER_LOKASI').get(sektor.kode, {}).get('uraian', ''),
-            'terukur': '; '.join(filter(None, [
-                'Darat' if karakter['ranah'] == 'DARAT' else 'Perairan', _ringkas_karakter(karakter, sektor.kode),
-            ])),
-            'cocok': cocok,
+        'karakter': karakter_ringkas,
+        'kecocokan_fisik': {
+            **karakter_ringkas,
+            'label': 'Cocok' if cocok else 'Perlu dicek',
+            'alasan': alasan_karakter,
+            'syarat': [{'label': k, 'nilai': v} for k, v in fisik.items()],
         },
         'syarat_dasar': [{'label': k, 'nilai': v} for k, v in dasar.items()],
         'parameter': [{'label': k, 'nilai': v} for k, v in (parameter or {}).items()],
         'pengecualian': kena,
         'persen_sangat_sesuai': round(persen_sangat_sesuai(parameter)) if parameter else None,
         'kkprl': kkprl,
+        'verifikasi_batas': tepi,
         'parameter_tambahan': tambahan,
-        'alasan': [alasan_karakter] * (not cocok) + _alasan_pengecualian(kena, sektor.nama) + [
+        'alasan': alasan_gugur + [
             f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
-        ] + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl),
+        ] + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi) + [
+            'Sebagian kecil area perlu verifikasi batas (lihat peringatan), sehingga kesesuaiannya bersyarat: bagian '
+            'itu dikeluarkan dari rencana tapak bila terbukti masuk.'
+        ] * (status != 'TIDAK_SESUAI' and bool(tepi or kkprl_tepi or batas_pengecualian)),
+        'peringatan': peringatan,
         'rekomendasi': rekomendasi,
         'kelengkapan': kelengkapan(parameter, dasar),
         'asal_data': asal_data(zona_efektif, karakter, tambahan),

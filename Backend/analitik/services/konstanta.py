@@ -310,11 +310,19 @@ EKOSISTEM_TERLARANG_SEKTOR = {
 }
 # Kawasan konservasi (jenis zona ZL atau sub-zona konservasi dari sumber mana pun) hanya terbuka bagi jenis ini.
 SEKTOR_BOLEH_DI_KAWASAN_KONSERVASI = ['KONSERVASI_PESISIR']
+# Alur pelayaran/ALKI (poligon zonasi dari lapisan mana pun) dikecualikan bagi semua jenis kecuali yang tercantum.
+SEKTOR_BOLEH_DI_ALUR_PELAYARAN = []
 # Jarak aman dari unsur garis RTRL; usulan, sesuaikan dengan ketentuan Kemenhub/KKP yang berlaku.
 BUFFER_UNSUR_TERLARANG_M = {'KABEL': 500.0, 'PIPA': 500.0, 'ALUR_PELAYARAN': 500.0}
 # Screening area: irisan pengecualian di bawah bagian ini dicatat sebagai peringatan, tidak menggugurkan
 # (batas peta tata ruang 1:50.000-1:250.000 dapat bergeser puluhan hingga ratusan meter).
 AMBANG_IRISAN_PENGECUALIAN_PERSEN = 1.0
+# Screening area: zona yang tidak mengizinkan (atau belum berketentuan) dan KKPRL terbit yang hanya teriris sebagian
+# kecil di tepi area ditandai "perlu verifikasi batas", tidak langsung menggugurkan.
+AMBANG_IRISAN_TEPI_PERSEN = 2.0
+# Batas luas area yang dapat di-screening / dianalisis.
+LUAS_AREA_MIN_HA = 0.01
+LUAS_AREA_MAKS_HA = 50000
 
 RADIUS_EKOSISTEM_PENDUKUNG_M = 500
 

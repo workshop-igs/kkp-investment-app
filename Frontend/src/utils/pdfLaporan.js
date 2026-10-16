@@ -15,6 +15,7 @@ import { angkaRingkas as angkaRingkasUmum, rupiahRingkas as rupiahRingkasUmum } 
 import { ATRIBUSI_CITRA, RASIO_PANEL, siapkanPetaLaporan } from './petaLaporan';
 import { barisTitikSudut, keDMS } from './koordinat';
 import { CATATAN_DASAR, catatanSkala, kelengkapanScreening, ringkasKelengkapan, statusIndikatif } from './kelengkapanData';
+import { JENIS_PERINGATAN, fisikScreening, pengecualianScreening, peringatanScreening, teksLanjut } from './hasilScreening';
 
 const AKSEN = [0, 86, 165];
 const GELAP = [15, 23, 42];
@@ -658,15 +659,20 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
   if (sc) {
     k.tema(
       'Tahap 1 - Screening Kesesuaian Ruang',
-      'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN), tumpang tindih dengan KKPRL yang sudah terbit, dan ketentuan ruang lainnya. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial.'
+      'Kesesuaian ruang (hukum) adalah satu-satunya gerbang: acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN) dan matriks KKPRL Perda, tumpang tindih dengan KKPRL terbit, serta pengecualian kawasan konservasi dan alur pelayaran yang selalu berlaku di atas RTRW. Kecocokan fisik (kedalaman, gelombang, dan sejenisnya) bersifat indikatif dan hanya menjadi peringatan. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial; lokasi yang belum terverifikasi tetap dilanjutkan dengan label.'
     );
     k.bukaKartu(
       `Hasil: ${sc.status_label}${kelengkapanScreening(sc)?.indikatif ? ' (indikatif)' : ''}`,
       `${sc.sektor_nama} | cakupan acuan tata ruang ${nf(sc.cakupan_persen, 1)}% | ${
-        sc.lanjut ? 'dilanjutkan ke Tahap 2' : 'analisis berhenti di Tahap 1'
+        teksLanjut(sc)
       }`
     );
     k.daftar(sc.alasan);
+    const peringatan = peringatanScreening(sc);
+    if (peringatan.length) {
+      k.teks('Peringatan (tidak menggugurkan)', { tebal: true, warna: AMBER_TEKS, ukuran: 7.5 });
+      k.daftar(peringatan.map((p) => `${JENIS_PERINGATAN[p.jenis] || 'Peringatan'}: ${p.teks}`));
+    }
     if (sc.zona.length) {
       k.tabel(
         ['Zona', 'Sub-zona', 'Acuan', 'Porsi', 'Ketentuan'],
@@ -699,29 +705,40 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         );
       }
     }
-    if (sc.karakter) {
-      k.teks(`Karakter lokasi ${sc.sektor_nama.toLowerCase()}`, { tebal: true, warna: GELAP, ukuran: 7.5 });
+    const kecualiKeras = pengecualianScreening(sc);
+    if (kecualiKeras.length) {
+      k.teks('Pengecualian keras (gerbang kesesuaian ruang)', { tebal: true, warna: GELAP, ukuran: 7.5 });
+      k.tabel(
+        ['Pengecualian', 'Status'],
+        kecualiKeras.map((d) => [d.label,
+          d.nilai === true ? 'Terpenuhi' : d.nilai === false ? 'Tidak terpenuhi' : 'Belum terukur']),
+        [(LEBAR - 8) * 0.65, (LEBAR - 8) * 0.35]
+      );
+    }
+    const fisik = fisikScreening(sc);
+    if (fisik) {
+      k.teks(`Kecocokan fisik ${sc.sektor_nama.toLowerCase()} (indikatif, peringatan bukan gerbang)`, { tebal: true, warna: GELAP, ukuran: 7.5 });
       k.tabel(
         ['Aspek', 'Keterangan'],
         [
-          ['Kebutuhan', sc.karakter.kebutuhan || 'Tidak ada syarat karakter khusus.'],
-          ['Kondisi area', sc.karakter.terukur],
-          ['Kecocokan', sc.karakter.cocok ? 'Cocok' : 'Belum cocok'],
+          ['Kebutuhan', fisik.kebutuhan || 'Tidak ada syarat karakter khusus.'],
+          ['Kondisi area', fisik.terukur],
+          ['Kecocokan', fisik.label],
         ],
         [(LEBAR - 8) * 0.22, (LEBAR - 8) * 0.78]
       );
       if (sc.parameter?.length) {
-        if (sc.syarat_dasar?.length) {
-          k.teks('Syarat dasar (tidak ikut persentase; wajib terpenuhi agar lolos penyaringan peta)', { tebal: true, warna: GELAP, ukuran: 7 });
+        if (fisik.syarat?.length) {
+          k.teks('Kondisi fisik (tidak ikut persentase; yang belum terpenuhi menjadi peringatan)', { tebal: true, warna: GELAP, ukuran: 7 });
           k.tabel(
-            ['Syarat dasar', 'Status'],
-            sc.syarat_dasar.map((d) => [d.label,
-              d.nilai === true ? 'Terpenuhi' : d.nilai === false ? 'Tidak terpenuhi' : 'Belum terukur']),
+            ['Kondisi fisik', 'Status'],
+            fisik.syarat.map((d) => [d.label,
+              d.nilai === true ? 'Terpenuhi' : d.nilai === false ? 'Belum terpenuhi (peringatan)' : 'Belum terukur']),
             [(LEBAR - 8) * 0.65, (LEBAR - 8) * 0.35]
           );
         }
         k.teks(`${nf(sc.persen_sangat_sesuai)}% dari ${sc.parameter.filter((p) => p.nilai !== null).length} parameter dinilai yang terukur sangat sesuai `
-          + '(ambang Peta Sebaran Lokasi Indikatif Lolos Penyaringan: seluruh syarat dasar terpenuhi dan sedikitnya 75% parameter '
+          + '(ambang Peta Sebaran Lokasi Indikatif Lolos Penyaringan: seluruh kondisi fisik dan pengecualian keras terpenuhi dan sedikitnya 75% parameter '
             + 'dinilai yang terukur sangat sesuai; di zona peruntukan lain yang hanya mengizinkan bersyarat seluruh parameter '
             + 'dinilai wajib terukur dan sangat sesuai)',
           { tebal: true, warna: GELAP, ukuran: 7 });
@@ -811,9 +828,10 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     }
     if (sc.kkprl.length) {
       k.tabel(
-        ['KKPRL tumpang tindih', 'Kegiatan', 'Irisan (m2)'],
-        sc.kkprl.map((x) => [x.nomor_izin, x.kegiatan, nf(x.luas_m2)]),
-        [(LEBAR - 8) * 0.4, (LEBAR - 8) * 0.4, (LEBAR - 8) * 0.2]
+        ['KKPRL tumpang tindih', 'Kegiatan', 'Irisan (m2)', 'Status'],
+        sc.kkprl.map((x) => [x.nomor_izin, x.kegiatan, nf(x.luas_m2),
+          x.gugur === false ? 'Perlu verifikasi batas' : 'Menggugurkan']),
+        [(LEBAR - 8) * 0.3, (LEBAR - 8) * 0.3, (LEBAR - 8) * 0.15, (LEBAR - 8) * 0.25]
       );
     }
     k.tutupKartu('Ketentuan kegiatan diambil dari matriks KKPRL Perda RTRW Provinsi bila tersedia; selain itu dari ketentuan yang dikelola administrator.');
