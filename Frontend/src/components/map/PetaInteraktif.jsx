@@ -142,6 +142,7 @@ const MouseTracker = ({ onMouseMove }) => {
 const PetaInteraktif = ({ 
   setMousePosition, 
   onPolygonCompleted, 
+  onPilihSektor,
   panelOpen, 
   setPanelOpen,
   mapLayers = [],
@@ -328,8 +329,11 @@ const PetaInteraktif = ({
     const lokasi = cari.get('lokasi');
     if (lokasi) {
       api.get(`${LAYER_LOKAL.potensi.url.replace(/peta\/$/, '')}${encodeURIComponent(lokasi)}/`)
-        .then(({ data }) => drawerRef.current?.loadGeometry(data?.geometry))
-        .catch(() => setError('Batas lokasi potensial tidak dapat dimuat.'));
+        .then(({ data }) => {
+          if (data?.sektor_kode) onPilihSektor?.(data.sektor_kode);
+          drawerRef.current?.loadGeometry(data?.geometry);
+        })
+        .catch(() => setError('Batas lokasi indikatif tidak dapat dimuat.'));
     }
   }, [petaSiap]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -419,14 +423,18 @@ const PetaInteraktif = ({
                       ?.addEventListener('click', async () => {
                         layer.closePopup();
                         let geometri = feature.geometry;
+                        let sektor = p.sektor_kode || p.jenis?.[0] || null;
                         if (feature.id !== undefined && feature.id !== null) {
                           try {
                             const { data } = await api.get(LAYER_LOKAL[id].url.replace(/peta\/$/, `${feature.id}/`));
                             geometri = data?.geometry || geometri;
+                            sektor = data?.sektor_kode || sektor;
                           } catch {
                             geometri = feature.geometry;
                           }
                         }
+                        // Jenis investasi lokasi ikut dipilih agar hasil analisis sama dengan penilaian di peta.
+                        if (sektor) onPilihSektor?.(sektor);
                         drawerRef.current?.loadGeometry(geometri);
                       });
                   });

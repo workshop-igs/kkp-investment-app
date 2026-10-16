@@ -308,7 +308,7 @@ const AdminPengaturanAnalisisPage = () => {
         <div>
           <h1 className="text-2xl font-bold text-slate-900 font-syne">Pengaturan Analisis</h1>
           <p className="text-slate-500 text-sm mt-1">
-            Ambang, bobot, dan skor yang dipakai analisis area, Peta Sebaran Wilayah Potensial, analisis finansial, dan skor AHP.
+            Ambang, bobot, dan skor yang dipakai analisis area, Peta Sebaran Lokasi Indikatif Lolos Penyaringan, analisis finansial, dan skor AHP.
             Setiap perubahan langsung berlaku dan tercatat di Log Aktivitas.
           </p>
         </div>

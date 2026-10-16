@@ -58,7 +58,7 @@ const getBbox = (geometry) => {
 
 const LANGKAH = ['Identitas Proyek', 'Analisis Ruang', 'Analisis Finansial'];
 
-const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLihatLokasi }) => {
+const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sektorAwal, onLihatLokasi }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   
@@ -66,7 +66,10 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, onLi
   const [investor, setInvestor] = useState("");
   const [lokasiDetail, setLokasiDetail] = useState("");
   
-  const [sektor, setSektor] = useState("PERIKANAN_BUDIDAYA");
+  const [sektor, setSektor] = useState(sektorAwal || "PERIKANAN_BUDIDAYA");
+  useEffect(() => {
+    if (sektorAwal) setSektor(sektorAwal);
+  }, [sektorAwal]);
   const daftarSektor = useSektorAktif();
   const [capex, setCapex] = useState("");
   const [revenue, setRevenue] = useState("");

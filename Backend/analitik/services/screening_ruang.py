@@ -18,9 +18,11 @@ from analitik.services.konstanta import (
     SEKTOR_SUB_ZONA_COCOK,
     SUB_ZONA_TANPA_RINCIAN,
 )
+from analitik.services import pengecualian
 from analitik.services.asal_data import asal_data, catatan_skala, kelengkapan
-from analitik.services.konstanta import BULAN
+from analitik.services.konstanta import BULAN, EKOSISTEM_TERLARANG_SEKTOR
 from analitik.services.laporan_spasial import _arah
+from analitik.services.oseanografi import daya_gelombang, raster_tersedia
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.parameter_tambahan import nilai_area
 from analitik.services.pengaturan import atur
@@ -187,6 +189,10 @@ def _penuhi(syarat, data):
                 return False
         elif (bawah is not None and dalam < bawah) or (atas is not None and dangkal > atas):
             return False
+    if 'daya_gelombang_min' in syarat and 'PERIODE_GLB' in data.get('tersedia', ()):
+        daya = data.get('daya_gelombang')
+        if daya is None or daya < syarat['daya_gelombang_min']:
+            return False
     gelombang = data.get('gelombang')
     if gelombang is None:
         if 'gelombang_min' in syarat:
@@ -227,6 +233,7 @@ LABEL_SYARAT = {
     'kedalaman': 'Kedalaman perairan sesuai',
     'gelombang_maks': 'Tinggi gelombang sesuai',
     'gelombang_min': 'Tinggi gelombang sesuai',
+    'daya_gelombang_min': 'Daya gelombang memadai',
     'suhu_min': 'Suhu permukaan laut sesuai',
     'jarak_pantai_maks_km': 'Jarak ke pantai sesuai',
     'ekosistem': 'Ada ekosistem pendukung',
@@ -235,13 +242,28 @@ SUMBER_SYARAT = {
     'kedalaman': 'kedalaman_maks',
     'gelombang_maks': 'gelombang',
     'gelombang_min': 'gelombang',
+    'daya_gelombang_min': 'daya_gelombang',
     'suhu_min': 'suhu_min',
     'jarak_pantai_maks_km': 'jarak_pantai_km',
 }
+# Syarat yang bergantung pada raster yang mungkin belum pernah ditarik: dilewati bila datanya belum ada.
+RASTER_SYARAT = {'daya_gelombang_min': 'PERIODE_GLB'}
+LABEL_RANAH = 'Ranah lokasi sesuai jenis investasi'
+LABEL_INFRASTRUKTUR = 'Dekat infrastruktur pendukung'
+# kunci PARAMETER_TAMBAHAN -> (label, kunci data, arah ambang, raster sumber atau None)
 LABEL_TAMBAHAN = {
-    'kedalaman_maks': ('Kedalaman perairan sesuai', 'kedalaman_maks'),
-    'gelombang_maks': ('Tinggi gelombang sesuai', 'gelombang'),
-    'anomali_suhu_maks': ('Tanpa stres panas (anomali suhu rendah)', 'anomali_suhu'),
+    'kedalaman_maks': ('Kedalaman perairan sesuai', 'kedalaman_maks', 'maks', 'KEDALAMAN'),
+    'gelombang_maks': ('Tinggi gelombang sesuai', 'gelombang', 'maks', 'GELOMBANG'),
+    'anomali_suhu_maks': ('Tanpa stres panas (anomali suhu rendah)', 'anomali_suhu', 'maks', 'ANOMALI_SUHU'),
+    'suhu_rata_min': ('Suhu permukaan laut tidak terlalu dingin', 'suhu_rata', 'min', 'SUHU'),
+    'suhu_rata_maks': ('Suhu permukaan laut tidak terlalu panas', 'suhu_rata', 'maks', 'SUHU'),
+    'klorofil_min': ('Perairan cukup subur (klorofil-a)', 'klorofil', 'min', 'KLOROFIL'),
+    'klorofil_maks': ('Perairan tidak terlalu subur atau tercemar (klorofil-a)', 'klorofil', 'maks', 'KLOROFIL'),
+    'kd490_maks': ('Perairan cukup jernih (Kd490)', 'kd490', 'maks', 'KD490'),
+    'gelombang_tertinggi_maks': ('Gelombang tertinggi setahun aman', 'gelombang_tertinggi', 'maks', 'GELOMBANG'),
+    'jarak_karang_maks_km': ('Dekat terumbu karang', 'jarak_karang_km', 'maks', None),
+    'curah_hujan_maks': ('Curah hujan tahunan rendah', 'curah_hujan', 'maks', 'CURAH_HUJAN'),
+    'bulan_kering_min': ('Musim kemarau cukup panjang', 'bulan_kering', 'min', 'BULAN_KERING'),
 }
 BENCANA_LOKASI = (
     ('TSUNAMI', 'Risiko tsunami rendah'),
@@ -250,33 +272,56 @@ BENCANA_LOKASI = (
 )
 
 
+def _syarat_berlaku(kunci, data):
+    raster = RASTER_SYARAT.get(kunci)
+    return raster is None or raster in data.get('tersedia', ())
+
+
 def parameter_lokasi(sektor_kode, data):
+    """Penilaian lokasi untuk satu jenis investasi, sama untuk Peta Sebaran dan screening.
+
+    Mengembalikan (syarat_dasar, dinilai), atau None bila karakter lokasi tidak cocok. Syarat dasar menyaring
+    lokasi (ranah, karakter fisik, pengecualian keras, infrastruktur) sehingga pada lokasi yang lolos semuanya
+    terpenuhi; karena itu tidak ikut persentase. Parameter dinilai membedakan mutu lokasi: True sangat sesuai,
+    False perlu dinilai di lapangan, None tidak terukur di lokasi itu.
+    """
     if not cocok_karakter(sektor_kode, data)[0]:
         return None
     pilihan = atur('KARAKTER_LOKASI').get(sektor_kode, {}).get(data['ranah'], [{}])
     syarat = next((s for s in pilihan if _penuhi(s, data)), {})
-    nilai = {'Ranah lokasi sesuai jenis investasi': True, **{
-        LABEL_SYARAT[k]: None if k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None else True
-        for k in syarat if k in LABEL_SYARAT
-    }}
+    dasar = {LABEL_RANAH: True}
+    for k in syarat:
+        if k in LABEL_SYARAT and _syarat_berlaku(k, data):
+            dasar[LABEL_SYARAT[k]] = None if k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None else True
+    for kode, nilai in (data.get('pengecualian') or {}).items():
+        dasar[pengecualian.LABEL[kode]] = nilai
+    if 'dekat_infrastruktur' in data:
+        dasar[LABEL_INFRASTRUKTUR] = data['dekat_infrastruktur']
+
+    nilai = {}
+    tersedia = data.get('tersedia', ())
     for kunci, batas in atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}).items():
-        label, sumber = LABEL_TAMBAHAN[kunci]
-        nilai[label] = None if data.get(sumber) is None else data[sumber] <= batas
+        if kunci not in LABEL_TAMBAHAN:
+            continue
+        label, sumber, arah, raster = LABEL_TAMBAHAN[kunci]
+        if raster is not None and raster not in tersedia:
+            continue
+        v = data.get(sumber)
+        nilai[label] = None if v is None else (v <= batas if arah == 'maks' else v >= batas)
     nilai[LABEL_TATA_RUANG] = data.get('status_tr') == 'DIIZINKAN'
     for jenis, label in BENCANA_LOKASI:
         kelas = (data.get('bencana') or {}).get(jenis)
         nilai[label] = None if kelas is None else kelas == 'RENDAH'
-    if not any('ekosistem' in s for s in pilihan):
+    if not any('ekosistem' in s for s in pilihan) and sektor_kode not in EKOSISTEM_TERLARANG_SEKTOR:
         nilai['Tidak beririsan ekosistem sensitif'] = not set(data.get('ekosistem') or ()) & set(EKOSISTEM_PESISIR)
-    nilai['Dekat infrastruktur pendukung'] = data.get('dekat_infrastruktur')
     nilai['Di luar wilayah kelola masyarakat hukum adat'] = None if data.get('adat') is None else not data['adat']
     nilai.update(data.get('tambahan') or {})
-    return nilai
+    return dasar, nilai
 
 
 def persen_sangat_sesuai(nilai):
     terukur = [v for v in nilai.values() if v is not None]
-    return 100 * sum(terukur) / len(terukur)
+    return 100 * sum(terukur) / len(terukur) if terukur else 0.0
 
 
 def ekosistem_di(c, geom, radius=0.0):
@@ -292,6 +337,33 @@ def ekosistem_di(c, geom, radius=0.0):
     return {r[0] for r in c.fetchall()}
 
 
+RASTER_LAUT = ['KEDALAMAN', 'GELOMBANG', 'SUHU', 'ANOMALI_SUHU', 'KLOROFIL', 'KD490', 'PERIODE_GLB']
+RASTER_DARAT = ['CURAH_HUJAN', 'BULAN_KERING']
+# Batas pencarian terumbu karang terdekat untuk parameter "dekat terumbu karang".
+RADIUS_CARI_KARANG_KM = 20.0
+
+
+def _catat_oseanografi(data, stat):
+    data['oseanografi'] = {
+        k: {'sumber': v.get('sumber'), 'periode': v.get('periode')} for k, v in stat.items() if v.get('rata2') is not None
+    }
+
+
+def _jarak_karang(c, geom):
+    c.execute("SELECT EXISTS (SELECT 1 FROM inventarisasi_sumber_daya_alam WHERE jenis = 'TERUMBU_KARANG')")
+    if not c.fetchone()[0]:
+        return None
+    radius = RADIUS_CARI_KARANG_KM / KM_PER_DERAJAT
+    c.execute(
+        "SELECT MIN(ST_Distance(e.geometry, a.g)) FROM inventarisasi_sumber_daya_alam e, "
+        "(SELECT ST_GeomFromEWKT(%s) AS g) a WHERE e.jenis = 'TERUMBU_KARANG' "
+        "AND e.geometry && ST_Expand(a.g, %s) AND ST_DWithin(e.geometry, a.g, %s)",
+        [geom.ewkt, radius, radius],
+    )
+    jarak = c.fetchone()[0]
+    return jarak * KM_PER_DERAJAT if jarak is not None else 99.0
+
+
 def karakter_area(c, geom):
     c.execute(
         'SELECT EXISTS (SELECT 1 FROM inti_provinsi WHERE geometry && ST_PointOnSurface(ST_GeomFromEWKT(%s)) '
@@ -302,22 +374,33 @@ def karakter_area(c, geom):
         'ranah': 'DARAT' if c.fetchone()[0] else 'LAUT',
         'ekosistem': ekosistem_di(c, geom),
         'ekosistem_sekitar': ekosistem_di(c, geom, atur('RADIUS_EKOSISTEM_PENDUKUNG_M') / 1000 / KM_PER_DERAJAT),
+        'tersedia': raster_tersedia(),
     }
     if data['ranah'] == 'DARAT':
+        stat = statistik_oseanografi(geom, RASTER_DARAT)
+        _catat_oseanografi(data, stat)
+        hujan = stat.get('CURAH_HUJAN', {}).get('rata2')
+        data['curah_hujan'] = hujan * 12 if hujan is not None else None
+        data['bulan_kering'] = stat.get('BULAN_KERING', {}).get('rata2')
         return data
-    stat = statistik_oseanografi(geom, ['KEDALAMAN', 'GELOMBANG', 'SUHU', 'ANOMALI_SUHU'])
-    data['oseanografi'] = {
-        k: {'sumber': v.get('sumber'), 'periode': v.get('periode')} for k, v in stat.items() if v.get('rata2') is not None
-    }
+    stat = statistik_oseanografi(geom, RASTER_LAUT)
+    _catat_oseanografi(data, stat)
     dalam = stat.get('KEDALAMAN', {})
     if dalam.get('rata2') is not None:
         data['kedalaman_min'], data['kedalaman_maks'] = max(0.0, -dalam['max']), max(0.0, -dalam['min'])
     c.execute(SEBARAN_KEDALAMAN.format(zona='(SELECT 0 AS id, ST_GeomFromEWKT(%s) AS geometry)'), [geom.ewkt])
     data['sebaran_kedalaman'] = [(d, n) for _, d, n in c.fetchall()]
-    data['gelombang'] = stat.get('GELOMBANG', {}).get('rata2')
+    gelombang = stat.get('GELOMBANG', {})
+    data['gelombang'] = gelombang.get('rata2')
+    data['gelombang_tertinggi'] = gelombang.get('max') if gelombang.get('rata2') is not None else None
     data['anomali_suhu'] = stat.get('ANOMALI_SUHU', {}).get('rata2')
     suhu = stat.get('SUHU', {})
     data['suhu_min'] = suhu['min'] if suhu.get('rata2') is not None else None
+    data['suhu_rata'] = suhu.get('rata2')
+    data['klorofil'] = stat.get('KLOROFIL', {}).get('rata2')
+    data['kd490'] = stat.get('KD490', {}).get('rata2')
+    data['daya_gelombang'] = daya_gelombang(data['gelombang'], stat.get('PERIODE_GLB', {}).get('rata2'))
+    data['jarak_karang_km'] = _jarak_karang(c, geom)
     c.execute(
         'SELECT MIN(ST_Distance(COALESCE(v.geometry_tampilan, v.geometry), a.g)) '
         'FROM inti_provinsi v, (SELECT ST_GeomFromEWKT(%s) AS g) a '
@@ -482,7 +565,7 @@ def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
     ]
 
 
-def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids, tambahan=None):
+def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids, tambahan=None, bebas=None):
     c.execute(
         "SELECT jenis, (ARRAY['RENDAH', 'SEDANG', 'TINGGI'])[MAX(CASE kelas WHEN 'TINGGI' THEN 3 "
         "WHEN 'SEDANG' THEN 2 ELSE 1 END)] FROM analitik_zona_risiko_bencana "
@@ -490,7 +573,8 @@ def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids, tamb
         'GROUP BY jenis',
         [geom.ewkt, geom.ewkt],
     )
-    data = {**karakter, 'status_tr': status_tr, 'bencana': dict(c.fetchall()), 'tambahan': tambahan}
+    data = {**karakter, 'status_tr': status_tr, 'bencana': dict(c.fetchall()), 'tambahan': tambahan,
+            'pengecualian': bebas or {}, 'dekat_infrastruktur': None}
     c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung)')
     if c.fetchone()[0]:
         c.execute(
@@ -510,6 +594,20 @@ def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids, tamb
     terdata, adat = c.fetchone()
     data['adat'] = adat if terdata else None
     return parameter_lokasi(sektor_kode, data)
+
+
+def _alasan_pengecualian(kena, sektor_nama) -> List[str]:
+    alasan = []
+    for k in kena:
+        porsi = f"{_persen_area(k['persen'])} area ({_angka(k['luas_m2'] / 10000, 2)} ha)"
+        if k['gugur']:
+            alasan.append(f"{porsi} berada di {k['keterangan']}, yang dikecualikan untuk {sektor_nama}.")
+        else:
+            alasan.append(
+                f"{porsi} menyentuh {k['keterangan']}; irisan sekecil ini belum menggugurkan area, tetapi bagian itu "
+                f"harus dikeluarkan dari rencana tapak."
+            )
+    return alasan
 
 
 def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl) -> List[str]:
@@ -614,6 +712,8 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
 
     with connection.cursor() as c:
         luas_aoi = _luas(c, geom)
+        irisan = pengecualian.irisan_area(c, geom)
+        kena = pengecualian.nilai_area(irisan, sektor.kode, luas_aoi)
         zona_efektif, cakupan = _zona_efektif(c, geom, luas_aoi)
         semua_aturan = _aturan_per_sektor({z['matriks_id'] for z in zona_efektif if z['matriks_id']})
         aturan = semua_aturan.get(sektor.id, {})
@@ -625,16 +725,20 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         karakter = karakter_area(c, geom)
         cocok, alasan_karakter = cocok_karakter(sektor.kode, karakter)
         status = _nilai(zona_efektif, aturan, cakupan, bool(kkprl)) if cocok else 'TIDAK_SESUAI'
+        if any(k['gugur'] for k in kena):
+            status = 'TIDAK_SESUAI'
         provinsi_ids = {z['provinsi_id'] for z in zona_efektif}
         tambahan = nilai_area(c, geom, sektor.kode, provinsi_ids)
         gerbang_gagal = [t for t in tambahan if t['peran'] == 'GERBANG' and t['hasil'] is False]
         if gerbang_gagal:
             status = 'TIDAK_SESUAI'
         lanjut = status in ('SESUAI', 'SESUAI_BERSYARAT')
-        parameter = parameter_area(
+        penilaian = parameter_area(
             c, geom, sektor.kode, karakter, STATUS_TATA_RUANG.get(status), provinsi_ids,
             {t['nama']: t['hasil'] for t in tambahan if t['peran'] == 'DINILAI'},
+            pengecualian.bebas(sektor.kode, kena, kkprl),
         )
+        dasar, parameter = penilaian if penilaian else ({}, None)
 
         rekomendasi: Optional[Dict[str, Any]] = None
         if not lanjut:
@@ -642,7 +746,8 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
             if not kkprl:
                 for s in SektorInvestasi.objects.filter(aktif=True).exclude(id=sektor.id).order_by('urutan', 'nama'):
                     st = _nilai(zona_efektif, semua_aturan.get(s.id, {}), cakupan, False)
-                    if st in ('SESUAI', 'SESUAI_BERSYARAT') and cocok_karakter(s.kode, karakter)[0]:
+                    gugur = any(k['gugur'] for k in pengecualian.nilai_area(irisan, s.kode, luas_aoi))
+                    if st in ('SESUAI', 'SESUAI_BERSYARAT') and not gugur and cocok_karakter(s.kode, karakter)[0]:
                         alternatif.append({'kode': s.kode, 'nama': s.nama, 'status_label': LABEL_STATUS[st]})
             rekomendasi = {
                 'sektor_alternatif': alternatif,
@@ -681,15 +786,17 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
             ])),
             'cocok': cocok,
         },
+        'syarat_dasar': [{'label': k, 'nilai': v} for k, v in dasar.items()],
         'parameter': [{'label': k, 'nilai': v} for k, v in (parameter or {}).items()],
+        'pengecualian': kena,
         'persen_sangat_sesuai': round(persen_sangat_sesuai(parameter)) if parameter else None,
         'kkprl': kkprl,
         'parameter_tambahan': tambahan,
-        'alasan': [alasan_karakter] * (not cocok) + [
+        'alasan': [alasan_karakter] * (not cocok) + _alasan_pengecualian(kena, sektor.nama) + [
             f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
         ] + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl),
         'rekomendasi': rekomendasi,
-        'kelengkapan': kelengkapan(parameter),
+        'kelengkapan': kelengkapan(parameter, dasar),
         'asal_data': asal_data(zona_efektif, karakter, tambahan),
         'catatan_skala': catatan_skala(zona_efektif, karakter),
     }

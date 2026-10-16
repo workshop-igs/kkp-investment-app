@@ -10,8 +10,8 @@ const LANGKAH = [
   },
   {
     pilih: '[data-tur="legenda"]',
-    judul: 'Lokasi potensial',
-    isi: 'Setiap titik di peta adalah lokasi potensial investasi; warnanya menunjukkan jenis investasi. Klik sebuah titik lalu "Analisis lokasi ini".',
+    judul: 'Lokasi indikatif',
+    isi: 'Setiap titik adalah lokasi indikatif yang lolos penyaringan awal; warnanya menunjukkan jenis investasi. Klik sebuah titik lalu "Analisis lokasi ini".',
   },
   {
     peraga: true,

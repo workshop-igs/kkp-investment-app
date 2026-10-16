@@ -20,11 +20,31 @@ PALET = {
                      (2, '#b2182b')],
     'KLOROFIL': [(0.05, '#440154'), (0.1, '#3b528b'), (0.3, '#21918c'), (1, '#5ec962'), (3, '#fde725')],
     'GELOMBANG': [(0, '#e0f3f8'), (0.75, '#91bfdb'), (1.25, '#4575b4'), (2, '#fc8d59'), (3, '#d73027')],
+    'PERIODE_GLB': [(4, '#e0f3f8'), (7, '#91bfdb'), (10, '#4575b4'), (13, '#fc8d59'), (16, '#d73027')],
+    'KD490': [(0.03, '#08306b'), (0.06, '#2171b5'), (0.1, '#6baed6'), (0.3, '#c6dbef'), (1, '#8c6d31')],
+    'CURAH_HUJAN': [(0, '#fff7bc'), (50, '#fec44f'), (100, '#d9f0a3'), (200, '#78c679'), (400, '#238443')],
+    'BULAN_KERING': [(0, '#238443'), (3, '#addd8e'), (5, '#fec44f'), (8, '#ec7014'), (12, '#993404')],
     'KEDALAMAN': [(0, '#e0f2fe'), (50, '#bae6fd'), (200, '#7dd3fc'), (1000, '#38bdf8'), (3000, '#0369a1'),
                   (6000, '#082f49')],
 }
-SKALA_LOG = {'KLOROFIL'}
+SKALA_LOG = {'KLOROFIL', 'KD490'}
 DIBALIK = {'KEDALAMAN'}
+
+
+def raster_tersedia():
+    """Kode raster yang pernah ditarik; kriteria dari raster yang belum ada dilewati, bukan dianggap tak terukur."""
+    hasil = cache.get('raster-tersedia')
+    if hasil is None:
+        hasil = frozenset(RasterOseanografi.objects.values_list('parameter', flat=True).distinct())
+        cache.set('raster-tersedia', hasil, 600)
+    return hasil
+
+
+def daya_gelombang(tinggi, periode_puncak):
+    """Fluks daya gelombang perairan dalam P = 0,49 Hs² Te kW/m, dengan Te ≈ 0,9 Tp (indikatif)."""
+    if tinggi is None or periode_puncak is None:
+        return None
+    return 0.49 * tinggi ** 2 * 0.9 * periode_puncak
 
 
 def statistik(geom, parameter):

@@ -11,6 +11,7 @@ const AnalisisPage = () => {
   const [loading, setLoading] = useState(false);
   const [geometry, setGeometry] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [sektorAwal, setSektorAwal] = useState(null);
   const [cari] = useSearchParams();
   const [fokus, setFokus] = useState(() => {
     const lat = Number.parseFloat(cari.get('lat'));
@@ -66,6 +67,7 @@ const AnalisisPage = () => {
       <div className="flex-1 relative bg-slate-50 overflow-hidden">
         <PetaInteraktif 
           onPolygonCompleted={handlePolygonCreated} 
+          onPilihSektor={setSektorAwal}
           panelOpen={panelOpen}
           setPanelOpen={setPanelOpen}
           mapLayers={result?.map_layers}
@@ -89,6 +91,7 @@ const AnalisisPage = () => {
                 onAnalyze={handleAnalyze} 
                 hasGeometry={!!geometry} 
                 geometry={geometry}
+                sektorAwal={sektorAwal}
                 onLihatLokasi={lihatLokasi}
               />
             </div>

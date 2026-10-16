@@ -60,7 +60,7 @@ def hitung_ulang():
                 break
             if lokasi is not None:
                 call_command('hitung_lokasi_potensial', provinsi=','.join(lokasi) or None,
-                             progres=_progres('Lokasi potensial'))
+                             progres=_progres('Lokasi indikatif'))
                 cache.clear()
             if skor:
                 call_command('hitung_skor_zona', progres=_progres('Skor kelayakan zona'))

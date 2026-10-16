@@ -10,7 +10,7 @@ PETA, SKOR = 'peta', 'skor'
 
 KELOMPOK = [
     ('karakter', 'Karakter lokasi per jenis investasi'),
-    ('peta', 'Peta Sebaran Wilayah Potensial'),
+    ('peta', 'Peta Sebaran Lokasi Indikatif Lolos Penyaringan'),
     ('analisis_area', 'Analisis area'),
     ('finansial', 'Analisis finansial'),
     ('ahp', 'Skor AHP dan keputusan kelayakan'),
@@ -41,13 +41,26 @@ DAFTAR = [
        'menyentuhnya. Syarat bebas terumbu karang dan lamun tetap memakai irisan langsung.', 'm', (PETA,),
        (0, 5000), bulat=True),
     _d('PARAMETER_TAMBAHAN', 'karakter', 'Parameter penilaian tambahan per jenis',
-       'Parameter yang ikut dihitung dalam persentase sangat sesuai, tetapi tidak menggugurkan lokasi.',
+       'Parameter yang ikut dihitung dalam persentase sangat sesuai, tetapi tidak menggugurkan lokasi. Semuanya '
+       'dari data publik; parameter yang datanya belum pernah ditarik ke aplikasi dilewati.',
        dampak=(PETA,)),
+    _d('BUFFER_UNSUR_TERLARANG_M', 'karakter', 'Jarak aman kabel, pipa, dan alur pelayaran',
+       'Pengecualian keras: lokasi tidak boleh berada dalam jarak ini dari kabel bawah laut, pipa bawah laut, dan '
+       'alur pelayaran pada Rencana Tata Ruang Laut.', 'm', (PETA,), (0, 20000)),
+    _d('AMBANG_IRISAN_PENGECUALIAN_PERSEN', 'analisis_area', 'Toleransi irisan pengecualian pada screening',
+       'Pada screening area, irisan dengan kawasan konservasi, ekosistem sensitif, atau jarak aman kabel/pipa/alur '
+       'yang lebih kecil dari bagian ini dicatat sebagai peringatan dan tidak menggugurkan area.', '%', (),
+       (0, 100)),
+    _d('AMBANG_BULAN_KERING_MM', 'karakter', 'Batas curah hujan bulan kering',
+       'Bulan dengan curah hujan di bawah ini dihitung bulan kering (parameter tambak garam).', 'mm/bulan', (PETA,),
+       (0, 500)),
     _d('AMBANG_KECOCOKAN', 'peta', 'Ambang persentase parameter sangat sesuai',
-       'Bagian parameter terukur yang harus sangat sesuai agar sebuah sel menjadi lokasi potensial.',
+       'Bagian parameter dinilai yang terukur dan harus sangat sesuai agar sebuah sel menjadi lokasi indikatif '
+       'lolos penyaringan.',
        'proporsi (0-1)', (PETA,), (0, 1)),
-    _d('MINIMAL_PARAMETER_TERUKUR', 'peta', 'Jumlah minimal parameter terukur', '', 'parameter', (PETA,),
-       (1, 30), bulat=True),
+    _d('MINIMAL_PARAMETER_TERUKUR', 'peta', 'Jumlah minimal parameter terukur',
+       'Dihitung dari parameter dinilai saja; syarat dasar yang pasti terpenuhi tidak ikut dihitung.', 'parameter',
+       (PETA,), (1, 30), bulat=True),
     _d('WAJIB_LENGKAP_BERSYARAT', 'peta', 'Zona peruntukan lain: seluruh parameter wajib terukur',
        'Lokasi di zona yang peruntukannya untuk kegiatan lain dan hanya mengizinkan jenis itu bersyarat direkomendasikan '
        'hanya bila seluruh parameter selain tata ruang terukur.', dampak=(PETA,)),
@@ -60,7 +73,7 @@ DAFTAR = [
     _d('SEL_PER_SISI_INTI_LOKASI', 'peta', 'Ukuran inti lokasi',
        'Jumlah sel 250 m per sisi; 4 berarti inti paling luas 1 km x 1 km.', 'sel', (PETA,), (1, 20), bulat=True),
     _d('INFRASTRUKTUR_AKSESIBILITAS', 'peta', 'Jarak infrastruktur pendukung',
-       'Lokasi potensial wajib berada dalam jarak ideal salah satu infrastruktur; bobot dan jarak maksimum '
+       'Syarat dasar peta: lokasi wajib berada dalam jarak ideal salah satu infrastruktur; bobot dan jarak maksimum '
        'dipakai skor aksesibilitas.', dampak=(PETA, SKOR),
        kolom=['Kategori', 'Bobot', 'Jarak ideal (km)', 'Jarak maksimum (km)']),
     _d('AMBANG_CAKUPAN_ACUAN', 'analisis_area', 'Cakupan minimal acuan tata ruang',
@@ -168,12 +181,21 @@ LABEL_BAGIAN = {
     'gelombang_min': 'Tinggi gelombang minimum (m)', 'suhu_min': 'Suhu permukaan laut minimum (°C)',
     'jarak_pantai_maks_km': 'Jarak maksimum ke pantai (km)', 'tanpa_ekosistem': 'Ekosistem yang harus dihindari',
     'kedalaman_maks': 'Kedalaman maksimum (m)', 'anomali_suhu_maks': 'Anomali suhu maksimum (°C)',
+    'daya_gelombang_min': 'Daya gelombang minimum (kW/m)',
+    'suhu_rata_min': 'Suhu permukaan rata-rata minimum (°C)', 'suhu_rata_maks': 'Suhu permukaan rata-rata maksimum (°C)',
+    'klorofil_min': 'Klorofil-a minimum (mg/m³)', 'klorofil_maks': 'Klorofil-a maksimum (mg/m³)',
+    'kd490_maks': 'Kekeruhan Kd490 maksimum (1/m)', 'gelombang_tertinggi_maks': 'Gelombang tertinggi setahun maksimum (m)',
+    'jarak_karang_maks_km': 'Jarak maksimum ke terumbu karang (km)', 'curah_hujan_maks': 'Curah hujan tahunan maksimum (mm)',
+    'bulan_kering_min': 'Jumlah bulan kering minimum',
+    'KABEL': 'Kabel bawah laut', 'PIPA': 'Pipa bawah laut', 'ALUR_PELAYARAN': 'Alur pelayaran',
     'lokasi_risiko': 'Lokasi dan risiko',
 }
 
-SYARAT_KARAKTER = ['kedalaman', 'gelombang_maks', 'gelombang_min', 'suhu_min', 'jarak_pantai_maks_km', 'ekosistem',
-                   'tanpa_ekosistem']
-SYARAT_TAMBAHAN = ['kedalaman_maks', 'gelombang_maks', 'anomali_suhu_maks']
+SYARAT_KARAKTER = ['kedalaman', 'gelombang_maks', 'gelombang_min', 'daya_gelombang_min', 'suhu_min',
+                   'jarak_pantai_maks_km', 'ekosistem', 'tanpa_ekosistem']
+SYARAT_TAMBAHAN = ['kedalaman_maks', 'gelombang_maks', 'anomali_suhu_maks', 'suhu_rata_min', 'suhu_rata_maks',
+                   'klorofil_min', 'klorofil_maks', 'kd490_maks', 'gelombang_tertinggi_maks', 'jarak_karang_maks_km',
+                   'curah_hujan_maks', 'bulan_kering_min']
 
 BAWAAN = {kunci: json.loads(json.dumps(getattr(konstanta, kunci))) for kunci in TERDAFTAR}
 
