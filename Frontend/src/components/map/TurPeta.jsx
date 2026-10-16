@@ -86,17 +86,23 @@ const letakKartu = (k, w, h) => {
   const W = window.innerWidth;
   const H = window.innerHeight;
   if (!k) return { left: (W - w) / 2, top: (H - h) / 2 };
-  let left = k.left + k.width / 2 - w / 2;
-  let top;
-  if (k.left > W / 2 && k.left - JARAK - w >= TEPI) {
-    left = k.left - JARAK - w;
-    top = k.top + k.height / 2 - h / 2;
-  } else if (k.bottom + JARAK + h <= H - TEPI) {
-    top = k.bottom + JARAK;
-  } else {
-    top = k.top - JARAK - h;
-  }
-  return { left: batasi(left, TEPI, W - w - TEPI), top: batasi(top, TEPI, H - h - TEPI) };
+  const tengahX = k.left + k.width / 2 - w / 2;
+  const tengahY = k.top + k.height / 2 - h / 2;
+  const muatX = (left) => left >= TEPI && left + w <= W - TEPI;
+  const muatY = (top) => top >= TEPI && top + h <= H - TEPI;
+  const sisiKiri = { left: k.left - JARAK - w, top: tengahY };
+  const sisiKanan = { left: k.right + JARAK, top: tengahY };
+  const bawah = { left: tengahX, top: k.bottom + JARAK };
+  const atas = { left: tengahX, top: k.top - JARAK - h };
+  // Target tinggi (mis. panel legenda) tidak menyisakan ruang di atas/bawah:
+  // taruh kartu di sampingnya agar tidak menutupi target.
+  const pilihan = (k.left > W / 2 && muatX(sisiKiri.left) && sisiKiri)
+    || (muatY(bawah.top) && bawah)
+    || (muatY(atas.top) && atas)
+    || (muatX(sisiKanan.left) && sisiKanan)
+    || (muatX(sisiKiri.left) && sisiKiri)
+    || atas;
+  return { left: batasi(pilihan.left, TEPI, W - w - TEPI), top: batasi(pilihan.top, TEPI, H - h - TEPI) };
 };
 
 const letakBawah = (w, h) => ({ left: (window.innerWidth - w) / 2, top: window.innerHeight - h - TEPI });
