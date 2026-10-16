@@ -13,6 +13,7 @@ import {
 import { SECTORS } from '../../utils/konstanta';
 import { API_V1_URL } from '../../api/alamat';
 import { lambangSvg } from './ikonPeta';
+import { kelengkapanScreening } from '../../utils/kelengkapanData';
 
 const TOMBOL_ANALISIS = `<button type="button" data-analisis-lokasi class="mt-2 w-full rounded-lg bg-[#0056A5] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#004a8f]">
   Analisis lokasi ini
@@ -278,6 +279,10 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
            </li>`;
         })
         .join('');
+      const nilaiParameter = Object.values(p.parameter || {});
+      const kelengkapan = kelengkapanScreening({
+        parameter: nilaiParameter.map((v) => ({ nilai: v === null ? null : true })),
+      });
 
       return `<div class="font-sans w-[18.5rem] max-w-full">
         <div class="flex items-center gap-2.5">
@@ -301,10 +306,14 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           ? `<p class="mt-1 text-[10px] text-slate-500 leading-snug">Inti terbaik dari wilayah sesuai seluas &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha: persentase tertinggi, lalu paling dekat infrastruktur.</p>`
           : ''}
         <ul class="mt-2 text-[11px] space-y-px text-slate-700">${butir}</ul>
+        ${kelengkapan
+          ? `<p class="mt-1 text-[10.5px] leading-snug ${kelengkapan.indikatif ? 'font-semibold text-amber-700' : 'text-slate-500'}">Data tersedia untuk ${kelengkapan.terukur} dari ${kelengkapan.total} parameter${kelengkapan.indikatif ? ' &middot; <span class="rounded bg-amber-500 px-1 text-[9.5px] font-bold uppercase text-white">Indikatif</span>' : ''}</p>`
+          : ''}
         ${p.status_tata_ruang === 'BERSYARAT'
           ? `<p class="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[10.5px] text-amber-800 leading-snug">Diizinkan bersyarat oleh ${rencana}; syaratnya tercantum di Analisis lokasi ini.</p>`
           : ''}
         <p class="text-[10px] text-slate-500 mt-1.5 leading-snug">${p.perlu_dinilai?.length ? 'Parameter bertanda ! atau ?, serta' : 'Parameter yang belum terukur di aplikasi, seperti'} kualitas air dan substrat, perlu dinilai langsung di lapangan.</p>
+        <p class="text-[10px] text-slate-400 mt-1 leading-snug">Penyaringan awal dari peta tata ruang berskala provinsi; bukan pengganti Persetujuan KKPRL.</p>
         ${TOMBOL_ANALISIS}
       </div>`;
     },

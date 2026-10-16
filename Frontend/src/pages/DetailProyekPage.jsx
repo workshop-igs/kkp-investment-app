@@ -44,6 +44,8 @@ import { keLatLng } from '../utils/koordinat';
 import { angkaRingkas as nf, rupiahRingkas } from '../utils/pemformat';
 import { unduhPdfLaporan } from '../utils/pdfLaporan';
 import { mulaiMemuat } from '../components/OverlayMemuat';
+import BannerIndikatif from '../components/laporan/BannerIndikatif';
+import { statusIndikatif } from '../utils/kelengkapanData';
 import { LABEL_TAHAPAN, TAHAPAN_PROYEK } from '../utils/konstanta';
 
 const PALET = ['#0056A5', '#3d81c0', '#7aa9d6', '#a9c6e5', '#cfdff0', '#8fa3b8'];
@@ -145,6 +147,11 @@ const DetailProyekPage = () => {
 
   const analisis = useMemo(() => normalkanAnalisis(proyek?.analisis_json), [proyek]);
   const geom = proyek?.geometry || analisis.geometry;
+  const indikatif = statusIndikatif(screening || analisis.screening, {
+    berbasisSpasial: analisis.spasial?.skorSpasial,
+    total: analisis.spasial?.totalSkor,
+  });
+  const keputusanTampil = (k) => `${(k || '—').replace(/_/g, ' ')}${indikatif.indikatif && k ? ' (indikatif)' : ''}`;
   const bencana = useMemo(() => {
     if (spasial.memuat) return { memuat: true, data: null, galat: null };
     const bagian = (spasial.data?.bagian || []).find((b) => b.kunci === 'bencana');
@@ -574,6 +581,11 @@ const DetailProyekPage = () => {
 
         <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-4 py-4 print:overflow-visible">
           <p className="text-[13px] text-slate-500 leading-relaxed mb-4">{PENGANTAR[tema]}</p>
+          {(analisis.kelayakan?.skor != null || screening) && (
+            <div className="mb-4">
+              <BannerIndikatif status={indikatif} />
+            </div>
+          )}
 
           {tema === 'umum' && (
             <>
@@ -740,7 +752,7 @@ const DetailProyekPage = () => {
                   judul="Penilaian Kelayakan"
                   pengantar={[
                     analisis.kelayakan.keputusan
-                      && `Keputusan ${analisis.kelayakan.keputusan.replace(/_/g, ' ')}`,
+                      && `Keputusan ${keputusanTampil(analisis.kelayakan.keputusan)}`,
                     analisis.kelayakan.prioritas && `prioritas ${analisis.kelayakan.prioritas}`,
                     analisis.kelayakan.kelasRisiko && `kelas risiko ${analisis.kelayakan.kelasRisiko}`,
                   ]
@@ -760,7 +772,7 @@ const DetailProyekPage = () => {
                         warna: warnaStatus(analisis.kelayakan.keputusan),
                       },
                       {
-                        nilai: (analisis.kelayakan.keputusan || '—').replace(/_/g, ' '),
+                        nilai: keputusanTampil(analisis.kelayakan.keputusan),
                         satuan: 'Keputusan',
                         warna: warnaStatus(analisis.kelayakan.keputusan),
                       },
