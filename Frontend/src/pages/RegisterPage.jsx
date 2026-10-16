@@ -52,8 +52,13 @@ const RegisterPage = () => {
       setError('Alamat email valid wajib diisi.');
       return;
     }
-    if (formData.password.length < 6) {
-      setError('Kata sandi minimal 6 karakter.');
+    // Selaras dengan AUTH_PASSWORD_VALIDATORS di backend.
+    if (formData.password.length < 8) {
+      setError('Kata sandi minimal 8 karakter.');
+      return;
+    }
+    if (/^\d+$/.test(formData.password)) {
+      setError('Kata sandi tidak boleh seluruhnya angka.');
       return;
     }
     if (formData.password !== formData.confirm_password) {
@@ -80,7 +85,15 @@ const RegisterPage = () => {
         navigate('/dashboard', { replace: true });
       }, 900);
     } catch (err) {
-      setError(err.message || 'Pendaftaran akun gagal. Silakan coba lagi.');
+      // Tampilkan alasan dari server (mis. sandi terlalu umum, email sudah terdaftar), bukan pesan HTTP mentah.
+      const data = err.response?.data;
+      const pertama = data && typeof data === 'object' ? Object.values(data).flat()[0] : null;
+      setError(
+        data?.detail
+          || (typeof pertama === 'string' ? pertama : null)
+          || (err.response ? 'Pendaftaran akun gagal. Periksa kembali isian Anda.' : err.message)
+          || 'Pendaftaran akun gagal. Silakan coba lagi.',
+      );
     }
   };
 
@@ -277,7 +290,7 @@ const RegisterPage = () => {
                       name="password"
                       value={formData.password}
                       onChange={handleChange}
-                      placeholder="Minimal 6 karakter"
+                      placeholder="Minimal 8 karakter"
                       required
                       className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-kkp-700 focus:bg-white transition-all font-medium"
                     />
@@ -289,6 +302,10 @@ const RegisterPage = () => {
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
+                  <p className="mt-1.5 text-[11px] text-slate-500 leading-snug">
+                    Minimal 8 karakter, tidak seluruhnya angka, tidak umum dipakai (mis. password123), dan tidak mirip
+                    username atau email.
+                  </p>
                 </div>
 
                 <div>
