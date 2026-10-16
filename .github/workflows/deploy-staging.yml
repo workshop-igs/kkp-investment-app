@@ -1,0 +1,71 @@
+name: Deploy ke staging
+
+# Setiap push ke main otomatis di-deploy ke VPS staging lewat SSH,
+# menjalankan deploy/deploy.sh yang sudah ada di server.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      STAGING_HOST: ${{ secrets.STAGING_HOST }}
+      STAGING_USER: ${{ secrets.STAGING_USER }}
+      STAGING_PORT: ${{ secrets.STAGING_PORT }}
+      STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+      STAGING_KNOWN_HOSTS: ${{ secrets.STAGING_KNOWN_HOSTS }}
+      STAGING_URL: https://stg-9a8f7b2c.tech
+    steps:
+      - name: Cek secrets
+        id: cek
+        run: |
+          if [ -z "$STAGING_HOST" ] || [ -z "$STAGING_USER" ] || [ -z "$STAGING_SSH_KEY" ]; then
+            echo "::warning::Secrets STAGING_HOST / STAGING_USER / STAGING_SSH_KEY belum diisi, deploy dilewati."
+            echo "siap=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "siap=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Siapkan SSH
+        if: steps.cek.outputs.siap == 'true'
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$STAGING_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          if [ -n "$STAGING_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$STAGING_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -p "${STAGING_PORT:-22}" "$STAGING_HOST" > ~/.ssh/known_hosts
+          fi
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Jalankan deploy di server
+        if: steps.cek.outputs.siap == 'true'
+        run: |
+          ssh -i ~/.ssh/id_deploy -p "${STAGING_PORT:-22}" \
+            -o BatchMode=yes -o ServerAliveInterval=30 \
+            "$STAGING_USER@$STAGING_HOST" \
+            'bash /home/deploy/kkp/deploy/deploy.sh'
+
+      - name: Periksa situs staging
+        if: steps.cek.outputs.siap == 'true'
+        run: |
+          for url in "$STAGING_URL/" "$STAGING_URL/api/v1/inti/ringkasan-publik/"; do
+            ok=0
+            for i in 1 2 3 4 5 6; do
+              if curl -fsS -o /dev/null --max-time 20 "$url"; then ok=1; break; fi
+              sleep 10
+            done
+            if [ "$ok" != 1 ]; then echo "::error::$url tidak merespons setelah deploy"; exit 1; fi
+            echo "OK: $url"
+          done
