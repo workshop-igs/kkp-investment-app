@@ -16,6 +16,11 @@ LABEL_OSEANOGRAFI = {
     'GELOMBANG': 'Tinggi gelombang',
     'SUHU': 'Suhu permukaan laut',
     'ANOMALI_SUHU': 'Anomali suhu permukaan laut',
+    'KLOROFIL': 'Klorofil-a',
+    'KD490': 'Kekeruhan perairan (Kd490)',
+    'PERIODE_GLB': 'Periode puncak gelombang',
+    'CURAH_HUJAN': 'Curah hujan bulanan',
+    'BULAN_KERING': 'Jumlah bulan kering',
 }
 
 # Peta tata ruang berskala provinsi/nasional: ketelitian posisinya kasar untuk keputusan tapak.
@@ -116,10 +121,11 @@ def asal_data(zona, karakter, tambahan):
     return baris
 
 
-def kelengkapan(parameter):
-    """Berapa parameter lokasi yang datanya tersedia; "indikatif" bila kurang."""
+def kelengkapan(parameter, dasar=None):
+    """Berapa parameter dinilai yang datanya tersedia; "indikatif" bila kurang atau ada syarat dasar tak terukur."""
     if not parameter:
         return None
+    dasar_kosong = [label for label, nilai in (dasar or {}).items() if nilai is None]
     total = len(parameter)
     tidak_terukur = [label for label, nilai in parameter.items() if nilai is None]
     terukur = total - len(tidak_terukur)
@@ -129,10 +135,13 @@ def kelengkapan(parameter):
         alasan.append(f'hanya {terukur} parameter terukur, kurang dari batas minimal {minimal}')
     if terukur < AMBANG_KELENGKAPAN_DATA * total:
         alasan.append(f'{len(tidak_terukur)} dari {total} parameter tidak memiliki data di lokasi ini')
+    if dasar_kosong:
+        alasan.append('syarat dasar belum terukur: ' + ', '.join(t[0].lower() + t[1:] for t in dasar_kosong))
     return {
         'terukur': terukur,
         'total': total,
         'tidak_terukur': tidak_terukur,
+        'dasar_tidak_terukur': dasar_kosong,
         'indikatif': bool(alasan),
         'alasan_indikatif': alasan,
     }

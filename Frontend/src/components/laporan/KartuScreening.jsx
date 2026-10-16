@@ -37,6 +37,12 @@ const TANDA_PARAMETER = {
   null: [null, '?', 'Tidak terukur'],
 };
 
+const TANDA_DASAR = {
+  true: ['DIIZINKAN', '✓', 'Terpenuhi'],
+  false: ['TIDAK_DIIZINKAN', '✕', 'Tidak terpenuhi'],
+  null: [null, '?', 'Belum terukur, dianggap terpenuhi'],
+};
+
 const HASIL_TAMBAHAN = {
   true: ['DIIZINKAN', 'Sesuai'],
   false: ['TIDAK_DIIZINKAN', 'Tidak sesuai'],
@@ -112,7 +118,7 @@ const Ringkasan = ({ s }) => {
       s.karakter.cocok ? 'text-emerald-700' : 'text-rose-700',
     ],
     s.persen_sangat_sesuai != null && [
-      'Parameter sangat sesuai',
+      'Parameter dinilai sangat sesuai',
       `${angka(s.persen_sangat_sesuai)}%`,
       kelengkapan ? `data tersedia untuk ${kelengkapan.terukur} dari ${kelengkapan.total} parameter` : '',
       'text-slate-800',
@@ -262,7 +268,7 @@ const KarakterLokasi = ({ s }) => {
           <div className="border-t border-slate-100 px-3 py-2.5">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
               <span className="font-semibold text-slate-800">
-                {angka(s.persen_sangat_sesuai)}% dari {terukur} parameter terukur sangat sesuai
+                {angka(s.persen_sangat_sesuai)}% dari {terukur} parameter dinilai yang terukur sangat sesuai
               </span>
               <div className="h-1.5 min-w-[6rem] flex-1 overflow-hidden rounded-full bg-slate-100">
                 <div className="h-full rounded-full bg-emerald-500" style={{ width: `${s.persen_sangat_sesuai || 0}%` }} />
@@ -274,7 +280,32 @@ const KarakterLokasi = ({ s }) => {
                 {kelengkapan.indikatif && ' Hasil bersifat indikatif.'}
               </p>
             )}
-            <ul className="mt-2 grid gap-x-5 gap-y-1 sm:grid-cols-2">
+            {s.syarat_dasar?.length > 0 && (
+              <div className="mt-2 rounded-md bg-slate-50 px-2.5 py-2">
+                <div className="text-[10.5px] font-semibold text-slate-600">
+                  Syarat dasar (tidak ikut persentase; wajib terpenuhi agar lolos penyaringan peta)
+                </div>
+                <ul className="mt-1 grid gap-x-5 gap-y-0.5 sm:grid-cols-2">
+                  {s.syarat_dasar.map((d) => {
+                    const [kode, tanda, ket] = TANDA_DASAR[d.nilai];
+                    return (
+                      <li key={d.label} className="flex gap-2 leading-snug text-slate-700" title={ket}>
+                        <Tanda kode={kode} tanda={tanda} />
+                        {d.label}
+                      </li>
+                    );
+                  })}
+                </ul>
+                {s.syarat_dasar.some((d) => d.label === 'Dekat infrastruktur pendukung' && d.nilai === false) && (
+                  <p className="mt-1 text-[10.5px] leading-snug text-slate-500">
+                    Jauh dari infrastruktur pendukung tidak memengaruhi kesesuaian ruang, tetapi area seperti ini tidak
+                    ditampilkan di Peta Sebaran Lokasi Indikatif.
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="mt-2 text-[10.5px] font-semibold text-slate-600">Parameter dinilai</div>
+            <ul className="mt-1 grid gap-x-5 gap-y-1 sm:grid-cols-2">
               {s.parameter.map((p) => {
                 const [kode, tanda, ket] = TANDA_PARAMETER[p.nilai];
                 return (
@@ -286,8 +317,9 @@ const KarakterLokasi = ({ s }) => {
               })}
             </ul>
             <p className="mt-2 text-[10.5px] leading-snug text-slate-400">
-              Ambang Peta Sebaran Wilayah Potensial: 75% dari sedikitnya 5 parameter terukur; di zona peruntukan lain yang
-              hanya mengizinkan bersyarat seluruh parameter lain wajib terukur dan sangat sesuai.
+              Ambang Peta Sebaran Lokasi Indikatif Lolos Penyaringan: seluruh syarat dasar terpenuhi dan sedikitnya 75%
+              parameter dinilai yang terukur sangat sesuai; di zona peruntukan lain yang hanya mengizinkan bersyarat
+              seluruh parameter dinilai wajib terukur dan sangat sesuai.
             </p>
           </div>
         )}
@@ -614,7 +646,8 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
               </ul>
             ) : (
               <p className="text-xs text-slate-500">
-                Tidak ada lokasi potensial {s.sektor_nama.toLowerCase()} pada Peta Sebaran Wilayah Potensial dalam radius 100 km.
+                Tidak ada lokasi indikatif {s.sektor_nama.toLowerCase()} pada Peta Sebaran Lokasi Indikatif Lolos Penyaringan
+                dalam radius 100 km.
               </p>
             )}
           </section>

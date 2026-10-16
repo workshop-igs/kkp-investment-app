@@ -711,12 +711,22 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         [(LEBAR - 8) * 0.22, (LEBAR - 8) * 0.78]
       );
       if (sc.parameter?.length) {
-        k.teks(`${nf(sc.persen_sangat_sesuai)}% dari ${sc.parameter.filter((p) => p.nilai !== null).length} parameter terukur sangat sesuai `
-          + '(ambang Peta Sebaran Wilayah Potensial: 75% dari sedikitnya 5 parameter terukur; di zona peruntukan lain yang hanya '
-            + 'mengizinkan bersyarat seluruh parameter lain wajib terukur dan sangat sesuai)',
+        if (sc.syarat_dasar?.length) {
+          k.teks('Syarat dasar (tidak ikut persentase; wajib terpenuhi agar lolos penyaringan peta)', { tebal: true, warna: GELAP, ukuran: 7 });
+          k.tabel(
+            ['Syarat dasar', 'Status'],
+            sc.syarat_dasar.map((d) => [d.label,
+              d.nilai === true ? 'Terpenuhi' : d.nilai === false ? 'Tidak terpenuhi' : 'Belum terukur']),
+            [(LEBAR - 8) * 0.65, (LEBAR - 8) * 0.35]
+          );
+        }
+        k.teks(`${nf(sc.persen_sangat_sesuai)}% dari ${sc.parameter.filter((p) => p.nilai !== null).length} parameter dinilai yang terukur sangat sesuai `
+          + '(ambang Peta Sebaran Lokasi Indikatif Lolos Penyaringan: seluruh syarat dasar terpenuhi dan sedikitnya 75% parameter '
+            + 'dinilai yang terukur sangat sesuai; di zona peruntukan lain yang hanya mengizinkan bersyarat seluruh parameter '
+            + 'dinilai wajib terukur dan sangat sesuai)',
           { tebal: true, warna: GELAP, ukuran: 7 });
         k.tabel(
-          ['Parameter', 'Penilaian'],
+          ['Parameter dinilai', 'Penilaian'],
           sc.parameter.map((p) => [p.label,
             p.nilai === true ? 'Sangat sesuai' : p.nilai === false ? 'Perlu dinilai di lapangan' : 'Tidak terukur']),
           [(LEBAR - 8) * 0.65, (LEBAR - 8) * 0.35]

@@ -3,7 +3,7 @@
 // analisis lama yang tersimpan sebelum itu dihitung ulang di sini dari daftar parameternya.
 
 // Selaras dengan MINIMAL_PARAMETER_TERUKUR dan AMBANG_KELENGKAPAN_DATA di backend.
-const MINIMAL_PARAMETER = 5;
+const MINIMAL_PARAMETER = 3;
 const AMBANG_KELENGKAPAN = 0.75;
 
 export const CATATAN_DASAR =
