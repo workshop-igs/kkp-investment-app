@@ -1,11 +1,15 @@
 """Pengecualian keras yang berlaku sama di Peta Sebaran dan screening area.
 
 Lokasi tidak boleh berada di kawasan konservasi (kecuali jenis yang memang untuk konservasi), menempati ekosistem
-sensitif yang terlarang bagi jenis investasinya, berada dalam jarak aman kabel/pipa bawah laut dan alur
-pelayaran, tumpang tindih KKPRL terbit, atau tertutup bangunan eksisting.
+sensitif yang terlarang bagi jenis investasinya, berada di alur pelayaran/ALKI atau dalam jarak aman kabel/pipa
+bawah laut dan alur pelayaran, tumpang tindih KKPRL terbit, atau tertutup bangunan eksisting.
+
+Kawasan konservasi dan alur pelayaran dibaca dari seluruh lapisan zonasi (RTRW Provinsi, RZ KAW, RZWP-3-K, RTRWN)
+tanpa memandang prioritas acuan, sehingga selalu berlaku di atas peruntukan RTRW.
 """
 from analitik.services.konstanta import (
     EKOSISTEM_TERLARANG_SEKTOR,
+    SEKTOR_BOLEH_DI_ALUR_PELAYARAN,
     GMW_TAHUN_AKHIR,
     KM_PER_DERAJAT,
     SEKTOR_BOLEH_DI_KAWASAN_KONSERVASI,
@@ -13,10 +17,11 @@ from analitik.services.konstanta import (
 from analitik.services.pengaturan import atur
 from inventarisasi.klasifikasi import jenis_unsur
 
-KONSERVASI, EKOSISTEM, UNSUR, KKPRL, BANGUNAN = 'KONSERVASI', 'EKOSISTEM', 'UNSUR', 'KKPRL', 'BANGUNAN'
+KONSERVASI, ALUR, EKOSISTEM, UNSUR, KKPRL, BANGUNAN = 'KONSERVASI', 'ALUR', 'EKOSISTEM', 'UNSUR', 'KKPRL', 'BANGUNAN'
 
 LABEL = {
     KONSERVASI: 'Di luar kawasan konservasi',
+    ALUR: 'Di luar alur pelayaran dan ALKI',
     EKOSISTEM: 'Tidak menempati ekosistem sensitif',
     UNSUR: 'Di luar jarak aman kabel, pipa, dan alur pelayaran',
     KKPRL: 'Tidak tumpang tindih KKPRL terbit',
@@ -24,6 +29,12 @@ LABEL = {
 }
 
 ZONA_KONSERVASI = "(z.jenis_zona = 'ZL' OR z.sub_zona = 'KONSERVASI')"
+# Kawasan alur laut (ALKI) dan zona alur pelayaran dari lapisan mana pun; alur kabel/pipa dan migrasi biota tidak
+# termasuk kecuali dicatat sebagai ALKI.
+ZONA_ALUR = (
+    "(z.jenis_zona = 'ALKI' OR (z.sub_zona = 'PELAYARAN' "
+    "AND z.nama_zona ~* '(alur[[:space:]]+(pelayaran|laut)|[[:<:]]alki[[:>:]]|perlintasan)'))"
+)
 SUMBER_EKOSISTEM = (
     "(e.sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG') "
     f"OR (e.sumber_data = 'GMW-MANGROVE' AND e.tahun_data = {int(GMW_TAHUN_AKHIR)}))"
@@ -40,11 +51,17 @@ def konservasi_terlarang(sektor_kode):
     return sektor_kode not in SEKTOR_BOLEH_DI_KAWASAN_KONSERVASI
 
 
+def alur_terlarang(sektor_kode):
+    return sektor_kode not in SEKTOR_BOLEH_DI_ALUR_PELAYARAN
+
+
 def berlaku(sektor_kode):
     """Pengecualian yang diperiksa untuk jenis investasi ini, berurutan seperti tampilan syarat dasar."""
     kode = []
     if konservasi_terlarang(sektor_kode):
         kode.append(KONSERVASI)
+    if alur_terlarang(sektor_kode):
+        kode.append(ALUR)
     if ekosistem_terlarang(sektor_kode):
         kode.append(EKOSISTEM)
     if any(v > 0 for v in atur('BUFFER_UNSUR_TERLARANG_M').values()):
@@ -75,18 +92,22 @@ def unsur_terlarang(c, ewkt):
 def irisan_area(c, geom):
     """Luas irisan (m²) area dengan setiap lapisan pengecualian; dihitung sekali lalu dinilai per jenis."""
     ewkt = geom.ewkt
-    c.execute(
-        f"""
-        SELECT COALESCE(ST_Area(ST_Intersection(ST_Union(ST_MakeValid(z.geometry)), a.g)::geography), 0),
-               string_agg(DISTINCT z.nama_zona, ', ')
-        FROM inventarisasi_zonasi_ruang_laut z, (SELECT ST_GeomFromEWKT(%s) AS g) a
-        WHERE z.geometry && a.g AND ST_Intersects(z.geometry, a.g) AND {ZONA_KONSERVASI}
-        GROUP BY a.g
-        """,
-        [ewkt],
-    )
-    baris = c.fetchone()
-    konservasi = (float(baris[0]), baris[1]) if baris else (0.0, '')
+    def kawasan(syarat):
+        c.execute(
+            f"""
+            SELECT COALESCE(ST_Area(ST_Intersection(ST_Union(ST_MakeValid(z.geometry)), a.g)::geography), 0),
+                   string_agg(DISTINCT z.nama_zona, ', ')
+            FROM inventarisasi_zonasi_ruang_laut z, (SELECT ST_GeomFromEWKT(%s) AS g) a
+            WHERE z.geometry && a.g AND ST_Intersects(z.geometry, a.g) AND {syarat}
+            GROUP BY a.g
+            """,
+            [ewkt],
+        )
+        baris = c.fetchone()
+        return (float(baris[0]), baris[1]) if baris else (0.0, '')
+
+    konservasi = kawasan(ZONA_KONSERVASI)
+    alur = kawasan(ZONA_ALUR)
 
     c.execute(
         f"""
@@ -132,6 +153,7 @@ def irisan_area(c, geom):
     baris = c.fetchone()
     return {
         KONSERVASI: konservasi,
+        ALUR: alur,
         EKOSISTEM: ekosistem,
         UNSUR: (luas_unsur, jenis_unsur_kena),
         BANGUNAN: float(baris[0]) if baris else 0.0,
@@ -161,6 +183,9 @@ def nilai_area(irisan, sektor_kode, luas_aoi):
     if KONSERVASI in berlaku_:
         luas, nama = irisan[KONSERVASI]
         tambah(KONSERVASI, luas, f'kawasan konservasi ({nama})' if nama else 'kawasan konservasi')
+    if ALUR in berlaku_:
+        luas, nama = irisan[ALUR]
+        tambah(ALUR, luas, f'alur pelayaran/ALKI ({nama})' if nama else 'alur pelayaran/ALKI')
     if EKOSISTEM in berlaku_:
         kena = {j: luas for j, luas in irisan[EKOSISTEM].items() if j in ekosistem_terlarang(sektor_kode)}
         if kena:

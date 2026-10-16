@@ -3,13 +3,70 @@ import shp from 'shpjs';
 import { kml } from '@tmcw/togeojson';
 import { DOMParser } from '@xmldom/xmldom';
 
+// Batas bawaan; server memakai Pengaturan Analisis (Luas area paling kecil/besar) sebagai acuan akhir.
+export const LUAS_MIN_HA = 0.01;
+export const LUAS_MAKS_HA = 50000;
+// Kotak kasar wilayah perairan dan daratan Indonesia (derajat).
+const INDONESIA = { barat: 90, timur: 145, selatan: -15, utara: 10 };
+const JARI_BUMI = 6378137;
+
+const ha = (n, d = 2) => n.toLocaleString('id-ID', { maximumFractionDigits: d });
+
+const titikSemua = (geom) => {
+  const hasil = [];
+  const jelajah = (k) => {
+    if (typeof k?.[0] === 'number') hasil.push(k);
+    else k?.forEach(jelajah);
+  };
+  jelajah(geom?.coordinates);
+  return hasil;
+};
+
+const luasCincin = (cincin) => {
+  // Luas bola (rumus yang sama dengan Leaflet/Mapbox geojson-area), m².
+  let jumlah = 0;
+  for (let i = 0; i < cincin.length - 1; i += 1) {
+    const [x1, y1] = cincin[i];
+    const [x2, y2] = cincin[i + 1];
+    jumlah += ((x2 - x1) * Math.PI / 180) * (2 + Math.sin(y1 * Math.PI / 180) + Math.sin(y2 * Math.PI / 180));
+  }
+  return Math.abs(jumlah * JARI_BUMI * JARI_BUMI / 2);
+};
+
+export const luasHa = (geom) => {
+  const poligon = geom.type === 'Polygon' ? [geom.coordinates] : geom.type === 'MultiPolygon' ? geom.coordinates : [];
+  return poligon.reduce((n, [luar, ...lubang]) => n + luasCincin(luar) - lubang.reduce((m, c) => m + luasCincin(c), 0), 0) / 10000;
+};
+
+const periksaKoordinat = (geojson, fitur) => {
+  const crs = geojson?.crs?.properties?.name;
+  if (crs && !/4326|CRS84/i.test(crs)) {
+    throw new Error(`File memakai sistem koordinat ${crs}. Ekspor ulang ke WGS 84 (EPSG:4326) dalam derajat.`);
+  }
+  const titik = fitur.flatMap((f) => titikSemua(f.geometry));
+  if (titik.some(([, y]) => Math.abs(y) > 90) && titik.every(([x, y]) => Math.abs(x) <= 90 && Math.abs(y) <= 180)) {
+    throw new Error('Urutan koordinat tampaknya tertukar (lintang, bujur). GeoJSON wajib berurutan bujur, lintang.');
+  }
+  if (titik.some(([x, y]) => !Number.isFinite(x) || !Number.isFinite(y) || Math.abs(x) > 180 || Math.abs(y) > 90)) {
+    throw new Error(
+      'Koordinat file bukan derajat lintang/bujur (kemungkinan proyeksi UTM dalam meter). Untuk Shapefile sertakan '
+      + 'berkas .prj di dalam .zip, atau ekspor ulang ke WGS 84 (EPSG:4326).'
+    );
+  }
+  return titik;
+};
+
 export async function bacaGeospasial(file) {
   const nama = file.name.toLowerCase();
   let geojson;
   if (nama.endsWith('.zip')) {
     geojson = await shp(await file.arrayBuffer());
   } else if (nama.endsWith('.geojson') || nama.endsWith('.json')) {
-    geojson = JSON.parse(await file.text());
+    try {
+      geojson = JSON.parse(await file.text());
+    } catch {
+      throw new Error('Isi file GeoJSON tidak dapat dibaca (format JSON rusak).');
+    }
   } else if (nama.endsWith('.kml')) {
     geojson = kml(new DOMParser().parseFromString(await file.text(), 'text/xml'));
   } else {
@@ -22,10 +79,42 @@ export async function bacaGeospasial(file) {
   if (!fitur.length) throw new Error('Tidak ada data poligon yang ditemukan dalam file ini.');
   const poligon = fitur.filter((f) => ['Polygon', 'MultiPolygon'].includes(f?.geometry?.type));
   if (!poligon.length) throw new Error('File tidak mengandung geometri Poligon yang valid.');
-  return { type: 'FeatureCollection', features: poligon };
+  periksaKoordinat(geojson, poligon);
+  return { type: 'FeatureCollection', features: poligon, diabaikan: fitur.length - poligon.length };
 }
 
-export default function UnggahGeospasial({ onUploadSuccess, onError, disabled, className, buttonText, icon }) {
+/** Area proyek dari file: satu poligon, di Indonesia, dengan luas dalam batas. Mengembalikan geometri dan peringatan. */
+export function areaProyek({ features, diabaikan = 0 }) {
+  const peringatan = [];
+  const geometry = features[0].geometry;
+  const luas = luasHa(geometry);
+  if (features.length > 1) {
+    peringatan.push(
+      `File berisi ${features.length} poligon; hanya poligon pertama (${ha(luas)} ha) yang dipakai. `
+      + 'Unggah satu poligon per area proyek, atau gabungkan poligonnya lebih dulu bila memang satu area.'
+    );
+  }
+  if (diabaikan) peringatan.push(`${diabaikan} fitur titik/garis di dalam file diabaikan.`);
+  if (geometry.type === 'MultiPolygon' && geometry.coordinates.length > 1) {
+    peringatan.push(`Poligon terdiri atas ${geometry.coordinates.length} bagian terpisah; semuanya dianalisis sebagai satu area.`);
+  }
+  if (luas < LUAS_MIN_HA) throw new Error(`Luas area ${ha(luas, 4)} ha terlalu kecil; paling kecil ${ha(LUAS_MIN_HA)} ha.`);
+  if (luas > LUAS_MAKS_HA) {
+    throw new Error(`Luas area ${ha(luas, 0)} ha melebihi batas ${ha(LUAS_MAKS_HA, 0)} ha; pecah menjadi beberapa area proyek.`);
+  }
+  const titik = titikSemua(geometry);
+  const di = (x, y) => x >= INDONESIA.barat && x <= INDONESIA.timur && y >= INDONESIA.selatan && y <= INDONESIA.utara;
+  const [x, y] = titik.reduce(([a, b], [p, q]) => [a + p / titik.length, b + q / titik.length], [0, 0]);
+  if (!di(x, y)) {
+    if (di(y, x)) {
+      throw new Error('Urutan koordinat tampaknya tertukar (lintang, bujur). GeoJSON wajib berurutan bujur, lintang.');
+    }
+    peringatan.push('Area berada di luar wilayah Indonesia; data tata ruang dan perairan tidak tersedia di sana.');
+  }
+  return { geometry, peringatan };
+}
+
+export default function UnggahGeospasial({ onUploadSuccess, onError, onPeringatan, disabled, className, buttonText, icon }) {
   const fileInputRef = useRef(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -35,10 +124,12 @@ export default function UnggahGeospasial({ onUploadSuccess, onError, disabled, c
 
     setIsProcessing(true);
     onError(null);
+    onPeringatan?.([]);
 
     try {
-      const { features } = await bacaGeospasial(file);
-      onUploadSuccess(features[0].geometry);
+      const { geometry, peringatan } = areaProyek(await bacaGeospasial(file));
+      onUploadSuccess(geometry);
+      onPeringatan?.(peringatan);
     } catch (err) {
       console.error(err);
       onError(err.message || 'Gagal memproses file geospasial.');

@@ -51,7 +51,8 @@ const UnggahData = ({ parameter, onSelesai }) => {
     setHasil(null);
     try {
       if (area) {
-        const { data } = await api.post(`${URL}${parameter.id}/area/`, await bacaGeospasial(berkas));
+        const { diabaikan, ...area_ } = await bacaGeospasial(berkas);
+        const { data } = await api.post(`${URL}${parameter.id}/area/`, area_);
         setHasil(`${data.jumlah} poligon area tersimpan; berlaku di provinsi ${data.provinsi.join(', ') || '-'}.`);
       } else {
         const form = new FormData();

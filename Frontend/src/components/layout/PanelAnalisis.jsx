@@ -333,9 +333,10 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
               <div className="bg-slate-50/50 border border-slate-200 rounded-xl p-6">
                 <h3 className="font-bold text-slate-800 mb-1 text-[15px]">Analisis Kesesuaian Ruang</h3>
                 <p className="text-xs text-slate-500 mb-5">
-                  Kesesuaian terhadap RTRW Provinsi, Rencana Zonasi KAW, atau RTRWN (berjenjang), tumpang tindih
-                  dengan KKPRL yang sudah terbit, dan ketentuan ruang lainnya. Lokasi yang tidak sesuai tidak dapat
-                  dilanjutkan ke analisis finansial.
+                  Gerbangnya hanya kesesuaian ruang: RTRW Provinsi, Rencana Zonasi KAW, atau RTRWN (berjenjang) dan
+                  matriks KKPRL Perda, KKPRL yang sudah terbit, serta kawasan konservasi dan alur pelayaran. Kecocokan
+                  fisik (kedalaman, gelombang, dan sejenisnya) hanya menjadi peringatan. Lokasi yang tidak sesuai tidak
+                  dapat dilanjutkan; lokasi yang belum terverifikasi tetap dapat dilanjutkan dengan label.
                 </p>
                 {memeriksa && (
                   <div className="flex items-center gap-2 text-sm text-slate-500 py-6">
@@ -372,7 +373,8 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
               <div className="bg-slate-50/50 border border-slate-200 rounded-xl p-6">
                 <h3 className="font-bold text-slate-800 mb-1 text-[15px]">Parameter Finansial</h3>
                 <p className="text-xs text-slate-500 mb-5">
-                  Lokasi dinyatakan {screening.status_label.toLowerCase()} secara ruang untuk {screening.sektor_nama}.
+                  Lokasi dinyatakan {screening.status_label.toLowerCase()} secara ruang untuk {screening.sektor_nama}
+                  {screening.status === 'BELUM_TERVERIFIKASI' && '; analisis dilanjutkan dengan label belum terverifikasi'}.
                 </p>
                 <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
