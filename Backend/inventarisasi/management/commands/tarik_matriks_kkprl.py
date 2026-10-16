@@ -364,13 +364,15 @@ class Command(BaseCommand):
             provinsi = Provinsi.objects.filter(kode_bps=kode).first()
             data = transkripsi[kode]
             self.stdout.write(self.style.MIGRATE_HEADING(f'{provinsi.nama}: transkripsi {data["berkas"]}'))
-            sumber = f'{data["perda"]}, {PENANDA_MATRIKS} (transkripsi lampiran pindaian)'
+            sumber = f'{data["perda"]}, {PENANDA_MATRIKS} ({data.get("cara", "transkripsi lampiran pindaian")})'
+            # kode_zona berupa daftar kode, atau {kode: [bujur, lintang]} bila koordinatnya ikut ditranskripsi
+            # sehingga zona dapat ditautkan ke poligonnya.
             blok = [(MatriksKKPRL(
                 provinsi=provinsi, nama_zona=b['nama_zona'], sub_zona=sub_zona(b['nama_zona'], jenis_kawasan(b['nama_zona'])),
-                kode_zona=b.get('kode_zona', []), diperbolehkan=b['diperbolehkan'], bersyarat=b['bersyarat'],
+                kode_zona=list(b.get('kode_zona', [])), diperbolehkan=b['diperbolehkan'], bersyarat=b['bersyarat'],
                 tidak_diperbolehkan=b['tidak_diperbolehkan'], ketentuan_khusus=b.get('ketentuan_khusus', ''),
                 sumber=sumber[:255], halaman=b['halaman'],
-            ), {}) for b in data['blok']]
+            ), b['kode_zona'] if isinstance(b.get('kode_zona'), dict) else {}) for b in data['blok']]
             self._simpan(provinsi, blok, sumber)
         if not diminta & set(MATRIKS):
             return

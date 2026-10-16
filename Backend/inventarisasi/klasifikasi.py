@@ -140,21 +140,70 @@ LARANGAN_UMUM = re.compile(
 )
 SEMUA_KEGIATAN = re.compile(r'^semua\b(?!.*\bkecuali\b)')
 
+# Matriks RZWP3K yang mengelompokkan butir di bawah judul jenis investasi disimpan sebagai "Judul: kegiatan";
+# judul itu menentukan jenis investasinya, bukan kata kunci.
+JUDUL_SEKTOR = {
+    'perikanan tangkap': ('PERIKANAN_TANGKAP',),
+    'perikanan budidaya': ('PERIKANAN_BUDIDAYA',),
+    'wisata bahari': ('PARIWISATA_BAHARI',),
+    'jasa maritim & kepelabuhanan': ('JASA_MARITIM',),
+    'jasa maritim & kepelabuhan': ('JASA_MARITIM',),
+    'infrastruktur & bangunan laut': ('INFRASTRUKTUR_LAUT',),
+    'energi & sumber daya non-hayati': ('ENERGI_KELAUTAN',),
+    'bioteknologi kelautan': ('BIOTEKNOLOGI_KELAUTAN',),
+    'konservasi & rehabilitasi pesisir': ('KONSERVASI_PESISIR',),
+    'pengolahan & hilirisasi hasil laut': ('PENGOLAHAN_HASIL_LAUT',),
+    'produksi garam': ('GARAM',),
+    'semua jenis investasi': tuple(KATA_SEKTOR),
+}
+# Judul yang juga memuat kegiatan di luar jenis investasinya (pertambangan, perusakan habitat): butirnya dihitung
+# hanya bila kata kunci jenis investasinya cocok.
+JUDUL_LUAS = {'ENERGI_KELAUTAN', 'KONSERVASI_PESISIR'}
+# Larangan atas cara yang ilegal atau merusak, bukan atas jenis investasinya.
+LARANGAN_PRAKTIK = re.compile(
+    r'peledak|beracun|\bbius\b|potas|perusak|kerusakan|tidak ramah lingkungan|dilindungi|sampah|limbah|dumping'
+    r'|pencemaran|mencemari'
+)
+SEMUA_TERBATAS = re.compile(r'\b(?:selain|saat|di area|di luar)\b')
+
+
+def pecah_judul(butir):
+    """(jenis investasi, isi) bila butir berawalan judul sektor matriks; selain itu (None, butir)."""
+    judul, pemisah, isi = butir.partition(': ')
+    sektor = JUDUL_SEKTOR.get(judul.strip().lower()) if pemisah else None
+    return (sektor, isi) if sektor else (None, butir)
+
+
+def _milik(butir, kode, pola, larangan):
+    sektor, isi = pecah_judul(butir)
+    teks = isi.lower()
+    if sektor is None:
+        return bool(pola.search(teks)) and not LARANGAN_UMUM.search(teks)
+    if larangan and (LARANGAN_UMUM.search(teks) or LARANGAN_PRAKTIK.search(teks)):
+        return False
+    return kode in sektor and (len(sektor) > 1 or kode not in JUDUL_LUAS or bool(pola.search(teks)))
+
 
 def rincian_kegiatan(matriks, kode):
     pola = re.compile(KATA_SEKTOR[kode])
     return {
         status: list(dict.fromkeys(
             k for b in getattr(matriks, kolom) for k in re.split(r'\s*;\s*', b.strip(' ;'))
-            if pola.search(k.lower()) and not LARANGAN_UMUM.search(k.lower())
+            if _milik(k, kode, pola, status == 'TIDAK_DIIZINKAN')
         ))
         for status, kolom in KOLOM_MATRIKS
     }
 
 
+def _larangan_menyeluruh(butir):
+    sektor, isi = pecah_judul(butir)
+    isi = isi.lower()
+    return bool(SEMUA_KEGIATAN.match(isi)) and not (sektor and SEMUA_TERBATAS.search(isi))
+
+
 def status_rincian(rincian):
     boleh, syarat, larang = (rincian[s] for s, _ in KOLOM_MATRIKS)
-    if any(SEMUA_KEGIATAN.match(b.lower()) for b in larang) or (larang and not boleh and not syarat):
+    if any(_larangan_menyeluruh(b) for b in larang) or (larang and not boleh and not syarat):
         return 'TIDAK_DIIZINKAN'
     if syarat or larang:
         return 'BERSYARAT'
