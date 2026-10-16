@@ -43,6 +43,8 @@ import { angkaRingkas as nf, rupiahRingkas } from '../utils/pemformat';
 import { unduhPdfLaporan } from '../utils/pdfLaporan';
 import { SECTORS } from '../utils/konstanta';
 import { mulaiMemuat } from '../components/OverlayMemuat';
+import BannerIndikatif from '../components/laporan/BannerIndikatif';
+import { statusIndikatif } from '../utils/kelengkapanData';
 
 const CATATAN_SCREENING =
   'Acuan berjenjang: RTRW Provinsi, lalu Rencana Zonasi KAW, lalu RTRWN. Ketentuan pemanfaatan per jenis investasi dikelola administrator.';
@@ -115,6 +117,11 @@ const LaporanAnalisisPage = () => {
     location.state || {};
   const jenisInvestasi = SECTORS.find((s) => s.id === result?.sektor)?.label || result?.sektor;
   const skorTema = (t) => skorBagian(result?.kelayakan?.skor_per_aspek, result?.spasial?.sumber, t);
+  const indikatif = statusIndikatif(result?.screening, {
+    berbasisSpasial: result?.spasial?.skor_berbasis_spasial,
+    total: result?.spasial?.total_skor,
+  });
+  const keputusanTampil = (k) => `${(k || '—').replace(/_/g, ' ')}${indikatif.indikatif && k ? ' (indikatif)' : ''}`;
 
   const [tema, setTema] = useState('umum');
   const [spasialData, setSpasialData] = useState(null);
@@ -548,6 +555,12 @@ const LaporanAnalisisPage = () => {
             </div>
           )}
 
+          {result && (
+            <div className="mb-4">
+              <BannerIndikatif status={indikatif} />
+            </div>
+          )}
+
           {tema === 'umum' && area && (
             <>
               {jenisInvestasi && (
@@ -676,7 +689,9 @@ const LaporanAnalisisPage = () => {
               {kelayakan && (
                 <KartuLaporan
                   judul="Penilaian Multi-Kriteria (AHP)"
-                  pengantar={`Keputusan ${kelayakan.keputusan?.replace(/_/g, ' ')}, prioritas ${kelayakan.prioritas}, kelas risiko ${kelayakan.kelas_risiko}.`}
+                  pengantar={`Keputusan ${keputusanTampil(kelayakan.keputusan)}, prioritas ${kelayakan.prioritas}, kelas risiko ${kelayakan.kelas_risiko}.${
+                    indikatif.indikatif ? ' Karena data lokasi belum lengkap, keputusan ini bukan rekomendasi pasti.' : ''
+                  }`}
                   catatan={`Rasio konsistensi ${nf(kelayakan.consistency_ratio, 4)} — ${
                     kelayakan.is_consistent ? 'matriks konsisten' : 'matriks TIDAK konsisten, bobot perlu ditinjau'
                   }.`}
@@ -690,7 +705,7 @@ const LaporanAnalisisPage = () => {
                         warna: warnaStatus(kelayakan.keputusan),
                       },
                       {
-                        nilai: kelayakan.keputusan?.replace(/_/g, ' '),
+                        nilai: keputusanTampil(kelayakan.keputusan),
                         satuan: 'Keputusan',
                         warna: warnaStatus(kelayakan.keputusan),
                       },

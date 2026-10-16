@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, ChevronRight, CircleHelp, MapPin, Search, XCircle } from 'lucide-react';
 import { keDesimal, keDMS } from '../../utils/koordinat';
 import { gabungZona, persenArea, ringkasKkprlZona } from '../../utils/normalisasiAnalisis';
+import { catatanSkala, kelengkapanScreening, ringkasKelengkapan } from '../../utils/kelengkapanData';
 
 const GAYA = {
   SESUAI: { kotak: 'bg-emerald-50 border-emerald-200', teks: 'text-emerald-800', titik: 'bg-emerald-500', Ikon: CheckCircle2 },
@@ -101,7 +102,7 @@ const Ringkasan = ({ s }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
   const { Ikon } = gaya;
   const acuan = s.acuan.map((a) => `${a.label} ${angka(a.persen, 1)}%`).join(', ');
-  const terukur = s.parameter?.filter((p) => p.nilai !== null).length || 0;
+  const kelengkapan = kelengkapanScreening(s);
   const sel = [
     ['Cakupan acuan tata ruang', `${angka(s.cakupan_persen, 1)}%`, acuan || 'Tidak ada acuan', 'text-slate-800'],
     s.karakter && [
@@ -113,7 +114,7 @@ const Ringkasan = ({ s }) => {
     s.persen_sangat_sesuai != null && [
       'Parameter sangat sesuai',
       `${angka(s.persen_sangat_sesuai)}%`,
-      `dari ${terukur} parameter terukur`,
+      kelengkapan ? `data tersedia untuk ${kelengkapan.terukur} dari ${kelengkapan.total} parameter` : '',
       'text-slate-800',
     ],
     [
@@ -132,7 +133,17 @@ const Ringkasan = ({ s }) => {
           <div className="text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             Tahap 1 · Screening kesesuaian ruang
           </div>
-          <div className={`text-xl font-bold leading-snug ${gaya.teks}`}>{s.status_label}</div>
+          <div className={`flex flex-wrap items-center gap-2 text-xl font-bold leading-snug ${gaya.teks}`}>
+            {s.status_label}
+            {kelengkapan?.indikatif && (
+              <span
+                title={`Data belum lengkap: ${kelengkapan.alasan_indikatif.join('; ')}`}
+                className="rounded bg-amber-500 px-1.5 py-0.5 text-[10.5px] font-bold uppercase tracking-wide text-white"
+              >
+                Indikatif
+              </span>
+            )}
+          </div>
           <p className="mt-0.5 text-xs text-slate-600">
             <span className="font-semibold text-slate-700">{s.sektor_nama}</span> ·{' '}
             {s.lanjut
@@ -229,6 +240,7 @@ const RincianJenis = ({ s }) => {
 
 const KarakterLokasi = ({ s }) => {
   const terukur = s.parameter?.filter((p) => p.nilai !== null).length || 0;
+  const kelengkapan = kelengkapanScreening(s);
   return (
     <section>
       <Judul>Karakter lokasi {s.sektor_nama.toLowerCase()}</Judul>
@@ -256,6 +268,12 @@ const KarakterLokasi = ({ s }) => {
                 <div className="h-full rounded-full bg-emerald-500" style={{ width: `${s.persen_sangat_sesuai || 0}%` }} />
               </div>
             </div>
+            {kelengkapan && (
+              <p className={`mt-1 text-[11px] leading-snug ${kelengkapan.indikatif ? 'font-semibold text-amber-700' : 'text-slate-500'}`}>
+                Kelengkapan data: {ringkasKelengkapan(kelengkapan)}.
+                {kelengkapan.indikatif && ' Hasil bersifat indikatif.'}
+              </p>
+            )}
             <ul className="mt-2 grid gap-x-5 gap-y-1 sm:grid-cols-2">
               {s.parameter.map((p) => {
                 const [kode, tanda, ket] = TANDA_PARAMETER[p.nilai];
@@ -442,6 +460,42 @@ const KetentuanArea = ({ s }) => {
   );
 };
 
+const AsalData = ({ s }) => (
+  <section>
+    <Judul>Asal data &amp; batas ketelitian</Judul>
+    {s.asal_data?.length > 0 && (
+      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
+        <table className="w-full text-left text-xs">
+          <thead className="bg-slate-50 text-slate-500">
+            <tr>
+              <th className="px-3 py-2 font-semibold">Data</th>
+              <th className="px-3 py-2 font-semibold">Sumber</th>
+              <th className="px-3 py-2 font-semibold">Keterangan &amp; tanggal</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100">
+            {s.asal_data.map((d, i) => (
+              <tr key={i} className="align-top">
+                <td className="px-3 py-1.5 font-medium text-slate-700">{d.data}</td>
+                <td className="px-3 py-1.5 text-slate-600">{d.sumber}</td>
+                <td className="px-3 py-1.5 text-slate-500">{d.keterangan || '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+    <ul className="mt-2 space-y-1">
+      {catatanSkala(s).map((c) => (
+        <li key={c} className="flex gap-2 text-[11px] leading-snug text-slate-500">
+          <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-slate-400" />
+          {c}
+        </li>
+      ))}
+    </ul>
+  </section>
+);
+
 const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
   const zona = gabungZona(s.zona);
@@ -495,6 +549,8 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
           </div>
         </section>
       )}
+
+      <AsalData s={s} />
 
       {s.rekomendasi && (
         <div className="space-y-5 border-t border-slate-200 pt-5">

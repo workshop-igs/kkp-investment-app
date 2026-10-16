@@ -14,6 +14,7 @@ import {
 import { angkaRingkas as angkaRingkasUmum, rupiahRingkas as rupiahRingkasUmum } from './pemformat';
 import { ATRIBUSI_CITRA, RASIO_PANEL, siapkanPetaLaporan } from './petaLaporan';
 import { barisTitikSudut, keDMS } from './koordinat';
+import { CATATAN_DASAR, catatanSkala, kelengkapanScreening, ringkasKelengkapan, statusIndikatif } from './kelengkapanData';
 
 const AKSEN = [0, 86, 165];
 const GELAP = [15, 23, 42];
@@ -578,7 +579,7 @@ export class Kanvas {
 
       d.setFontSize(5.8);
       d.text(
-        `Diterbitkan ${tgl} dari basis data aplikasi - bukan salinan manual`,
+        `Diterbitkan ${tgl} dari basis data aplikasi - bukan salinan manual. Penyaringan awal, bukan pengganti Persetujuan KKPRL.`,
         TEPI,
         HAL_H - 5.6
       );
@@ -598,6 +599,14 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     'Disusun dari basis data aplikasi pada saat penerbitan',
   ]);
   const a = analisis;
+  const indikatif = statusIndikatif(a.screening, { berbasisSpasial: a.spasial?.skorSpasial, total: a.spasial?.totalSkor });
+  const keputusanTampil = (kp) => `${(kp || '—').replace(/_/g, ' ')}${indikatif.indikatif && kp ? ' (indikatif)' : ''}`;
+  if (indikatif.indikatif) {
+    k.peringatan(
+      `INDIKATIF - Data lokasi belum lengkap, jadi hasil ini hanya gambaran awal, bukan rekomendasi pasti. Sebab: ${indikatif.alasan.join('; ')}.`
+    );
+  }
+  k.teks(CATATAN_DASAR, { ukuran: 6.5 });
 
   const kotakSkor = (...tema) => {
     const baris = tema.flatMap((t) => skorBagian(a.kelayakan?.perAspek, a.spasial?.sumber, t));
@@ -652,7 +661,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN), tumpang tindih dengan KKPRL yang sudah terbit, dan ketentuan ruang lainnya. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial.'
     );
     k.bukaKartu(
-      `Hasil: ${sc.status_label}`,
+      `Hasil: ${sc.status_label}${kelengkapanScreening(sc)?.indikatif ? ' (indikatif)' : ''}`,
       `${sc.sektor_nama} | cakupan acuan tata ruang ${nf(sc.cakupan_persen, 1)}% | ${
         sc.lanjut ? 'dilanjutkan ke Tahap 2' : 'analisis berhenti di Tahap 1'
       }`
@@ -712,6 +721,12 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
             p.nilai === true ? 'Sangat sesuai' : p.nilai === false ? 'Perlu dinilai di lapangan' : 'Tidak terukur']),
           [(LEBAR - 8) * 0.65, (LEBAR - 8) * 0.35]
         );
+        const kl = kelengkapanScreening(sc);
+        if (kl) {
+          k.teks(`Kelengkapan data: ${ringkasKelengkapan(kl)}.${kl.indikatif ? ' Hasil bersifat indikatif.' : ''}`, {
+            ukuran: 7, tebal: kl.indikatif, warna: kl.indikatif ? AMBER_TEKS : ABU,
+          });
+        }
       }
     }
     if (sc.parameter_tambahan?.length) {
@@ -1041,6 +1056,20 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       : null
   );
 
+  k.bukaKartu(
+    'Asal Data & Batas Ketelitian',
+    'Set data yang dipakai screening kesesuaian ruang, beserta sumber dan tanggal pembaruannya di basis data aplikasi.'
+  );
+  if (a.screening?.asal_data?.length) {
+    // Daftar (bukan tabel) karena sumber dan keterangannya panjang dan perlu turun baris.
+    k.daftar(a.screening.asal_data.map((d) => `${d.data}: ${d.sumber}${d.keterangan ? ` (${d.keterangan})` : ''}`));
+  } else {
+    k.peringatan('Rincian asal data tidak tersimpan pada analisis ini (dibuat sebelum fitur asal data tersedia).');
+  }
+  k.teks('Batas ketelitian', { tebal: true, warna: GELAP, ukuran: 7.5 });
+  k.daftar(catatanSkala(a.screening));
+  k.tutupKartu();
+
   if (a.finansial) {
     k.tema(
       'Analisis Finansial',
@@ -1117,7 +1146,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     if (a.kelayakan?.skor != null) {
       k.bukaKartu(
         'Penilaian Multi-Kriteria (AHP)',
-        [a.kelayakan.keputusan && `Keputusan ${a.kelayakan.keputusan.replace(/_/g, ' ')}`,
+        [a.kelayakan.keputusan && `Keputusan ${keputusanTampil(a.kelayakan.keputusan)}`,
          a.kelayakan.prioritas && `prioritas ${a.kelayakan.prioritas}`,
          a.kelayakan.kelasRisiko && `kelas risiko ${a.kelayakan.kelasRisiko}`]
           .filter(Boolean).join(', ') + '.'
@@ -1125,7 +1154,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       const wKeputusan = hexKeRgb(warnaStatus(a.kelayakan.keputusan));
       k.angkaBesar([
         { nilai: nf(a.kelayakan.skor, 2), satuan: 'Skor AHP', warna: wKeputusan },
-        { nilai: (a.kelayakan.keputusan || '—').replace(/_/g, ' '), satuan: 'Keputusan', warna: wKeputusan },
+        { nilai: keputusanTampil(a.kelayakan.keputusan), satuan: 'Keputusan', warna: wKeputusan },
         { nilai: a.kelayakan.prioritas || '—', satuan: 'Prioritas', warna: hexKeRgb(warnaStatus(a.kelayakan.prioritas)) },
       ]);
       const aspek = Object.entries(a.kelayakan.perAspek || {});
