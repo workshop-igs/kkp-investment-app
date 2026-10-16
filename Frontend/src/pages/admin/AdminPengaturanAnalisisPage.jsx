@@ -74,9 +74,12 @@ export const StatusHitungUlang = ({ status, onMulai }) => {
   if (berjalan || menunggu) {
     const [namaTahap, wilayah] = tahap.includes(': ') ? tahap.split(': ') : [tahap || 'Menyiapkan', ''];
     const indeks = Math.max(0, TAHAP_HITUNG.findIndex((t) => t.kunci === namaTahap));
-    const persen = dari ? Math.min(100, Math.round((ke / dari) * 100)) : null;
+    // Server mencatat nomor provinsi saat provinsi itu MULAI diproses, jadi yang sudah selesai adalah ke - 1.
+    const rampung = Math.max(0, ke - 1);
+    const persen = dari ? Math.min(100, Math.round((rampung / dari) * 100)) : null;
     const lewat = mulai ? (sekarang - new Date(mulai).getTime()) / 1000 : 0;
-    const sisa = dari && ke > 0 && ke < dari ? (lewat / ke) * (dari - ke) : null;
+    // Ukuran provinsi sangat beragam; perkiraan baru ditampilkan setelah beberapa provinsi selesai.
+    const sisa = dari && rampung >= 2 ? (lewat / rampung) * (dari - rampung) : null;
     return (
       <div role="status" aria-live="polite" className="rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white px-4 py-4 text-sm shadow-sm">
         <div className="flex items-start gap-3">
@@ -112,11 +115,15 @@ export const StatusHitungUlang = ({ status, onMulai }) => {
             </div>
             <div className="mt-1.5 flex flex-wrap justify-between gap-x-4 gap-y-1 text-[11px] text-slate-500">
               <span>
-                {persen === null ? 'Menyiapkan data…' : <><b className="text-slate-700">{persen}%</b> · provinsi {ke} dari {dari}</>}
+                {persen === null ? 'Menyiapkan data…' : (
+                  <><b className="text-slate-700">{persen}%</b> · {rampung} dari {dari} provinsi selesai, provinsi ke-{ke} sedang diproses</>
+                )}
               </span>
               <span>
                 {mulai && <>Berjalan {durasi(lewat)}</>}
-                {sisa !== null && <> · perkiraan sisa ±{durasi(sisa)}</>}
+                {sisa !== null
+                  ? <> · perkiraan sisa ±{durasi(sisa)}</>
+                  : persen !== null && <> · perkiraan sisa muncul setelah 2 provinsi selesai</>}
               </span>
             </div>
 
