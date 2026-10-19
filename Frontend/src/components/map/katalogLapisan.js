@@ -13,7 +13,6 @@ import {
 import { SECTORS } from '../../utils/konstanta';
 import { API_V1_URL } from '../../api/alamat';
 import { lambangSvg } from './ikonPeta';
-import { kelengkapanScreening } from '../../utils/kelengkapanData';
 
 const TOMBOL_ANALISIS = `<button type="button" data-analisis-lokasi class="mt-2 w-full rounded-lg bg-[#0056A5] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#004a8f]">
   Analisis lokasi ini
@@ -234,101 +233,76 @@ export const LAYER_LOKAL = {
 ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     zoomPin: 8,
     keteranganLegenda:
-      'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi; warnanya '
-      + 'menunjukkan jenis itu dan titik berwarna ganda cocok untuk beberapa jenis. Ini bukan rekomendasi pasti dan '
-      + 'bukan pengganti Persetujuan KKPRL. Mulai tingkat provinsi titik menjadi penanda berlambang jenis, dan batas '
-      + 'lokasinya dimuat sebagai area analisis saat tombol Analisis lokasi ini di popup diklik; analisis itu memakai '
-      + 'aturan yang sama sehingga hasilnya sama dengan popup. Lokasi dibentuk dari sel 250 m (sekitar 6,25 ha) di zona '
-      + 'ruang laut, atau kawasan Pola Ruang darat RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu. '
-      + 'Sel harus memenuhi seluruh SYARAT DASAR: karakter lokasi cocok (misalnya budi daya laut di perairan 1 sampai '
-      + '30 m, tambak garam di darat pesisir; kedalaman dan gelombang bersifat indikatif), dekat infrastruktur '
-      + 'pendukung, serta lolos pengecualian keras: di luar alur pelayaran/ALKI dari lapisan zonasi mana pun '
-      + '(kecuali jasa maritim dan infrastruktur laut), tidak '
+      'Setiap titik adalah lokasi potensial untuk satu sub-sektor investasi; warnanya menunjukkan jenisnya dan titik '
+      + 'berwarna ganda cocok untuk beberapa jenis. Ini bukan rekomendasi pasti dan bukan pengganti Persetujuan KKPRL. '
+      + 'Mulai tingkat provinsi titik menjadi penanda berlambang jenis, dan batas lokasinya dimuat sebagai area analisis '
+      + 'saat tombol Analisis lokasi ini di popup diklik; analisis itu memakai aturan yang sama. Lokasi dibentuk dari sel '
+      + '250 m (sekitar 6,25 ha) di zona ruang laut atau kawasan Pola Ruang darat RTRW Provinsi di pesisir. Sel harus '
+      + 'lolos GERBANG: matriks KKPRL Perda mengizinkan jenis itu (langsung atau bersyarat), tidak berada di wilayah '
+      + 'kelola masyarakat hukum adat, di luar alur pelayaran/ALKI (kecuali jasa maritim dan infrastruktur laut), tidak '
       + 'menempati mangrove, lamun, atau terumbu karang bagi jenis yang dapat merusaknya, di luar jarak aman kabel, pipa, '
-      + 'dan alur pelayaran, tidak beririsan KKPRL terbit, dan tidak tertutup bangunan. Di kawasan konservasi, jenis '
-      + 'yang boleh mengikuti matriks KKPRL Perda zona itu. Syarat dasar ini pasti '
-      + 'terpenuhi pada setiap titik sehingga tidak ikut persentase. Persentase dihitung dari PARAMETER DINILAI: '
-      + 'peruntukan diizinkan tanpa syarat, risiko tsunami, gelombang ekstrem dan abrasi, serta banjir yang rendah, di '
-      + 'luar wilayah kelola masyarakat hukum adat, dan kriteria per jenis dari data publik (misalnya suhu, klorofil-a, '
-      + 'kekeruhan, dan gelombang tertinggi untuk budi daya laut; kesuburan perairan untuk perikanan tangkap; kejernihan '
-      + 'air dan kedekatan terumbu karang untuk wisata bahari; curah hujan dan panjang musim kemarau untuk garam). '
-      + 'Ambang kriteria per jenis adalah usulan dari pustaka kesesuaian lokasi yang menunggu tinjauan KKP. Sebuah sel '
-      + 'masuk bila parameter dinilainya cukup terukur dan sedikitnya 75% di antaranya sangat sesuai; di zona yang '
-      + 'peruntukannya untuk kegiatan lain dan hanya mengizinkan jenis itu bersyarat, seluruh parameter dinilai wajib '
-      + 'terukur dan sangat sesuai. Setiap wilayah sel yang bersambung ditampilkan sebagai satu titik dengan batas '
-      + 'berupa inti terbaiknya, paling luas 1 km x 1 km (100 ha). Dalam radius 10 km hanya lokasi terbaik yang '
-      + 'ditampilkan; wilayah sesuai lain di sekitarnya dapat diperiksa lewat Analisis lokasi. Pada pilihan semua jenis, '
-      + 'lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; Konservasi & Rehabilitasi Pesisir hanya '
-      + 'tampil bila jenis itu dipilih. Pada tampilan seluruh Indonesia yang tampil adalah lokasi dengan persentase '
-      + 'tertinggi; perbesar peta untuk melihat lokasi lainnya. Kriteria finansial (NPV, IRR, payback) tidak ikut; '
+      + 'dan alur pelayaran, tidak beririsan KKPRL terbit, dan tidak tertutup bangunan. Sesudah itu sel harus memenuhi '
+      + 'SEMUA KRITERIA sub-sektornya yang terukur, misalnya klorofil-a 0,3–5 mg/m³, suhu permukaan 26–30 °C, gelombang '
+      + 'paling tinggi 2 m, dan jarak ke pelabuhan perikanan paling jauh 100 km untuk perikanan tangkap. Kriteria yang '
+      + 'datanya belum tersedia dilewati selama sedikitnya separuh kriteria terukur. Risiko tsunami, abrasi, atau banjir '
+      + 'yang tinggi menggugurkan lokasi di darat atau yang menyentuh darat. Ambang kriteria dapat diubah administrator. '
+      + 'Setiap wilayah sel yang bersambung ditampilkan sebagai satu titik dengan batas berupa inti terbaiknya, paling '
+      + 'luas 1 km x 1 km (100 ha); dalam radius 10 km hanya lokasi terbaik tiap sub-sektor yang ditampilkan. Pada '
+      + 'pilihan semua jenis, lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; Konservasi & '
+      + 'Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Kriteria finansial (NPV, IRR, payback) tidak ikut; '
       + 'penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
     popup: (p) => {
       const jenis = p.jenis?.length ? p.jenis : [p.sektor_kode];
-      const nama = p.jenis_nama?.length ? p.jenis_nama : [p.sektor || ''];
+      const nama = p.jenis_nama?.length ? p.jenis_nama : [p.sub_sektor || p.sektor || ''];
       const warna = warnaJenisInvestasi(jenis[0]);
-      const persen = Math.max(0, Math.min(100, Number(p.persen_sesuai) || 0));
       const luas = Number(p.luas_ha || 0).toLocaleString('id-ID', { maximumFractionDigits: 1 });
       const rencana = p.ranah === 'DARAT' ? 'Pola Ruang darat RTRW Provinsi' : 'rencana tata ruang laut';
-      const butir = Object.entries(p.parameter || {})
-        .map(([label, bagian]) => {
-          const [tanda, kelasTanda, ket] = bagian === null
-            ? ['?', 'text-slate-400', ' (tidak terukur)']
-            : bagian >= 100
-              ? ['&check;', 'text-emerald-600', '']
-              : ['!', 'text-amber-600', ` (${bagian}% luas)`];
+      const kriteria = p.kriteria || [];
+      const butir = kriteria
+        .map((k) => {
+          const [tanda, kelasTanda] = k.lulus ? ['&check;', 'text-emerald-600'] : ['?', 'text-slate-400'];
+          const nilai = k.nilai_teks ? `: <b class="font-semibold">${aman(k.nilai_teks)}</b>` : k.lulus ? '' : ': belum terukur';
           return `<li class="flex gap-1.5 leading-snug">
              <span class="${kelasTanda} font-bold shrink-0 w-3">${tanda}</span>
-             <span>${aman(label)}${ket}</span>
+             <span>${aman(k.label)}${nilai} <span class="text-slate-400">(syarat ${aman(k.ambang_teks)})</span></span>
            </li>`;
         })
         .join('');
-      const dasar = Object.entries(p.syarat_dasar || {});
-      const dasarKosong = dasar.filter(([, v]) => v === null).map(([label]) => label);
-      const blokDasar = dasar.length
-        ? `<div class="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5">
-            <p class="text-[10.5px] font-semibold text-emerald-800">&check; Syarat dasar terpenuhi (${dasar.length - dasarKosong.length} dari ${dasar.length})</p>
-            <p class="mt-0.5 text-[10px] leading-snug text-emerald-900/80">${dasar.filter(([, v]) => v !== null).map(([label]) => aman(label)).join(' &middot; ')}</p>
-            ${dasarKosong.length
-              ? `<p class="mt-0.5 text-[10px] leading-snug text-amber-700">? Belum terukur, dianggap terpenuhi: ${dasarKosong.map((l) => aman(l.charAt(0).toLowerCase() + l.slice(1))).join(', ')}</p>`
-              : ''}
-          </div>`
-        : '';
-      const nilaiParameter = Object.values(p.parameter || {});
-      const kelengkapan = kelengkapanScreening({
-        parameter: nilaiParameter.map((v) => ({ nilai: v === null ? null : true })),
-      });
+      const gerbang = Array.isArray(p.syarat_dasar) ? p.syarat_dasar : [];
+      const peringatan = (p.peringatan || [])
+        .map((teks) => `<p class="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[10.5px] text-amber-800 leading-snug">${aman(teks)}</p>`)
+        .join('');
 
-      return `<div class="font-sans w-[18.5rem] max-w-full">
+      return `<div class="font-sans w-[19rem] max-w-full">
         <div class="flex items-center gap-2.5">
           <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full shadow-sm" style="background:${warna}">${lambangSvg(IKON_JENIS_INVESTASI[jenis[0]], 18)}</span>
           <div class="min-w-0">
-            <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Cocok untuk ${nama.length} jenis investasi` : `Lokasi potensial ${aman(nama[0])}`}</h3>
+            <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Cocok untuk ${nama.length} sub-sektor investasi` : `Lokasi potensial ${aman(nama[0])}`}</h3>
             <p class="text-[11px] text-slate-500 leading-snug">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
           </div>
         </div>
         ${nama.length > 1
-          ? `<div class="mt-2 flex flex-wrap gap-1">${jenis.map((kode, i) => `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] font-medium text-slate-700"><span class="h-2 w-2 rounded-full" style="background:${warnaJenisInvestasi(kode)}"></span>${aman(nama[i])}</span>`).join('')}</div>`
+          ? `<div class="mt-2 flex flex-wrap gap-1">${nama.map((n, i) => `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] font-medium text-slate-700"><span class="h-2 w-2 rounded-full" style="background:${warnaJenisInvestasi((p.jenis_sub || jenis)[i] || jenis[0])}"></span>${aman(n)}</span>`).join('')}</div>`
           : ''}
-        <div class="mt-2 flex items-center gap-2.5 rounded-lg bg-slate-50 px-2.5 py-1.5">
-          <span class="text-lg font-bold tabular-nums leading-none" style="color:${warna}">${persen}%</span>
-          <div class="min-w-0 flex-1">
-            <div class="h-1.5 overflow-hidden rounded-full bg-slate-200"><div class="h-full rounded-full" style="width:${persen}%;background:${warna}"></div></div>
-            <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">parameter dinilai sangat sesuai &middot; ${aman(luas)} ha</p>
-          </div>
+        <div class="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
+          <p class="text-[11px] font-semibold" style="color:${warna}">&check; Semua kriteria terukur terpenuhi${p.total ? ` (${p.terukur} dari ${p.total} kriteria terukur)` : ''}</p>
+          <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Inti lokasi &plusmn;${aman(luas)} ha${p.luas_wilayah_ha > p.luas_ha ? ` dari wilayah sesuai &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha` : ''}</p>
         </div>
-        ${p.luas_wilayah_ha > p.luas_ha
-          ? `<p class="mt-1 text-[10px] text-slate-500 leading-snug">Inti terbaik dari wilayah sesuai seluas &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha: persentase tertinggi, lalu paling dekat infrastruktur.</p>`
+        ${gerbang.length
+          ? `<div class="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5">
+              <p class="text-[10.5px] font-semibold text-emerald-800">&check; Lolos gerbang Perda KKPRL dan pengecualian</p>
+              <p class="mt-0.5 text-[10px] leading-snug text-emerald-900/80">${gerbang.map(aman).join(' &middot; ')}</p>
+            </div>`
           : ''}
-        ${blokDasar}
-        <p class="mt-2 text-[10.5px] font-semibold text-slate-600">Parameter dinilai</p>
-        <ul class="mt-0.5 text-[11px] space-y-px text-slate-700">${butir}</ul>
-        ${kelengkapan
-          ? `<p class="mt-1 text-[10.5px] leading-snug ${kelengkapan.indikatif ? 'font-semibold text-amber-700' : 'text-slate-500'}">Data tersedia untuk ${kelengkapan.terukur} dari ${kelengkapan.total} parameter${kelengkapan.indikatif ? ' &middot; <span class="rounded bg-amber-500 px-1 text-[9.5px] font-bold uppercase text-white">Indikatif</span>' : ''}</p>`
-          : ''}
+        ${kriteria.length
+          ? `<p class="mt-2 text-[10.5px] font-semibold text-slate-600">Kriteria ${aman(p.sub_sektor || '')}</p>
+             <ul class="mt-0.5 text-[11px] space-y-px text-slate-700">${butir}</ul>`
+          : '<p class="mt-2 text-[10.5px] text-slate-500">Rincian kriteria tampil setelah Peta Sebaran dihitung ulang.</p>'}
         ${p.status_tata_ruang === 'BERSYARAT'
           ? `<p class="mt-1.5 rounded-md bg-amber-50 px-2 py-1 text-[10.5px] text-amber-800 leading-snug">Diizinkan bersyarat oleh ${rencana}; syaratnya tercantum di Analisis lokasi ini.</p>`
           : ''}
-        <p class="text-[10px] text-slate-500 mt-1.5 leading-snug">${p.perlu_dinilai?.length ? 'Parameter bertanda ! atau ?, serta' : 'Parameter yang belum terukur di aplikasi, seperti'} kualitas air dan substrat, perlu dinilai langsung di lapangan.</p>
+        ${peringatan}
+        <p class="text-[10px] text-slate-500 mt-1.5 leading-snug">${p.perlu_dinilai?.length ? 'Kriteria bertanda ? belum terukur dan perlu' : 'Kondisi tapak tetap perlu'} dinilai langsung di lapangan.</p>
         <p class="text-[10px] text-slate-400 mt-1 leading-snug">Penyaringan awal dari peta tata ruang berskala provinsi; bukan pengganti Persetujuan KKPRL.</p>
         ${TOMBOL_ANALISIS}
       </div>`;

@@ -122,10 +122,15 @@ const Ringkasan = ({ s }) => {
     fisik && [
       'Kecocokan fisik',
       fisik.label,
-      `untuk ${s.sektor_nama.toLowerCase()}`,
-      fisik.cocok ? 'text-emerald-700' : 'text-rose-700',
+      `untuk ${(fisik.sub_sektor || s.sektor_nama).toLowerCase()}`,
+      fisik.cocok ? 'text-emerald-700' : fisik.label === 'Belum dapat dinilai' ? 'text-amber-700' : 'text-rose-700',
     ],
-    s.persen_sangat_sesuai != null && [
+    Array.isArray(s.sub_sektor) ? kelengkapan && [
+      'Kriteria terukur',
+      `${kelengkapan.terukur} dari ${kelengkapan.total}`,
+      kelengkapan.indikatif ? 'hasil indikatif' : 'kriteria tanpa data dilewati',
+      kelengkapan.indikatif ? 'text-amber-700' : 'text-slate-800',
+    ] : s.persen_sangat_sesuai != null && [
       'Parameter dinilai sangat sesuai',
       `${angka(s.persen_sangat_sesuai)}%`,
       kelengkapan ? `data tersedia untuk ${kelengkapan.terukur} dari ${kelengkapan.total} parameter` : '',
@@ -331,14 +336,75 @@ const KarakterLokasi = ({ s }) => {
                 );
               })}
             </ul>
-            <p className="mt-2 text-[10.5px] leading-snug text-slate-400">
-              Ambang Peta Sebaran Wilayah Potensial Investasi: seluruh kondisi fisik dan pengecualian keras terpenuhi dan sedikitnya 75%
-              parameter dinilai yang terukur sangat sesuai; di zona peruntukan lain yang hanya mengizinkan bersyarat
-              seluruh parameter dinilai wajib terukur dan sangat sesuai.
-            </p>
           </div>
         )}
       </div>
+    </section>
+  );
+};
+
+const statusSub = (h) => {
+  if (h.cocok) return ['DIIZINKAN', 'Cocok'];
+  return h.gagal.length ? ['TIDAK_DIIZINKAN', 'Tidak cocok'] : [null, 'Data belum cukup'];
+};
+
+const KriteriaSubSektor = ({ s }) => {
+  const kelengkapan = kelengkapanScreening(s);
+  return (
+    <section>
+      <Judul>Kecocokan fisik {s.sektor_nama.toLowerCase()}</Judul>
+      <p className="-mt-1 mb-2 text-[11px] text-slate-400">
+        Setelah lolos matriks Perda, tiap sub-sektor dinilai dengan kriterianya sendiri. Area cocok bila semua kriteria
+        yang terukur memenuhi syarat dan sedikitnya separuh kriterianya terukur; kriteria tanpa data dilewati. Data global
+        beresolusi kasar, pastikan dengan survei lapangan.
+      </p>
+      {s.sub_sektor.length === 0 && <p className="text-xs leading-snug text-slate-700">{s.kecocokan_fisik?.alasan}</p>}
+      <div className="space-y-3">
+        {s.sub_sektor.map((h) => {
+          const [kode, label] = statusSub(h);
+          return (
+            <div key={h.kode} className="overflow-x-auto rounded-lg border border-slate-200 bg-white text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
+                <span className="font-semibold text-slate-800">{h.nama}</span>
+                <span className="flex items-center gap-2 text-[10.5px] text-slate-500">
+                  {h.terukur} dari {h.total} kriteria terukur
+                  <Pil kode={kode}>{label}</Pil>
+                </span>
+              </div>
+              <table className="w-full min-w-[28rem]">
+                <thead>
+                  <tr className="text-left text-[10.5px] text-slate-500">
+                    <th className="px-3 py-1.5 font-semibold">Kriteria</th>
+                    <th className="px-3 py-1.5 font-semibold">Di lokasi</th>
+                    <th className="px-3 py-1.5 font-semibold">Syarat</th>
+                    <th className="w-8" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {[...h.kriteria, ...h.umum].map((k) => {
+                    const [kd, tanda, ket] = TANDA_FISIK[k.lulus];
+                    return (
+                      <tr key={k.kunci}>
+                        <td className="px-3 py-1.5 leading-snug text-slate-700">{k.label}</td>
+                        <td className="px-3 py-1.5 tabular-nums text-slate-800">
+                          {k.nilai_teks || (k.data_ada === false ? 'belum ada data' : 'tidak terukur')}
+                        </td>
+                        <td className="px-3 py-1.5 text-slate-500">{k.ambang_teks}</td>
+                        <td className="px-3 py-1.5"><Tanda kode={kd} tanda={tanda} title={ket} /></td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          );
+        })}
+      </div>
+      {kelengkapan?.indikatif && (
+        <p className="mt-2 text-[11px] font-semibold leading-snug text-amber-700">
+          Hasil bersifat indikatif: {kelengkapan.alasan_indikatif.join('; ')}.
+        </p>
+      )}
     </section>
   );
 };
@@ -611,7 +677,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
       {zona.length > 0 && <KomposisiZona zona={zona} />}
       <RincianJenis s={s} />
       <PengecualianKeras s={s} />
-      {s.karakter && <KarakterLokasi s={s} />}
+      {Array.isArray(s.sub_sektor) ? <KriteriaSubSektor s={s} /> : s.karakter && <KarakterLokasi s={s} />}
       {s.parameter_tambahan?.length > 0 && <ParameterTambahan daftar={s.parameter_tambahan} />}
       {s.informasi_ruang?.length > 0 && <KetentuanArea s={s} />}
 

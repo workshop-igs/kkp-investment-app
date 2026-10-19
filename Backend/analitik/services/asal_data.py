@@ -2,8 +2,7 @@ from django.core.cache import cache
 from django.db.models import Max
 
 from analitik.models import RasterOseanografi, ZonaRisikoBencana
-from analitik.services.konstanta import AMBANG_KELENGKAPAN_DATA, BULAN, LABEL_SUMBER_ZONASI
-from analitik.services.pengaturan import atur
+from analitik.services.konstanta import BULAN, LABEL_SUMBER_ZONASI
 from inventarisasi.models import KKPRL, InfrastrukturPendukung, SumberDayaAlam, UnsurRuangLaut
 
 LABEL_OSEANOGRAFI = {
@@ -113,26 +112,21 @@ def asal_data(zona, karakter, tambahan):
     return baris
 
 
-def kelengkapan(parameter, dasar=None):
-    if not parameter:
+def kelengkapan(sub):
+    if not sub:
         return None
-    dasar_kosong = [label for label, nilai in (dasar or {}).items() if nilai is None]
-    total = len(parameter)
-    tidak_terukur = [label for label, nilai in parameter.items() if nilai is None]
-    terukur = total - len(tidak_terukur)
-    minimal = atur('MINIMAL_PARAMETER_TERUKUR')
+    tidak_terukur = [k['label'] for k in sub['kriteria'] if k['lulus'] is None]
+    belum_ada = [k['label'][0].lower() + k['label'][1:] for k in sub['kriteria'] if not k['data_ada']]
     alasan = []
-    if terukur < minimal:
-        alasan.append(f'hanya {terukur} parameter terukur, kurang dari batas minimal {minimal}')
-    if terukur < AMBANG_KELENGKAPAN_DATA * total:
-        alasan.append(f'{len(tidak_terukur)} dari {total} parameter tidak memiliki data di lokasi ini')
-    if dasar_kosong:
-        alasan.append('syarat dasar belum terukur: ' + ', '.join(t[0].lower() + t[1:] for t in dasar_kosong))
+    if not sub['cukup_data']:
+        alasan.append(f"baru {sub['terukur']} dari {sub['total']} kriteria {sub['nama']} yang terukur di lokasi ini")
+    if belum_ada:
+        alasan.append('data belum tersedia di aplikasi: ' + ', '.join(belum_ada))
     return {
-        'terukur': terukur,
-        'total': total,
+        'terukur': sub['terukur'],
+        'total': sub['total'],
         'tidak_terukur': tidak_terukur,
-        'dasar_tidak_terukur': dasar_kosong,
+        'dasar_tidak_terukur': [],
         'indikatif': bool(alasan),
         'alasan_indikatif': alasan,
     }

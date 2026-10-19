@@ -25,7 +25,7 @@ from analitik.models import (
     StatusHitungUlang,
 )
 from analitik.services import pengaturan
-from analitik.services.konstanta import EKOSISTEM_PESISIR
+from analitik.services.kriteria import PARAMETER
 from analitik.services.parameter_tambahan import kunci_nama
 from analitik.tasks import jadwalkan_hitung_ulang
 from inti.models import (
@@ -221,9 +221,7 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
             'daftar': [self._baris(m, simpanan) for m in pengaturan.DAFTAR],
             'label_bagian': pengaturan.LABEL_BAGIAN,
             'sektor': list(SektorInvestasi.objects.order_by('urutan', 'nama').values('kode', 'nama')),
-            'syarat_karakter': pengaturan.SYARAT_KARAKTER,
-            'syarat_tambahan': pengaturan.SYARAT_TAMBAHAN,
-            'ekosistem': EKOSISTEM_PESISIR,
+            'parameter_kriteria': {k: {'label': label, 'satuan': satuan} for k, (label, satuan, _) in PARAMETER.items()},
             'hitung_ulang': status_hitung_ulang(),
         })
 
