@@ -365,8 +365,6 @@ class Command(BaseCommand):
             data = transkripsi[kode]
             self.stdout.write(self.style.MIGRATE_HEADING(f'{provinsi.nama}: transkripsi {data["berkas"]}'))
             sumber = f'{data["perda"]}, {PENANDA_MATRIKS} ({data.get("cara", "transkripsi lampiran pindaian")})'
-            # kode_zona berupa daftar kode, atau {kode: [bujur, lintang]} bila koordinatnya ikut ditranskripsi
-            # sehingga zona dapat ditautkan ke poligonnya.
             blok = [(MatriksKKPRL(
                 provinsi=provinsi, nama_zona=b['nama_zona'], sub_zona=sub_zona(b['nama_zona'], jenis_kawasan(b['nama_zona'])),
                 kode_zona=list(b.get('kode_zona', [])), diperbolehkan=b['diperbolehkan'], bersyarat=b['bersyarat'],

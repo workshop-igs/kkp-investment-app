@@ -1,4 +1,3 @@
-"""Pemeriksaan kondisi aplikasi untuk dashboard admin: hijau normal, kuning peringatan, merah bermasalah."""
 import logging
 import os
 import shutil

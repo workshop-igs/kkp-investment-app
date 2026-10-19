@@ -1,8 +1,3 @@
-"""Asal data, kelengkapan parameter, dan catatan skala untuk setiap hasil screening/analisis.
-
-Tujuannya agar pengguna tahu seberapa kuat dasar sebuah hasil: data apa yang dipakai beserta tanggalnya,
-berapa parameter yang benar-benar terukur di lokasi, dan batas ketelitian peta acuannya.
-"""
 from django.core.cache import cache
 from django.db.models import Max
 
@@ -23,7 +18,6 @@ LABEL_OSEANOGRAFI = {
     'BULAN_KERING': 'Jumlah bulan kering',
 }
 
-# Peta tata ruang berskala provinsi/nasional: ketelitian posisinya kasar untuk keputusan tapak.
 SUMBER_SKALA_KASAR = {
     LABEL_SUMBER_ZONASI['KKP-RZWP3K'],
     LABEL_SUMBER_ZONASI['KKP-RTRW'],
@@ -45,7 +39,6 @@ def _tanggal(t):
 
 
 def _terbaru():
-    """Tanggal pembaruan terakhir tiap set data di basis data (disimpan 10 menit)."""
     hasil = cache.get('asal-data:terbaru')
     if hasil is not None:
         return hasil
@@ -69,7 +62,6 @@ def _baris(data, sumber, keterangan=''):
 
 
 def asal_data(zona, karakter, tambahan):
-    """Daftar set data yang dipakai screening ini, dengan sumber dan tanggalnya."""
     terbaru = _terbaru()
     baris = []
 
@@ -122,7 +114,6 @@ def asal_data(zona, karakter, tambahan):
 
 
 def kelengkapan(parameter, dasar=None):
-    """Berapa parameter dinilai yang datanya tersedia; "indikatif" bila kurang atau ada syarat dasar tak terukur."""
     if not parameter:
         return None
     dasar_kosong = [label for label, nilai in (dasar or {}).items() if nilai is None]

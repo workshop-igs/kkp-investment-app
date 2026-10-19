@@ -5,10 +5,14 @@ from django.contrib.gis.geos import GeometryCollection, GEOSException, GEOSGeome
 from django.db import connection
 
 from analitik.models import KetentuanRuang
+from analitik.services import pengecualian
+from analitik.services.asal_data import asal_data, catatan_skala, kelengkapan
 from analitik.services.konstanta import (
     AMBANG_IRISAN_KKPRL_M2,
     BATAS_JARAK_PANTAI_DERAJAT,
+    BULAN,
     EKOSISTEM_PESISIR,
+    EKOSISTEM_TERLARANG_SEKTOR,
     GMW_TAHUN_AKHIR,
     JENIS_ZONA_TERLARANG,
     KETENTUAN_DARAT_BAWAAN,
@@ -18,9 +22,6 @@ from analitik.services.konstanta import (
     SEKTOR_SUB_ZONA_COCOK,
     SUB_ZONA_TANPA_RINCIAN,
 )
-from analitik.services import pengecualian
-from analitik.services.asal_data import asal_data, catatan_skala, kelengkapan
-from analitik.services.konstanta import BULAN, EKOSISTEM_TERLARANG_SEKTOR
 from analitik.services.laporan_spasial import _arah
 from analitik.services.oseanografi import daya_gelombang, raster_tersedia
 from analitik.services.oseanografi import statistik as statistik_oseanografi
@@ -176,7 +177,6 @@ def _nama_ekosistem(daftar, sambung=None):
 
 
 def _rinci(syarat, data):
-    """Terpenuhi atau tidaknya setiap butir satu alternatif syarat karakter lokasi."""
     hasil = {}
     dangkal, dalam = data.get('kedalaman_min'), data.get('kedalaman_maks')
     if 'kedalaman' in syarat:
@@ -246,13 +246,10 @@ SUMBER_SYARAT = {
     'suhu_min': 'suhu_min',
     'jarak_pantai_maks_km': 'jarak_pantai_km',
 }
-# Syarat yang bergantung pada raster yang mungkin belum pernah ditarik: dilewati bila datanya belum ada.
 RASTER_SYARAT = {'daya_gelombang_min': 'PERIODE_GLB'}
 LABEL_RANAH = 'Ranah lokasi sesuai jenis investasi'
 LABEL_INFRASTRUKTUR = 'Dekat infrastruktur pendukung'
-# Butir syarat dasar yang bersifat fisik: pada screening dipisah sebagai kecocokan fisik (peringatan).
 LABEL_FISIK = {LABEL_RANAH, LABEL_INFRASTRUKTUR, *LABEL_SYARAT.values()}
-# kunci PARAMETER_TAMBAHAN -> (label, kunci data, arah ambang, raster sumber atau None)
 LABEL_TAMBAHAN = {
     'kedalaman_maks': ('Perairan cukup dangkal', 'kedalaman_maks', 'maks', 'KEDALAMAN'),
     'kedalaman_min': ('Perairan cukup dalam', 'kedalaman_maks', 'min', 'KEDALAMAN'),
@@ -296,14 +293,6 @@ def _dinilai(batasan, data):
 
 
 def parameter_lokasi(sektor_kode, data, saring_fisik=True):
-    """Penilaian lokasi untuk satu jenis investasi, sama untuk Peta Sebaran dan screening.
-
-    Mengembalikan (syarat_dasar, dinilai). Syarat dasar menyaring lokasi (ranah, karakter fisik, pengecualian keras,
-    infrastruktur) sehingga pada lokasi peta yang lolos semuanya terpenuhi; karena itu tidak ikut persentase.
-    Parameter dinilai membedakan mutu lokasi: True sangat sesuai, False perlu dinilai di lapangan, None tidak
-    terukur di lokasi itu. Dengan saring_fisik (Peta Sebaran) lokasi yang karakter fisiknya tidak cocok
-    menghasilkan None; tanpa itu (screening) butir fisik yang tidak terpenuhi bernilai False sebagai peringatan.
-    """
     aturan = atur('KARAKTER_LOKASI').get(sektor_kode)
     if saring_fisik and not cocok_karakter(sektor_kode, data)[0]:
         return None
@@ -313,7 +302,6 @@ def parameter_lokasi(sektor_kode, data, saring_fisik=True):
     if cocok:
         syarat = max(cocok, key=lambda s: persen_sangat_sesuai(_dinilai(s.get('dinilai', {}), data)))
     else:
-        # Tidak ada alternatif yang terpenuhi: tampilkan alternatif yang paling banyak butirnya terpenuhi.
         syarat = max(pilihan, key=lambda s: sum(_rinci(s, data).values()))
     rinci = _rinci(syarat, data)
     dasar = {LABEL_RANAH: ranah_cocok}
@@ -360,7 +348,6 @@ def ekosistem_di(c, geom, radius=0.0):
 
 RASTER_LAUT = ['KEDALAMAN', 'GELOMBANG', 'SUHU', 'ANOMALI_SUHU', 'KLOROFIL', 'KD490', 'PERIODE_GLB']
 RASTER_DARAT = ['CURAH_HUJAN', 'BULAN_KERING']
-# Batas pencarian terumbu karang terdekat untuk parameter "dekat terumbu karang".
 RADIUS_CARI_KARANG_KM = 20.0
 
 
@@ -467,12 +454,6 @@ def _ketentuan(aturan, zona) -> Dict[str, Any]:
 
 
 def _nilai(zona_efektif, aturan, cakupan, luas_aoi, kkprl_gugur=False):
-    """Status kesesuaian ruang (gerbang hukum) beserta zona yang hanya teriris kecil di tepi area.
-
-    Zona yang tidak mengizinkan atau belum memiliki ketentuan, tetapi seluruhnya mengiris kurang dari toleransi tepi,
-    tidak menggugurkan area: zona itu dikembalikan sebagai butir "perlu verifikasi batas" dan statusnya paling
-    tinggi sesuai bersyarat.
-    """
     per_zona: Dict[tuple, Dict[str, Any]] = {}
     for z in zona_efektif:
         st = _ketentuan(aturan, z)['status']
@@ -633,7 +614,6 @@ def parameter_area(c, geom, sektor_kode, karakter, status_tr, provinsi_ids, tamb
 
 
 def _alasan_pengecualian(kena, sektor_nama):
-    """(alasan gugur, peringatan perlu verifikasi batas) dari pengecualian keras yang mengenai area."""
     gugur, batas = [], []
     for k in kena:
         porsi = f"{_persen_area(k['persen'])} area ({_angka(k['luas_m2'] / 10000, 2)} ha)"
@@ -886,9 +866,9 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'kkprl': kkprl,
         'verifikasi_batas': tepi,
         'parameter_tambahan': tambahan,
-        'alasan': [alasan_karakter] * (not cocok) + alasan_gugur + [
+        'alasan': _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi) + alasan_gugur + [
             f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
-        ] + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi) + [
+        ] + [alasan_karakter] * (not cocok) + [
             'Sebagian kecil area perlu verifikasi batas (lihat peringatan), sehingga kesesuaiannya bersyarat: bagian '
             'itu dikeluarkan dari rencana tapak bila terbukti masuk.'
         ] * (status != 'TIDAK_SESUAI' and bool(tepi or kkprl_tepi or batas_pengecualian)),

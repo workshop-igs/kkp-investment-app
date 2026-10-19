@@ -282,7 +282,6 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
            </li>`;
         })
         .join('');
-      // Lokasi hasil hitungan sebelum syarat dasar dipisah belum memiliki syarat_dasar; bloknya tidak ditampilkan.
       const dasar = Object.entries(p.syarat_dasar || {});
       const dasarKosong = dasar.filter(([, v]) => v === null).map(([label]) => label);
       const blokDasar = dasar.length

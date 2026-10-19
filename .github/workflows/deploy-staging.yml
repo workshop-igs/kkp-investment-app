@@ -1,7 +1,5 @@
 name: Deploy ke staging
 
-# Setiap push ke main otomatis di-deploy ke VPS staging lewat SSH,
-# menjalankan deploy/deploy.sh yang sudah ada di server.
 on:
   push:
     branches: [main]

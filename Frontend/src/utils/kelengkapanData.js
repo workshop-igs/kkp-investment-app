@@ -1,8 +1,3 @@
-// Kelengkapan data, label "indikatif", dan catatan skala hasil analisis.
-// Server mengirim screening.kelengkapan / asal_data / catatan_skala (analitik/services/asal_data.py);
-// analisis lama yang tersimpan sebelum itu dihitung ulang di sini dari daftar parameternya.
-
-// Selaras dengan MINIMAL_PARAMETER_TERUKUR dan AMBANG_KELENGKAPAN_DATA di backend.
 const MINIMAL_PARAMETER = 3;
 const AMBANG_KELENGKAPAN = 0.75;
 
@@ -29,7 +24,6 @@ export const kelengkapanScreening = (s) => {
   };
 };
 
-// skor: { berbasisSpasial, total } — jumlah skor AHP yang dihitung dari data spasial vs seluruhnya.
 export const statusIndikatif = (screening, skor) => {
   const kelengkapan = kelengkapanScreening(screening);
   const alasan = [...(kelengkapan?.alasan_indikatif || [])];

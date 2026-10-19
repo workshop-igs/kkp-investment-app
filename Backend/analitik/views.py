@@ -390,7 +390,6 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
 
     def retrieve(self, request, pk=None):
         lok = self.get_object()
-        # Jenis investasi ikut dikirim agar "Analisis lokasi ini" menilai lokasi dengan jenis yang sama seperti peta.
         sektor = lok.sektor.kode if lok.sektor_id else (lok.jenis[0] if lok.jenis else None)
         return Response({'geometry': json.loads(lok.geometry.geojson), 'sektor_kode': sektor})
 

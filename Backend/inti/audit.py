@@ -3,7 +3,6 @@ from datetime import timedelta
 
 logger = logging.getLogger('inti')
 
-# Jeda minimum antar-pembaruan ProfilPengguna.terakhir_aktif per akun.
 JEDA_TANDA_AKTIF_DETIK = 60
 
 METODE_DICATAT = frozenset({'POST', 'PUT', 'PATCH', 'DELETE'})
@@ -24,7 +23,6 @@ NAMA_SASARAN = {
     'proyek': 'Proyek investasi',
     'users': 'Akun pengguna',
     'sektor': 'Sektor investasi',
-    'data-sources': 'Sumber data',
     'potensi': 'Lokasi potensi',
     'kkprl': 'Izin KKPRL',
     'zonasi': 'Zona ruang laut',
@@ -55,7 +53,6 @@ def _sasaran(jalur):
 
 
 def tandai_aktif(request):
-    """Catat waktu permintaan terakhir akun untuk hitungan pengguna aktif di dashboard admin."""
     pengguna = getattr(request, 'user', None)
     if not (pengguna and pengguna.is_authenticated):
         return
