@@ -196,16 +196,17 @@ LABEL_BAGIAN = {
     'klorofil_min': 'Klorofil-a minimum (mg/m³)', 'klorofil_maks': 'Klorofil-a maksimum (mg/m³)',
     'kd490_maks': 'Kekeruhan Kd490 maksimum (1/m)', 'gelombang_tertinggi_maks': 'Gelombang tertinggi setahun maksimum (m)',
     'jarak_karang_maks_km': 'Jarak maksimum ke terumbu karang (km)', 'curah_hujan_maks': 'Curah hujan tahunan maksimum (mm)',
-    'bulan_kering_min': 'Jumlah bulan kering minimum',
+    'bulan_kering_min': 'Jumlah bulan kering minimum', 'kedalaman_min': 'Kedalaman minimum (m)',
     'KABEL': 'Kabel bawah laut', 'PIPA': 'Pipa bawah laut', 'ALUR_PELAYARAN': 'Alur pelayaran',
     'lokasi_risiko': 'Lokasi dan risiko',
 }
 
 SYARAT_KARAKTER = ['kedalaman', 'gelombang_maks', 'gelombang_min', 'daya_gelombang_min', 'suhu_min',
                    'jarak_pantai_maks_km', 'ekosistem', 'tanpa_ekosistem']
-SYARAT_TAMBAHAN = ['kedalaman_maks', 'gelombang_maks', 'anomali_suhu_maks', 'suhu_rata_min', 'suhu_rata_maks',
-                   'klorofil_min', 'klorofil_maks', 'kd490_maks', 'gelombang_tertinggi_maks', 'jarak_karang_maks_km',
-                   'curah_hujan_maks', 'bulan_kering_min']
+SYARAT_TAMBAHAN = ['kedalaman_maks', 'kedalaman_min', 'gelombang_maks', 'anomali_suhu_maks', 'suhu_rata_min',
+                   'suhu_rata_maks', 'klorofil_min', 'klorofil_maks', 'kd490_maks', 'gelombang_tertinggi_maks',
+                   'daya_gelombang_min', 'jarak_pantai_maks_km', 'jarak_karang_maks_km', 'curah_hujan_maks',
+                   'bulan_kering_min']
 
 BAWAAN = {kunci: json.loads(json.dumps(getattr(konstanta, kunci))) for kunci in TERDAFTAR}
 
@@ -288,10 +289,12 @@ def _karakter(nilai, sektor):
                 raise NilaiTidakSah(f'{kode} > {ranah}: sedikitnya satu alternatif syarat.')
             for i, syarat in enumerate(pilihan, 1):
                 jalur = f'{kode} > {ranah} > alternatif {i}'
-                if not isinstance(syarat, dict) or not set(syarat) <= set(SYARAT_KARAKTER):
+                if not isinstance(syarat, dict) or not set(syarat) <= {*SYARAT_KARAKTER, 'dinilai'}:
                     raise NilaiTidakSah(f'{jalur}: syarat tidak dikenal.')
                 for k, v in syarat.items():
-                    if k == 'kedalaman':
+                    if k == 'dinilai':
+                        _syarat_tambahan(v, f'{jalur} > parameter dinilai', meta)
+                    elif k == 'kedalaman':
                         if not isinstance(v, list) or len(v) != 2 or v == [None, None]:
                             raise NilaiTidakSah(f'{jalur} > kedalaman: isi batas dangkal dan/atau dalam.')
                         for batas in v:
@@ -313,10 +316,14 @@ def _tambahan(nilai, sektor):
         if not isinstance(per_ranah, dict) or not set(per_ranah) <= {'LAUT', 'DARAT'}:
             raise NilaiTidakSah(f'{kode}: ranah harus perairan atau darat.')
         for ranah, syarat in per_ranah.items():
-            if not isinstance(syarat, dict) or not set(syarat) <= set(SYARAT_TAMBAHAN):
-                raise NilaiTidakSah(f'{kode} > {ranah}: parameter tidak dikenal.')
-            for k, v in syarat.items():
-                _angka(v, f'{kode} > {ranah} > {k}', meta)
+            _syarat_tambahan(syarat, f'{kode} > {ranah}', meta)
+
+
+def _syarat_tambahan(syarat, jalur, meta):
+    if not isinstance(syarat, dict) or not set(syarat) <= set(SYARAT_TAMBAHAN):
+        raise NilaiTidakSah(f'{jalur}: parameter tidak dikenal.')
+    for k, v in syarat.items():
+        _angka(v, f'{jalur} > {k}', meta)
 
 
 def periksa(kunci, nilai):
