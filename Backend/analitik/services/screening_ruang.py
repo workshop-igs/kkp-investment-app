@@ -254,7 +254,10 @@ LABEL_INFRASTRUKTUR = 'Dekat infrastruktur pendukung'
 LABEL_FISIK = {LABEL_RANAH, LABEL_INFRASTRUKTUR, *LABEL_SYARAT.values()}
 # kunci PARAMETER_TAMBAHAN -> (label, kunci data, arah ambang, raster sumber atau None)
 LABEL_TAMBAHAN = {
-    'kedalaman_maks': ('Kedalaman perairan sesuai', 'kedalaman_maks', 'maks', 'KEDALAMAN'),
+    'kedalaman_maks': ('Perairan cukup dangkal', 'kedalaman_maks', 'maks', 'KEDALAMAN'),
+    'kedalaman_min': ('Perairan cukup dalam', 'kedalaman_maks', 'min', 'KEDALAMAN'),
+    'daya_gelombang_min': ('Daya gelombang tinggi', 'daya_gelombang', 'min', 'PERIODE_GLB'),
+    'jarak_pantai_maks_km': ('Dekat garis pantai', 'jarak_pantai_km', 'maks', None),
     'gelombang_maks': ('Tinggi gelombang sesuai', 'gelombang', 'maks', 'GELOMBANG'),
     'anomali_suhu_maks': ('Tanpa stres panas (anomali suhu rendah)', 'anomali_suhu', 'maks', 'ANOMALI_SUHU'),
     'suhu_rata_min': ('Suhu permukaan laut tidak terlalu dingin', 'suhu_rata', 'min', 'SUHU'),
@@ -279,6 +282,19 @@ def _syarat_berlaku(kunci, data):
     return raster is None or raster in data.get('tersedia', ())
 
 
+def _dinilai(batasan, data):
+    nilai = {}
+    for kunci, batas in batasan.items():
+        if kunci not in LABEL_TAMBAHAN:
+            continue
+        label, sumber, arah, raster = LABEL_TAMBAHAN[kunci]
+        if raster is not None and raster not in data.get('tersedia', ()):
+            continue
+        v = data.get(sumber)
+        nilai[label] = None if v is None else (v <= batas if arah == 'maks' else v >= batas)
+    return nilai
+
+
 def parameter_lokasi(sektor_kode, data, saring_fisik=True):
     """Penilaian lokasi untuk satu jenis investasi, sama untuk Peta Sebaran dan screening.
 
@@ -293,8 +309,10 @@ def parameter_lokasi(sektor_kode, data, saring_fisik=True):
         return None
     ranah_cocok = aturan is None or data['ranah'] in aturan
     pilihan = (aturan or {}).get(data['ranah'], [{}])
-    syarat = next((s for s in pilihan if _penuhi(s, data)), None)
-    if syarat is None:
+    cocok = [s for s in pilihan if _penuhi(s, data)]
+    if cocok:
+        syarat = max(cocok, key=lambda s: persen_sangat_sesuai(_dinilai(s.get('dinilai', {}), data)))
+    else:
         # Tidak ada alternatif yang terpenuhi: tampilkan alternatif yang paling banyak butirnya terpenuhi.
         syarat = max(pilihan, key=lambda s: sum(_rinci(s, data).values()))
     rinci = _rinci(syarat, data)
@@ -308,20 +326,13 @@ def parameter_lokasi(sektor_kode, data, saring_fisik=True):
     if 'dekat_infrastruktur' in data:
         dasar[LABEL_INFRASTRUKTUR] = data['dekat_infrastruktur']
 
-    nilai = {}
-    tersedia = data.get('tersedia', ())
-    for kunci, batas in atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}).items():
-        if kunci not in LABEL_TAMBAHAN:
-            continue
-        label, sumber, arah, raster = LABEL_TAMBAHAN[kunci]
-        if raster is not None and raster not in tersedia:
-            continue
-        v = data.get(sumber)
-        nilai[label] = None if v is None else (v <= batas if arah == 'maks' else v >= batas)
+    nilai = _dinilai(atur('PARAMETER_TAMBAHAN').get(sektor_kode, {}).get(data['ranah'], {}), data)
+    nilai.update(_dinilai(syarat.get('dinilai', {}), data))
     nilai[LABEL_TATA_RUANG] = data.get('status_tr') == 'DIIZINKAN'
-    for jenis, label in BENCANA_LOKASI:
-        kelas = (data.get('bencana') or {}).get(jenis)
-        nilai[label] = None if kelas is None else kelas == 'RENDAH'
+    if not (data['ranah'] == 'LAUT' and (data.get('jarak_pantai_km') or 0) > 0):
+        for jenis, label in BENCANA_LOKASI:
+            kelas = (data.get('bencana') or {}).get(jenis)
+            nilai[label] = None if kelas is None else kelas == 'RENDAH'
     if not any('ekosistem' in s for s in pilihan) and sektor_kode not in EKOSISTEM_TERLARANG_SEKTOR:
         nilai['Tidak beririsan ekosistem sensitif'] = not set(data.get('ekosistem') or ()) & set(EKOSISTEM_PESISIR)
     nilai['Di luar wilayah kelola masyarakat hukum adat'] = None if data.get('adat') is None else not data['adat']

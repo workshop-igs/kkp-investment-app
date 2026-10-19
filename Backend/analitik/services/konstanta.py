@@ -259,9 +259,9 @@ KARAKTER_LOKASI = {
                   '(tinggi gelombang 1 m atau lebih dan daya gelombang 10 kW/m atau lebih), atau PLTS terapung '
                   '(5-50 m, gelombang di bawah 1,5 m)',
         'LAUT': [
-            {'kedalaman': (500, None), 'suhu_min': 25},
-            {'gelombang_min': 1.0, 'daya_gelombang_min': 10},
-            {'kedalaman': (5, 50), 'gelombang_maks': 1.5},
+            {'kedalaman': (500, None), 'suhu_min': 25, 'dinilai': {'kedalaman_min': 1000, 'suhu_rata_min': 27}},
+            {'gelombang_min': 1.0, 'daya_gelombang_min': 10, 'dinilai': {'daya_gelombang_min': 15, 'kedalaman_maks': 100}},
+            {'kedalaman': (5, 50), 'gelombang_maks': 1.5, 'dinilai': {'gelombang_tertinggi_maks': 2.5, 'kedalaman_maks': 30}},
         ],
     },
     'KONSERVASI_PESISIR': {
@@ -290,6 +290,7 @@ PARAMETER_TAMBAHAN = {
         'kd490_maks': 0.15, 'jarak_karang_maks_km': 2, 'anomali_suhu_maks': 1.0, 'gelombang_tertinggi_maks': 2.5,
     }},
     'JASA_MARITIM': {'LAUT': {'gelombang_tertinggi_maks': 2.5}},
+    'ENERGI_KELAUTAN': {'LAUT': {'jarak_pantai_maks_km': 5}},
     'GARAM': {'DARAT': {'curah_hujan_maks': 1300, 'bulan_kering_min': 4}},
     'KONSERVASI_PESISIR': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
     'BIOTEKNOLOGI_KELAUTAN': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
