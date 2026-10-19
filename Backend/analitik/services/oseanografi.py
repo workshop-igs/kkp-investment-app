@@ -32,7 +32,6 @@ DIBALIK = {'KEDALAMAN'}
 
 
 def raster_tersedia():
-    """Kode raster yang pernah ditarik; kriteria dari raster yang belum ada dilewati, bukan dianggap tak terukur."""
     hasil = cache.get('raster-tersedia')
     if hasil is None:
         hasil = frozenset(RasterOseanografi.objects.values_list('parameter', flat=True).distinct())
@@ -41,7 +40,6 @@ def raster_tersedia():
 
 
 def daya_gelombang(tinggi, periode_puncak):
-    """Fluks daya gelombang perairan dalam P = 0,49 Hs² Te kW/m, dengan Te ≈ 0,9 Tp (indikatif)."""
     if tinggi is None or periode_puncak is None:
         return None
     return 0.49 * tinggi ** 2 * 0.9 * periode_puncak

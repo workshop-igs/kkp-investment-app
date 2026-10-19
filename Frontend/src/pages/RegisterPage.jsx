@@ -52,7 +52,6 @@ const RegisterPage = () => {
       setError('Alamat email valid wajib diisi.');
       return;
     }
-    // Selaras dengan AUTH_PASSWORD_VALIDATORS di backend.
     if (formData.password.length < 8) {
       setError('Kata sandi minimal 8 karakter.');
       return;
@@ -85,7 +84,6 @@ const RegisterPage = () => {
         navigate('/dashboard', { replace: true });
       }, 900);
     } catch (err) {
-      // Tampilkan alasan dari server (mis. sandi terlalu umum, email sudah terdaftar), bukan pesan HTTP mentah.
       const data = err.response?.data;
       const pertama = data && typeof data === 'object' ? Object.values(data).flat()[0] : null;
       setError(

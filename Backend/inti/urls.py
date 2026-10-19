@@ -1,16 +1,6 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
-from .views_admin import (
-    AdminDataSourceViewSet,
-    AdminLogAktivitasViewSet,
-    AdminParameterTambahanViewSet,
-    AdminPengaturanAnalisisViewSet,
-    AdminProyekViewSet,
-    AdminSektorViewSet,
-    AdminUserViewSet,
-    status_sistem,
-)
 from .asisten import daftar_alat, obrolan, pakai_alat
 from .pencarian import cari_lokasi
 from .views import (
@@ -29,6 +19,15 @@ from .views import (
     register_api,
     ringkasan_publik,
 )
+from .views_admin import (
+    AdminLogAktivitasViewSet,
+    AdminParameterTambahanViewSet,
+    AdminPengaturanAnalisisViewSet,
+    AdminProyekViewSet,
+    AdminSektorViewSet,
+    AdminUserViewSet,
+    status_sistem,
+)
 
 router = DefaultRouter()
 router.register(r'provinsi', ProvinsiViewSet)
@@ -40,7 +39,6 @@ admin_router = DefaultRouter()
 admin_router.register(r'users', AdminUserViewSet, basename='admin-users')
 admin_router.register(r'proyek', AdminProyekViewSet, basename='admin-proyek')
 admin_router.register(r'sektor', AdminSektorViewSet, basename='admin-sektor')
-admin_router.register(r'data-sources', AdminDataSourceViewSet, basename='admin-datasources')
 admin_router.register(r'log-aktivitas', AdminLogAktivitasViewSet, basename='admin-log-aktivitas')
 admin_router.register(r'pengaturan-analisis', AdminPengaturanAnalisisViewSet, basename='admin-pengaturan-analisis')
 admin_router.register(r'parameter-tambahan', AdminParameterTambahanViewSet, basename='admin-parameter-tambahan')

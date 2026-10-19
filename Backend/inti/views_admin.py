@@ -33,7 +33,6 @@ from inti.models import (
     LogAktivitas,
     Provinsi,
     SektorInvestasi,
-    SumberData,
 )
 from inventarisasi.models import ZonasiRuangLaut
 from ketenagakerjaan.models import KalibrasiPelatihanSektor, MatriksKeahlianSektor
@@ -41,7 +40,7 @@ from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
 from pipeline.models import ProyekInvestasi
 
 from .kesehatan import periksa_semua
-from .serializers import SektorInvestasiSerializer, SumberDataSerializer
+from .serializers import SektorInvestasiSerializer
 from .serializers_admin import (
     SUB_ZONA_BERKETENTUAN,
     AdminLogAktivitasSerializer,
@@ -71,13 +70,10 @@ class AdminUserViewSet(viewsets.ModelViewSet):
             raise ValidationError({'detail': 'Anda tidak dapat menghapus akun Anda sendiri.'})
         if sasaran.is_superuser and not request.user.is_superuser:
             raise ValidationError({'detail': 'Akun superadmin hanya dapat dihapus oleh superadmin.'})
-        # Proyek dan log aktivitas tetap tersimpan: relasinya ke akun di-set kosong (SET_NULL).
         sasaran.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-# Pengguna dihitung aktif bila ada permintaan darinya (termasuk denyut tiap menit dari tab yang terbuka)
-# dalam rentang ini.
 RENTANG_AKTIF_MENIT = 3
 
 
@@ -171,12 +167,6 @@ class AdminSektorViewSet(viewsets.ModelViewSet):
              'estimasi_biaya_per_orang_juta': m['biaya_juta'], 'skema_sertifikasi': m['skema']}
             for m in MATRIKS_KEAHLIAN.get(sektor.kode, MATRIKS_KEAHLIAN['DEFAULT'])
         ]})
-
-
-class AdminDataSourceViewSet(viewsets.ModelViewSet):
-    queryset = SumberData.objects.all().order_by('nama')
-    serializer_class = SumberDataSerializer
-    permission_classes = [IsAdminUser]
 
 
 class AdminLogAktivitasViewSet(viewsets.ReadOnlyModelViewSet):

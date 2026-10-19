@@ -107,7 +107,6 @@ const KontrolPeta = ({
 
   return (
     <>
-      {/* Kolom dibatasi di atas kompas; di layar pendek jarak & padding dirapatkan agar tetap muat. */}
       <div className="pointer-events-none absolute right-6 top-4 bottom-[104px] z-[1100] flex items-center">
       <div
         ref={refKontrol}

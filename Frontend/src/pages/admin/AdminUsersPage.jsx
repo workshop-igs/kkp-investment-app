@@ -21,7 +21,6 @@ const namaTampil = (u) => `${u.first_name || ''} ${u.last_name || ''}`.trim() ||
 
 const KELAS_ISIAN = 'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-kkp-700/20 focus:border-kkp-700';
 
-// Sama dengan RENTANG_AKTIF_MENIT di backend (inti/views_admin.py).
 const RENTANG_AKTIF_MS = 3 * 60 * 1000;
 
 const terakhirAktif = (iso) => {
