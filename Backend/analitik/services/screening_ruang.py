@@ -21,11 +21,11 @@ from analitik.services.konstanta import (
     SUB_ZONA_TANPA_RINCIAN,
 )
 from analitik.services.kriteria import (
-    RASTER_DARAT,
     RASTER_DATA,
     dari_raster,
     jarak_area,
     penilaian,
+    raster_ranah,
     sumber_tersedia,
     uraian,
 )
@@ -166,7 +166,7 @@ def karakter_area(c, geom):
     darat = c.fetchone()[0]
     tersedia = sumber_tersedia()
     data = {'ranah': 'DARAT' if darat else 'LAUT', 'ekosistem': ekosistem_di(c, geom)}
-    kunci = [k for k in RASTER_DATA if (k in RASTER_DARAT) == darat]
+    kunci = [k for k in RASTER_DATA if raster_ranah(k, darat)]
     stat = statistik_oseanografi(geom, sorted({RASTER_DATA[k] for k in kunci}))
     _catat_oseanografi(data, stat)
     for k in kunci:

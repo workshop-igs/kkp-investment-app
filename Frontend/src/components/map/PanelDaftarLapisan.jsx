@@ -34,6 +34,11 @@ const KATEGORI = [
       { id: 'infra_pembangkit_listrik', nama: 'Pembangkit Listrik', warna: '#b91c1c' },
       { id: 'infra_kawasan_industri', nama: 'Kawasan Industri', warna: '#44403c' },
       { id: 'infra_kpbpb', nama: 'Kawasan Perdagangan Bebas', warna: '#15803d' },
+      { id: 'infra_bandara', nama: 'Bandar Udara', warna: '#0f766e' },
+      { id: 'infra_gardu_induk', nama: 'Gardu Induk', warna: '#9a3412' },
+      { id: 'infra_listrik_tm', nama: 'Jaringan Listrik 20 kV', warna: '#ca8a04' },
+      { id: 'infra_kampus_riset', nama: 'Kampus & Lembaga Riset', warna: '#4338ca' },
+      { id: 'infra_muara', nama: 'Muara Sungai Besar', warna: '#0284c7' },
     ],
   },
   {
@@ -52,6 +57,15 @@ const KATEGORI = [
       { id: 'osea_klorofil', nama: 'Klorofil-a', warna: '#21918c' },
       { id: 'osea_gelombang', nama: 'Tinggi Gelombang Signifikan', warna: '#4575b4' },
       { id: 'osea_kedalaman', nama: 'Kedalaman Laut', warna: '#0369a1' },
+      { id: 'osea_kd490', nama: 'Kecerahan Perairan (Kd490)', warna: '#2171b5' },
+      { id: 'osea_periode', nama: 'Periode Gelombang', warna: '#4575b4' },
+    ],
+  },
+  {
+    judul: 'Iklim & Lahan Pesisir',
+    layer: [
+      { id: 'iklim_hujan', nama: 'Curah Hujan Bulanan', warna: '#238443' },
+      { id: 'iklim_kering', nama: 'Bulan Kering Berturut-turut', warna: '#ec7014' },
     ],
   },
   {

@@ -84,8 +84,21 @@ PARAMETER = {
 }
 
 BULAN_KERING = {
-    'satuan': 'bulan', 'sumber': 'Dihitung dari CHIRPS v2.0: jumlah bulan bercurah hujan di bawah ambang bulan kering',
+    'satuan': 'bulan',
+    'sumber': 'Dihitung dari CHIRPS v2.0: rangkaian bulan berturut-turut terpanjang dengan curah hujan di bawah ambang '
+              'bulan kering dalam 12 bulan terakhir',
 }
+
+
+def kering_berturut(bulanan, ambang):
+    kering = np.asarray(bulanan) < ambang
+    if kering.all():
+        return float(len(kering))
+    terpanjang = jalan = 0
+    for k in np.concatenate([kering, kering]):
+        jalan = jalan + 1 if k else 0
+        terpanjang = max(terpanjang, jalan)
+    return float(terpanjang)
 
 
 def _unduh(url, percobaan=6):
@@ -211,7 +224,7 @@ class Command(BaseCommand):
             self._simpan(kode, p, rast, cakupan, periode)
             if kode == 'CURAH_HUJAN':
                 ambang = atur('AMBANG_BULAN_KERING_MM')
-                kering, cakupan = _raster(sel, p['resolusi'] * langkah, [lambda a: float((a < ambang).sum())])
+                kering, cakupan = _raster(sel, p['resolusi'] * langkah, [lambda a: kering_berturut(a, ambang)])
                 RasterOseanografi.objects.filter(parameter='BULAN_KERING').delete()
                 self._simpan('BULAN_KERING', BULAN_KERING, kering, cakupan, periode)
         return 1
