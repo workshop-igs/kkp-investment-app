@@ -87,9 +87,9 @@ def _per_kabupaten(i, per_kab, kabupaten):
 
 class Command(BaseCommand):
     help = (
-        'Bentuk Peta Sebaran Lokasi Indikatif Lolos Penyaringan: zona yang peruntukannya mengizinkan dibagi ke sel '
+        'Bentuk Peta Sebaran Wilayah Potensial Investasi: zona yang peruntukannya mengizinkan dibagi ke sel '
         '250 m; sel harus memenuhi seluruh syarat dasar (karakter lokasi, infrastruktur, dan pengecualian keras: '
-        'kawasan konservasi, alur pelayaran/ALKI, ekosistem sensitif, jarak aman kabel/pipa/alur pelayaran, KKPRL, '
+        'alur pelayaran/ALKI, ekosistem sensitif, jarak aman kabel/pipa/alur pelayaran, KKPRL, '
         'bangunan), lalu sel yang sedikitnya 75% parameter dinilainya sangat sesuai digabung bila bersebelahan; '
         'dalam radius 10 km hanya lokasi terbaik yang disimpan. Jalankan setelah tarik_bangunan_eksisting.'
     )
@@ -244,13 +244,6 @@ class Command(BaseCommand):
             for i, jarak in c.fetchall():
                 d['jarak_karang'][i] = jarak * KM_PER_DERAJAT
 
-        # Pengecualian keras yang sama dengan screening (analitik.services.pengecualian).
-        c.execute(
-            f'CREATE TEMP TABLE konservasi_sel AS SELECT ST_Subdivide(ST_MakeValid(z.geometry), 256, 1e-9) AS g '
-            f'FROM inventarisasi_zonasi_ruang_laut z WHERE z.geometry && %s::geometry AND {pengecualian.ZONA_KONSERVASI}',
-            [cakupan],
-        )
-        c.execute('CREATE INDEX ON konservasi_sel USING gist (g)')
         c.execute(
             f'CREATE TEMP TABLE alur_sel AS SELECT ST_Subdivide(ST_MakeValid(z.geometry), 256, 1e-9) AS g '
             f'FROM inventarisasi_zonasi_ruang_laut z WHERE z.geometry && %s::geometry AND {pengecualian.ZONA_ALUR}',
@@ -259,9 +252,11 @@ class Command(BaseCommand):
         c.execute('CREATE INDEX ON alur_sel USING gist (g)')
         unsur = pengecualian.unsur_terlarang(c, cakupan)
         c.execute(
-            'CREATE TEMP TABLE unsur_sel AS SELECT ST_Subdivide(ST_Buffer(u.geometry::geography, b.m)::geometry, 256, 1e-9) AS g '
-            'FROM unnest(%s::int[], %s::float8[]) AS b(id, m) JOIN inventarisasi_unsur_ruang_laut u ON u.id = b.id',
-            [[u[0] for u in unsur], [u[2] for u in unsur]],
+            'CREATE TEMP TABLE unsur_sel AS SELECT b.kode, '
+            'ST_Subdivide(ST_Buffer(u.geometry::geography, b.m)::geometry, 256, 1e-9) AS g '
+            'FROM unnest(%s::int[], %s::text[], %s::float8[]) AS b(id, kode, m) '
+            'JOIN inventarisasi_unsur_ruang_laut u ON u.id = b.id',
+            [[u[0] for u in unsur], [u[1] for u in unsur], [u[2] for u in unsur]],
         )
         c.execute('CREATE INDEX ON unsur_sel USING gist (g)')
 
@@ -294,14 +289,15 @@ class Command(BaseCommand):
             'SELECT DISTINCT s.id FROM sel s JOIN inventarisasi_bangunan_eksisting b '
             'ON b.geometry && s.kotak AND ST_Intersects(b.geometry, s.kotak)'
         )
-        d['konservasi'] = himpunan(
-            'SELECT DISTINCT s.id FROM sel s JOIN konservasi_sel k ON k.g && s.kotak AND ST_Intersects(k.g, s.kotak)'
-        )
         d['alur'] = himpunan(
             'SELECT DISTINCT s.id FROM sel s JOIN alur_sel k ON k.g && s.kotak AND ST_Intersects(k.g, s.kotak)'
         )
         d['unsur'] = himpunan(
             'SELECT DISTINCT s.id FROM sel s JOIN unsur_sel u ON u.g && s.kotak AND ST_Intersects(u.g, s.kotak)'
+        )
+        d['unsur_tanpa_alur'] = himpunan(
+            'SELECT DISTINCT s.id FROM sel s JOIN unsur_sel u ON u.g && s.kotak AND ST_Intersects(u.g, s.kotak) '
+            "AND u.kode <> 'ALUR_PELAYARAN'"
         )
         c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung)')
         d['infra_terdata'] = c.fetchone()[0]
@@ -388,16 +384,15 @@ class Command(BaseCommand):
         dinilai = [(nama, f) for nama, peran, _, f in berlaku if peran == 'DINILAI']
         peruntukan = {*SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, ()), *(
             sub for sub, st in KETENTUAN_DARAT_BAWAAN.get(sektor.kode, {}).items() if st == 'DIIZINKAN')}
-        tanpa_konservasi = pengecualian.konservasi_terlarang(sektor.kode)
         tanpa_alur = pengecualian.alur_terlarang(sektor.kode)
+        unsur = d['unsur'] if tanpa_alur else d['unsur_tanpa_alur']
         ekosistem_terlarang = pengecualian.ekosistem_terlarang(sektor.kode)
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
-            if not zids or i in d['kkprl'] or i in d['bangunan'] or i in d['unsur'] or (d['infra_terdata'] and i not in d['infra']):
+            if not zids or i in d['kkprl'] or i in d['bangunan'] or i in unsur or (d['infra_terdata'] and i not in d['infra']):
                 continue
-            if (tanpa_konservasi and i in d['konservasi']) or (tanpa_alur and i in d['alur']) \
-                    or (d['ekosistem'][i] or frozenset()) & ekosistem_terlarang:
+            if (tanpa_alur and i in d['alur']) or (d['ekosistem'][i] or frozenset()) & ekosistem_terlarang:
                 continue
             st = {status[(z, sektor.kode)] for z in zids}
             ranah = {zona[z][3] for z in zids}

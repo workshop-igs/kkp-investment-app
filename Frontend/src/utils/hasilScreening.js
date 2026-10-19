@@ -1,6 +1,3 @@
-// Hasil screening terbagi dua: kesesuaian ruang (hukum, satu-satunya gerbang) dan kecocokan fisik (indikatif,
-// hanya peringatan). Analisis lama belum memisahkan keduanya; fungsi di sini menurunkannya dari isian lama.
-
 const LABEL_FISIK = new Set([
   'Ranah lokasi sesuai jenis investasi',
   'Dekat infrastruktur pendukung',
@@ -23,7 +20,7 @@ export const fisikScreening = (s) => {
   if (!s.karakter) return null;
   return {
     ...s.karakter,
-    label: s.karakter.cocok ? 'Cocok' : 'Perlu dicek',
+    label: s.karakter.cocok ? 'Cocok' : 'Tidak cocok',
     syarat: (s.syarat_dasar || []).filter((d) => LABEL_FISIK.has(d.label)),
   };
 };
