@@ -10,7 +10,7 @@ PETA, SKOR = 'peta', 'skor'
 
 KELOMPOK = [
     ('karakter', 'Karakter lokasi per jenis investasi'),
-    ('peta', 'Peta Sebaran Lokasi Indikatif Lolos Penyaringan'),
+    ('peta', 'Peta Sebaran Wilayah Potensial Investasi'),
     ('analisis_area', 'Analisis area'),
     ('finansial', 'Analisis finansial'),
     ('ahp', 'Skor AHP dan keputusan kelayakan'),
@@ -65,8 +65,8 @@ DAFTAR = [
        'Bulan dengan curah hujan di bawah ini dihitung bulan kering (parameter tambak garam).', 'mm/bulan', (PETA,),
        (0, 500)),
     _d('AMBANG_KECOCOKAN', 'peta', 'Ambang persentase parameter sangat sesuai',
-       'Bagian parameter dinilai yang terukur dan harus sangat sesuai agar sebuah sel menjadi lokasi indikatif '
-       'lolos penyaringan.',
+       'Bagian parameter dinilai yang terukur dan harus sangat sesuai agar sebuah sel menjadi lokasi '
+       'potensial.',
        'proporsi (0-1)', (PETA,), (0, 1)),
     _d('MINIMAL_PARAMETER_TERUKUR', 'peta', 'Jumlah minimal parameter terukur',
        'Dihitung dari parameter dinilai saja; syarat dasar yang pasti terpenuhi tidak ikut dihitung.', 'parameter',

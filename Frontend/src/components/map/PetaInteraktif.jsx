@@ -335,7 +335,7 @@ const PetaInteraktif = ({
           if (data?.sektor_kode) onPilihSektor?.(data.sektor_kode);
           drawerRef.current?.loadGeometry(data?.geometry);
         })
-        .catch(() => setError('Batas lokasi indikatif tidak dapat dimuat.'));
+        .catch(() => setError('Batas lokasi potensial tidak dapat dimuat.'));
     }
   }, [petaSiap]); // eslint-disable-line react-hooks/exhaustive-deps
 

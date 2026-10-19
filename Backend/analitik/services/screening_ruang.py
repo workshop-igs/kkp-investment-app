@@ -322,7 +322,7 @@ def parameter_lokasi(sektor_kode, data, saring_fisik=True):
             terukur = not (k in SUMBER_SYARAT and data.get(SUMBER_SYARAT[k]) is None)
             dasar[LABEL_SYARAT[k]] = rinci.get(k, True) if terukur else None
     for kode, nilai in (data.get('pengecualian') or {}).items():
-        dasar[pengecualian.LABEL[kode]] = nilai
+        dasar[pengecualian.label(kode, sektor_kode)] = nilai
     if 'dekat_infrastruktur' in data:
         dasar[LABEL_INFRASTRUKTUR] = data['dekat_infrastruktur']
 
@@ -791,7 +791,6 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
             list(SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama')),
         )
         karakter = karakter_area(c, geom)
-        # Kecocokan fisik bersifat indikatif: menjadi peringatan, bukan gerbang kesesuaian ruang.
         cocok, alasan_karakter = cocok_karakter(sektor.kode, karakter)
         toleransi = atur('AMBANG_IRISAN_TEPI_PERSEN')
         for k in kkprl:
@@ -799,7 +798,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
             k['gugur'] = k['persen'] >= toleransi
         kkprl_gugur = [k for k in kkprl if k['gugur']]
         status, tepi = _nilai(zona_efektif, aturan, cakupan, luas_aoi, bool(kkprl_gugur))
-        if any(k['gugur'] for k in kena):
+        if not cocok or any(k['gugur'] for k in kena):
             status = 'TIDAK_SESUAI'
         provinsi_ids = {z['provinsi_id'] for z in zona_efektif}
         tambahan = nilai_area(c, geom, sektor.kode, provinsi_ids)
@@ -809,7 +808,6 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         kkprl_tepi = [k for k in kkprl if not k['gugur']]
         if status == 'SESUAI' and (kkprl_tepi or any(not k['gugur'] for k in kena)):
             status = 'SESUAI_BERSYARAT'
-        # Belum terverifikasi tetap boleh lanjut dengan label; hanya tidak sesuai yang menghentikan analisis.
         lanjut = status != 'TIDAK_SESUAI'
         dasar, parameter = parameter_area(
             c, geom, sektor.kode, karakter, STATUS_TATA_RUANG.get(status), provinsi_ids,
@@ -826,13 +824,8 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
                 for s in SektorInvestasi.objects.filter(aktif=True).exclude(id=sektor.id).order_by('urutan', 'nama'):
                     st = _nilai(zona_efektif, semua_aturan.get(s.id, {}), cakupan, luas_aoi)[0]
                     gugur = any(k['gugur'] for k in pengecualian.nilai_area(irisan, s.kode, luas_aoi))
-                    if st in ('SESUAI', 'SESUAI_BERSYARAT') and not gugur:
-                        fisik_cocok = cocok_karakter(s.kode, karakter)[0]
-                        alternatif.append({
-                            'kode': s.kode, 'nama': s.nama, 'fisik_cocok': fisik_cocok,
-                            'status_label': LABEL_STATUS[st] + ('' if fisik_cocok else ', fisik perlu dicek'),
-                        })
-                alternatif.sort(key=lambda a: not a['fisik_cocok'])
+                    if st in ('SESUAI', 'SESUAI_BERSYARAT') and not gugur and cocok_karakter(s.kode, karakter)[0]:
+                        alternatif.append({'kode': s.kode, 'nama': s.nama, 'status_label': LABEL_STATUS[st]})
             rekomendasi = {
                 'sektor_alternatif': alternatif,
                 'lokasi_alternatif': _lokasi_alternatif(c, geom, sektor),
@@ -854,13 +847,8 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'cocok': cocok,
     }
     alasan_gugur, batas_pengecualian = _alasan_pengecualian(kena, sektor.nama)
-    peringatan = []
-    if not cocok:
-        peringatan.append({'jenis': 'FISIK', 'teks': (
-            f'{alasan_karakter} Kecocokan fisik bersifat indikatif dan tidak menentukan kesesuaian ruang; '
-            f'pastikan dengan survei lapangan.')})
-    peringatan += [{'jenis': 'BATAS', 'teks': t} for t in
-                   _peringatan_tepi(tepi, kkprl_tepi, sektor.nama) + batas_pengecualian]
+    peringatan = [{'jenis': 'BATAS', 'teks': t} for t in
+                  _peringatan_tepi(tepi, kkprl_tepi, sektor.nama) + batas_pengecualian]
     if status == 'BELUM_TERVERIFIKASI':
         peringatan.append({'jenis': 'BELUM_TERVERIFIKASI', 'teks': (
             'Kesesuaian ruang belum dapat diverifikasi dengan acuan yang tersedia. Analisis tetap dapat dilanjutkan '
@@ -887,7 +875,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'karakter': karakter_ringkas,
         'kecocokan_fisik': {
             **karakter_ringkas,
-            'label': 'Cocok' if cocok else 'Perlu dicek',
+            'label': 'Cocok' if cocok else 'Tidak cocok',
             'alasan': alasan_karakter,
             'syarat': [{'label': k, 'nilai': v} for k, v in fisik.items()],
         },
@@ -898,7 +886,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'kkprl': kkprl,
         'verifikasi_batas': tepi,
         'parameter_tambahan': tambahan,
-        'alasan': alasan_gugur + [
+        'alasan': [alasan_karakter] * (not cocok) + alasan_gugur + [
             f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
         ] + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi) + [
             'Sebagian kecil area perlu verifikasi batas (lihat peringatan), sehingga kesesuaiannya bersyarat: bagian '
