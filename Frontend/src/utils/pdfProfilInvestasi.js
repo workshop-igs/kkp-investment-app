@@ -981,7 +981,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
   const y = dek.slide({
     alis: `Bab ${i + 1}  |  ${b.nama}`,
     judul: `Lokasi Paling Sesuai: ${b.nama}`,
-    sub: `Lokasi potensial dari Peta Sebaran Wilayah Potensial Investasi: syarat dasar terpenuhi dan sedikitnya 75% parameter dinilai sangat sesuai${j.karakter ? `, karakter lokasi cocok (${j.karakter})` : ''}${
+    sub: `Lokasi potensial dari Peta Sebaran Wilayah Potensial Investasi: lolos matriks Perda dan memenuhi semua kriteria sub-sektor yang terukur${
       j.lokasi.length && !j.lokasi.some((l) => l.peruntukan_utama) ? '; seluruhnya diizinkan bersyarat atau hanya untuk rincian kegiatan tertentu menurut matriks Perda' : ''}.`,
     subBaris: 2,
     aksen,
@@ -1018,7 +1018,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
     dek.gaya(7.4, C.navy, true);
     d.text(bersih(namaRapi(l.nama, 38)), x + 11.6, yy);
     const warnaKelas = C.tinggi;
-    const teksKelas = `${angka(l.persen_sesuai)}% sesuai`;
+    const teksKelas = l.sub_sektor || `${angka(l.persen_sesuai)}% kriteria terukur`;
     dek.gaya(5.6, gelap(warnaKelas, 0.8), true);
     const lebarPil = d.getTextWidth(teksKelas) + 3.6;
     dek.pil(x + lebar - 5 - lebarPil, yy, teksKelas, campur(warnaKelas, 0.16), gelap(warnaKelas, 0.8), 5.6);

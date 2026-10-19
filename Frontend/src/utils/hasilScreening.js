@@ -13,6 +13,7 @@ export const JENIS_PERINGATAN = {
   FISIK: 'Kecocokan fisik',
   BATAS: 'Perlu verifikasi batas',
   BELUM_TERVERIFIKASI: 'Belum terverifikasi',
+  ADAT: 'Dekat wilayah adat',
 };
 
 export const fisikScreening = (s) => {

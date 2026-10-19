@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  AlertTriangle, Check, CheckCircle2, Loader2, Plus, RefreshCw, RotateCcw, Save, SlidersHorizontal, Trash2,
+  AlertTriangle, Check, CheckCircle2, Loader2, RefreshCw, RotateCcw, Save, SlidersHorizontal, Trash2,
 } from 'lucide-react';
 import { api } from '../../api/klien';
 
@@ -280,116 +280,73 @@ const Editor = ({ nilai, onUbah, meta, label }) => {
   );
 };
 
-const SyaratEditor = ({ syarat, onUbah, pilihan, ekosistem, label }) => {
-  const sisa = pilihan.filter((k) => !(k in syarat));
-  const bawaan = (k) => (k === 'kedalaman' ? [null, null] : k.includes('ekosistem') ? [ekosistem[0]] : 0);
-  return (
-    <div className="space-y-2">
-      {Object.entries(syarat).map(([k, v]) => (
-        <div key={k} className="flex flex-wrap items-center gap-2">
-          <span className="w-56 text-xs font-medium text-slate-600">{label[k] || k}</span>
-          {k === 'kedalaman' ? (
-            <div className="flex gap-2 w-60">
-              <Angka nilai={v[0]} kosong onUbah={(x) => onUbah({ ...syarat, kedalaman: [x, v[1]] })} />
-              <Angka nilai={v[1]} kosong onUbah={(x) => onUbah({ ...syarat, kedalaman: [v[0], x] })} />
-            </div>
-          ) : Array.isArray(v) ? (
-            <div className="flex flex-wrap gap-3">
-              {ekosistem.map((e) => (
-                <label key={e} className="inline-flex items-center gap-1 text-xs">
-                  <input type="checkbox" checked={v.includes(e)}
-                    onChange={(ev) => onUbah({ ...syarat, [k]: ev.target.checked ? [...v, e] : v.filter((x) => x !== e) })} />
-                  {e.replace(/_/g, ' ').toLowerCase()}
-                </label>
-              ))}
-            </div>
-          ) : (
-            <div className="w-28"><Angka nilai={v} onUbah={(x) => onUbah({ ...syarat, [k]: x })} /></div>
-          )}
-          <button type="button" title="Hapus syarat" onClick={() => {
-            const { [k]: _, ...lain } = syarat;
-            onUbah(lain);
-          }} className="p-1 text-rose-500 hover:bg-rose-50 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
-        </div>
-      ))}
-      {sisa.length > 0 && (
-        <select value="" onChange={(e) => e.target.value && onUbah({ ...syarat, [e.target.value]: bawaan(e.target.value) })}
-          className="rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs text-slate-600 bg-white">
-          <option value="">+ Tambah syarat</option>
-          {sisa.map((k) => <option key={k} value={k}>{label[k] || k}</option>)}
-        </select>
-      )}
-    </div>
-  );
-};
+const RANAH = [['LAUT', 'Perairan'], ['DARAT', 'Darat pesisir']];
 
-const KarakterEditor = ({ nilai, onUbah, data, tambahan }) => {
+const KriteriaEditor = ({ nilai, onUbah, data }) => {
   const [kode, setKode] = useState(data.sektor[0]?.kode);
-  const aturan = nilai[kode] || (tambahan ? {} : { uraian: '' });
-  const ubahJenis = (baru) => onUbah({ ...nilai, [kode]: baru });
-  const RANAH = [['LAUT', 'Perairan'], ['DARAT', 'Darat pesisir']];
+  const parameter = data.parameter_kriteria;
+  const subs = nilai[kode] || {};
+  const ubahSub = (sub, baru) => onUbah({ ...nilai, [kode]: { ...subs, [sub]: baru } });
   return (
     <div className="space-y-3">
       <select value={kode} onChange={(e) => setKode(e.target.value)} className={`${kelasInput} max-w-sm`}>
         {data.sektor.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
       </select>
-      {!tambahan && (
-        <label className="block text-xs font-semibold text-slate-600">
-          Uraian kebutuhan (tampil di laporan dan profil)
-          <textarea rows={2} value={aturan.uraian || ''} onChange={(e) => ubahJenis({ ...aturan, uraian: e.target.value })}
-            className={`${kelasInput} mt-1 font-normal`} />
-        </label>
-      )}
-      {RANAH.map(([ranah, nama]) => (
-        <div key={ranah} className="rounded-lg border border-slate-100 p-3">
-          <label className="inline-flex items-center gap-2 text-sm font-semibold text-slate-700">
-            <input type="checkbox" checked={ranah in aturan} onChange={(e) => {
-              if (e.target.checked) ubahJenis({ ...aturan, [ranah]: tambahan ? {} : [{}] });
-              else {
-                const { [ranah]: _, ...lain } = aturan;
-                ubahJenis(lain);
-              }
-            }} />
-            {nama}
-          </label>
-          {ranah in aturan && (tambahan ? (
-            <div className="mt-2">
-              <SyaratEditor syarat={aturan[ranah]} pilihan={data.syarat_tambahan} ekosistem={data.ekosistem}
-                label={data.label_bagian} onUbah={(s) => ubahJenis({ ...aturan, [ranah]: s })} />
+      {Object.entries(subs).map(([sub, isi]) => {
+        const ubahKriteria = (k, ambang) => ubahSub(sub, { ...isi, kriteria: { ...isi.kriteria, [k]: ambang } });
+        const sisa = Object.keys(parameter).filter((k) => !(k in isi.kriteria));
+        return (
+          <div key={sub} className="rounded-lg border border-slate-100 p-3 space-y-2">
+            <div className="flex flex-wrap items-center gap-3">
+              <input value={isi.nama} onChange={(e) => ubahSub(sub, { ...isi, nama: e.target.value })}
+                className={`${kelasInput} max-w-xs font-semibold`} />
+              {RANAH.map(([r, n]) => (
+                <label key={r} className="inline-flex items-center gap-1 text-xs text-slate-600">
+                  <input type="checkbox" checked={isi.ranah.includes(r)}
+                    onChange={(e) => ubahSub(sub, { ...isi, ranah: e.target.checked ? [...isi.ranah, r] : isi.ranah.filter((x) => x !== r) })} />
+                  {n}
+                </label>
+              ))}
             </div>
-          ) : (
-            <div className="mt-2 space-y-2">
-              {aturan[ranah].map(({ dinilai, ...syarat }, i) => {
-                const ubah = (baru) => ubahJenis({ ...aturan, [ranah]: aturan[ranah].map((x, j) => (j === i ? baru : x)) });
-                return (
-                  <div key={i} className="rounded-md bg-slate-50 p-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Alternatif {i + 1}{aturan[ranah].length > 1 ? ' (cukup salah satu terpenuhi)' : ''}
-                      </span>
-                      {aturan[ranah].length > 1 && (
-                        <button type="button" onClick={() => ubahJenis({ ...aturan, [ranah]: aturan[ranah].filter((_, j) => j !== i) })}
-                          className="text-xs text-rose-600 hover:underline">Hapus alternatif</button>
-                      )}
-                    </div>
-                    <SyaratEditor syarat={syarat} pilihan={data.syarat_karakter} ekosistem={data.ekosistem} label={data.label_bagian}
-                      onUbah={(s) => ubah(dinilai ? { ...s, dinilai } : s)} />
-                    <div className="mt-2 border-t border-slate-200 pt-2">
-                      <span className="block mb-1 text-[11px] font-semibold text-slate-500">
-                        Parameter dinilai khusus alternatif ini (ikut persentase sangat sesuai)
-                      </span>
-                      <SyaratEditor syarat={dinilai || {}} pilihan={data.syarat_tambahan} ekosistem={data.ekosistem}
-                        label={data.label_bagian} onUbah={(d) => ubah(Object.keys(d).length ? { ...syarat, dinilai: d } : syarat)} />
-                    </div>
-                  </div>
-                );
-              })}
-              <button type="button" onClick={() => ubahJenis({ ...aturan, [ranah]: [...aturan[ranah], {}] })}
-                className="text-xs font-semibold text-sky-700 flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Tambah alternatif</button>
+            <div className="overflow-x-auto">
+              <table className="text-sm">
+                <thead>
+                  <tr className="text-left text-xs text-slate-500">
+                    <th className="pr-3 pb-1 font-semibold">Kriteria</th>
+                    <th className="px-1 pb-1 font-semibold">Batas bawah</th>
+                    <th className="px-1 pb-1 font-semibold">Batas atas</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(isi.kriteria).map(([k, [bawah, atas]]) => (
+                    <tr key={k}>
+                      <td className="pr-3 py-0.5 text-xs font-medium text-slate-600">
+                        {parameter[k]?.label || k}{parameter[k]?.satuan ? ` (${parameter[k].satuan})` : ''}
+                      </td>
+                      <td className="px-1 py-0.5 w-32"><Angka nilai={bawah} kosong onUbah={(x) => ubahKriteria(k, [x, atas])} /></td>
+                      <td className="px-1 py-0.5 w-32"><Angka nilai={atas} kosong onUbah={(x) => ubahKriteria(k, [bawah, x])} /></td>
+                      <td>
+                        <button type="button" title="Hapus kriteria" onClick={() => {
+                          const { [k]: _, ...lain } = isi.kriteria;
+                          ubahSub(sub, { ...isi, kriteria: lain });
+                        }} className="p-1 text-rose-500 hover:bg-rose-50 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          ))}
-        </div>
-      ))}
+            {sisa.length > 0 && (
+              <select value="" onChange={(e) => e.target.value && ubahKriteria(e.target.value, [null, null])}
+                className="rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs text-slate-600 bg-white">
+                <option value="">+ Tambah kriteria</option>
+                {sisa.map((k) => <option key={k} value={k}>{parameter[k].label}</option>)}
+              </select>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -414,7 +371,7 @@ const KartuPengaturan = ({ item, data, onTersimpan }) => {
     }
   };
 
-  const khusus = ['KARAKTER_LOKASI', 'PARAMETER_TAMBAHAN'].includes(item.kunci);
+  const khusus = item.kunci === 'KRITERIA_JENIS';
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
@@ -441,7 +398,7 @@ const KartuPengaturan = ({ item, data, onTersimpan }) => {
         </div>
       </div>
       {khusus
-        ? <KarakterEditor nilai={nilai} onUbah={setNilai} data={data} tambahan={item.kunci === 'PARAMETER_TAMBAHAN'} />
+        ? <KriteriaEditor nilai={nilai} onUbah={setNilai} data={data} />
         : <Editor nilai={nilai} onUbah={setNilai} meta={item} label={data.label_bagian} />}
       {galat && <p className="mt-3 text-xs font-medium text-rose-600">{galat}</p>}
     </div>

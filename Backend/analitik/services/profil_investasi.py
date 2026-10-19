@@ -11,6 +11,7 @@ from analitik.services.konstanta import (
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
 )
+from analitik.services.kriteria import uraian
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.pengaturan import atur
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
@@ -245,7 +246,9 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
             'luas_ha': lok.luas_ha,
             'luas_wilayah_ha': r.get('luas_wilayah_ha'),
             'persen_sesuai': lok.persen_sesuai,
-            'keunggulan': [k for k, v in r['parameter'].items() if v == 100 and not k.startswith('Ranah')],
+            'sub_sektor': r.get('sub_sektor'),
+            'keunggulan': [f"{k['label']} {k['nilai_teks']}" if k['nilai_teks'] else k['label']
+                           for k in r.get('kriteria', []) if k['lulus']],
             'pembatas': [f'Perlu dinilai di lapangan: {k[0].lower()}{k[1:]}' for k in r['perlu_dinilai']],
             'titik': [round(titik.x, 5), round(titik.y, 5)],
             'oseanografi': {k: v['rata2'] for k, v in _oseanografi(lok.geometry, PARAMETER_OSEANOGRAFI_LOKASI).items()},
@@ -265,7 +268,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         **luas.get(sektor.kode, {'sesuai_ha': 0, 'tinggi_ha': 0, 'sedang_ha': 0, 'jumlah_zona_tinggi': 0}),
         'sub_zona_diizinkan': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'DIIZINKAN'),
         'sub_zona_bersyarat': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'BERSYARAT'),
-        'karakter': atur('KARAKTER_LOKASI').get(sektor.kode, {}).get('uraian', ''),
+        'karakter': uraian(sektor.kode),
         'rincian_matriks': _rincian_matriks(provinsi, sektor),
         'lokasi': lokasi,
         'peta': [{'kelas': kelas_zona[i], 'geometry': _geojson(g)} for i, g in c.fetchall() if g],

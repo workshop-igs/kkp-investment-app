@@ -1,3 +1,4 @@
+import math
 import time
 from collections import Counter
 from functools import partial
@@ -11,35 +12,32 @@ from analitik.models import LokasiPotensial, NilaiWilayahParameter, ParameterTam
 from analitik.services import pengecualian
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
-    KETENTUAN_DARAT_BAWAAN,
     KM_PER_DERAJAT,
-    SEKTOR_SUB_ZONA_COCOK,
     SEKTOR_TERSENDIRI_DI_PETA,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
-from analitik.services.oseanografi import daya_gelombang, raster_tersedia
+from analitik.services.kriteria import (
+    BENCANA,
+    PARAMETER,
+    RASTER_DATA,
+    dari_raster,
+    lulus,
+    sumber_tersedia,
+    teks_ambang,
+    teks_nilai,
+)
 from analitik.services.parameter_tambahan import sesuai_ambang
 from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
-from analitik.services.screening_ruang import (
-    BOLEH,
-    LABEL_TATA_RUANG,
-    _aturan_per_sektor,
-    _ketentuan,
-    parameter_lokasi,
-    persen_sangat_sesuai,
-)
+from analitik.services.screening_ruang import BOLEH, LABEL_ADAT, _aturan_per_sektor, _ketentuan
 from inti.models import Provinsi, SektorInvestasi
+from inventarisasi.klasifikasi import jenis_unsur
 from inventarisasi.models import ZonasiRuangLaut
 
 LABEL_SUB_ZONA = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
 PERINGKAT_BENCANA = {1: 'RENDAH', 2: 'SEDANG', 3: 'TINGGI'}
-PITA_RASTER = [
-    ('KEDALAMAN', 1, 'kedalaman'), ('GELOMBANG', 1, 'gelombang'), ('GELOMBANG', 3, 'gelombang_tertinggi'),
-    ('SUHU', 2, 'suhu'), ('SUHU', 1, 'suhu_rata'), ('ANOMALI_SUHU', 1, 'anomali'), ('KLOROFIL', 1, 'klorofil'),
-    ('KD490', 1, 'kd490'), ('PERIODE_GLB', 1, 'periode'), ('CURAH_HUJAN', 1, 'curah_hujan'),
-    ('BULAN_KERING', 1, 'bulan_kering'),
-]
+PITA_RASTER = [(raster, 1, kunci) for kunci, raster in RASTER_DATA.items()]
+JANGKAU_ALUR_DERAJAT = 0.7
 
 SEL = """
 CREATE TEMP TABLE sel AS
@@ -71,6 +69,11 @@ SELECT p.i, ST_AsEWKB(ST_Multi(p.g)), ST_Area(p.g::geography) / 10000, a.id,
 FROM p JOIN a ON a.g && p.g AND ST_Intersects(a.g, p.g)
 """
 
+TERDEKAT = """
+SELECT s.id, (SELECT ST_Distance(t.g, s.{kolom}) FROM {tabel} t {saring} ORDER BY t.g <-> s.{kolom} LIMIT 1)
+FROM sel s WHERE s.id = ANY(%s)
+"""
+
 
 def _di_area(i, kena, dalam):
     return (i in kena) == dalam
@@ -86,11 +89,10 @@ def _per_kabupaten(i, per_kab, kabupaten):
 
 class Command(BaseCommand):
     help = (
-        'Bentuk Peta Sebaran Wilayah Potensial Investasi: zona yang peruntukannya mengizinkan dibagi ke sel '
-        '250 m; sel harus memenuhi seluruh syarat dasar (karakter lokasi, infrastruktur, dan pengecualian keras: '
-        'alur pelayaran/ALKI, ekosistem sensitif, jarak aman kabel/pipa/alur pelayaran, KKPRL, '
-        'bangunan), lalu sel yang sedikitnya 75% parameter dinilainya sangat sesuai digabung bila bersebelahan; '
-        'dalam radius 10 km hanya lokasi terbaik yang disimpan. Jalankan setelah tarik_bangunan_eksisting.'
+        'Bentuk Peta Sebaran Wilayah Potensial Investasi: zona yang peruntukannya mengizinkan dibagi ke sel 250 m; '
+        'sel harus lolos gerbang (matriks Perda, wilayah adat, alur pelayaran/ALKI, ekosistem sensitif, jarak aman '
+        'kabel/pipa/alur, KKPRL, bangunan) lalu memenuhi seluruh kriteria sub-sektor yang terukur; sel yang '
+        'bersebelahan digabung dan dalam radius 10 km hanya lokasi terbaik yang disimpan.'
     )
 
     stealth_options = ('progres',)
@@ -145,7 +147,7 @@ class Command(BaseCommand):
             return Counter()
 
         with connection.cursor() as c:
-            c.execute('DROP TABLE IF EXISTS zona_sel, sel, piksel, bencana_sel, alur_sel, unsur_sel')
+            c.execute('DROP TABLE IF EXISTS zona_sel, sel, piksel, bencana_sel, alur_sel, unsur_sel, alur_jarak')
             c.execute(
                 'CREATE TEMP TABLE zona_sel AS SELECT id, id = ANY(%s) AS kandidat, '
                 'ST_Subdivide(ST_MakeValid(geometry), 256, 1e-9) AS g '
@@ -163,11 +165,13 @@ class Command(BaseCommand):
             lokasi = self._lokasi(c, prov, zona, status, data)
         return Counter(lok.sektor.kode for lok in lokasi)
 
+    def _kunci_dipakai(self):
+        return {k for s in self.sektor for sub in atur('KRITERIA_JENIS').get(s.kode, {}).values() for k in sub['kriteria']}
+
     def _data_sel(self, c, banyak, cakupan, prov):
-        d = {k: [None] * (banyak + 1) for k in (
-            'zona', 'jarak', 'ekosistem', 'sekitar', 'bencana', 'jarak_karang', *(kunci for _, _, kunci in PITA_RASTER),
-        )}
-        d['tersedia'] = raster_tersedia()
+        d = {k: [None] * (banyak + 1) for k in ('zona', 'ekosistem', 'bencana', 'jarak_pantai_km', *RASTER_DATA)}
+        d['tersedia'] = sumber_tersedia()
+        dipakai = self._kunci_dipakai()
 
         c.execute(
             """
@@ -180,6 +184,7 @@ class Command(BaseCommand):
         for i, zids, tertutup in c.fetchall():
             if tertutup >= atur('AMBANG_CAKUPAN_ACUAN'):
                 d['zona'][i] = zids
+        calon = [i for i in range(1, banyak + 1) if d['zona'][i]]
 
         c.execute(
             """
@@ -200,48 +205,42 @@ class Command(BaseCommand):
             'SELECT s.id, p.kunci, p.nilai FROM sel s JOIN piksel p ON p.g && s.titik AND ST_Intersects(p.g, s.titik)'
         )
         for i, kunci, nilai in c.fetchall():
-            d[kunci][i] = max(0.0, -nilai) if kunci == 'kedalaman' else nilai
+            d[kunci][i] = dari_raster(kunci, nilai)
 
-        for km in (0.5, 5):
-            c.execute(
-                'SELECT s.id FROM sel s WHERE EXISTS '
-                '(SELECT 1 FROM darat_terbagi g WHERE ST_DWithin(s.kotak, g.g, %s))',
-                [km / KM_PER_DERAJAT],
-            )
-            for (i,) in c.fetchall():
-                if d['jarak'][i] is None:
-                    d['jarak'][i] = 0.0 if km == 0.5 else 1.0
+        c.execute(TERDEKAT.format(kolom='kotak', tabel='darat_terbagi', saring=''), [calon])
+        for i, jarak in c.fetchall():
+            d['jarak_pantai_km'][i] = jarak * KM_PER_DERAJAT if jarak is not None else None
 
-        for kolom, radius in (('ekosistem', 0.0), ('sekitar', atur('RADIUS_EKOSISTEM_PENDUKUNG_M') / 1000 / KM_PER_DERAJAT)):
-            c.execute(
-                """
-                SELECT s.id, array_agg(DISTINCT e.jenis) FROM sel s JOIN inventarisasi_sumber_daya_alam e
-                  ON e.geometry && ST_Expand(s.kotak, %s) AND ST_DWithin(e.geometry, s.kotak, %s)
-                 AND (e.sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG')
-                      OR (e.sumber_data = 'GMW-MANGROVE' AND e.tahun_data = %s))
-                GROUP BY s.id
-                """,
-                [radius, radius, GMW_TAHUN_AKHIR],
-            )
-            for i, jenis in c.fetchall():
-                d[kolom][i] = frozenset(jenis)
+        c.execute(
+            """
+            SELECT s.id, array_agg(DISTINCT e.jenis) FROM sel s JOIN inventarisasi_sumber_daya_alam e
+              ON e.geometry && s.kotak AND ST_Intersects(e.geometry, s.kotak)
+             AND (e.sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG')
+                  OR (e.sumber_data = 'GMW-MANGROVE' AND e.tahun_data = %s))
+            GROUP BY s.id
+            """,
+            [GMW_TAHUN_AKHIR],
+        )
+        for i, jenis in c.fetchall():
+            d['ekosistem'][i] = frozenset(jenis)
 
-        radius_karang = max((
-            syarat['jarak_karang_maks_km'] for per_ranah in atur('PARAMETER_TAMBAHAN').values()
-            for syarat in per_ranah.values() if 'jarak_karang_maks_km' in syarat
-        ), default=None)
-        c.execute("SELECT EXISTS (SELECT 1 FROM inventarisasi_sumber_daya_alam WHERE jenis = 'TERUMBU_KARANG')")
-        if radius_karang is not None and c.fetchone()[0]:
-            d['jarak_karang'] = [99.0] * (banyak + 1)
-            r = radius_karang / KM_PER_DERAJAT
+        km = {}
+        for kategori in sorted({k for kunci in dipakai if isinstance(PARAMETER[kunci][2], tuple)
+                                for k in PARAMETER[kunci][2]} & d['tersedia']):
             c.execute(
-                "SELECT s.id, MIN(ST_Distance(e.geometry, s.kotak)) FROM sel s JOIN inventarisasi_sumber_daya_alam e "
-                "ON e.jenis = 'TERUMBU_KARANG' AND e.geometry && ST_Expand(s.kotak, %s) AND ST_DWithin(e.geometry, s.kotak, %s) "
-                'GROUP BY s.id',
-                [r, r],
+                TERDEKAT.format(kolom='titik', tabel='(SELECT geometry AS g, kategori FROM inventarisasi_infrastruktur_pendukung)',
+                                saring='WHERE t.kategori = %s'),
+                [kategori, calon],
             )
-            for i, jarak in c.fetchall():
-                d['jarak_karang'][i] = jarak * KM_PER_DERAJAT
+            km[kategori] = {i: jarak * KM_PER_DERAJAT for i, jarak in c.fetchall() if jarak is not None}
+        for kunci in dipakai:
+            sumber = PARAMETER[kunci][2]
+            if not isinstance(sumber, tuple) or not set(sumber) & set(km):
+                continue
+            d[kunci] = [None] * (banyak + 1)
+            for i in calon:
+                ada = [km[k][i] for k in sumber if i in km.get(k, {})]
+                d[kunci][i] = min(ada) if ada else None
 
         c.execute(
             f'CREATE TEMP TABLE alur_sel AS SELECT ST_Subdivide(ST_MakeValid(z.geometry), 256, 1e-9) AS g '
@@ -249,6 +248,8 @@ class Command(BaseCommand):
             [cakupan],
         )
         c.execute('CREATE INDEX ON alur_sel USING gist (g)')
+        if 'jarak_alur_km' in dipakai:
+            self._jarak_alur(c, cakupan, calon, d, banyak)
         unsur = pengecualian.unsur_terlarang(c, cakupan)
         c.execute(
             'CREATE TEMP TABLE unsur_sel AS SELECT b.kode, '
@@ -297,38 +298,45 @@ class Command(BaseCommand):
             'SELECT DISTINCT s.id FROM sel s JOIN unsur_sel u ON u.g && s.kotak AND ST_Intersects(u.g, s.kotak) '
             "AND u.kode <> 'ALUR_PELAYARAN'"
         )
-        c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung)')
-        d['infra_terdata'] = c.fetchone()[0]
-        d['infra'] = set()
-        for kategori, _, ideal_km, _ in atur('INFRASTRUKTUR_AKSESIBILITAS'):
-            d['infra'] |= himpunan(
-                'SELECT s.id FROM sel s WHERE EXISTS (SELECT 1 FROM inventarisasi_infrastruktur_pendukung i '
-                'WHERE i.kategori = %s AND ST_DWithin(i.geometry, s.titik, %s))',
-                [kategori, ideal_km / KM_PER_DERAJAT],
-            )
-        c.execute(
-            'SELECT s.id, (SELECT ST_Distance(i.geometry, s.titik) FROM inventarisasi_infrastruktur_pendukung i '
-            'WHERE i.kategori = ANY(%s) ORDER BY i.geometry <-> s.titik LIMIT 1) FROM sel s WHERE s.id = ANY(%s)',
-            [[k for k, _, _, _ in atur('INFRASTRUKTUR_AKSESIBILITAS')], list(d['infra'])],
+        d['adat'] = himpunan(
+            "SELECT DISTINCT s.id FROM sel s JOIN inventarisasi_unsur_ruang_laut u ON u.kelompok = 'MHA' "
+            'AND u.geometry && s.kotak AND ST_Intersects(u.geometry, s.kotak)'
         )
-        d['jarak_infra'] = dict(c.fetchall())
+        radius = atur('RADIUS_ADAT_DEKAT_M') / 1000 / KM_PER_DERAJAT
+        d['adat_dekat'] = himpunan(
+            "SELECT DISTINCT s.id FROM sel s JOIN inventarisasi_unsur_ruang_laut u ON u.kelompok = 'MHA' "
+            'AND u.geometry && ST_Expand(s.kotak, %s) AND ST_DWithin(u.geometry, s.kotak, %s)',
+            [radius, radius],
+        ) - d['adat']
         c.execute(
             'SELECT id, floor(ST_X(titik) / %s)::int, floor(ST_Y(titik) / %s)::int FROM sel',
             [UKURAN_SEL_LOKASI_DERAJAT, UKURAN_SEL_LOKASI_DERAJAT],
         )
         d['ij'] = {i: (x, y) for i, x, y in c.fetchall()}
-        c.execute(
-            "SELECT EXISTS (SELECT 1 FROM inventarisasi_unsur_ruang_laut WHERE kelompok = 'MHA' AND provinsi_id = %s)",
-            [prov.id],
-        )
-        d['adat_terdata'] = c.fetchone()[0]
-        d['adat'] = himpunan(
-            "SELECT DISTINCT s.id FROM sel s JOIN inventarisasi_unsur_ruang_laut u ON u.kelompok = 'MHA' "
-            'AND u.geometry && s.kotak AND ST_Intersects(u.geometry, s.kotak)'
-        )
         d['banyak'] = banyak
         d['tambahan'] = self._tambahan(c, prov, d)
         return d
+
+    @staticmethod
+    def _jarak_alur(c, cakupan, calon, d, banyak):
+        c.execute(
+            f'CREATE TEMP TABLE alur_jarak AS SELECT ST_Subdivide(ST_MakeValid(z.geometry), 256, 1e-9) AS g '
+            f'FROM inventarisasi_zonasi_ruang_laut z WHERE z.geometry && ST_Expand(%s::geometry, %s) '
+            f'AND {pengecualian.ZONA_ALUR}',
+            [cakupan, JANGKAU_ALUR_DERAJAT],
+        )
+        c.execute(
+            "SELECT id, nama, jenis, keterangan, kode_lapisan FROM inventarisasi_unsur_ruang_laut "
+            "WHERE kelompok = 'RTRL' AND geometry && ST_Expand(%s::geometry, %s)",
+            [cakupan, JANGKAU_ALUR_DERAJAT],
+        )
+        garis = [uid for uid, *teks in c.fetchall() if jenis_unsur(*teks) == 'ALUR_PELAYARAN']
+        c.execute('INSERT INTO alur_jarak SELECT geometry FROM inventarisasi_unsur_ruang_laut WHERE id = ANY(%s)', [garis])
+        c.execute('CREATE INDEX ON alur_jarak USING gist (g)')
+        c.execute(TERDEKAT.format(kolom='titik', tabel='alur_jarak', saring=''), [calon])
+        d['jarak_alur_km'] = [None] * (banyak + 1)
+        for i, jarak in c.fetchall():
+            d['jarak_alur_km'][i] = jarak * KM_PER_DERAJAT if jarak is not None else None
 
     def _tambahan(self, c, prov, d):
         hasil, kabupaten = [], None
@@ -362,11 +370,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def _kabupaten_sel(c, prov, d):
-        calon = [
-            i for i in range(1, d['banyak'] + 1)
-            if d['zona'][i] and i not in d['kkprl'] and i not in d['bangunan']
-            and (not d['infra_terdata'] or i in d['infra'])
-        ]
+        calon = [i for i in range(1, d['banyak'] + 1) if d['zona'][i] and i not in d['kkprl'] and i not in d['bangunan']]
         c.execute(
             'SELECT s.id, (SELECT k.id FROM inti_kabupaten_kota k WHERE k.provinsi_id = %s AND k.geometry IS NOT NULL '
             'ORDER BY k.geometry <-> s.titik LIMIT 1) FROM sel s WHERE s.id = ANY(%s)',
@@ -374,73 +378,57 @@ class Command(BaseCommand):
         )
         return dict(c.fetchall())
 
-    def _nilai_sel(self, sektor, zona, status, d):
-        karakter = atur('KARAKTER_LOKASI').get(sektor.kode)
-        izin = {'LAUT', 'DARAT'} if karakter is None else {'LAUT', 'DARAT'} & set(karakter)
+    @staticmethod
+    def _nilai_kriteria(kunci, i, d):
+        if kunci == 'karang':
+            return int('TERUMBU_KARANG' in (d['ekosistem'][i] or ())) if 'TERUMBU_KARANG' in d['tersedia'] else None
+        v = d[kunci][i] if kunci in d else None
+        return None if v is None else round(v, 2)
+
+    @staticmethod
+    def _cocok(kriteria, nilai, bencana, tambahan, minimal):
+        terukur = 0
+        for (_, ambang), v in zip(kriteria, nilai):
+            if v is None:
+                continue
+            if not lulus(v, ambang):
+                return None
+            terukur += 1
+        if terukur < minimal or any(kelas == 'TINGGI' for _, kelas in bencana) or False in tambahan:
+            return None
+        return 100 * terukur / len(kriteria)
+
+    def _nilai_sel(self, sektor, sub, zona, status, d):
         berlaku = [t for t in d['tambahan'] if not t[2] or sektor.kode in t[2]]
         gerbang = [f for _, peran, _, f in berlaku if peran == 'GERBANG']
-        dinilai = [(nama, f) for nama, peran, _, f in berlaku if peran == 'DINILAI']
-        peruntukan = {*SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, ()), *(
-            sub for sub, st in KETENTUAN_DARAT_BAWAAN.get(sektor.kode, {}).items() if st == 'DIIZINKAN')}
+        dinilai = [f for _, peran, _, f in berlaku if peran == 'DINILAI']
         tanpa_alur = pengecualian.alur_terlarang(sektor.kode)
         unsur = d['unsur'] if tanpa_alur else d['unsur_tanpa_alur']
         ekosistem_terlarang = pengecualian.ekosistem_terlarang(sektor.kode)
+        kriteria = list(sub['kriteria'].items())
+        minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
-            if not zids or i in d['kkprl'] or i in d['bangunan'] or i in unsur or (d['infra_terdata'] and i not in d['infra']):
+            if not zids or i in d['kkprl'] or i in d['bangunan'] or i in unsur or i in d['adat']:
                 continue
             if (tanpa_alur and i in d['alur']) or (d['ekosistem'][i] or frozenset()) & ekosistem_terlarang:
                 continue
             st = {status[(z, sektor.kode)] for z in zids}
             ranah = {zona[z][3] for z in zids}
-            if not st <= set(BOLEH) or len(ranah) != 1 or not ranah <= izin or any(f(i) is False for f in gerbang):
+            if not st <= set(BOLEH) or len(ranah) != 1 or not ranah <= set(sub['ranah']) or any(f(i) is False for f in gerbang):
                 continue
-            bersyarat = 'BERSYARAT' in st
+            kena = ranah == {'DARAT'} or (d['jarak_pantai_km'][i] or 0) <= 0
             kunci = (
-                ranah.pop(), 'BERSYARAT' if bersyarat else 'DIIZINKAN', d['jarak'][i], d['ekosistem'][i], d['sekitar'][i],
-                tuple(sorted((d['bencana'][i] or {}).items())),
-                (i in d['infra']) if d['infra_terdata'] else None, (i in d['adat']) if d['adat_terdata'] else None,
-                tuple((nama, f(i)) for nama, f in dinilai),
-                bersyarat and any(zona[z][1] not in peruntukan for z in zids),
-                d['jarak_karang'][i], tuple(d[k][i] for _, _, k in PITA_RASTER),
+                tuple(self._nilai_kriteria(k, i, d) for k, _ in kriteria),
+                tuple(sorted((d['bencana'][i] or {}).items())) if kena else (),
+                tuple(f(i) for f in dinilai),
             )
             if kunci not in tembolok:
-                tembolok[kunci] = self._nilai(sektor.kode, kunci, d['tersedia'])
-            if tembolok[kunci]:
-                lolos[i] = tembolok[kunci]
+                tembolok[kunci] = self._cocok(kriteria, *kunci, minimal)
+            if tembolok[kunci] is not None:
+                lolos[i] = (tembolok[kunci], kunci[0], kunci[1])
         return lolos
-
-    @staticmethod
-    def _nilai(kode, kunci, tersedia):
-        ranah, status_tr, jarak, ekosistem, sekitar, bencana, infra, adat, tambahan, ketat, jarak_karang, raster = kunci
-        r = {k: v for (_, _, k), v in zip(PITA_RASTER, raster)}
-        hujan = r['curah_hujan']
-        hasil = parameter_lokasi(kode, {
-            'ranah': ranah, 'status_tr': status_tr, 'kedalaman_min': r['kedalaman'], 'kedalaman_maks': r['kedalaman'],
-            'gelombang': r['gelombang'], 'gelombang_tertinggi': r['gelombang_tertinggi'], 'suhu_min': r['suhu'],
-            'suhu_rata': r['suhu_rata'], 'anomali_suhu': r['anomali'], 'klorofil': r['klorofil'], 'kd490': r['kd490'],
-            'daya_gelombang': daya_gelombang(r['gelombang'], r['periode']),
-            'curah_hujan': hujan * 12 if hujan is not None else None, 'bulan_kering': r['bulan_kering'],
-            'jarak_karang_km': jarak_karang, 'tersedia': tersedia,
-            'jarak_pantai_km': (jarak if jarak is not None else 99.0) if ranah == 'LAUT' else None,
-            'ekosistem': ekosistem or frozenset(), 'ekosistem_sekitar': sekitar or frozenset(), 'bencana': dict(bencana),
-            'dekat_infrastruktur': infra, 'adat': adat, 'tambahan': dict(tambahan),
-            'pengecualian': {p: True for p in pengecualian.berlaku(kode)},
-        })
-        if hasil is None:
-            return None
-        dasar, nilai = hasil
-        if sum(v is not None for v in nilai.values()) < atur('MINIMAL_PARAMETER_TERUKUR'):
-            return None
-        if ketat:
-            lain = [v for k, v in nilai.items() if k != LABEL_TATA_RUANG]
-            if atur('WAJIB_LENGKAP_BERSYARAT') and None in lain:
-                return None
-            if sum(v is True for v in lain) < atur('AMBANG_KECOCOKAN_BERSYARAT') * sum(v is not None for v in lain):
-                return None
-        persen = persen_sangat_sesuai(nilai)
-        return (persen, nilai, dasar) if persen >= 100 * atur('AMBANG_KECOCOKAN') else None
 
     @staticmethod
     def _wilayah(lolos, ij):
@@ -464,19 +452,15 @@ class Command(BaseCommand):
         return wilayah
 
     @staticmethod
-    def _mutu(sel, lolos, d):
-        return (
-            sum(lolos[i][0] for i in sel) / len(sel),
-            -min(d['jarak_infra'].get(i) or 0 for i in sel),
-            len(sel),
-        )
+    def _mutu(sel, lolos):
+        return sum(lolos[i][0] for i in sel) / len(sel), len(sel)
 
     def _inti(self, wilayah, lolos, d):
         blok = {}
         for i in wilayah:
             x, y = d['ij'][i]
             blok.setdefault((x // atur('SEL_PER_SISI_INTI_LOKASI'), y // atur('SEL_PER_SISI_INTI_LOKASI')), []).append(i)
-        return max(blok.values(), key=lambda sel: self._mutu(sel, lolos, d))
+        return max(blok.values(), key=lambda sel: self._mutu(sel, lolos))
 
     @staticmethod
     def _tersebar(calon):
@@ -491,22 +475,23 @@ class Command(BaseCommand):
     def _lokasi(self, c, prov, zona, status, d):
         hasil = []
         for sektor in self.sektor:
-            lolos = self._nilai_sel(sektor, zona, status, d)
-            if not lolos:
-                continue
-            calon = []
-            for w in self._wilayah(lolos, d['ij']):
-                sel = self._inti(w, lolos, d)
-                calon.append((
-                    self._mutu(sel, lolos, d),
-                    sum(d['ij'][i][0] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
-                    sum(d['ij'][i][1] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
-                    (sel, len(w)),
-                ))
-            inti = self._tersebar(calon)
-            c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for sel, _ in inti for i in sel]])
-            for k, ewkb, luas in c.fetchall():
-                hasil.append(self._satu(prov, sektor, ewkb, luas, *inti[k], lolos, zona, status, d))
+            for sub_kode, sub in atur('KRITERIA_JENIS').get(sektor.kode, {}).items():
+                lolos = self._nilai_sel(sektor, sub, zona, status, d)
+                if not lolos:
+                    continue
+                calon = []
+                for w in self._wilayah(lolos, d['ij']):
+                    sel = self._inti(w, lolos, d)
+                    calon.append((
+                        self._mutu(sel, lolos),
+                        sum(d['ij'][i][0] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
+                        sum(d['ij'][i][1] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
+                        (sel, len(w)),
+                    ))
+                inti = self._tersebar(calon)
+                c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for sel, _ in inti for i in sel]])
+                for k, ewkb, luas in c.fetchall():
+                    hasil.append(self._satu(prov, sektor, sub_kode, sub, ewkb, luas, *inti[k], lolos, zona, status, d))
         with transaction.atomic():
             LokasiPotensial.objects.filter(provinsi=prov).delete()
             LokasiPotensial.objects.bulk_create(hasil)
@@ -515,25 +500,19 @@ class Command(BaseCommand):
             )
         return hasil
 
-    def _satu(self, prov, sektor, ewkb, luas, sel, sel_wilayah, lolos, zona, status, d):
-        bagian, terukur = Counter(), Counter()
-        dasar_ada, dasar_terukur = Counter(), Counter()
-        for i in sel:
-            for label, v in lolos[i][1].items():
-                if v is not None:
-                    terukur[label] += 1
-                    bagian[label] += v
-            for label, v in lolos[i][2].items():
-                if v is not None:
-                    dasar_terukur[label] += 1
-                    dasar_ada[label] += v
-        label_semua = list(lolos[sel[0]][1])
-        label_dasar = list(lolos[sel[0]][2])
+    def _satu(self, prov, sektor, sub_kode, sub, ewkb, luas, sel, sel_wilayah, lolos, zona, status, d):
+        kriteria = []
+        for j, (kunci, ambang) in enumerate(sub['kriteria'].items()):
+            nilai = [lolos[i][1][j] for i in sel if lolos[i][1][j] is not None]
+            rata = sum(nilai) / len(nilai) if nilai else None
+            kriteria.append({'label': PARAMETER[kunci][0], 'nilai_teks': teks_nilai(kunci, rata),
+                             'ambang_teks': teks_ambang(kunci, ambang), 'lulus': True if nilai else None})
+        terukur = sum(k['lulus'] is True for k in kriteria)
+        bencana = {jenis for i in sel for jenis, _ in lolos[i][2]}
+        kriteria += [{'label': label, 'nilai_teks': None, 'ambang_teks': 'rendah–sedang', 'lulus': True}
+                     for jenis, label in BENCANA if jenis in bencana]
         zona_utama = Counter(z for i in sel for z in d['zona'][i]).most_common(1)[0][0]
         bersyarat = any(status[(z, sektor.kode)] == 'BERSYARAT' for i in sel for z in d['zona'][i])
-        parameter = {
-            label: round(100 * bagian[label] / terukur[label]) if terukur[label] else None for label in label_semua
-        }
         return LokasiPotensial(
             sektor=sektor, provinsi=prov, geometry=GEOSGeometry(memoryview(ewkb)), luas_ha=luas,
             persen_sesuai=sum(lolos[i][0] for i in sel) / len(sel), jenis=[sektor.kode],
@@ -542,15 +521,20 @@ class Command(BaseCommand):
                 'sub_zona': LABEL_SUB_ZONA.get(zona[zona_utama][1], zona[zona_utama][1]),
                 'ranah': zona[zona_utama][3],
                 'sektor': sektor.nama,
+                'sub_sektor': sub['nama'],
+                'sub_sektor_kode': sub_kode,
                 'jumlah_sel': len(sel),
                 'luas_wilayah_ha': round(luas / len(sel) * sel_wilayah),
                 'status_tata_ruang': 'BERSYARAT' if bersyarat else 'DIIZINKAN',
-                'syarat_dasar': {
-                    label: round(100 * dasar_ada[label] / dasar_terukur[label]) if dasar_terukur[label] else None
-                    for label in label_dasar
-                },
-                'parameter': parameter,
-                'perlu_dinilai': [label for label, v in parameter.items() if v is None or v < 100],
+                'syarat_dasar': [LABEL_ADAT, *(pengecualian.label(p, sektor.kode) for p in pengecualian.berlaku(sektor.kode))],
+                'kriteria': kriteria,
+                'terukur': terukur,
+                'total': len(sub['kriteria']),
+                'perlu_dinilai': [k['label'] for k in kriteria if k['lulus'] is None],
+                'peringatan': [
+                    'Dekat wilayah kelola masyarakat hukum adat: berisiko konflik tenurial, libatkan masyarakat adat '
+                    'sejak awal.'
+                ] if any(i in d['adat_dekat'] for i in sel) else [],
             },
         )
 
@@ -567,9 +551,10 @@ class Command(BaseCommand):
         for g in gabungan.values():
             urut = sorted(g['anggota'], key=lambda lok: -lok.persen_sesuai)
             jenis = list(dict.fromkeys(lok.sektor.kode for lok in urut))
-            calon.append(((urut[0].persen_sesuai, len(jenis), g['luas']), g['x'], g['y'], LokasiPotensial(
+            sub = list(dict.fromkeys((lok.rincian['sub_sektor'], lok.sektor.kode) for lok in urut))
+            calon.append(((urut[0].persen_sesuai, len(sub), g['luas']), g['x'], g['y'], LokasiPotensial(
                 sektor=None, provinsi=prov, geometry=GEOSGeometry(memoryview(g['geom'])), luas_ha=g['luas'],
                 persen_sesuai=urut[0].persen_sesuai, jenis=jenis,
-                rincian={**urut[0].rincian, 'jenis_nama': list(dict.fromkeys(lok.sektor.nama for lok in urut))},
+                rincian={**urut[0].rincian, 'jenis_nama': [n for n, _ in sub], 'jenis_sub': [k for _, k in sub]},
             )))
         return self._tersebar(calon)
