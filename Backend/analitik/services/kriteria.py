@@ -18,7 +18,7 @@ PARAMETER = {
     'karang': ('Terumbu karang di lokasi', 'ada/tidak', 'TERUMBU_KARANG'),
     'jarak_pelabuhan_perikanan_km': ('Jarak ke pelabuhan perikanan (PP/TPI)', 'km', ('PELABUHAN_PERIKANAN',)),
     'jarak_jalan_nasional_km': ('Jarak ke jalan arteri/nasional', 'km', ('JALAN_NASIONAL',)),
-    'jarak_listrik_km': ('Jarak ke jaringan listrik', 'km', ('JARINGAN_LISTRIK',)),
+    'jarak_listrik_km': ('Jarak ke jaringan listrik', 'km', ('JARINGAN_LISTRIK_TM', 'JARINGAN_LISTRIK')),
     'jarak_pelabuhan_ekspor_km': ('Jarak ke pelabuhan ekspor/bandara kargo', 'km', ('PELABUHAN_UMUM', 'BANDARA')),
     'jarak_gerbang_wisata_km': ('Jarak ke bandara/pelabuhan penumpang (±2 jam)', 'km',
                                 ('BANDARA', 'PELABUHAN_PENYEBERANGAN', 'PELABUHAN_UMUM')),
@@ -39,8 +39,8 @@ PARAMETER = {
     'gelombang_ekstrem': ('Gelombang ekstrem periode ulang 50 tahun', 'm', 'GELOMBANG_EKSTREM'),
     'angin_100m': ('Kecepatan angin 100 m', 'm/s', 'ANGIN_100M'),
     'ghi': ('Iradiasi surya global (GHI)', 'kWh/m²/hari', 'GHI'),
-    'beda_suhu_1000m': ('Beda suhu permukaan dan kedalaman 1.000 m', '°C', 'SUHU_1000M'),
-    'bulan_kering_berturut': ('Bulan kering berturut-turut (curah hujan < 50 mm)', 'bulan', 'BULAN_KERING_BERTURUT'),
+    'beda_suhu_1000m': ('Beda suhu permukaan dan kedalaman 1.000 m', '°C', 'BEDA_SUHU_1000M'),
+    'bulan_kering_berturut': ('Bulan kering berturut-turut (curah hujan < 50 mm)', 'bulan', 'BULAN_KERING'),
     'tanah_liat': ('Kandungan tanah liat', '%', 'TANAH_LIAT'),
     'shannon': ('Indeks keanekaragaman hayati (Shannon-Wiener H′)', '', 'SHANNON'),
     'eks_mangrove_mudflat': ('Eks-mangrove terdegradasi atau hamparan lumpur', 'ada/tidak', 'EKS_MANGROVE'),
@@ -51,9 +51,18 @@ PARAMETER = {
 BINER = {'karang', 'eks_mangrove_mudflat', 'intertidal'}
 RASTER_DATA = {
     'kedalaman': 'KEDALAMAN', 'gelombang': 'GELOMBANG', 'suhu_rata': 'SUHU', 'klorofil': 'KLOROFIL', 'kd490': 'KD490',
-    'periode_gelombang': 'PERIODE_GLB', 'curah_hujan': 'CURAH_HUJAN',
+    'periode_gelombang': 'PERIODE_GLB', 'curah_hujan': 'CURAH_HUJAN', 'bulan_kering_berturut': 'BULAN_KERING',
+    'arus': 'ARUS', 'arus_dasar': 'ARUS_DASAR', 'salinitas': 'SALINITAS', 'tss': 'TSS', 'kemiringan_lahan': 'KEMIRINGAN',
+    'kemiringan_dasar_laut': 'KEMIRINGAN_DASAR', 'tunggang_pasut': 'PASUT', 'pga': 'PGA',
+    'gelombang_ekstrem': 'GELOMBANG_EKSTREM', 'angin_100m': 'ANGIN_100M', 'ghi': 'GHI',
+    'beda_suhu_1000m': 'BEDA_SUHU_1000M', 'tanah_liat': 'TANAH_LIAT', 'shannon': 'SHANNON',
 }
-RASTER_DARAT = {'curah_hujan'}
+RASTER_DARAT = {'curah_hujan', 'bulan_kering_berturut', 'kemiringan_lahan', 'tanah_liat'}
+RASTER_DUA_RANAH = {'salinitas', 'pga'}
+
+
+def raster_ranah(kunci, darat):
+    return kunci in RASTER_DUA_RANAH or (kunci in RASTER_DARAT) == darat
 UBAH = {'kedalaman': lambda v: max(0.0, -v), 'curah_hujan': lambda v: v * 12}
 
 
