@@ -203,10 +203,8 @@ KETENTUAN_DARAT_BAWAAN = {
 SEKTOR_TERSENDIRI_DI_PETA = ['KONSERVASI_PESISIR']
 
 AMBANG_KECOCOKAN = 0.75
-MINIMAL_PARAMETER_TERUKUR = 3
-AMBANG_KELENGKAPAN_DATA = 0.75
-WAJIB_LENGKAP_BERSYARAT = True
-AMBANG_KECOCOKAN_BERSYARAT = 1.0
+PROPORSI_MINIMAL_KRITERIA_TERUKUR = 0.5
+RADIUS_ADAT_DEKAT_M = 1000
 UKURAN_SEL_LOKASI_DERAJAT = 0.00225
 SEL_PER_SISI_INTI_LOKASI = 4
 JARAK_ANTAR_LOKASI_KM = 10
@@ -215,78 +213,74 @@ PITA_PESISIR_DARAT_M = (100, 4000)
 KM_PER_DERAJAT = 111.32
 BATAS_JARAK_PANTAI_DERAJAT = 0.06
 
-EKOSISTEM_PESISIR = ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG']
-
-KARAKTER_LOKASI = {
-    'GARAM': {
-        'uraian': 'tambak garam di darat pesisir, 100 m sampai 4 km dari garis pantai',
-        'DARAT': [{}],
-    },
-    'PENGOLAHAN_HASIL_LAUT': {
-        'uraian': 'unit pengolahan di darat pesisir, paling jauh 4 km dari garis pantai',
-        'DARAT': [{}],
-    },
+KRITERIA_JENIS = {
+    'PERIKANAN_TANGKAP': {'PERIKANAN_TANGKAP': {
+        'nama': 'Perikanan Tangkap', 'ranah': ['LAUT'],
+        'kriteria': {'klorofil': [0.3, 5.0], 'suhu_rata': [26.0, 30.0], 'gelombang': [None, 2.0],
+                     'jarak_pelabuhan_perikanan_km': [None, 100.0]},
+    }},
     'PERIKANAN_BUDIDAYA': {
-        'uraian': 'budi daya laut di perairan 1-30 m bergelombang paling tinggi 1,5 m, atau tambak di kawasan '
-                  'perikanan darat pesisir, 100 m sampai 4 km dari garis pantai',
-        'LAUT': [{'kedalaman': (1, 30), 'gelombang_maks': 1.5}],
-        'DARAT': [{}],
+        'BUDIDAYA_LAUT': {
+            'nama': 'Budidaya Laut (KJA)', 'ranah': ['LAUT'],
+            'kriteria': {'arus': [0.15, 0.45], 'kedalaman': [12.0, 40.0], 'salinitas': [27.0, 34.0], 'tss': [None, 35.0]},
+        },
+        'BUDIDAYA_TAMBAK': {
+            'nama': 'Budidaya Tambak', 'ranah': ['DARAT'], 'kriteria': {'kemiringan_lahan': [None, 3.0]},
+        },
     },
-    'PERIKANAN_TANGKAP': {
-        'uraian': 'daerah penangkapan di perairan sedalam 10 m atau lebih',
-        'LAUT': [{'kedalaman': (10, None)}],
-    },
-    'PARIWISATA_BAHARI': {
-        'uraian': 'perairan paling dalam 30 m dan paling jauh 5 km dari pantai atau di dekat terumbu karang, '
-                  'serta kawasan pariwisata di darat pesisir',
-        'LAUT': [{'kedalaman': (None, 30), 'jarak_pantai_maks_km': 5}, {'ekosistem': ['TERUMBU_KARANG']}],
-        'DARAT': [{}],
-    },
-    'JASA_MARITIM': {
-        'uraian': 'perairan yang menempel garis pantai (paling jauh 500 m) dengan gelombang paling tinggi 1,5 m',
-        'LAUT': [{'jarak_pantai_maks_km': 0.5, 'gelombang_maks': 1.5}],
-    },
-    'INFRASTRUKTUR_LAUT': {
-        'uraian': 'perairan paling dalam 40 m tanpa terumbu karang atau lamun',
-        'LAUT': [{'kedalaman': (None, 40), 'tanpa_ekosistem': ['TERUMBU_KARANG', 'LAMUN']}],
-    },
+    'PENGOLAHAN_HASIL_LAUT': {'PENGOLAHAN_HASIL_LAUT': {
+        'nama': 'Pengolahan & Hilirisasi Hasil Laut', 'ranah': ['DARAT'],
+        'kriteria': {'jarak_pelabuhan_perikanan_km': [None, 60.0], 'jarak_listrik_km': [None, 3.0],
+                     'jarak_jalan_nasional_km': [None, 3.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
+                     'produksi_ikan_kabupaten_ton': [20000.0, None]},
+    }},
+    'PARIWISATA_BAHARI': {'PARIWISATA_BAHARI': {
+        'nama': 'Wisata Bahari', 'ranah': ['LAUT'],
+        'kriteria': {'kd490': [None, 0.08], 'karang': [1, None], 'arus': [None, 0.3],
+                     'jarak_gerbang_wisata_km': [None, 60.0]},
+    }},
+    'JASA_MARITIM': {'JASA_MARITIM': {
+        'nama': 'Jasa Maritim & Kepelabuhanan', 'ranah': ['LAUT'],
+        'kriteria': {'kedalaman': [10.0, None], 'jarak_pantai_km': [None, 1.0], 'gelombang': [None, 0.8],
+                     'tunggang_pasut': [None, 3.0], 'jarak_alur_km': [None, 65.0], 'jarak_muara_km': [5.0, None]},
+    }},
+    'INFRASTRUKTUR_LAUT': {'INFRASTRUKTUR_LAUT': {
+        'nama': 'Infrastruktur & Bangunan Laut', 'ranah': ['LAUT'],
+        'kriteria': {'pga': [None, 0.35], 'kemiringan_dasar_laut': [None, 5.0], 'arus_dasar': [None, 0.8],
+                     'gelombang_ekstrem': [None, 4.0]},
+    }},
     'ENERGI_KELAUTAN': {
-        'uraian': 'perairan untuk OTEC (sedalam 500 m atau lebih, suhu permukaan minimum 25 °C), energi gelombang '
-                  '(tinggi gelombang 1 m atau lebih dan daya gelombang 10 kW/m atau lebih), atau PLTS terapung '
-                  '(5-50 m, gelombang di bawah 1,5 m)',
-        'LAUT': [
-            {'kedalaman': (500, None), 'suhu_min': 25, 'dinilai': {'kedalaman_min': 1000, 'suhu_rata_min': 27}},
-            {'gelombang_min': 1.0, 'daya_gelombang_min': 10, 'dinilai': {'daya_gelombang_min': 15, 'kedalaman_maks': 100}},
-            {'kedalaman': (5, 50), 'gelombang_maks': 1.5, 'dinilai': {'gelombang_tertinggi_maks': 2.5, 'kedalaman_maks': 30}},
-        ],
+        'PLTB_OFFSHORE': {
+            'nama': 'PLTB Offshore', 'ranah': ['LAUT'],
+            'kriteria': {'angin_100m': [6.5, None], 'kedalaman': [None, 45.0], 'jarak_gardu_km': [None, 20.0]},
+        },
+        'PLTS_TERAPUNG': {
+            'nama': 'PLTS Terapung', 'ranah': ['LAUT'],
+            'kriteria': {'ghi': [4.8, None], 'kedalaman': [None, 45.0], 'jarak_gardu_km': [None, 20.0]},
+        },
+        'OTEC': {
+            'nama': 'OTEC', 'ranah': ['LAUT'], 'kriteria': {'beda_suhu_1000m': [20.0, None], 'jarak_gardu_km': [None, 20.0]},
+        },
+        'ENERGI_GELOMBANG': {
+            'nama': 'Energi Gelombang', 'ranah': ['LAUT'],
+            'kriteria': {'gelombang': [1.5, None], 'periode_gelombang': [5.0, 10.0], 'kedalaman': [20.0, 50.0],
+                         'jarak_gardu_km': [None, 20.0]},
+        },
     },
-    'KONSERVASI_PESISIR': {
-        'uraian': 'pesisir yang memiliki atau berdekatan dengan mangrove, lamun, atau terumbu karang, di perairan '
-                  'maupun di darat',
-        'LAUT': [{'ekosistem': EKOSISTEM_PESISIR}],
-        'DARAT': [{'ekosistem': EKOSISTEM_PESISIR}],
-    },
-    'BIOTEKNOLOGI_KELAUTAN': {
-        'uraian': 'perairan yang memiliki atau berdekatan dengan mangrove, lamun, atau terumbu karang sebagai sumber '
-                  'bahan baku hayati',
-        'LAUT': [{'ekosistem': EKOSISTEM_PESISIR}],
-    },
-}
-
-PARAMETER_TAMBAHAN = {
-    'PERIKANAN_BUDIDAYA': {'LAUT': {
-        'suhu_rata_min': 26, 'suhu_rata_maks': 32, 'anomali_suhu_maks': 1.0, 'klorofil_min': 0.2, 'klorofil_maks': 10,
-        'kd490_maks': 0.4, 'gelombang_tertinggi_maks': 2.5,
+    'GARAM': {'GARAM': {
+        'nama': 'Produksi Garam', 'ranah': ['DARAT'],
+        'kriteria': {'bulan_kering_berturut': [4, None], 'curah_hujan': [None, 1500.0], 'tanah_liat': [30.0, None],
+                     'kemiringan_lahan': [None, 2.0], 'salinitas': [30.0, None]},
     }},
-    'PERIKANAN_TANGKAP': {'LAUT': {'klorofil_min': 0.2}},
-    'PARIWISATA_BAHARI': {'LAUT': {
-        'kd490_maks': 0.15, 'jarak_karang_maks_km': 2, 'anomali_suhu_maks': 1.0, 'gelombang_tertinggi_maks': 2.5,
+    'BIOTEKNOLOGI_KELAUTAN': {'BIOTEKNOLOGI_KELAUTAN': {
+        'nama': 'Bioteknologi Kelautan', 'ranah': ['LAUT'],
+        'kriteria': {'shannon': [2.0, None], 'jarak_muara_pelabuhan_km': [10.0, None], 'jarak_bandara_lab_km': [None, 60.0]},
     }},
-    'JASA_MARITIM': {'LAUT': {'gelombang_tertinggi_maks': 2.5}},
-    'ENERGI_KELAUTAN': {'LAUT': {'jarak_pantai_maks_km': 5}},
-    'GARAM': {'DARAT': {'curah_hujan_maks': 1300, 'bulan_kering_min': 4}},
-    'KONSERVASI_PESISIR': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
-    'BIOTEKNOLOGI_KELAUTAN': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
+    'KONSERVASI_PESISIR': {'KONSERVASI_PESISIR': {
+        'nama': 'Konservasi & Rehabilitasi Pesisir', 'ranah': ['LAUT', 'DARAT'],
+        'kriteria': {'eks_mangrove_mudflat': [1, None], 'intertidal': [1, None], 'luas_hamparan_ha': [100.0, None],
+                     'laju_abrasi': [None, 1.5]},
+    }},
 }
 AMBANG_BULAN_KERING_MM = 100
 
@@ -305,7 +299,6 @@ AMBANG_IRISAN_TEPI_PERSEN = 2.0
 LUAS_AREA_MIN_HA = 0.01
 LUAS_AREA_MAKS_HA = 50000
 
-RADIUS_EKOSISTEM_PENDUKUNG_M = 500
 
 JENIS_ZONA_TERLARANG = ['ALKI']
 

@@ -716,7 +716,25 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       );
     }
     const fisik = fisikScreening(sc);
-    if (fisik) {
+    if (Array.isArray(sc.sub_sektor)) {
+      k.teks(`Kecocokan fisik ${sc.sektor_nama.toLowerCase()} per sub-sektor`, { tebal: true, warna: GELAP, ukuran: 7.5 });
+      k.teks('Setelah lolos matriks Perda, tiap sub-sektor dinilai dengan kriterianya sendiri: cocok bila semua kriteria '
+        + 'yang terukur memenuhi syarat dan sedikitnya separuh kriteria terukur; kriteria tanpa data dilewati.', { ukuran: 6.4 });
+      if (!sc.sub_sektor.length) k.teks(fisik?.alasan || '', { ukuran: 7 });
+      sc.sub_sektor.forEach((h) => {
+        k.teks(`${h.nama}: ${h.cocok ? 'cocok' : h.gagal.length ? 'tidak cocok' : 'data belum cukup'} `
+          + `(${h.terukur} dari ${h.total} kriteria terukur)`, { tebal: true, warna: h.cocok ? HIJAU_TEKS : MERAH_TEKS, ukuran: 7 });
+        k.tabel(
+          ['Kriteria', 'Di lokasi', 'Syarat', 'Status'],
+          [...h.kriteria, ...h.umum].map((x) => [x.label,
+            x.nilai_teks || (x.data_ada === false ? 'belum ada data' : 'tidak terukur'), x.ambang_teks,
+            x.lulus === true ? 'Terpenuhi' : x.lulus === false ? 'Tidak terpenuhi' : 'Dilewati']),
+          [(LEBAR - 8) * 0.42, (LEBAR - 8) * 0.2, (LEBAR - 8) * 0.2, (LEBAR - 8) * 0.18]
+        );
+      });
+      const kl = kelengkapanScreening(sc);
+      if (kl?.indikatif) k.teks(`Hasil bersifat indikatif: ${kl.alasan_indikatif.join('; ')}.`, { ukuran: 7, tebal: true, warna: AMBER_TEKS });
+    } else if (fisik) {
       k.teks(`Kecocokan fisik ${sc.sektor_nama.toLowerCase()}`, { tebal: true, warna: GELAP, ukuran: 7.5 });
       k.tabel(
         ['Aspek', 'Keterangan'],
@@ -737,10 +755,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
             [(LEBAR - 8) * 0.65, (LEBAR - 8) * 0.35]
           );
         }
-        k.teks(`${nf(sc.persen_sangat_sesuai)}% dari ${sc.parameter.filter((p) => p.nilai !== null).length} parameter dinilai yang terukur sangat sesuai `
-          + '(ambang Peta Sebaran Wilayah Potensial Investasi: seluruh kondisi fisik dan pengecualian keras terpenuhi dan sedikitnya 75% parameter '
-            + 'dinilai yang terukur sangat sesuai; di zona peruntukan lain yang hanya mengizinkan bersyarat seluruh parameter '
-            + 'dinilai wajib terukur dan sangat sesuai)',
+        k.teks(`${nf(sc.persen_sangat_sesuai)}% dari ${sc.parameter.filter((p) => p.nilai !== null).length} parameter dinilai yang terukur sangat sesuai`,
           { tebal: true, warna: GELAP, ukuran: 7 });
         k.tabel(
           ['Parameter dinilai', 'Penilaian'],

@@ -7,7 +7,7 @@ import { StatusHitungUlang, useStatusHitungUlang } from './AdminPengaturanAnalis
 const URL = '/inti/admin/parameter-tambahan/';
 const PERAN = [
   ['GERBANG', 'Gerbang wajib', 'Lokasi yang tidak memenuhi dinilai tidak sesuai dan tidak direkomendasikan.'],
-  ['DINILAI', 'Parameter dinilai', 'Ikut dihitung dalam persentase parameter sangat sesuai, tanpa menggugurkan lokasi.'],
+  ['DINILAI', 'Parameter dinilai', 'Dinilai bersama kriteria jenis investasi: bila terukur, wajib terpenuhi agar lokasi sesuai.'],
   ['INFORMASI', 'Informasi saja', 'Hanya ditampilkan di laporan analisis.'],
 ];
 const LABEL_PERAN = Object.fromEntries(PERAN.map(([k, l]) => [k, l]));

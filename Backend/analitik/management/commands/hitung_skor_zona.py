@@ -20,13 +20,13 @@ from analitik.services.konstanta import (
 from analitik.services.konstanta import (
     risiko_sosial as hitung_risiko_sosial,
 )
+from analitik.services.kriteria import penilaian, sumber_tersedia
 from analitik.services.pengaturan import atur
 from analitik.services.screening_ruang import (
     BOLEH,
     SEBARAN_KEDALAMAN,
     _aturan_per_sektor,
     _ketentuan,
-    cocok_karakter,
 )
 from inti.models import Provinsi, SektorInvestasi
 
@@ -164,7 +164,7 @@ class Command(BaseCommand):
                 CROSS JOIN LATERAL (
                     SELECT ST_SummaryStats(
                         ST_Clip(o.rast, z.geometry, true),
-                        CASE WHEN o.parameter = 'SUHU' THEN LEAST(2, ST_NumBands(o.rast)) ELSE 1 END,
+                        1,
                         true
                     ) AS s
                 ) t
@@ -173,12 +173,8 @@ class Command(BaseCommand):
                 """,
                 [provinsi_id],
             )
-            for zona_id, parameter, minimum, _, rata2 in c.fetchall():
-                data = hasil.setdefault(zona_id, {})
-                if parameter == 'GELOMBANG':
-                    data['gelombang'] = rata2
-                else:
-                    data['suhu_min'] = minimum
+            for zona_id, parameter, _, _, rata2 in c.fetchall():
+                hasil.setdefault(zona_id, {})['gelombang' if parameter == 'GELOMBANG' else 'suhu_rata'] = rata2
             c.execute(
                 SEBARAN_KEDALAMAN.format(
                     zona="(SELECT id, geometry FROM inventarisasi_zonasi_ruang_laut WHERE provinsi_id = %s AND ranah = 'LAUT')"
@@ -188,9 +184,9 @@ class Command(BaseCommand):
             for zona_id, kedalaman, jumlah in c.fetchall():
                 hasil.setdefault(zona_id, {}).setdefault('sebaran_kedalaman', []).append((kedalaman, jumlah))
             for data in hasil.values():
-                if data.get('sebaran_kedalaman'):
-                    data['kedalaman_min'] = min(d for d, _ in data['sebaran_kedalaman'])
-                    data['kedalaman_maks'] = max(d for d, _ in data['sebaran_kedalaman'])
+                sebaran = data.pop('sebaran_kedalaman', None)
+                if sebaran:
+                    data['kedalaman'] = sum(d * n for d, n in sebaran) / sum(n for _, n in sebaran)
             c.execute(
                 """
                 WITH z AS MATERIALIZED (
@@ -478,6 +474,7 @@ class Command(BaseCommand):
         adat = self._adat(prov.id)
         adat_terdata = self._adat_terdata(prov.id)
         aturan = _aturan_per_sektor({z[5] for z in zona if z[5]})
+        tersedia = sumber_tersedia()
 
         baris = []
         for zona_id, sub_zona, jenis_zona, luas_zona, ranah, matriks_id in zona:
@@ -486,7 +483,7 @@ class Command(BaseCommand):
             p = potensi.get(zona_id, [])
             n = kkprl.get(zona_id, 0)
             e = ekosistem.get(zona_id, [])
-            k = {**karakter.get(zona_id, {}), 'ranah': ranah, 'ekosistem': {x['jenis'] for x in e}}
+            k = {**karakter.get(zona_id, {}), 'ranah': ranah}
             for sektor in sektor_list:
                 ket = _ketentuan(
                     aturan.get(sektor.id, {}),
@@ -496,7 +493,7 @@ class Command(BaseCommand):
                     sub_zona, ket['status'], sektor.kode, b, j, p, n, e, luas_zona,
                     sosial.get(zona_id), zona_id in adat, adat_terdata,
                 )
-                nilai['sesuai_karakter'] = cocok_karakter(sektor.kode, k)[0]
+                nilai['sesuai_karakter'] = any(not h['gagal'] for h in penilaian(sektor.kode, k, tersedia))
                 if not nilai['sesuai_karakter']:
                     nilai['kelas'] = 'SANGAT_RENDAH'
                 baris.append(SkorKelayakanZona(zona_id=zona_id, sektor_id=sektor.id, **nilai))

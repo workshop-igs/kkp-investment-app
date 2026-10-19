@@ -280,7 +280,7 @@ const LegendaDisarankan = ({ sektor, onPilih }) => {
         )}
         <p className="text-[11px] leading-snug text-white/85">
           <b className="block text-[12px] text-white">lokasi potensial investasi</b>
-          syarat dasar terpenuhi dan sedikitnya 75% parameter dinilai sangat sesuai
+          lolos matriks Perda dan memenuhi semua kriteria sub-sektor yang terukur
         </p>
       </div>
 

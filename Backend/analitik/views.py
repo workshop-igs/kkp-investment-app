@@ -26,9 +26,9 @@ from .models import (
 )
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
+from .services.kriteria import uraian
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
-from .services.pengaturan import atur
 from .services.screening_ruang import screening_ruang
 from .services.skor_spasial import ambil_skor_spasial
 
@@ -411,7 +411,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
             'kelas': 'TINGGI',
             'persen_sesuai': round(r['persen_sesuai']),
             'luas_ha': round(r['luas_ha'], 1),
-            'karakter': atur('KARAKTER_LOKASI').get(r['jenis'][0], {}).get('uraian') if len(r['jenis']) == 1 else None,
+            'karakter': uraian(r['jenis'][0]) if len(r['jenis']) == 1 else None,
         }
 
 

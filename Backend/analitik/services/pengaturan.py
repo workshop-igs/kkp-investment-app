@@ -9,7 +9,7 @@ from analitik.services import konstanta
 PETA, SKOR = 'peta', 'skor'
 
 KELOMPOK = [
-    ('karakter', 'Karakter lokasi per jenis investasi'),
+    ('karakter', 'Kriteria kesesuaian per jenis investasi'),
     ('peta', 'Peta Sebaran Wilayah Potensial Investasi'),
     ('analisis_area', 'Analisis area'),
     ('finansial', 'Analisis finansial'),
@@ -32,24 +32,22 @@ BOBOT = dict(batas=(0, 1), jumlah_satu=True)
 SKOR_0_1 = dict(batas=(0, 1))
 
 DAFTAR = [
-    _d('KARAKTER_LOKASI', 'karakter', 'Syarat karakter lokasi',
-       'Syarat fisik per jenis investasi di perairan dan di darat. Peta Sebaran hanya menampilkan lokasi yang '
-       'memenuhi salah satu alternatif syarat; pada screening area syarat ini menjadi kecocokan fisik indikatif '
-       '(peringatan), bukan gerbang kesesuaian ruang.', dampak=(PETA, SKOR)),
-    _d('RADIUS_EKOSISTEM_PENDUKUNG_M', 'karakter', 'Radius ekosistem pendukung',
-       'Syarat ekosistem pendukung (mangrove, lamun, terumbu karang) terpenuhi bila ekosistem itu berada di dalam '
-       'lokasi atau dalam radius ini darinya, sehingga area di samping ekosistem dinilai sama dengan lokasi yang '
-       'menyentuhnya. Syarat bebas terumbu karang dan lamun tetap memakai irisan langsung.', 'm', (PETA,),
-       (0, 5000), bulat=True),
-    _d('PARAMETER_TAMBAHAN', 'karakter', 'Parameter penilaian tambahan per jenis',
-       'Parameter yang ikut dihitung dalam persentase sangat sesuai, tetapi tidak menggugurkan lokasi. Semuanya '
-       'dari data publik; parameter yang datanya belum pernah ditarik ke aplikasi dilewati.',
-       dampak=(PETA,)),
+    _d('KRITERIA_JENIS', 'karakter', 'Kriteria kesesuaian per jenis dan sub-sektor',
+       'Parameter fisik dan aksesibilitas per sub-sektor beserta ambang bawah dan atasnya. Lokasi dinyatakan cocok '
+       'bila semua kriteria yang terukur memenuhi ambang; kriteria yang datanya belum tersedia dilewati.',
+       dampak=(PETA, SKOR)),
+    _d('PROPORSI_MINIMAL_KRITERIA_TERUKUR', 'karakter', 'Bagian minimal kriteria yang harus terukur',
+       'Lokasi baru dapat dinyatakan cocok bila sedikitnya bagian ini dari kriteria sub-sektornya terukur; sisanya '
+       'dilewati dan bobotnya dibagi ke kriteria lain.', 'proporsi (0-1)', (PETA, SKOR), (0, 1)),
+    _d('RADIUS_ADAT_DEKAT_M', 'karakter', 'Jarak peringatan wilayah adat',
+       'Lokasi di atas wilayah kelola masyarakat hukum adat tidak sesuai secara tata ruang; lokasi dalam jarak ini '
+       'darinya diberi peringatan risiko konflik tenurial tanpa memengaruhi penilaian.', 'm', (PETA,), (0, 20000),
+       bulat=True),
     _d('BUFFER_UNSUR_TERLARANG_M', 'karakter', 'Jarak aman kabel, pipa, dan alur pelayaran',
        'Pengecualian keras: lokasi tidak boleh berada dalam jarak ini dari kabel bawah laut, pipa bawah laut, dan '
        'alur pelayaran pada Rencana Tata Ruang Laut.', 'm', (PETA,), (0, 20000)),
     _d('AMBANG_IRISAN_PENGECUALIAN_PERSEN', 'analisis_area', 'Toleransi irisan pengecualian pada screening',
-       'Pada screening area, irisan dengan kawasan konservasi, alur pelayaran/ALKI, ekosistem sensitif, atau jarak '
+       'Pada screening area, irisan dengan alur pelayaran/ALKI, ekosistem sensitif, atau jarak '
        'aman kabel/pipa/alur yang lebih kecil dari bagian ini ditandai perlu verifikasi batas dan tidak '
        'menggugurkan area.', '%', (), (0, 100)),
     _d('AMBANG_IRISAN_TEPI_PERSEN', 'analisis_area', 'Toleransi irisan tepi zona pada screening',
@@ -64,27 +62,15 @@ DAFTAR = [
     _d('AMBANG_BULAN_KERING_MM', 'karakter', 'Batas curah hujan bulan kering',
        'Bulan dengan curah hujan di bawah ini dihitung bulan kering (parameter tambak garam).', 'mm/bulan', (PETA,),
        (0, 500)),
-    _d('AMBANG_KECOCOKAN', 'peta', 'Ambang persentase parameter sangat sesuai',
-       'Bagian parameter dinilai yang terukur dan harus sangat sesuai agar sebuah sel menjadi lokasi '
-       'potensial.',
-       'proporsi (0-1)', (PETA,), (0, 1)),
-    _d('MINIMAL_PARAMETER_TERUKUR', 'peta', 'Jumlah minimal parameter terukur',
-       'Dihitung dari parameter dinilai saja; syarat dasar yang pasti terpenuhi tidak ikut dihitung.', 'parameter',
-       (PETA,), (1, 30), bulat=True),
-    _d('WAJIB_LENGKAP_BERSYARAT', 'peta', 'Zona peruntukan lain: seluruh parameter wajib terukur',
-       'Lokasi di zona yang peruntukannya untuk kegiatan lain dan hanya mengizinkan jenis itu bersyarat direkomendasikan '
-       'hanya bila seluruh parameter selain tata ruang terukur.', dampak=(PETA,)),
-    _d('AMBANG_KECOCOKAN_BERSYARAT', 'peta', 'Zona peruntukan lain: ambang parameter sangat sesuai',
-       'Bagian parameter selain tata ruang yang harus sangat sesuai untuk lokasi di zona peruntukan lain yang hanya '
-       'mengizinkan bersyarat; 1 berarti semuanya.',
-       'proporsi (0-1)', (PETA,), (0, 1)),
+    _d('AMBANG_KECOCOKAN', 'peta', 'Bagian area minimal di dalam area parameter tambahan',
+       'Parameter tambahan bertipe area dari administrator dinilai terpenuhi bila sedikitnya bagian ini dari lokasi '
+       'berada di dalam areanya.', 'proporsi (0-1)', (PETA,), (0, 1)),
     _d('JARAK_ANTAR_LOKASI_KM', 'peta', 'Jarak minimal antartitik lokasi',
        'Dalam radius ini hanya lokasi terbaik yang ditampilkan.', 'km', (PETA,), (0, 200)),
     _d('SEL_PER_SISI_INTI_LOKASI', 'peta', 'Ukuran inti lokasi',
        'Jumlah sel 250 m per sisi; 4 berarti inti paling luas 1 km x 1 km.', 'sel', (PETA,), (1, 20), bulat=True),
-    _d('INFRASTRUKTUR_AKSESIBILITAS', 'peta', 'Jarak infrastruktur pendukung',
-       'Syarat dasar peta: lokasi wajib berada dalam jarak ideal salah satu infrastruktur; bobot dan jarak maksimum '
-       'dipakai skor aksesibilitas.', dampak=(PETA, SKOR),
+    _d('INFRASTRUKTUR_AKSESIBILITAS', 'lokasi_risiko', 'Jarak infrastruktur pendukung',
+       'Bobot, jarak ideal, dan jarak maksimum infrastruktur untuk skor aksesibilitas.', dampak=(SKOR,),
        kolom=['Kategori', 'Bobot', 'Jarak ideal (km)', 'Jarak maksimum (km)']),
     _d('AMBANG_CAKUPAN_ACUAN', 'analisis_area', 'Cakupan minimal acuan tata ruang',
        'Bagian area yang harus tercakup acuan tata ruang agar kesesuaian dapat diverifikasi.', 'proporsi (0-1)',
@@ -186,27 +172,10 @@ LABEL_BAGIAN = {
     'akses_listrik': 'Akses listrik', 'akses_air': 'Akses air bersih', 'zona_tidak_cocok': 'Zona tidak cocok',
     'tumpang_tindih_kkprl': 'Tumpang tindih KKPRL', 'ekosistem': 'Ekosistem', 'bencana': 'Bencana',
     'kemiskinan': 'Kemiskinan', 'tenurial': 'Tenurial', 'KAWASAN_SUCI': 'Kawasan suci',
-    'PERMUKIMAN': 'Permukiman', 'uraian': 'Uraian kebutuhan', 'LAUT': 'Perairan', 'DARAT': 'Darat',
-    'kedalaman': 'Kedalaman (m)', 'gelombang_maks': 'Tinggi gelombang maksimum (m)',
-    'gelombang_min': 'Tinggi gelombang minimum (m)', 'suhu_min': 'Suhu permukaan laut minimum (°C)',
-    'jarak_pantai_maks_km': 'Jarak maksimum ke pantai (km)', 'tanpa_ekosistem': 'Ekosistem yang harus dihindari',
-    'kedalaman_maks': 'Kedalaman maksimum (m)', 'anomali_suhu_maks': 'Anomali suhu maksimum (°C)',
-    'daya_gelombang_min': 'Daya gelombang minimum (kW/m)',
-    'suhu_rata_min': 'Suhu permukaan rata-rata minimum (°C)', 'suhu_rata_maks': 'Suhu permukaan rata-rata maksimum (°C)',
-    'klorofil_min': 'Klorofil-a minimum (mg/m³)', 'klorofil_maks': 'Klorofil-a maksimum (mg/m³)',
-    'kd490_maks': 'Kekeruhan Kd490 maksimum (1/m)', 'gelombang_tertinggi_maks': 'Gelombang tertinggi setahun maksimum (m)',
-    'jarak_karang_maks_km': 'Jarak maksimum ke terumbu karang (km)', 'curah_hujan_maks': 'Curah hujan tahunan maksimum (mm)',
-    'bulan_kering_min': 'Jumlah bulan kering minimum', 'kedalaman_min': 'Kedalaman minimum (m)',
+    'PERMUKIMAN': 'Permukiman', 'LAUT': 'Perairan', 'DARAT': 'Darat',
     'KABEL': 'Kabel bawah laut', 'PIPA': 'Pipa bawah laut', 'ALUR_PELAYARAN': 'Alur pelayaran',
     'lokasi_risiko': 'Lokasi dan risiko',
 }
-
-SYARAT_KARAKTER = ['kedalaman', 'gelombang_maks', 'gelombang_min', 'daya_gelombang_min', 'suhu_min',
-                   'jarak_pantai_maks_km', 'ekosistem', 'tanpa_ekosistem']
-SYARAT_TAMBAHAN = ['kedalaman_maks', 'kedalaman_min', 'gelombang_maks', 'anomali_suhu_maks', 'suhu_rata_min',
-                   'suhu_rata_maks', 'klorofil_min', 'klorofil_maks', 'kd490_maks', 'gelombang_tertinggi_maks',
-                   'daya_gelombang_min', 'jarak_pantai_maks_km', 'jarak_karang_maks_km', 'curah_hujan_maks',
-                   'bulan_kering_min']
 
 BAWAAN = {kunci: json.loads(json.dumps(getattr(konstanta, kunci))) for kunci in TERDAFTAR}
 
@@ -272,67 +241,40 @@ def _sama_bentuk(nilai, bawaan, jalur, meta):
             _sama_bentuk(n, b, f'{jalur} > {i + 1}', meta)
 
 
-def _karakter(nilai, sektor):
-    meta = {'batas': [0, None], 'bulat': False}
+def _kriteria(nilai, sektor):
+    from analitik.services.kriteria import PARAMETER
+
+    meta = {'batas': [None, None], 'bulat': False}
     if not isinstance(nilai, dict) or not set(nilai) <= sektor:
-        raise NilaiTidakSah('Karakter lokasi: kunci harus kode jenis investasi yang terdaftar.')
-    for kode, aturan in nilai.items():
-        if not isinstance(aturan, dict) or not isinstance(aturan.get('uraian'), str) or not aturan['uraian'].strip():
-            raise NilaiTidakSah(f'{kode}: uraian karakter wajib diisi.')
-        if not set(aturan) - {'uraian'} or not set(aturan) - {'uraian'} <= {'LAUT', 'DARAT'}:
-            raise NilaiTidakSah(f'{kode}: pilih sedikitnya satu ranah, perairan atau darat.')
-        for ranah in ('LAUT', 'DARAT'):
-            pilihan = aturan.get(ranah)
-            if pilihan is None:
-                continue
-            if not isinstance(pilihan, list) or not pilihan:
-                raise NilaiTidakSah(f'{kode} > {ranah}: sedikitnya satu alternatif syarat.')
-            for i, syarat in enumerate(pilihan, 1):
-                jalur = f'{kode} > {ranah} > alternatif {i}'
-                if not isinstance(syarat, dict) or not set(syarat) <= {*SYARAT_KARAKTER, 'dinilai'}:
-                    raise NilaiTidakSah(f'{jalur}: syarat tidak dikenal.')
-                for k, v in syarat.items():
-                    if k == 'dinilai':
-                        _syarat_tambahan(v, f'{jalur} > parameter dinilai', meta)
-                    elif k == 'kedalaman':
-                        if not isinstance(v, list) or len(v) != 2 or v == [None, None]:
-                            raise NilaiTidakSah(f'{jalur} > kedalaman: isi batas dangkal dan/atau dalam.')
-                        for batas in v:
-                            _angka(batas, f'{jalur} > kedalaman', meta, boleh_kosong=True)
-                        if None not in v and v[0] > v[1]:
-                            raise NilaiTidakSah(f'{jalur} > kedalaman: batas dangkal melebihi batas dalam.')
-                    elif k in ('ekosistem', 'tanpa_ekosistem'):
-                        if not isinstance(v, list) or not v or not set(v) <= set(konstanta.EKOSISTEM_PESISIR):
-                            raise NilaiTidakSah(f'{jalur} > {k}: pilih sedikitnya satu ekosistem.')
-                    else:
-                        _angka(v, f'{jalur} > {k}', meta)
-
-
-def _tambahan(nilai, sektor):
-    meta = {'batas': [0, None], 'bulat': False}
-    if not isinstance(nilai, dict) or not set(nilai) <= sektor:
-        raise NilaiTidakSah('Parameter tambahan: kunci harus kode jenis investasi yang terdaftar.')
-    for kode, per_ranah in nilai.items():
-        if not isinstance(per_ranah, dict) or not set(per_ranah) <= {'LAUT', 'DARAT'}:
-            raise NilaiTidakSah(f'{kode}: ranah harus perairan atau darat.')
-        for ranah, syarat in per_ranah.items():
-            _syarat_tambahan(syarat, f'{kode} > {ranah}', meta)
-
-
-def _syarat_tambahan(syarat, jalur, meta):
-    if not isinstance(syarat, dict) or not set(syarat) <= set(SYARAT_TAMBAHAN):
-        raise NilaiTidakSah(f'{jalur}: parameter tidak dikenal.')
-    for k, v in syarat.items():
-        _angka(v, f'{jalur} > {k}', meta)
+        raise NilaiTidakSah('Kriteria: kunci harus kode jenis investasi yang terdaftar.')
+    for kode, per_sub in nilai.items():
+        if not isinstance(per_sub, dict) or not per_sub:
+            raise NilaiTidakSah(f'{kode}: sedikitnya satu sub-sektor.')
+        for sub, isi in per_sub.items():
+            jalur = f'{kode} > {sub}'
+            if not isinstance(isi, dict) or set(isi) != {'nama', 'ranah', 'kriteria'}:
+                raise NilaiTidakSah(f'{jalur}: isian harus nama, ranah, dan kriteria.')
+            if not isinstance(isi['nama'], str) or not isi['nama'].strip():
+                raise NilaiTidakSah(f'{jalur}: nama sub-sektor wajib diisi.')
+            if not isinstance(isi['ranah'], list) or not isi['ranah'] or not set(isi['ranah']) <= {'LAUT', 'DARAT'}:
+                raise NilaiTidakSah(f'{jalur}: pilih perairan dan/atau darat.')
+            if not isinstance(isi['kriteria'], dict) or not isi['kriteria'] or not set(isi['kriteria']) <= set(PARAMETER):
+                raise NilaiTidakSah(f'{jalur}: sedikitnya satu kriteria yang dikenal.')
+            for k, ambang in isi['kriteria'].items():
+                if not isinstance(ambang, list) or len(ambang) != 2 or ambang == [None, None]:
+                    raise NilaiTidakSah(f'{jalur} > {PARAMETER[k][0]}: isi batas bawah dan/atau atas.')
+                for batas in ambang:
+                    _angka(batas, f'{jalur} > {PARAMETER[k][0]}', meta, boleh_kosong=True)
+                if None not in ambang and ambang[0] > ambang[1]:
+                    raise NilaiTidakSah(f'{jalur} > {PARAMETER[k][0]}: batas bawah melebihi batas atas.')
 
 
 def periksa(kunci, nilai):
     from inti.models import SektorInvestasi
 
     meta = TERDAFTAR[kunci]
-    if kunci in ('KARAKTER_LOKASI', 'PARAMETER_TAMBAHAN'):
-        sektor = set(SektorInvestasi.objects.values_list('kode', flat=True))
-        (_karakter if kunci == 'KARAKTER_LOKASI' else _tambahan)(nilai, sektor)
+    if kunci == 'KRITERIA_JENIS':
+        _kriteria(nilai, set(SektorInvestasi.objects.values_list('kode', flat=True)))
         return
     _sama_bentuk(nilai, BAWAAN[kunci], meta['label'], meta)
     if kunci == 'MATRIKS_PERBANDINGAN_BAWAAN':
