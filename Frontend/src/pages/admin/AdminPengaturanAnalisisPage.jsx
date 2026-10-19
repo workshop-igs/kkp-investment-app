@@ -362,21 +362,31 @@ const KarakterEditor = ({ nilai, onUbah, data, tambahan }) => {
             </div>
           ) : (
             <div className="mt-2 space-y-2">
-              {aturan[ranah].map((syarat, i) => (
-                <div key={i} className="rounded-md bg-slate-50 p-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                      Alternatif {i + 1}{aturan[ranah].length > 1 ? ' (cukup salah satu terpenuhi)' : ''}
-                    </span>
-                    {aturan[ranah].length > 1 && (
-                      <button type="button" onClick={() => ubahJenis({ ...aturan, [ranah]: aturan[ranah].filter((_, j) => j !== i) })}
-                        className="text-xs text-rose-600 hover:underline">Hapus alternatif</button>
-                    )}
+              {aturan[ranah].map(({ dinilai, ...syarat }, i) => {
+                const ubah = (baru) => ubahJenis({ ...aturan, [ranah]: aturan[ranah].map((x, j) => (j === i ? baru : x)) });
+                return (
+                  <div key={i} className="rounded-md bg-slate-50 p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                        Alternatif {i + 1}{aturan[ranah].length > 1 ? ' (cukup salah satu terpenuhi)' : ''}
+                      </span>
+                      {aturan[ranah].length > 1 && (
+                        <button type="button" onClick={() => ubahJenis({ ...aturan, [ranah]: aturan[ranah].filter((_, j) => j !== i) })}
+                          className="text-xs text-rose-600 hover:underline">Hapus alternatif</button>
+                      )}
+                    </div>
+                    <SyaratEditor syarat={syarat} pilihan={data.syarat_karakter} ekosistem={data.ekosistem} label={data.label_bagian}
+                      onUbah={(s) => ubah(dinilai ? { ...s, dinilai } : s)} />
+                    <div className="mt-2 border-t border-slate-200 pt-2">
+                      <span className="block mb-1 text-[11px] font-semibold text-slate-500">
+                        Parameter dinilai khusus alternatif ini (ikut persentase sangat sesuai)
+                      </span>
+                      <SyaratEditor syarat={dinilai || {}} pilihan={data.syarat_tambahan} ekosistem={data.ekosistem}
+                        label={data.label_bagian} onUbah={(d) => ubah(Object.keys(d).length ? { ...syarat, dinilai: d } : syarat)} />
+                    </div>
                   </div>
-                  <SyaratEditor syarat={syarat} pilihan={data.syarat_karakter} ekosistem={data.ekosistem} label={data.label_bagian}
-                    onUbah={(s) => ubahJenis({ ...aturan, [ranah]: aturan[ranah].map((x, j) => (j === i ? s : x)) })} />
-                </div>
-              ))}
+                );
+              })}
               <button type="button" onClick={() => ubahJenis({ ...aturan, [ranah]: [...aturan[ranah], {}] })}
                 className="text-xs font-semibold text-sky-700 flex items-center gap-1"><Plus className="w-3.5 h-3.5" /> Tambah alternatif</button>
             </div>
