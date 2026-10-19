@@ -14,7 +14,21 @@ LABEL_OSEANOGRAFI = {
     'KD490': 'Kekeruhan perairan (Kd490)',
     'PERIODE_GLB': 'Periode puncak gelombang',
     'CURAH_HUJAN': 'Curah hujan bulanan',
-    'BULAN_KERING': 'Jumlah bulan kering',
+    'BULAN_KERING': 'Bulan kering berturut-turut',
+    'ARUS': 'Kecepatan arus permukaan',
+    'ARUS_DASAR': 'Kecepatan arus dasar',
+    'SALINITAS': 'Salinitas permukaan laut',
+    'TSS': 'Padatan tersuspensi (TSS)',
+    'KEMIRINGAN': 'Kemiringan lahan',
+    'KEMIRINGAN_DASAR': 'Kemiringan dasar laut',
+    'PASUT': 'Tunggang pasang surut',
+    'PGA': 'Percepatan tanah puncak gempa (PGA)',
+    'GELOMBANG_EKSTREM': 'Gelombang ekstrem periode ulang 50 tahun',
+    'ANGIN_100M': 'Kecepatan angin 100 m',
+    'GHI': 'Iradiasi surya global (GHI)',
+    'BEDA_SUHU_1000M': 'Beda suhu permukaan dan kedalaman 1.000 m',
+    'TANAH_LIAT': 'Kandungan tanah liat',
+    'SHANNON': 'Indeks keanekaragaman hayati Shannon-Wiener',
 }
 
 SUMBER_SKALA_KASAR = {

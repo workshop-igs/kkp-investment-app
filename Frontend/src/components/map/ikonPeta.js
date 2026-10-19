@@ -75,6 +75,22 @@ const LAMBANG = {
   koper:
     '<rect x="3.5" y="7.5" width="17" height="12" rx="2"/>' +
     '<path d="M9 7.5V5.6A1.6 1.6 0 0 1 10.6 4h2.8A1.6 1.6 0 0 1 15 5.6v1.9M3.5 12.5h17"/>',
+
+  pesawat:
+    '<path d="M21 15.5 13.5 11V5.5a1.5 1.5 0 0 0-3 0V11L3 15.5v2l7.5-2.2v3.7L8.5 20.5V22l3.5-1 3.5 1v-1.5' +
+    'l-2-1.5v-3.7l7.5 2.2z"/>',
+
+  gardu:
+    '<rect x="4" y="5.5" width="16" height="14" rx="1.5"/>' +
+    '<path d="M12.8 8.2 9.4 13h3l-.8 3.8 3.6-5H12z"/>',
+
+  toga:
+    '<path d="M2.5 9.5 12 5l9.5 4.5L12 14z"/>' +
+    '<path d="M6.5 11.5v4.3c1.5 1.4 3.4 2.2 5.5 2.2s4-.8 5.5-2.2v-4.3M21.5 9.5v5"/>',
+
+  sungai:
+    '<path d="M4 4c3 3 0 6 3 9s6 2 9 5"/>' +
+    '<path d="M9 3c2.5 2.5.5 5 3 7.5s5 1.5 7.5 4"/>',
 };
 
 export const lambangSvg = (jenis, ukuran) =>

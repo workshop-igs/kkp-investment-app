@@ -50,6 +50,18 @@ const OSEANOGRAFI = [
       + '0,5°), penentu desain bangunan laut dan sarana budidaya.'],
   ['osea_kedalaman', 'KEDALAMAN', 'Kedalaman Laut',
     'Kedalaman laut dari batimetri NOAA ETOPO1 (resolusi 1 menit busur).'],
+  ['osea_kd490', 'KD490', 'Kecerahan Perairan (Kd490)',
+    'Koefisien atenuasi cahaya Kd490 dari NASA MODIS-Aqua, rata-rata 12 bulan terakhir; makin kecil makin jernih. '
+      + 'Wisata bahari mensyaratkan paling tinggi 0,08 per meter (visibilitas sekitar 10 m).'],
+  ['osea_periode', 'PERIODE_GLB', 'Periode Gelombang',
+    'Rata-rata periode puncak gelombang 12 bulan terakhir dari NOAA WaveWatch III; energi gelombang membutuhkan '
+      + 'periode 5 sampai 10 detik.'],
+  ['iklim_hujan', 'CURAH_HUJAN', 'Curah Hujan Bulanan',
+    'Rata-rata curah hujan bulanan 12 bulan terakhir dari CHIRPS v2.0; tambak garam membutuhkan curah hujan '
+      + 'tahunan paling tinggi 1.500 mm.'],
+  ['iklim_kering', 'BULAN_KERING', 'Bulan Kering Berturut-turut',
+    'Rangkaian bulan berturut-turut terpanjang dengan curah hujan di bawah 50 mm dalam 12 bulan terakhir '
+      + '(CHIRPS v2.0); tambak garam membutuhkan sedikitnya 4 bulan.'],
 ];
 
 export const LAYER_WMS = {};
@@ -73,6 +85,16 @@ const INFRASTRUKTUR = [
    'Kawasan industri eksisting dan yang direncanakan'],
   ['infra_kpbpb', 'KAWASAN_PERDAGANGAN_BEBAS', 'Kawasan Perdagangan Bebas', '#15803d', null,
    'Kawasan Perdagangan Bebas dan Pelabuhan Bebas (KPBPB)'],
+  ['infra_bandara', 'BANDARA', 'Bandar Udara', '#0f766e', 'pesawat',
+   'Bandar udara berkode IATA/ICAO dari OpenStreetMap; acuan waktu tempuh wisata bahari, ekspor, dan bioteknologi'],
+  ['infra_gardu_induk', 'GARDU_INDUK', 'Gardu Induk', '#9a3412', 'gardu',
+   'Gardu induk listrik dari OpenStreetMap (bukan gardu distribusi); energi kelautan mensyaratkan paling jauh 20 km'],
+  ['infra_listrik_tm', 'JARINGAN_LISTRIK_TM', 'Jaringan Listrik 20 kV', '#ca8a04', null,
+   'Jaringan listrik tegangan menengah 20 kV dari OpenStreetMap; pengolahan hasil laut mensyaratkan paling jauh 3 km'],
+  ['infra_kampus_riset', 'KAMPUS_RISET', 'Kampus & Lembaga Riset', '#4338ca', 'toga',
+   'Perguruan tinggi dan lembaga riset dari OpenStreetMap, pendekatan fasilitas laboratorium bioteknologi'],
+  ['infra_muara', 'MUARA_SUNGAI', 'Muara Sungai Besar', '#0284c7', 'sungai',
+   'Muara sungai besar dari HydroRIVERS (HydroSHEDS); jasa maritim dan bioteknologi mensyaratkan jarak minimum'],
 ];
 
 export const warnaInfrastruktur = (kategori) =>

@@ -3,6 +3,7 @@ import struct
 import zlib
 
 import numpy as np
+from django.contrib.gis.geos import Polygon
 from django.core.cache import cache
 from django.db import connection
 from django.db.models import Max
@@ -26,6 +27,20 @@ PALET = {
     'BULAN_KERING': [(0, '#238443'), (3, '#addd8e'), (5, '#fec44f'), (8, '#ec7014'), (12, '#993404')],
     'KEDALAMAN': [(0, '#e0f2fe'), (50, '#bae6fd'), (200, '#7dd3fc'), (1000, '#38bdf8'), (3000, '#0369a1'),
                   (6000, '#082f49')],
+    'ARUS': [(0, '#f7fbff'), (0.15, '#c6dbef'), (0.3, '#6baed6'), (0.45, '#2171b5'), (0.8, '#08306b')],
+    'ARUS_DASAR': [(0, '#f7fbff'), (0.2, '#c6dbef'), (0.4, '#6baed6'), (0.8, '#2171b5'), (1.2, '#08306b')],
+    'SALINITAS': [(25, '#f7fcb9'), (30, '#addd8e'), (32, '#41ab5d'), (34, '#006837'), (36, '#00441b')],
+    'TSS': [(0, '#08306b'), (10, '#4292c6'), (35, '#c6dbef'), (80, '#d9b26f'), (200, '#8c510a')],
+    'KEMIRINGAN': [(0, '#1a9850'), (2, '#91cf60'), (3, '#d9ef8b'), (8, '#fee08b'), (15, '#fc8d59'), (30, '#d73027')],
+    'KEMIRINGAN_DASAR': [(0, '#1a9850'), (2, '#91cf60'), (5, '#fee08b'), (10, '#fc8d59'), (25, '#d73027')],
+    'PASUT': [(0, '#ffffcc'), (1, '#a1dab4'), (2, '#41b6c4'), (3, '#2c7fb8'), (5, '#253494')],
+    'PGA': [(0, '#ffffb2'), (0.15, '#fecc5c'), (0.35, '#fd8d3c'), (0.6, '#f03b20'), (1, '#bd0026')],
+    'GELOMBANG_EKSTREM': [(0, '#e0f3f8'), (2, '#91bfdb'), (4, '#4575b4'), (6, '#fc8d59'), (9, '#d73027')],
+    'ANGIN_100M': [(2, '#f7fcf5'), (4, '#c7e9c0'), (5.5, '#74c476'), (6.5, '#238b45'), (9, '#00441b')],
+    'GHI': [(3.5, '#ffffcc'), (4.2, '#fed976'), (4.8, '#fd8d3c'), (5.5, '#e31a1c'), (6.5, '#800026')],
+    'BEDA_SUHU_1000M': [(10, '#313695'), (15, '#74add1'), (18, '#fee090'), (20, '#f46d43'), (24, '#a50026')],
+    'TANAH_LIAT': [(0, '#fff7bc'), (15, '#fec44f'), (30, '#d95f0e'), (45, '#993404'), (60, '#662506')],
+    'SHANNON': [(0, '#f7fcfd'), (1, '#ccece6'), (2, '#66c2a4'), (3, '#238b45'), (4.5, '#00441b')],
 }
 SKALA_LOG = {'KLOROFIL', 'KD490'}
 DIBALIK = {'KEDALAMAN'}
@@ -43,6 +58,26 @@ def daya_gelombang(tinggi, periode_puncak):
     if tinggi is None or periode_puncak is None:
         return None
     return 0.49 * tinggi ** 2 * 0.9 * periode_puncak
+
+
+def nilai_titik(kode, x, y):
+    hasil = np.full(len(x), np.nan)
+    if not len(x):
+        return hasil
+    kotak = Polygon.from_bbox((float(x.min()), float(y.min()), float(x.max()), float(y.max())))
+    kotak.srid = 4326
+    for b in RasterOseanografi.objects.filter(parameter=kode, cakupan__bboverlaps=kotak).only('rast'):
+        r = b.rast
+        pita = r.bands[0]
+        data = pita.data().reshape(r.height, r.width)
+        kolom = np.floor((x - r.origin.x) / r.scale.x).astype(int)
+        baris = np.floor((y - r.origin.y) / r.scale.y).astype(int)
+        di = (kolom >= 0) & (kolom < r.width) & (baris >= 0) & (baris < r.height) & np.isnan(hasil)
+        nilai = data[baris[di], kolom[di]].astype(float)
+        if pita.nodata_value is not None:
+            nilai[nilai == pita.nodata_value] = np.nan
+        hasil[di] = nilai
+    return hasil
 
 
 def statistik(geom, parameter):

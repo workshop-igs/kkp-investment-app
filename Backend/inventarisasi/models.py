@@ -227,6 +227,11 @@ class InfrastrukturPendukung(models.Model):
         ('PEMBANGKIT_LISTRIK', 'Pembangkit Listrik'),
         ('KAWASAN_INDUSTRI', 'Kawasan Industri'),
         ('KAWASAN_PERDAGANGAN_BEBAS', 'Kawasan Perdagangan Bebas & Pelabuhan Bebas'),
+        ('BANDARA', 'Bandar Udara'),
+        ('GARDU_INDUK', 'Gardu Induk'),
+        ('JARINGAN_LISTRIK_TM', 'Jaringan Listrik Tegangan Menengah'),
+        ('KAMPUS_RISET', 'Kampus & Lembaga Riset'),
+        ('MUARA_SUNGAI', 'Muara Sungai Besar'),
     ]
 
     kategori = models.CharField(max_length=30, choices=KATEGORI_CHOICES)

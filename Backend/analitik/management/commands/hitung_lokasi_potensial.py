@@ -3,6 +3,7 @@ import time
 from collections import Counter
 from functools import partial
 
+import numpy as np
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
@@ -26,6 +27,7 @@ from analitik.services.kriteria import (
     teks_ambang,
     teks_nilai,
 )
+from analitik.services.oseanografi import nilai_titik
 from analitik.services.parameter_tambahan import sesuai_ambang
 from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
@@ -36,7 +38,6 @@ from inventarisasi.models import ZonasiRuangLaut
 
 LABEL_SUB_ZONA = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
 PERINGKAT_BENCANA = {1: 'RENDAH', 2: 'SEDANG', 3: 'TINGGI'}
-PITA_RASTER = [(raster, 1, kunci) for kunci, raster in RASTER_DATA.items()]
 JANGKAU_ALUR_DERAJAT = 0.7
 
 SEL = """
@@ -147,7 +148,7 @@ class Command(BaseCommand):
             return Counter()
 
         with connection.cursor() as c:
-            c.execute('DROP TABLE IF EXISTS zona_sel, sel, piksel, bencana_sel, alur_sel, unsur_sel, alur_jarak')
+            c.execute('DROP TABLE IF EXISTS zona_sel, sel, bencana_sel, alur_sel, unsur_sel, alur_jarak')
             c.execute(
                 'CREATE TEMP TABLE zona_sel AS SELECT id, id = ANY(%s) AS kandidat, '
                 'ST_Subdivide(ST_MakeValid(geometry), 256, 1e-9) AS g '
@@ -186,26 +187,14 @@ class Command(BaseCommand):
                 d['zona'][i] = zids
         calon = [i for i in range(1, banyak + 1) if d['zona'][i]]
 
-        c.execute(
-            """
-            CREATE TEMP TABLE piksel AS
-            SELECT v.kunci, (p).val AS nilai, (p).geom AS g
-            FROM analitik_raster_oseanografi o
-            JOIN unnest(%s::text[], %s::int[], %s::text[]) AS v(parameter, pita, kunci) ON v.parameter = o.parameter
-            CROSS JOIN LATERAL ST_DumpAsPolygons(
-                ST_Clip(o.rast, %s::geometry, true), LEAST(v.pita, ST_NumBands(o.rast))
-            ) p
-            WHERE o.cakupan && %s::geometry
-            """,
-            [[r for r, _, _ in PITA_RASTER], [p for _, p, _ in PITA_RASTER], [k for _, _, k in PITA_RASTER],
-             cakupan, cakupan],
-        )
-        c.execute('CREATE INDEX ON piksel USING gist (g)')
-        c.execute(
-            'SELECT s.id, p.kunci, p.nilai FROM sel s JOIN piksel p ON p.g && s.titik AND ST_Intersects(p.g, s.titik)'
-        )
-        for i, kunci, nilai in c.fetchall():
-            d[kunci][i] = dari_raster(kunci, nilai)
+        c.execute('SELECT id, ST_X(titik), ST_Y(titik) FROM sel WHERE id = ANY(%s)', [calon])
+        titik = np.array(c.fetchall(), dtype=float).reshape(-1, 3)
+        for kunci, raster in RASTER_DATA.items():
+            if raster not in d['tersedia']:
+                continue
+            for i, v in zip(titik[:, 0].astype(int), nilai_titik(raster, titik[:, 1], titik[:, 2])):
+                if not np.isnan(v):
+                    d[kunci][i] = dari_raster(kunci, float(v))
 
         c.execute(TERDEKAT.format(kolom='kotak', tabel='darat_terbagi', saring=''), [calon])
         for i, jarak in c.fetchall():
