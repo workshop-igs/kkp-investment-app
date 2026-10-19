@@ -46,7 +46,7 @@ const TANDA_DASAR = {
 
 const TANDA_FISIK = {
   true: ['DIIZINKAN', '✓', 'Terpenuhi'],
-  false: ['BERSYARAT', '!', 'Belum terpenuhi: peringatan, tidak menggugurkan'],
+  false: ['TIDAK_DIIZINKAN', '✕', 'Tidak terpenuhi'],
   null: [null, '?', 'Belum terukur'],
 };
 
@@ -120,10 +120,10 @@ const Ringkasan = ({ s }) => {
   const sel = [
     ['Cakupan acuan tata ruang', `${angka(s.cakupan_persen, 1)}%`, acuan || 'Tidak ada acuan', 'text-slate-800'],
     fisik && [
-      'Kecocokan fisik (indikatif)',
+      'Kecocokan fisik',
       fisik.label,
-      'peringatan, bukan gerbang',
-      fisik.cocok ? 'text-emerald-700' : 'text-amber-700',
+      `untuk ${s.sektor_nama.toLowerCase()}`,
+      fisik.cocok ? 'text-emerald-700' : 'text-rose-700',
     ],
     s.persen_sangat_sesuai != null && [
       'Parameter dinilai sangat sesuai',
@@ -260,10 +260,10 @@ const KarakterLokasi = ({ s }) => {
   const fisik = fisikScreening(s);
   return (
     <section>
-      <Judul>Kecocokan fisik {s.sektor_nama.toLowerCase()} (indikatif)</Judul>
+      <Judul>Kecocokan fisik {s.sektor_nama.toLowerCase()}</Judul>
       <p className="-mt-1 mb-2 text-[11px] text-slate-400">
-        Kedalaman, gelombang, dan sejenisnya dari data global beresolusi kasar. Hasilnya hanya peringatan dan tidak
-        menentukan kesesuaian ruang; pastikan dengan survei lapangan.
+        Kedalaman, gelombang, dan sejenisnya dari data global beresolusi kasar. Area yang kondisi fisiknya tidak cocok
+        dinyatakan tidak sesuai; pastikan dengan survei lapangan.
       </p>
       <div className="rounded-lg border border-slate-200 bg-white text-xs">
         <div className="grid gap-px overflow-hidden rounded-t-lg bg-slate-100 sm:grid-cols-2">
@@ -274,7 +274,7 @@ const KarakterLokasi = ({ s }) => {
           <div className="bg-white px-3 py-2">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[10.5px] font-semibold text-slate-500">Kondisi area</span>
-              <Pil kode={fisik.cocok ? 'DIIZINKAN' : 'BERSYARAT'}>{fisik.label}</Pil>
+              <Pil kode={fisik.cocok ? 'DIIZINKAN' : 'TIDAK_DIIZINKAN'}>{fisik.label}</Pil>
             </div>
             <p className="mt-0.5 leading-snug text-slate-700">{s.karakter.terukur}</p>
           </div>
@@ -298,7 +298,7 @@ const KarakterLokasi = ({ s }) => {
             {fisik.syarat?.length > 0 && (
               <div className="mt-2 rounded-md bg-slate-50 px-2.5 py-2">
                 <div className="text-[10.5px] font-semibold text-slate-600">
-                  Kondisi fisik (tidak ikut persentase; yang belum terpenuhi menjadi peringatan)
+                  Kondisi fisik (tidak ikut persentase; wajib terpenuhi)
                 </div>
                 <ul className="mt-1 grid gap-x-5 gap-y-0.5 sm:grid-cols-2">
                   {fisik.syarat.map((d) => {
@@ -314,7 +314,7 @@ const KarakterLokasi = ({ s }) => {
                 {fisik.syarat.some((d) => d.label === 'Dekat infrastruktur pendukung' && d.nilai === false) && (
                   <p className="mt-1 text-[10.5px] leading-snug text-slate-500">
                     Jauh dari infrastruktur pendukung tidak memengaruhi kesesuaian ruang, tetapi area seperti ini tidak
-                    ditampilkan di Peta Sebaran Lokasi Indikatif.
+                    ditampilkan di Peta Sebaran Wilayah Potensial Investasi.
                   </p>
                 )}
               </div>
@@ -332,7 +332,7 @@ const KarakterLokasi = ({ s }) => {
               })}
             </ul>
             <p className="mt-2 text-[10.5px] leading-snug text-slate-400">
-              Ambang Peta Sebaran Lokasi Indikatif Lolos Penyaringan: seluruh kondisi fisik dan pengecualian keras terpenuhi dan sedikitnya 75%
+              Ambang Peta Sebaran Wilayah Potensial Investasi: seluruh kondisi fisik dan pengecualian keras terpenuhi dan sedikitnya 75%
               parameter dinilai yang terukur sangat sesuai; di zona peruntukan lain yang hanya mengizinkan bersyarat
               seluruh parameter dinilai wajib terukur dan sangat sesuai.
             </p>
@@ -350,8 +350,9 @@ const PengecualianKeras = ({ s }) => {
     <section>
       <Judul>Pengecualian keras (gerbang kesesuaian ruang)</Judul>
       <p className="-mt-1 mb-2 text-[11px] text-slate-400">
-        Kawasan konservasi dan alur pelayaran dibaca dari seluruh lapisan zonasi sehingga selalu berlaku di atas
-        peruntukan RTRW. Irisan kecil di tepi area ditandai perlu verifikasi batas, bukan langsung menggugurkan.
+        Alur pelayaran dan ALKI dibaca dari seluruh lapisan zonasi sehingga berlaku di atas peruntukan RTRW, kecuali
+        bagi jasa maritim dan infrastruktur laut. Kawasan konservasi mengikuti matriks KKPRL Perda. Irisan kecil di tepi
+        area ditandai perlu verifikasi batas, bukan langsung menggugurkan.
       </p>
       <ul className="grid gap-x-5 gap-y-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs sm:grid-cols-2">
         {daftar.map((d) => {
@@ -708,7 +709,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
               </ul>
             ) : (
               <p className="text-xs text-slate-500">
-                Tidak ada lokasi indikatif {s.sektor_nama.toLowerCase()} pada Peta Sebaran Lokasi Indikatif Lolos Penyaringan
+                Tidak ada lokasi potensial {s.sektor_nama.toLowerCase()} pada Peta Sebaran Wilayah Potensial Investasi
                 dalam radius 100 km.
               </p>
             )}

@@ -608,7 +608,7 @@ const LandingPage = () => {
                   <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
                     {angka(ringkas?.lokasi_potensial)}
                   </span>
-                  <span className="mt-3 block text-sm text-white/80">Lokasi indikatif lolos penyaringan untuk minimal satu jenis investasi: syarat dasar terpenuhi (di luar konservasi, ekosistem sensitif, kabel/pipa/alur pelayaran, KKPRL, dan bangunan) dan sedikitnya 75% parameter dinilai sangat sesuai</span>
+                  <span className="mt-3 block text-sm text-white/80">Lokasi potensial untuk minimal satu jenis investasi: syarat dasar terpenuhi (di luar alur pelayaran, ekosistem sensitif, jarak aman kabel/pipa, KKPRL, dan bangunan) dan sedikitnya 75% parameter dinilai sangat sesuai</span>
                 </Link>
                 <KartuKecil to="/peta?mulai=gambar" judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
                 <KartuKecil to="/profil-investasi" judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />
@@ -706,12 +706,12 @@ const LandingPage = () => {
         <div className="mx-auto max-w-7xl text-center">
           <Label>Peluang investasi</Label>
           <h2 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-extrabold leading-[1.08] tracking-[-0.03em] text-kkp-900 sm:text-5xl">
-            Lokasi indikatif lolos penyaringan untuk setiap jenis investasi.
+            Lokasi potensial untuk setiap jenis investasi.
           </h2>
           <p className="mx-auto mt-5 max-w-2xl leading-relaxed text-slate-600">
             Ruang laut dan darat pesisir dinilai per sel 250 m untuk tiap jenis investasi: peruntukan tata ruang dan
             matriks Perda, karakter lokasi, risiko bencana, dan kriteria per jenis dari data publik. Yang dihitung hanya
-            lokasi di luar kawasan konservasi, ekosistem sensitif, jarak aman kabel/pipa/alur pelayaran, KKPRL terbit, dan
+            lokasi di luar alur pelayaran, ekosistem sensitif, jarak aman kabel/pipa, KKPRL terbit, dan
             bangunan, dengan satu titik terbaik per radius 10 km. Hasilnya indikatif, bukan pengganti Persetujuan KKPRL.
             Pilih satu jenis untuk membuka profil investasinya per provinsi.
           </p>
@@ -733,7 +733,7 @@ const LandingPage = () => {
                 <Ikon className={`h-8 w-8 ${GERAK_IKON}`} style={{ color: warna }} strokeWidth={1.6} aria-hidden="true" />
                 <span className="mt-4 min-h-[2.5rem] text-[15px] font-bold leading-snug text-kkp-900">{nama}</span>
                 <span className="mt-3 text-3xl font-extrabold tracking-[-0.02em] text-kkp-900 tabular-nums">{angka(lokasi)}</span>
-                <span className="text-xs text-slate-500">lokasi indikatif</span>
+                <span className="text-xs text-slate-500">lokasi potensial</span>
                 <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-slate-100">
                   <span className="block h-full rounded-full" style={{ width: `${(lokasi / maksPeluang) * 100}%`, backgroundColor: warna }} />
                 </span>
@@ -743,7 +743,7 @@ const LandingPage = () => {
               </Link>
             );
           })}
-          {ringkas && peluang.length === 0 && <p className="text-sm text-slate-500">Lokasi indikatif belum dihitung.</p>}
+          {ringkas && peluang.length === 0 && <p className="text-sm text-slate-500">Lokasi potensial belum dihitung.</p>}
         </div>
       </section>
 

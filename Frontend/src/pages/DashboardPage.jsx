@@ -402,7 +402,7 @@ const DashboardPage = () => {
             <Grup judul="Potensi ruang laut" kolom="sm:grid-cols-3">
               <div className="col-span-2 sm:col-span-1">
                 <Kpi
-                  label="Lokasi indikatif"
+                  label="Lokasi potensial"
                   nilai={data ? angka(totalLokasi) : '…'}
                   sub={jenis ? SECTORS.find((s) => s.id === jenis)?.label : 'semua jenis'}
                   sorot
@@ -431,7 +431,7 @@ const DashboardPage = () => {
                   className="h-2.5 w-2.5 rounded-full"
                   style={{ background: `conic-gradient(${WARNA_JENIS_INVESTASI.PERIKANAN_TANGKAP} 0 33%, ${WARNA_JENIS_INVESTASI.PARIWISATA_BAHARI} 0 66%, ${WARNA_JENIS_INVESTASI.BIOTEKNOLOGI_KELAUTAN} 0)` }}
                 />
-                Lokasi indikatif
+                Lokasi potensial
               </span>
               <span className="hidden items-center gap-1.5 sm:flex">
                 <span className="grid h-3.5 w-3.5 place-items-center rounded-sm bg-kkp-900" dangerouslySetInnerHTML={{ __html: lambangSvg('koper', 9) }} />
@@ -470,7 +470,7 @@ const DashboardPage = () => {
             </ul>
           </Panel>
 
-          <Panel judul="Provinsi teratas" kanan={<span className="text-[11px] text-slate-400">lokasi indikatif</span>}>
+          <Panel judul="Provinsi teratas" kanan={<span className="text-[11px] text-slate-400">lokasi potensial</span>}>
             {provinsiTeratas.length ? (
               <ol className="-mx-2">
                 {provinsiTeratas.map((p) => (

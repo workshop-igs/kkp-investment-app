@@ -57,7 +57,7 @@ const KATEGORI = [
   {
     judul: 'Analisis Investasi',
     layer: [
-      { id: 'potensi', nama: 'Peta Sebaran Lokasi Indikatif Lolos Penyaringan', warna: '#15803d' },
+      { id: 'potensi', nama: 'Peta Sebaran Wilayah Potensial Investasi', warna: '#15803d' },
     ],
   },
 ];

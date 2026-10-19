@@ -309,10 +309,7 @@ EKOSISTEM_TERLARANG_SEKTOR = {
     'GARAM': ['MANGROVE'],
     'PENGOLAHAN_HASIL_LAUT': ['MANGROVE'],
 }
-# Kawasan konservasi (jenis zona ZL atau sub-zona konservasi dari sumber mana pun) hanya terbuka bagi jenis ini.
-SEKTOR_BOLEH_DI_KAWASAN_KONSERVASI = ['KONSERVASI_PESISIR']
-# Alur pelayaran/ALKI (poligon zonasi dari lapisan mana pun) dikecualikan bagi semua jenis kecuali yang tercantum.
-SEKTOR_BOLEH_DI_ALUR_PELAYARAN = []
+SEKTOR_BOLEH_DI_ALUR_PELAYARAN = ['JASA_MARITIM', 'INFRASTRUKTUR_LAUT']
 # Jarak aman dari unsur garis RTRL; usulan, sesuaikan dengan ketentuan Kemenhub/KKP yang berlaku.
 BUFFER_UNSUR_TERLARANG_M = {'KABEL': 500.0, 'PIPA': 500.0, 'ALUR_PELAYARAN': 500.0}
 # Screening area: irisan pengecualian di bawah bagian ini dicatat sebagai peringatan, tidak menggugurkan

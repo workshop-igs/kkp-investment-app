@@ -225,16 +225,16 @@ export const LAYER_LOKAL = {
     urlWilayah: '/analitik/lokasi-potensial/wilayah/',
     params: { sektor: 'SEMUA', kelas: 'TINGGI' },
     semuaJenis: 'Semua jenis investasi',
-    label: 'Peta Sebaran Lokasi Indikatif Lolos Penyaringan',
+    label: 'Peta Sebaran Wilayah Potensial Investasi',
     legenda: 'disarankan',
     ikon: (p) => IKON_JENIS_INVESTASI[p.sektor_kode] || 'bintang',
     warnaIkon: (p) => warnaJenisInvestasi(p.sektor_kode),
     warnaTitik: (p) => (p.jenis?.length ? p.jenis : [p.sektor_kode]).map(warnaJenisInvestasi),
-    tooltip: (p) => `Lokasi indikatif lolos penyaringan:
+    tooltip: (p) => `Lokasi potensial:
 ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     zoomPin: 8,
     keteranganLegenda:
-      'Setiap titik adalah lokasi indikatif yang lolos penyaringan awal untuk sebuah jenis investasi; warnanya '
+      'Setiap titik adalah lokasi potensial untuk sebuah jenis investasi; warnanya '
       + 'menunjukkan jenis itu dan titik berwarna ganda cocok untuk beberapa jenis. Ini bukan rekomendasi pasti dan '
       + 'bukan pengganti Persetujuan KKPRL. Mulai tingkat provinsi titik menjadi penanda berlambang jenis, dan batas '
       + 'lokasinya dimuat sebagai area analisis saat tombol Analisis lokasi ini di popup diklik; analisis itu memakai '
@@ -242,10 +242,11 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       + 'ruang laut, atau kawasan Pola Ruang darat RTRW Provinsi di pesisir, yang peruntukannya mengizinkan jenis itu. '
       + 'Sel harus memenuhi seluruh SYARAT DASAR: karakter lokasi cocok (misalnya budi daya laut di perairan 1 sampai '
       + '30 m, tambak garam di darat pesisir; kedalaman dan gelombang bersifat indikatif), dekat infrastruktur '
-      + 'pendukung, serta lolos pengecualian keras: di luar kawasan konservasi (kecuali jenis konservasi) dan alur '
-      + 'pelayaran/ALKI dari lapisan zonasi mana pun, tidak '
+      + 'pendukung, serta lolos pengecualian keras: di luar alur pelayaran/ALKI dari lapisan zonasi mana pun '
+      + '(kecuali jasa maritim dan infrastruktur laut), tidak '
       + 'menempati mangrove, lamun, atau terumbu karang bagi jenis yang dapat merusaknya, di luar jarak aman kabel, pipa, '
-      + 'dan alur pelayaran, tidak beririsan KKPRL terbit, dan tidak tertutup bangunan. Syarat dasar ini pasti '
+      + 'dan alur pelayaran, tidak beririsan KKPRL terbit, dan tidak tertutup bangunan. Di kawasan konservasi, jenis '
+      + 'yang boleh mengikuti matriks KKPRL Perda zona itu. Syarat dasar ini pasti '
       + 'terpenuhi pada setiap titik sehingga tidak ikut persentase. Persentase dihitung dari PARAMETER DINILAI: '
       + 'peruntukan diizinkan tanpa syarat, risiko tsunami, gelombang ekstrem dan abrasi, serta banjir yang rendah, di '
       + 'luar wilayah kelola masyarakat hukum adat, dan kriteria per jenis dari data publik (misalnya suhu, klorofil-a, '
@@ -302,7 +303,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         <div class="flex items-center gap-2.5">
           <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full shadow-sm" style="background:${warna}">${lambangSvg(IKON_JENIS_INVESTASI[jenis[0]], 18)}</span>
           <div class="min-w-0">
-            <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Lolos penyaringan untuk ${nama.length} jenis investasi` : `Lokasi indikatif ${aman(nama[0])}`}</h3>
+            <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Cocok untuk ${nama.length} jenis investasi` : `Lokasi potensial ${aman(nama[0])}`}</h3>
             <p class="text-[11px] text-slate-500 leading-snug">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
           </div>
         </div>
