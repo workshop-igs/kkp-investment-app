@@ -3,10 +3,8 @@ import shp from 'shpjs';
 import { kml } from '@tmcw/togeojson';
 import { DOMParser } from '@xmldom/xmldom';
 
-// Batas bawaan; server memakai Pengaturan Analisis (Luas area paling kecil/besar) sebagai acuan akhir.
 export const LUAS_MIN_HA = 0.01;
 export const LUAS_MAKS_HA = 50000;
-// Kotak kasar wilayah perairan dan daratan Indonesia (derajat).
 const INDONESIA = { barat: 90, timur: 145, selatan: -15, utara: 10 };
 const JARI_BUMI = 6378137;
 
@@ -23,7 +21,6 @@ const titikSemua = (geom) => {
 };
 
 const luasCincin = (cincin) => {
-  // Luas bola (rumus yang sama dengan Leaflet/Mapbox geojson-area), m².
   let jumlah = 0;
   for (let i = 0; i < cincin.length - 1; i += 1) {
     const [x1, y1] = cincin[i];
@@ -83,7 +80,6 @@ export async function bacaGeospasial(file) {
   return { type: 'FeatureCollection', features: poligon, diabaikan: fitur.length - poligon.length };
 }
 
-/** Area proyek dari file: satu poligon, di Indonesia, dengan luas dalam batas. Mengembalikan geometri dan peringatan. */
 export function areaProyek({ features, diabaikan = 0 }) {
   const peringatan = [];
   const geometry = features[0].geometry;

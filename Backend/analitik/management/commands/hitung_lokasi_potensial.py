@@ -8,6 +8,7 @@ from django.db import connection, transaction
 from django.db.models import Q
 
 from analitik.models import LokasiPotensial, NilaiWilayahParameter, ParameterTambahan
+from analitik.services import pengecualian
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
     KETENTUAN_DARAT_BAWAAN,
@@ -16,7 +17,6 @@ from analitik.services.konstanta import (
     SEKTOR_TERSENDIRI_DI_PETA,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
-from analitik.services import pengecualian
 from analitik.services.oseanografi import daya_gelombang, raster_tersedia
 from analitik.services.parameter_tambahan import sesuai_ambang
 from analitik.services.pengaturan import atur
@@ -34,7 +34,6 @@ from inventarisasi.models import ZonasiRuangLaut
 
 LABEL_SUB_ZONA = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
 PERINGKAT_BENCANA = {1: 'RENDAH', 2: 'SEDANG', 3: 'TINGGI'}
-# (raster, pita, kunci data sel): pita 1 rata-rata, 2 minimum, 3 maksimum sepanjang setahun.
 PITA_RASTER = [
     ('KEDALAMAN', 1, 'kedalaman'), ('GELOMBANG', 1, 'gelombang'), ('GELOMBANG', 3, 'gelombang_tertinggi'),
     ('SUHU', 2, 'suhu'), ('SUHU', 1, 'suhu_rata'), ('ANOMALI_SUHU', 1, 'anomali'), ('KLOROFIL', 1, 'klorofil'),
@@ -146,7 +145,7 @@ class Command(BaseCommand):
             return Counter()
 
         with connection.cursor() as c:
-            c.execute('DROP TABLE IF EXISTS zona_sel, sel, piksel, bencana_sel, konservasi_sel, alur_sel, unsur_sel')
+            c.execute('DROP TABLE IF EXISTS zona_sel, sel, piksel, bencana_sel, alur_sel, unsur_sel')
             c.execute(
                 'CREATE TEMP TABLE zona_sel AS SELECT id, id = ANY(%s) AS kandidat, '
                 'ST_Subdivide(ST_MakeValid(geometry), 256, 1e-9) AS g '
@@ -260,7 +259,6 @@ class Command(BaseCommand):
         )
         c.execute('CREATE INDEX ON unsur_sel USING gist (g)')
 
-        # Sama dengan screening: indeks RISIKO, kelas terburuk yang menyentuh sel (bukan hanya titik tengahnya).
         c.execute(
             'CREATE TEMP TABLE bencana_sel AS SELECT jenis, kelas, ST_Subdivide(ST_MakeValid(geometry), 256, 1e-9) AS g '
             "FROM analitik_zona_risiko_bencana WHERE varian = 'RISIKO' AND geometry && %s::geometry",
@@ -428,7 +426,6 @@ class Command(BaseCommand):
             'jarak_pantai_km': (jarak if jarak is not None else 99.0) if ranah == 'LAUT' else None,
             'ekosistem': ekosistem or frozenset(), 'ekosistem_sekitar': sekitar or frozenset(), 'bencana': dict(bencana),
             'dekat_infrastruktur': infra, 'adat': adat, 'tambahan': dict(tambahan),
-            # Sel yang sampai di sini sudah lolos seluruh pengecualian keras.
             'pengecualian': {p: True for p in pengecualian.berlaku(kode)},
         })
         if hasil is None:

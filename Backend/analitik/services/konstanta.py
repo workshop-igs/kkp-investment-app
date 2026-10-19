@@ -203,11 +203,7 @@ KETENTUAN_DARAT_BAWAAN = {
 SEKTOR_TERSENDIRI_DI_PETA = ['KONSERVASI_PESISIR']
 
 AMBANG_KECOCOKAN = 0.75
-# Dihitung dari parameter yang dinilai saja; syarat dasar (ranah, karakter, infrastruktur, pengecualian) yang
-# pasti terpenuhi pada lokasi yang lolos tidak lagi ikut dihitung.
 MINIMAL_PARAMETER_TERUKUR = 3
-# Hasil screening berlabel "indikatif" bila parameter terukurnya kurang dari bagian ini (atau kurang dari
-# MINIMAL_PARAMETER_TERUKUR).
 AMBANG_KELENGKAPAN_DATA = 0.75
 WAJIB_LENGKAP_BERSYARAT = True
 AMBANG_KECOCOKAN_BERSYARAT = 1.0
@@ -277,9 +273,6 @@ KARAKTER_LOKASI = {
     },
 }
 
-# Parameter dinilai per jenis investasi (ikut persentase sangat sesuai, tidak menggugurkan). Seluruhnya dari data
-# publik; ambangnya usulan berdasarkan pustaka kesesuaian lokasi dan menunggu tinjauan KKP. Parameter yang
-# datanya belum pernah ditarik ke aplikasi dilewati, bukan dihitung "tidak terukur".
 PARAMETER_TAMBAHAN = {
     'PERIKANAN_BUDIDAYA': {'LAUT': {
         'suhu_rata_min': 26, 'suhu_rata_maks': 32, 'anomali_suhu_maks': 1.0, 'klorofil_min': 0.2, 'klorofil_maks': 10,
@@ -295,12 +288,8 @@ PARAMETER_TAMBAHAN = {
     'KONSERVASI_PESISIR': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
     'BIOTEKNOLOGI_KELAUTAN': {'LAUT': {'kedalaman_maks': 30, 'gelombang_maks': 1.5, 'anomali_suhu_maks': 1.0}},
 }
-# Bulan dengan curah hujan di bawah ini dihitung bulan kering (pustaka tambak garam: < 100 mm/bulan).
 AMBANG_BULAN_KERING_MM = 100
 
-# Pengecualian keras, berlaku sama di Peta Sebaran dan screening.
-# Ekosistem sensitif yang tidak boleh ditempati tiap jenis investasi. Jenis yang membutuhkan ekosistem
-# (pariwisata, konservasi, bioteknologi) dan perikanan tangkap tidak dikecualikan.
 EKOSISTEM_TERLARANG_SEKTOR = {
     'PERIKANAN_BUDIDAYA': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],
     'ENERGI_KELAUTAN': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],
@@ -310,15 +299,9 @@ EKOSISTEM_TERLARANG_SEKTOR = {
     'PENGOLAHAN_HASIL_LAUT': ['MANGROVE'],
 }
 SEKTOR_BOLEH_DI_ALUR_PELAYARAN = ['JASA_MARITIM', 'INFRASTRUKTUR_LAUT']
-# Jarak aman dari unsur garis RTRL; usulan, sesuaikan dengan ketentuan Kemenhub/KKP yang berlaku.
 BUFFER_UNSUR_TERLARANG_M = {'KABEL': 500.0, 'PIPA': 500.0, 'ALUR_PELAYARAN': 500.0}
-# Screening area: irisan pengecualian di bawah bagian ini dicatat sebagai peringatan, tidak menggugurkan
-# (batas peta tata ruang 1:50.000-1:250.000 dapat bergeser puluhan hingga ratusan meter).
 AMBANG_IRISAN_PENGECUALIAN_PERSEN = 1.0
-# Screening area: zona yang tidak mengizinkan (atau belum berketentuan) dan KKPRL terbit yang hanya teriris sebagian
-# kecil di tepi area ditandai "perlu verifikasi batas", tidak langsung menggugurkan.
 AMBANG_IRISAN_TEPI_PERSEN = 2.0
-# Batas luas area yang dapat di-screening / dianalisis.
 LUAS_AREA_MIN_HA = 0.01
 LUAS_AREA_MAKS_HA = 50000
 

@@ -40,7 +40,6 @@ export const PenyediaAuth = ({ children }) => {
       .catch(() => {});
   }, []);
 
-  // Denyut tiap menit selama tab terlihat, agar dashboard admin dapat menghitung pengguna yang sedang aktif.
   const idPengguna = user?.id;
   useEffect(() => {
     if (!idPengguna) return undefined;

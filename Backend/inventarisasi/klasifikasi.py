@@ -140,8 +140,6 @@ LARANGAN_UMUM = re.compile(
 )
 SEMUA_KEGIATAN = re.compile(r'^semua\b(?!.*\bkecuali\b)')
 
-# Matriks RZWP3K yang mengelompokkan butir di bawah judul jenis investasi disimpan sebagai "Judul: kegiatan";
-# judul itu menentukan jenis investasinya, bukan kata kunci.
 JUDUL_SEKTOR = {
     'perikanan tangkap': ('PERIKANAN_TANGKAP',),
     'perikanan budidaya': ('PERIKANAN_BUDIDAYA',),
@@ -156,10 +154,7 @@ JUDUL_SEKTOR = {
     'produksi garam': ('GARAM',),
     'semua jenis investasi': tuple(KATA_SEKTOR),
 }
-# Judul yang juga memuat kegiatan di luar jenis investasinya (pertambangan, perusakan habitat): butirnya dihitung
-# hanya bila kata kunci jenis investasinya cocok.
 JUDUL_LUAS = {'ENERGI_KELAUTAN', 'KONSERVASI_PESISIR'}
-# Larangan atas cara yang ilegal atau merusak, bukan atas jenis investasinya.
 LARANGAN_PRAKTIK = re.compile(
     r'peledak|beracun|\bbius\b|potas|perusak|kerusakan|tidak ramah lingkungan|dilindungi|sampah|limbah|dumping'
     r'|pencemaran|mencemari'
@@ -168,7 +163,6 @@ SEMUA_TERBATAS = re.compile(r'\b(?:selain|saat|di area|di luar)\b')
 
 
 def pecah_judul(butir):
-    """(jenis investasi, isi) bila butir berawalan judul sektor matriks; selain itu (None, butir)."""
     judul, pemisah, isi = butir.partition(': ')
     sektor = JUDUL_SEKTOR.get(judul.strip().lower()) if pemisah else None
     return (sektor, isi) if sektor else (None, butir)

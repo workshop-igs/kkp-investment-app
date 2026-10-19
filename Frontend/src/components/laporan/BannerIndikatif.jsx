@@ -1,8 +1,6 @@
 import { AlertTriangle, Info } from 'lucide-react';
 import { CATATAN_DASAR } from '../../utils/kelengkapanData';
 
-// Ditampilkan di atas setiap laporan: label "indikatif" bila data kurang, dan catatan bahwa hasil
-// hanyalah penyaringan awal (bukan pengganti Persetujuan KKPRL).
 const BannerIndikatif = ({ status }) => (
   <div className="space-y-2">
     {status?.indikatif && (

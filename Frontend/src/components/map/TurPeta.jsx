@@ -94,8 +94,6 @@ const letakKartu = (k, w, h) => {
   const sisiKanan = { left: k.right + JARAK, top: tengahY };
   const bawah = { left: tengahX, top: k.bottom + JARAK };
   const atas = { left: tengahX, top: k.top - JARAK - h };
-  // Target tinggi (mis. panel legenda) tidak menyisakan ruang di atas/bawah:
-  // taruh kartu di sampingnya agar tidak menutupi target.
   const pilihan = (k.left > W / 2 && muatX(sisiKiri.left) && sisiKiri)
     || (muatY(bawah.top) && bawah)
     || (muatY(atas.top) && atas)

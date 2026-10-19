@@ -436,7 +436,6 @@ const PetaInteraktif = ({
                             geometri = feature.geometry;
                           }
                         }
-                        // Jenis investasi lokasi ikut dipilih agar hasil analisis sama dengan penilaian di peta.
                         if (sektor) onPilihSektor?.(sektor);
                         drawerRef.current?.loadGeometry(geometri);
                       });

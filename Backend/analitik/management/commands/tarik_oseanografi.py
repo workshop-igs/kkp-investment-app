@@ -83,7 +83,6 @@ PARAMETER = {
     },
 }
 
-# Diturunkan dari raster CURAH_HUJAN yang sama, tidak diunduh terpisah.
 BULAN_KERING = {
     'satuan': 'bulan', 'sumber': 'Dihitung dari CHIRPS v2.0: jumlah bulan bercurah hujan di bawah ambang bulan kering',
 }
@@ -204,7 +203,6 @@ class Command(BaseCommand):
                 break
         sel, waktu, satuan = _grid(teks, p['variabel'])
         if p.get('per_bulan') and 'day' in satuan.lower():
-            # Sebagian dataset bulanan ERDDAP menyimpan laju harian (mm/hari); ubah ke total bulanan.
             sel = {k: [x * 30.44 for x in v] for k, v in sel.items()}
         rast, cakupan = _raster(sel, p['resolusi'] * langkah, [np.mean, np.min, np.max])
         periode = _periode(waktu, p.get('bulanan'))

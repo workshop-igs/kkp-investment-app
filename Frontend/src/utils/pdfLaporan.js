@@ -1089,7 +1089,6 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     'Set data yang dipakai screening kesesuaian ruang, beserta sumber dan tanggal pembaruannya di basis data aplikasi.'
   );
   if (a.screening?.asal_data?.length) {
-    // Daftar (bukan tabel) karena sumber dan keterangannya panjang dan perlu turun baris.
     k.daftar(a.screening.asal_data.map((d) => `${d.data}: ${d.sumber}${d.keterangan ? ` (${d.keterangan})` : ''}`));
   } else {
     k.peringatan('Rincian asal data tidak tersimpan pada analisis ini (dibuat sebelum fitur asal data tersedia).');

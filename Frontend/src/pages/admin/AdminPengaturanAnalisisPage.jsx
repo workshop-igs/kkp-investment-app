@@ -74,11 +74,9 @@ export const StatusHitungUlang = ({ status, onMulai }) => {
   if (berjalan || menunggu) {
     const [namaTahap, wilayah] = tahap.includes(': ') ? tahap.split(': ') : [tahap || 'Menyiapkan', ''];
     const indeks = Math.max(0, TAHAP_HITUNG.findIndex((t) => t.kunci === namaTahap));
-    // Server mencatat nomor provinsi saat provinsi itu MULAI diproses, jadi yang sudah selesai adalah ke - 1.
     const rampung = Math.max(0, ke - 1);
     const persen = dari ? Math.min(100, Math.round((rampung / dari) * 100)) : null;
     const lewat = mulai ? (sekarang - new Date(mulai).getTime()) / 1000 : 0;
-    // Ukuran provinsi sangat beragam; perkiraan baru ditampilkan setelah beberapa provinsi selesai.
     const sisa = dari && rampung >= 2 ? (lewat / rampung) * (dari - rampung) : null;
     return (
       <div role="status" aria-live="polite" className="rounded-xl border border-sky-200 bg-gradient-to-br from-sky-50 to-white px-4 py-4 text-sm shadow-sm">
@@ -194,7 +192,6 @@ export const useStatusHitungUlang = (awal) => {
   useEffect(() => setStatus(awal), [awal]);
   useEffect(() => {
     if (!status?.berjalan && !status?.menunggu) return undefined;
-    // Diperiksa tiap 5 detik selama berjalan agar bilah progres bergerak mulus.
     const t = setInterval(() => {
       api.get(`${URL}hitung-ulang/`).then(({ data }) => setStatus(data)).catch(() => {});
     }, 5000);
