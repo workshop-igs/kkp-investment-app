@@ -41,10 +41,6 @@ def _periode(waktu, bulanan):
 
 
 PARAMETER = {
-    'KEDALAMAN': {
-        'dataset': 'etopo180', 'variabel': 'altitude', 'satuan': 'm', 'petak': 6.0, 'resolusi': 1 / 60,
-        'sumber': 'NOAA ETOPO1 (1 menit busur, rilis 2009) via ERDDAP',
-    },
     'SUHU': {
         'server': COASTWATCH, 'dataset': 'NOAA_DHW_monthly', 'variabel': 'sea_surface_temperature', 'satuan': '°C',
         'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True, 'bulanan': True,
@@ -137,7 +133,7 @@ def _grid(teks, variabel):
     return sel, waktu, satuan[i_nilai] if i_nilai < len(satuan) else ''
 
 
-def _raster(sel, resolusi, pita, kosong_bila=None):
+def _raster(sel, resolusi, pita):
     lintang = sorted({k[0] for k in sel}, reverse=True)
     bujur = sorted({k[1] for k in sel})
     if not lintang:
@@ -147,8 +143,6 @@ def _raster(sel, resolusi, pita, kosong_bila=None):
     lebar = round((bujur[-1] - bujur[0]) / resolusi) + 1
     data = np.full((len(pita), tinggi, lebar), KOSONG, dtype='float32')
     for (lat, lon), nilai in sel.items():
-        if kosong_bila and kosong_bila(nilai):
-            continue
         r, k = round((y0 - lat) / resolusi), round((lon - x0) / resolusi)
         arr = np.asarray(nilai)
         for i, fungsi in enumerate(pita):
@@ -164,8 +158,8 @@ def _raster(sel, resolusi, pita, kosong_bila=None):
 
 
 class Command(BaseCommand):
-    help = ('Tarik kondisi oseanografi (kedalaman, suhu permukaan dan anomalinya, klorofil-a, kekeruhan Kd490, tinggi '
-            'dan periode gelombang) serta curah hujan CHIRPS dari NOAA ERDDAP ke raster lokal.')
+    help = ('Tarik kondisi oseanografi (suhu permukaan dan anomalinya, klorofil-a, kekeruhan Kd490, tinggi dan periode '
+            'gelombang) serta curah hujan CHIRPS dari NOAA ERDDAP ke raster lokal. Kedalaman: tarik_data_publik.')
 
     def add_arguments(self, parser):
         parser.add_argument('--parameter', choices=list(PARAMETER), action='append',
@@ -175,7 +169,7 @@ class Command(BaseCommand):
         for kode in opsi['parameter'] or list(PARAMETER):
             p = PARAMETER[kode]
             mulai = time.time()
-            jumlah = self._kedalaman(p) if kode == 'KEDALAMAN' else self._deret(kode, p)
+            jumlah = self._deret(kode, p)
             self.stdout.write(self.style.SUCCESS(f'{kode}: {jumlah} petak raster ({time.time() - mulai:.0f} dtk)'))
 
     def _simpan(self, kode, p, rast, cakupan, periode):
@@ -183,24 +177,6 @@ class Command(BaseCommand):
             parameter=kode, cakupan=cakupan,
             defaults={'rast': rast, 'satuan': p['satuan'], 'periode': periode, 'sumber': p['sumber']},
         )
-
-    def _kedalaman(self, p):
-        res = p['resolusi']
-        jumlah = 0
-        x = BATAS[0]
-        while x < BATAS[2]:
-            y = BATAS[1]
-            while y < BATAS[3]:
-                url = (f"{ERDDAP}/{p['dataset']}.csv?{p['variabel']}[({y}):({y + p['petak'] - res})]"
-                       f"[({x}):({x + p['petak'] - res})]")
-                rast, cakupan = _raster(_grid(_unduh(url), p['variabel'])[0], res, [np.mean], kosong_bila=lambda v: v[0] >= 0)
-                if rast is not None:
-                    self._simpan('KEDALAMAN', p, rast, cakupan, '')
-                    jumlah += 1
-                self.stdout.write(f'  petak {x:.0f}°BT {y:.0f}°LU')
-                y += p['petak']
-            x += p['petak']
-        return jumlah
 
     def _deret(self, kode, p):
         waktu = _rentang_tahun(p['waktu_tahunan']) if 'waktu_tahunan' in p else p['waktu']

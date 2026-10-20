@@ -47,6 +47,8 @@ const KATEGORI = [
       { id: 'risiko_tsunami', nama: 'Risiko Tsunami', warna: '#dc2626' },
       { id: 'risiko_abrasi', nama: 'Risiko Gelombang Ekstrem & Abrasi', warna: '#ea580c' },
       { id: 'risiko_banjir', nama: 'Risiko Banjir', warna: '#2563eb' },
+      { id: 'risiko_pga', nama: 'Percepatan Tanah Gempa (PGA)', warna: '#f03b20' },
+      { id: 'risiko_laju_abrasi', nama: 'Laju Abrasi Garis Pantai', warna: '#e31a1c' },
     ],
   },
   {
@@ -59,6 +61,11 @@ const KATEGORI = [
       { id: 'osea_kedalaman', nama: 'Kedalaman Laut', warna: '#0369a1' },
       { id: 'osea_kd490', nama: 'Kecerahan Perairan (Kd490)', warna: '#2171b5' },
       { id: 'osea_periode', nama: 'Periode Gelombang', warna: '#4575b4' },
+      { id: 'osea_kemiringan_dasar', nama: 'Kemiringan Dasar Laut', warna: '#fc8d59' },
+      { id: 'osea_arus', nama: 'Kecepatan Arus Permukaan', warna: '#2171b5' },
+      { id: 'osea_salinitas', nama: 'Salinitas Permukaan Laut', warna: '#41ab5d' },
+      { id: 'osea_beda_suhu', nama: 'Beda Suhu Permukaan dan 1.000 m', warna: '#f46d43' },
+      { id: 'osea_shannon', nama: 'Keanekaragaman Hayati Laut (Shannon)', warna: '#238b45' },
     ],
   },
   {
@@ -66,6 +73,11 @@ const KATEGORI = [
     layer: [
       { id: 'iklim_hujan', nama: 'Curah Hujan Bulanan', warna: '#238443' },
       { id: 'iklim_kering', nama: 'Bulan Kering Berturut-turut', warna: '#ec7014' },
+      { id: 'iklim_kemiringan', nama: 'Kemiringan Lahan', warna: '#fc8d59' },
+      { id: 'iklim_liat', nama: 'Kandungan Tanah Liat', warna: '#d95f0e' },
+      { id: 'iklim_angin', nama: 'Kecepatan Angin 100 m', warna: '#238b45' },
+      { id: 'iklim_ghi', nama: 'Iradiasi Surya (GHI)', warna: '#fd8d3c' },
+      { id: 'pesisir_eks_mangrove', nama: 'Eks-Mangrove 1996-2020', warna: '#b45309' },
     ],
   },
   {

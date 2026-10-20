@@ -11,6 +11,7 @@ from inventarisasi.models import InfrastrukturPendukung
 
 BATAS = (94.0, -11.0, 142.0, 7.0)
 PETAK_GARIS = 2.0
+PERCOBAAN = 12
 SUMBER = 'OSM'
 TITIK = {
     'BANDARA': 'nwr["aeroway"="aerodrome"]["iata"](area.id);nwr["aeroway"="aerodrome"]["icao"](area.id);',
@@ -53,7 +54,7 @@ class Command(BaseCommand):
 
     def _ambil(self, kueri):
         isi = f'[out:json][timeout:180][maxsize:268435456];{kueri}'
-        for coba in range(6):
+        for coba in range(PERCOBAAN):
             try:
                 r = httpx.post(OVERPASS[coba % len(OVERPASS)], data={'data': isi}, headers=KEPALA, timeout=240)
                 r.raise_for_status()
@@ -63,8 +64,8 @@ class Command(BaseCommand):
                 return data['elements']
             except Exception as e:
                 self.stderr.write(f'  coba {coba + 1}: {type(e).__name__} {str(e)[:120]}')
-                time.sleep(10 * (coba + 1))
-        raise CommandError('Overpass gagal setelah 6 percobaan; jalankan ulang perintah ini.')
+                time.sleep(min(30 * (coba + 1), 180))
+        raise CommandError(f'Overpass gagal setelah {PERCOBAAN} percobaan; jalankan ulang perintah ini.')
 
     def _baru(self, kategori, tag, geom, cadangan):
         return InfrastrukturPendukung(

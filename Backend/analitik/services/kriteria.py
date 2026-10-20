@@ -45,7 +45,7 @@ PARAMETER = {
     'shannon': ('Indeks keanekaragaman hayati (Shannon-Wiener H′)', '', 'SHANNON'),
     'eks_mangrove_mudflat': ('Eks-mangrove terdegradasi atau hamparan lumpur', 'ada/tidak', 'EKS_MANGROVE'),
     'intertidal': ('Berada di zona intertidal (MSL–MHW)', 'ada/tidak', 'INTERTIDAL'),
-    'luas_hamparan_ha': ('Luas hamparan lahan kontigu', 'ha', 'EKS_MANGROVE'),
+    'luas_hamparan_ha': ('Luas hamparan lahan kontigu', 'ha', 'LUAS_EKS_MANGROVE'),
     'laju_abrasi': ('Laju abrasi garis pantai', 'm/tahun', 'ABRASI_PANTAI'),
 }
 BINER = {'karang', 'eks_mangrove_mudflat', 'intertidal'}
@@ -56,9 +56,10 @@ RASTER_DATA = {
     'kemiringan_dasar_laut': 'KEMIRINGAN_DASAR', 'tunggang_pasut': 'PASUT', 'pga': 'PGA',
     'gelombang_ekstrem': 'GELOMBANG_EKSTREM', 'angin_100m': 'ANGIN_100M', 'ghi': 'GHI',
     'beda_suhu_1000m': 'BEDA_SUHU_1000M', 'tanah_liat': 'TANAH_LIAT', 'shannon': 'SHANNON',
+    'laju_abrasi': 'ABRASI_PANTAI', 'eks_mangrove_mudflat': 'EKS_MANGROVE', 'luas_hamparan_ha': 'LUAS_EKS_MANGROVE',
 }
 RASTER_DARAT = {'curah_hujan', 'bulan_kering_berturut', 'kemiringan_lahan', 'tanah_liat'}
-RASTER_DUA_RANAH = {'salinitas', 'pga'}
+RASTER_DUA_RANAH = {'salinitas', 'pga', 'laju_abrasi', 'eks_mangrove_mudflat', 'luas_hamparan_ha'}
 
 
 def raster_ranah(kunci, darat):

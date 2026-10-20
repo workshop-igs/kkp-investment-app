@@ -25,6 +25,17 @@ def warp(sumber, tujuan, resolusi, metode='average', tambahan=()):
     )
 
 
+def warp_baca(sumber, resolusi, metode='average', isi_kosong=0, tambahan=()):
+    with tempfile.TemporaryDirectory() as d:
+        tif = os.path.join(d, 'raster.tif')
+        warp(sumber, tif, resolusi, metode, tambahan)
+        if isi_kosong:
+            terisi = os.path.join(d, 'terisi.tif')
+            subprocess.run(['gdal_fillnodata.py', '-q', '-md', str(isi_kosong), tif, terisi], check=True)
+            tif = terisi
+        return baca_grid(tif)
+
+
 def simpan_grid(kode, data, resolusi, satuan, sumber, periode=''):
     data = np.where(np.isnan(data), KOSONG, data).astype('float32')
     tinggi, lebar = data.shape
@@ -79,12 +90,7 @@ class Command(BaseCommand):
                             help='Isi piksel kosong dari tetangga terdekat sejauh N piksel (mis. salinitas ke darat)')
 
     def handle(self, *args, **o):
-        with tempfile.TemporaryDirectory() as d:
-            tif = os.path.join(d, 'raster.tif')
-            warp(o['sumber'], tif, o['resolusi'], o['metode'])
-            if o['isi_kosong']:
-                subprocess.run(['gdal_fillnodata.py', '-q', '-md', str(o['isi_kosong']), tif], check=True)
-            data = baca_grid(tif) * o['skala'] + o['tambah']
+        data = warp_baca(o['sumber'], o['resolusi'], o['metode'], o['isi_kosong']) * o['skala'] + o['tambah']
         jumlah = simpan_grid(o['kode'], data, o['resolusi'], o['satuan'], o['keterangan'], o['periode'])
         terisi = np.count_nonzero(~np.isnan(data))
         self.stdout.write(self.style.SUCCESS(
