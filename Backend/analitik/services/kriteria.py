@@ -71,9 +71,9 @@ UBAH = {'kedalaman': lambda v: max(0.0, -v), 'curah_hujan': lambda v: v * 12}
 def dari_raster(kunci, v):
     return None if v is None else UBAH.get(kunci, float)(v)
 BENCANA = (
-    ('TSUNAMI', 'Risiko tsunami tidak tinggi'),
-    ('ABRASI', 'Risiko gelombang ekstrem dan abrasi tidak tinggi'),
-    ('BANJIR', 'Risiko banjir tidak tinggi'),
+    ('TSUNAMI', 'Risiko tsunami'),
+    ('ABRASI', 'Risiko gelombang ekstrem dan abrasi'),
+    ('BANJIR', 'Risiko banjir'),
 )
 
 

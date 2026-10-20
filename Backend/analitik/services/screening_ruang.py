@@ -159,9 +159,11 @@ def _catat_oseanografi(data, stat):
 
 def karakter_area(c, geom):
     c.execute(
-        'SELECT EXISTS (SELECT 1 FROM inti_provinsi WHERE geometry && ST_PointOnSurface(ST_GeomFromEWKT(%s)) '
-        'AND ST_Intersects(geometry, ST_PointOnSurface(ST_GeomFromEWKT(%s))))',
-        [geom.ewkt, geom.ewkt],
+        'SELECT CASE WHEN ST_Area(a.g) = 0 THEN bool_or(p.id IS NOT NULL) '
+        'ELSE COALESCE(SUM(ST_Area(ST_Intersection(p.geometry, a.g))), 0) >= ST_Area(a.g) * %s END '
+        'FROM (SELECT ST_GeomFromEWKT(%s) AS g) a '
+        'LEFT JOIN inti_provinsi p ON p.geometry && a.g AND ST_Intersects(p.geometry, a.g) GROUP BY a.g',
+        [atur('PORSI_DARAT_MINIMAL'), geom.ewkt],
     )
     darat = c.fetchone()[0]
     tersedia = sumber_tersedia()
