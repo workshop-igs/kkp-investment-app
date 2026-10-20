@@ -608,6 +608,9 @@ def obrolan(request):
                 riwayat.append({'role': 'tool', 'tool_call_id': p.get('id', ''), 'content': _untuk_model(isi)})
             if time.monotonic() >= batas:
                 break
+    except (httpx.ConnectError, httpx.RemoteProtocolError) as e:
+        logger.warning(f'[ASISTEN] Server model tidak terjangkau: {type(e).__name__}: {e}')
+        return Response({'detail': 'Model asisten belum terhubung.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except (httpx.HTTPError, KeyError, ValueError) as e:
         logger.warning(f'[ASISTEN] Model tidak dapat dihubungi: {type(e).__name__}: {e}')
         return Response({'detail': 'Model asisten tidak dapat dihubungi.'}, status=status.HTTP_502_BAD_GATEWAY)
