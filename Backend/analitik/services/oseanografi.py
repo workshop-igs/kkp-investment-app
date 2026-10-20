@@ -41,9 +41,13 @@ PALET = {
     'BEDA_SUHU_1000M': [(10, '#313695'), (15, '#74add1'), (18, '#fee090'), (20, '#f46d43'), (24, '#a50026')],
     'TANAH_LIAT': [(0, '#fff7bc'), (15, '#fec44f'), (30, '#d95f0e'), (45, '#993404'), (60, '#662506')],
     'SHANNON': [(0, '#f7fcfd'), (1, '#ccece6'), (2, '#66c2a4'), (3, '#238b45'), (4.5, '#00441b')],
+    'ABRASI_PANTAI': [(0, '#ffffcc'), (0.5, '#fed976'), (1.5, '#fd8d3c'), (3, '#e31a1c'), (6, '#800026')],
+    'EKS_MANGROVE': [(0, '#ffffff'), (1, '#b45309')],
+    'LUAS_EKS_MANGROVE': [(0, '#fef3c7'), (30, '#fbbf24'), (100, '#d97706'), (500, '#92400e'), (2000, '#451a03')],
 }
 SKALA_LOG = {'KLOROFIL', 'KD490'}
 DIBALIK = {'KEDALAMAN'}
+NOL_TRANSPARAN = {'EKS_MANGROVE', 'LUAS_EKS_MANGROVE'}
 
 
 def raster_tersedia():
@@ -173,7 +177,7 @@ def _warnai(nilai, kode):
     else:
         posisi = [s for s, _ in stop]
     rgb = [[int(w[i:i + 2], 16) for i in (1, 3, 5)] for _, w in stop]
-    kosong = np.isnan(nilai)
+    kosong = np.isnan(nilai) | ((nilai == 0) if kode in NOL_TRANSPARAN else False)
     nilai = np.where(kosong, posisi[0], nilai)
     rgba = np.zeros((*nilai.shape, 4), dtype='uint8')
     for k in range(3):

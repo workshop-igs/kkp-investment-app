@@ -29,6 +29,9 @@ LABEL_OSEANOGRAFI = {
     'BEDA_SUHU_1000M': 'Beda suhu permukaan dan kedalaman 1.000 m',
     'TANAH_LIAT': 'Kandungan tanah liat',
     'SHANNON': 'Indeks keanekaragaman hayati Shannon-Wiener',
+    'ABRASI_PANTAI': 'Laju abrasi garis pantai',
+    'EKS_MANGROVE': 'Eks-mangrove 1996-2020',
+    'LUAS_EKS_MANGROVE': 'Luas hamparan eks-mangrove',
 }
 
 SUMBER_SKALA_KASAR = {
