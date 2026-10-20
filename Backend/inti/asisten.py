@@ -40,7 +40,8 @@ SINONIM = {
     'unit': 'satuan', 'units': 'satuan', 'abbreviation': 'singkatan', 'written': 'ditulis',
 }
 JUMLAH_PANDUAN = 3
-BUANG = frozenset({'geometry', 'batas', 'peta', 'grafik', 'map_markers', 'next', 'previous', 'created_at', 'updated_at'})
+BUANG = frozenset({'geometry', 'batas', 'peta', 'grafik', 'map_markers', 'next', 'previous', 'created_at', 'updated_at',
+                   'seri', 'bab', 'sektor_warna'})
 MAKS_DAFTAR = 40
 TAHAP = ['PERENCANAAN', 'PENYIAPAN', 'TRANSAKSI', 'KONSTRUKSI', 'OPERASI']
 SINGKATAN_PROVINSI = {
@@ -115,10 +116,56 @@ def _provinsi(nama):
 
 def _detail_proyek(request, proyek_id):
     kode, data = _api(request, 'GET', f'/api/v1/pipeline/proyek/{proyek_id}/')
-    kelayakan = (data.get('analisis_json') or {}).get('kelayakan') if kode == 200 else None
-    if not kelayakan:
+    if kode != 200:
         return kode, data
-    return kode, {'keputusan_kelayakan': kelayakan.get('keputusan'), 'prioritas': kelayakan.get('prioritas'), **data}
+    analisis = data.pop('analisis_json', None) or {}
+    kelayakan = analisis.pop('kelayakan', None) or {}
+    if not kelayakan:
+        return kode, {**data, 'analisis': analisis}
+    kelayakan['strategi_mitigasi'] = list(dict.fromkeys(kelayakan.get('strategi_mitigasi') or []))
+    return kode, {
+        'keputusan_kelayakan': kelayakan.get('keputusan'), 'prioritas': kelayakan.get('prioritas'), **data,
+        'kelayakan': kelayakan, 'analisis': analisis,
+    }
+
+
+def _portofolio(request):
+    kode, data = _api(request, 'GET', '/api/v1/inti/dashboard/')
+    return kode, {k: v for k, v in data.items() if k != 'proyek'} if kode == 200 else data
+
+
+STATUS_KRITERIA = {True: 'memenuhi', False: 'TIDAK memenuhi', None: 'belum terukur'}
+
+
+def _screening(request, geometri, jenis):
+    kode, data = _api(request, 'POST', '/api/v1/analitik/screening/', {'geometry': geometri, 'sektor': jenis})
+    if kode != 200:
+        return kode, data
+    zona = sorted(data['zona'], key=lambda z: -z['persen'])
+    return kode, {
+        'status': data['status'], 'status_label': data['status_label'], 'sektor_nama': data['sektor_nama'],
+        'alasan': ' '.join(data['alasan']),
+        'peringatan': ' '.join(p['teks'] for p in data['peringatan']),
+        'kecocokan_fisik': data['kecocokan_fisik']['label'],
+        'kriteria_fisik_per_sub_sektor': [
+            {
+                'sub_sektor': s['nama'], 'cocok': s['cocok'], 'terukur': f"{s['terukur']} dari {s['total']} kriteria",
+                'kriteria': '; '.join(f"{k['label']}: {k['nilai_teks'] or 'tidak ada data'} (syarat {k['ambang_teks']}), "
+                                      f"{STATUS_KRITERIA[k['lulus']]}" for k in s['kriteria'] + s['umum']),
+            }
+            for s in data['sub_sektor']
+        ],
+        'rekomendasi': data['rekomendasi'],
+        'luas_ha': round(data['luas_m2'] / 10000, 1),
+        'cakupan_tata_ruang_persen': data['cakupan_persen'],
+        'zona_terluas': [
+            {**{k: z[k] for k in ('nama', 'sub_zona_label', 'persen', 'ketentuan_label', 'kode_perda', 'sumber_ketentuan')},
+             'syarat': (z['syarat'] or '')[:300]}
+            for z in zona[:5]
+        ],
+        'jumlah_zona': len(zona),
+        'kkprl': data['kkprl'],
+    }
 
 
 def _informasi_area(request, geometri):
@@ -204,8 +251,8 @@ ALAT = {
     ),
     'profil_investasi_provinsi': (
         'Profil investasi satu provinsi: luas laut, jumlah penduduk, jumlah nelayan, komoditas unggulan menurut '
-        'produksi BPS, ruang laut yang sesuai per jenis investasi, lokasi prioritas, kondisi oseanografi, dan '
-        'sosial-ketenagakerjaan. Pakai untuk pertanyaan jumlah penduduk, jumlah nelayan, atau komoditas unggulan '
+        'produksi BPS, ruang laut yang sesuai dan kriteria per jenis investasi, lokasi prioritas dari Peta Sebaran '
+        'Wilayah Potensial Investasi, kondisi oseanografi, dan sosial-ketenagakerjaan. Pakai untuk pertanyaan jumlah penduduk, jumlah nelayan, atau komoditas unggulan '
         'sebuah provinsi.',
         _skema({
             'provinsi': _teks('Nama provinsi, misalnya "Nusa Tenggara Barat" atau "NTB".'),
@@ -228,14 +275,13 @@ ALAT = {
         }),
     ),
     'screening_ruang': (
-        'Pemeriksaan kesesuaian ruang sebuah area untuk satu jenis investasi terhadap rencana tata ruang laut dan '
-        'KKPRL terbit. SATU-SATUNYA sumber status kesesuaian dan izin ruang: jangan menyimpulkan boleh atau '
-        'tidaknya kegiatan di suatu lokasi dari alat lain. Jelaskan hasilnya memakai status_label dan kalimat pada '
-        'alasan apa adanya.',
+        'Pemeriksaan kesesuaian sebuah area untuk satu jenis investasi: lebih dulu matriks KKPRL Perda, KKPRL terbit, '
+        'wilayah adat, dan pengecualian sebagai gerbang, lalu kecocokan fisik per sub-sektor terhadap kriteria '
+        'jenis itu. SATU-SATUNYA sumber status kesesuaian dan izin ruang: jangan menyimpulkan boleh atau tidaknya '
+        'kegiatan di suatu lokasi dari alat lain. Jelaskan hasilnya memakai status_label dan kalimat pada alasan apa '
+        'adanya, lalu sebutkan kriteria fisik yang TIDAK memenuhi beserta nilai dan syaratnya.',
         _skema({'geometri': GEOMETRI, 'jenis_investasi': JENIS}, ['geometri', 'jenis_investasi']),
-        lambda r, a: _api(r, 'POST', '/api/v1/analitik/screening/', {
-            'geometry': a['geometri'], 'sektor': a['jenis_investasi'],
-        }),
+        lambda r, a: _screening(r, a['geometri'], a['jenis_investasi']),
     ),
     'informasi_area': (
         'Informasi umum area yang sedang digambar: luas, wilayah administratif, zona tata ruang dan KKPRL yang '
@@ -245,12 +291,14 @@ ALAT = {
         lambda r, a: _informasi_area(r, a['geometri']),
     ),
     'ringkasan_portofolio': (
-        'Ringkasan portofolio proyek nasional: jumlah proyek, nilai rencana dan realisasi (miliar rupiah), tenaga '
-        'kerja, sebaran per tahapan, per jenis investasi, dan per provinsi, serta zona berpotensi yang belum '
-        'berizin. Pakai untuk jumlah proyek atau nilai investasi per provinsi maupun per jenis investasi. Untuk satu '
-        'proyek tertentu pakai daftar_proyek.',
+        'Ringkasan Dashboard Nasional: jumlah proyek, nilai rencana dan realisasi, tenaga kerja, sebaran per tahap '
+        'proyek, per jenis investasi, dan per provinsi; jumlah dan luas lokasi potensial Peta Sebaran Wilayah '
+        'Potensial Investasi seluruhnya (summary.potensi) dan per provinsi dan jenis (potensi_wilayah; kode null = '
+        'semua jenis); serta produksi komoditas perikanan laut BPS. Pakai untuk jumlah proyek, nilai investasi, atau '
+        'jumlah lokasi potensial per provinsi maupun per jenis investasi. Untuk satu proyek tertentu pakai '
+        'daftar_proyek.',
         _skema(),
-        lambda r, a: _api(r, 'GET', '/api/v1/inti/dashboard/'),
+        lambda r, a: _portofolio(r),
     ),
     'daftar_proyek': (
         'Daftar Proyek Investasi, bisa dicari menurut nama, investor, kode, atau lokasi, dan disaring '
