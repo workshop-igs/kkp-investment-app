@@ -32,6 +32,7 @@ LABEL_OSEANOGRAFI = {
     'ABRASI_PANTAI': 'Laju abrasi garis pantai',
     'EKS_MANGROVE': 'Eks-mangrove 1996-2020',
     'LUAS_EKS_MANGROVE': 'Luas hamparan eks-mangrove',
+    'PRODUKSI_KABUPATEN': 'Perkiraan produksi ikan kabupaten/kota',
 }
 
 SUMBER_SKALA_KASAR = {

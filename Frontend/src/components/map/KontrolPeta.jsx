@@ -124,8 +124,8 @@ const KontrolPeta = ({
           </button>
         </div>
 
-      <div className="relative">
-        <button 
+      <div>
+        <button
           data-tur="lapisan"
           onClick={() => bukaPanel('layer')} 
           className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
