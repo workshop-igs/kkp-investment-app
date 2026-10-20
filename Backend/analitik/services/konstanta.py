@@ -219,14 +219,19 @@ KRITERIA_JENIS = {
         'nama': 'Perikanan Tangkap', 'ranah': ['LAUT'],
         'kriteria': {'klorofil': [0.3, 5.0], 'suhu_rata': [26.0, 30.0], 'gelombang': [None, 2.0],
                      'jarak_pelabuhan_perikanan_km': [None, 100.0]},
+        'unggulan': {'klorofil': [0.3, 0.5], 'suhu_rata': [28.0, 30.0], 'gelombang': [None, 1.25],
+                     'jarak_pelabuhan_perikanan_km': [None, 50.0]},
     }},
     'PERIKANAN_BUDIDAYA': {
         'BUDIDAYA_LAUT': {
             'nama': 'Budidaya Laut (KJA)', 'ranah': ['LAUT'],
             'kriteria': {'arus': [0.15, 0.45], 'kedalaman': [12.0, 40.0], 'salinitas': [27.0, 34.0], 'tss': [None, 35.0]},
+            'unggulan': {'arus': [0.2, 0.4], 'kedalaman': [12.0, 20.0], 'salinitas': [27.0, 31.0], 'tss': [None, 25.0],
+                         'gelombang': [None, 0.6]},
         },
         'BUDIDAYA_TAMBAK': {
             'nama': 'Budidaya Tambak', 'ranah': ['DARAT'], 'kriteria': {'kemiringan_lahan': [None, 3.0]},
+            'unggulan': {'kemiringan_lahan': [None, 2.0], 'jarak_dari_pantai_km': [0.1, None]},
         },
     },
     'PENGOLAHAN_HASIL_LAUT': {'PENGOLAHAN_HASIL_LAUT': {
@@ -234,53 +239,73 @@ KRITERIA_JENIS = {
         'kriteria': {'jarak_pelabuhan_perikanan_km': [None, 60.0], 'jarak_listrik_km': [None, 3.0],
                      'jarak_jalan_nasional_km': [None, 3.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
                      'produksi_ikan_kabupaten_ton': [20000.0, None]},
+        'unggulan': {'jarak_pelabuhan_perikanan_km': [None, 20.0], 'jarak_listrik_km': [None, 1.0],
+                     'jarak_jalan_nasional_km': [None, 1.0], 'jarak_pelabuhan_ekspor_km': [None, 50.0],
+                     'produksi_ikan_kabupaten_ton': [50000.0, None]},
     }},
     'PARIWISATA_BAHARI': {'PARIWISATA_BAHARI': {
         'nama': 'Wisata Bahari', 'ranah': ['LAUT'],
         'kriteria': {'kd490': [None, 0.08], 'karang': [1, None], 'arus': [None, 0.3],
                      'jarak_gerbang_wisata_km': [None, 60.0]},
+        'unggulan': {'kd490': [None, 0.05], 'karang': [1, None], 'arus': [None, 0.15],
+                     'jarak_gerbang_wisata_km': [None, 30.0]},
     }},
     'JASA_MARITIM': {'JASA_MARITIM': {
         'nama': 'Jasa Maritim & Kepelabuhanan', 'ranah': ['LAUT'],
         'kriteria': {'kedalaman': [10.0, None], 'jarak_pantai_km': [None, 1.0], 'gelombang': [None, 0.8],
                      'tunggang_pasut': [None, 3.0], 'jarak_alur_km': [None, 65.0], 'jarak_muara_km': [5.0, None]},
+        'unggulan': {'kedalaman': [12.0, None], 'jarak_pantai_km': [None, 0.5], 'gelombang': [None, 0.5],
+                     'tunggang_pasut': [None, 2.0], 'jarak_alur_km': [None, 20.0], 'jarak_muara_km': [10.0, None]},
     }},
     'INFRASTRUKTUR_LAUT': {'INFRASTRUKTUR_LAUT': {
         'nama': 'Infrastruktur & Bangunan Laut', 'ranah': ['LAUT'],
         'kriteria': {'pga': [None, 0.35], 'kemiringan_dasar_laut': [None, 5.0], 'arus_dasar': [None, 0.8],
                      'gelombang_ekstrem': [None, 4.0]},
+        'unggulan': {'pga': [None, 0.25], 'kemiringan_dasar_laut': [None, 5.0], 'arus_dasar': [None, 0.5],
+                     'gelombang_ekstrem': [None, 2.5]},
     }},
     'ENERGI_KELAUTAN': {
         'PLTB_OFFSHORE': {
             'nama': 'PLTB Offshore', 'ranah': ['LAUT'],
             'kriteria': {'angin_100m': [6.5, None], 'kedalaman': [None, 45.0], 'jarak_gardu_km': [None, 20.0]},
+            'unggulan': {'angin_100m': [7.0, None], 'kedalaman': [None, 45.0], 'jarak_gardu_km': [None, 10.0]},
         },
         'PLTS_TERAPUNG': {
             'nama': 'PLTS Terapung', 'ranah': ['LAUT'],
             'kriteria': {'ghi': [4.8, None], 'kedalaman': [None, 45.0], 'jarak_gardu_km': [None, 20.0]},
+            'unggulan': {'ghi': [5.5, None], 'kedalaman': [None, 30.0], 'jarak_gardu_km': [None, 10.0],
+                         'gelombang_ekstrem': [None, 2.5]},
         },
         'OTEC': {
             'nama': 'OTEC', 'ranah': ['LAUT'], 'kriteria': {'beda_suhu_1000m': [20.0, None], 'jarak_gardu_km': [None, 20.0]},
+            'unggulan': {'beda_suhu_1000m': [22.0, None], 'jarak_gardu_km': [None, 10.0]},
         },
         'ENERGI_GELOMBANG': {
             'nama': 'Energi Gelombang', 'ranah': ['LAUT'],
             'kriteria': {'gelombang': [1.5, None], 'periode_gelombang': [5.0, 10.0], 'kedalaman': [20.0, 50.0],
                          'jarak_gardu_km': [None, 20.0]},
+            'unggulan': {'gelombang': [2.0, None], 'periode_gelombang': [7.0, 10.0], 'kedalaman': [20.0, 50.0],
+                         'jarak_gardu_km': [None, 10.0]},
         },
     },
     'GARAM': {'GARAM': {
         'nama': 'Produksi Garam', 'ranah': ['DARAT'],
         'kriteria': {'bulan_kering_berturut': [4, None], 'curah_hujan': [None, 1500.0], 'tanah_liat': [30.0, None],
                      'kemiringan_lahan': [None, 2.0], 'salinitas': [30.0, None]},
+        'unggulan': {'bulan_kering_berturut': [5, None], 'curah_hujan': [None, 1000.0], 'tanah_liat': [40.0, None],
+                     'kemiringan_lahan': [None, 2.0], 'salinitas': [32.0, None]},
     }},
     'BIOTEKNOLOGI_KELAUTAN': {'BIOTEKNOLOGI_KELAUTAN': {
         'nama': 'Bioteknologi Kelautan', 'ranah': ['LAUT'],
         'kriteria': {'shannon': [2.0, None], 'jarak_muara_pelabuhan_km': [10.0, None], 'jarak_bandara_lab_km': [None, 60.0]},
+        'unggulan': {'shannon': [3.0, None], 'jarak_muara_pelabuhan_km': [20.0, None], 'jarak_bandara_lab_km': [None, 30.0]},
     }},
     'KONSERVASI_PESISIR': {'KONSERVASI_PESISIR': {
         'nama': 'Konservasi & Rehabilitasi Pesisir', 'ranah': ['LAUT', 'DARAT'],
         'kriteria': {'eks_mangrove_mudflat': [1, None], 'intertidal': [1, None], 'luas_hamparan_ha': [100.0, None],
                      'laju_abrasi': [None, 1.5]},
+        'unggulan': {'eks_mangrove_mudflat': [1, None], 'intertidal': [1, None], 'luas_hamparan_ha': [250.0, None],
+                     'laju_abrasi': [None, 1.0]},
     }},
 }
 AMBANG_BULAN_KERING_MM = 50

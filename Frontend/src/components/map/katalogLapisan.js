@@ -72,7 +72,7 @@ const OSEANOGRAFI = [
       + '(OTEC) membutuhkan sedikitnya 20 °C.'],
   ['osea_kd490', 'KD490', 'Kecerahan Perairan (Kd490)',
     'Koefisien atenuasi cahaya Kd490 dari NASA MODIS-Aqua, rata-rata 12 bulan terakhir; makin kecil makin jernih. '
-      + 'Wisata bahari mensyaratkan paling tinggi 0,08 per meter (visibilitas sekitar 10 m).'],
+      + 'Wisata bahari mensyaratkan paling tinggi 0,08 per meter, dan 0,05 untuk lokasi unggulan.'],
   ['osea_periode', 'PERIODE_GLB', 'Periode Gelombang',
     'Rata-rata periode puncak gelombang 12 bulan terakhir dari NOAA WaveWatch III; energi gelombang membutuhkan '
       + 'periode 5 sampai 10 detik.'],
@@ -311,9 +311,10 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       + 'kelola masyarakat hukum adat, di luar alur pelayaran/ALKI (kecuali jasa maritim dan infrastruktur laut), tidak '
       + 'menempati mangrove, lamun, atau terumbu karang bagi jenis yang dapat merusaknya, di luar jarak aman kabel, pipa, '
       + 'dan alur pelayaran, tidak beririsan KKPRL terbit, dan tidak tertutup bangunan. Sesudah itu sel harus memenuhi '
-      + 'SEMUA KRITERIA sub-sektornya yang terukur, misalnya klorofil-a 0,3–5 mg/m³, suhu permukaan 26–30 °C, gelombang '
-      + 'paling tinggi 2 m, dan jarak ke pelabuhan perikanan paling jauh 100 km untuk perikanan tangkap. Kriteria yang '
-      + 'datanya belum tersedia dilewati selama sedikitnya separuh kriteria terukur. Risiko tsunami, abrasi, atau banjir '
+      + 'BATAS UNGGULAN semua kriteria sub-sektornya, misalnya klorofil-a 0,3–0,5 mg/m³, suhu permukaan 28–30 °C, '
+      + 'gelombang paling tinggi 1,25 m, dan jarak ke pelabuhan perikanan paling jauh 50 km untuk perikanan tangkap. '
+      + 'Kriteria yang datanya tersedia wajib terukur di sel itu; hanya kriteria yang belum punya data nasional (misalnya '
+      + 'padatan tersuspensi dan zona intertidal) yang dilewati. Risiko tsunami, abrasi, atau banjir '
       + 'yang tinggi menggugurkan lokasi di darat atau yang menyentuh darat. Ambang kriteria dapat diubah administrator. '
       + 'Setiap wilayah sel yang bersambung ditampilkan sebagai satu titik dengan batas berupa inti terbaiknya, paling '
       + 'luas 1 km x 1 km (100 ha); dalam radius 10 km hanya lokasi terbaik tiap sub-sektor yang ditampilkan. Pada '
@@ -333,7 +334,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           const nilai = k.nilai_teks ? `: <b class="font-semibold">${aman(k.nilai_teks)}</b>` : k.lulus ? '' : ': belum terukur';
           return `<li class="flex gap-1.5 leading-snug">
              <span class="${kelasTanda} font-bold shrink-0 w-3">${tanda}</span>
-             <span>${aman(k.label)}${nilai} <span class="text-slate-400">(syarat ${aman(k.ambang_teks)})</span></span>
+             <span>${aman(k.label)}${nilai} <span class="text-slate-400">(syarat unggulan ${aman(k.ambang_teks)})</span></span>
            </li>`;
         })
         .join('');
