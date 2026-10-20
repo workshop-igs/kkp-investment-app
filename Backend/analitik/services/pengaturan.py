@@ -55,6 +55,10 @@ DAFTAR = [
        'mengiris area lebih kecil dari bagian ini ditandai perlu verifikasi batas, bukan langsung menggugurkan; '
        'batas peta tata ruang skala 1:50.000-1:250.000 dapat bergeser puluhan hingga ratusan meter.', '%', (),
        (0, 50)),
+    _d('PORSI_DARAT_MINIMAL', 'analisis_area', 'Porsi daratan agar area dinilai sebagai darat',
+       'Area yang digambar atau diunggah dinilai dengan kriteria jenis darat (misalnya tambak dan garam) bila '
+       'sedikitnya bagian ini dari luasnya berupa daratan; bila kurang, area dinilai sebagai perairan.',
+       'proporsi (0-1)', (), (0, 1)),
     _d('LUAS_AREA_MIN_HA', 'analisis_area', 'Luas area paling kecil',
        'Area yang digambar atau diunggah harus seluas ini atau lebih.', 'ha', (), (0, 100)),
     _d('LUAS_AREA_MAKS_HA', 'analisis_area', 'Luas area paling besar',
