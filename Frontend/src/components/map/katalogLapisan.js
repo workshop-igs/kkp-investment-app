@@ -49,7 +49,18 @@ const OSEANOGRAFI = [
     'Rata-rata tinggi gelombang signifikan 12 bulan terakhir dari model NOAA WaveWatch III (resolusi '
       + '0,5°), penentu desain bangunan laut dan sarana budidaya.'],
   ['osea_kedalaman', 'KEDALAMAN', 'Kedalaman Laut',
-    'Kedalaman laut dari batimetri NOAA ETOPO1 (resolusi 1 menit busur).'],
+    'Kedalaman laut dari batimetri SRTM15+ v2.6 (Scripps), dirata-rata ke 30 detik busur (sekitar 0,9 km).'],
+  ['osea_kemiringan_dasar', 'KEMIRINGAN_DASAR', 'Kemiringan Dasar Laut',
+    'Kemiringan dasar laut yang dihitung dari batimetri SRTM15+; infrastruktur laut membutuhkan paling tinggi 5°.'],
+  ['osea_arus', 'ARUS', 'Kecepatan Arus Permukaan',
+    'Rata-rata kecepatan arus permukaan setahun (September 2023 sampai Agustus 2024) dari model HYCOM GOFS 3.1 (1/12°); budidaya laut '
+      + 'membutuhkan 0,15 sampai 0,45 m/s, wisata bahari paling tinggi 0,3 m/s.'],
+  ['osea_salinitas', 'SALINITAS', 'Salinitas Permukaan Laut',
+    'Rata-rata salinitas permukaan setahun (September 2023 sampai Agustus 2024) dari HYCOM GOFS 3.1; budidaya laut membutuhkan 27 sampai '
+      + '34 ppt, tambak garam sedikitnya 30 ppt.'],
+  ['osea_beda_suhu', 'BEDA_SUHU_1000M', 'Beda Suhu Permukaan dan 1.000 m',
+    'Selisih suhu permukaan dan kedalaman 1.000 m dari klimatologi NOAA World Ocean Atlas 2023; energi panas laut '
+      + '(OTEC) membutuhkan sedikitnya 20 °C.'],
   ['osea_kd490', 'KD490', 'Kecerahan Perairan (Kd490)',
     'Koefisien atenuasi cahaya Kd490 dari NASA MODIS-Aqua, rata-rata 12 bulan terakhir; makin kecil makin jernih. '
       + 'Wisata bahari mensyaratkan paling tinggi 0,08 per meter (visibilitas sekitar 10 m).'],
@@ -62,6 +73,29 @@ const OSEANOGRAFI = [
   ['iklim_kering', 'BULAN_KERING', 'Bulan Kering Berturut-turut',
     'Rangkaian bulan berturut-turut terpanjang dengan curah hujan di bawah 50 mm dalam 12 bulan terakhir '
       + '(CHIRPS v2.0); tambak garam membutuhkan sedikitnya 4 bulan.'],
+  ['iklim_kemiringan', 'KEMIRINGAN', 'Kemiringan Lahan',
+    'Kemiringan lahan dari Copernicus DEM GLO-90, dirata-rata per 0,005° (sekitar 550 m); tambak budidaya '
+      + 'membutuhkan paling tinggi 3%, tambak garam paling tinggi 2%.'],
+  ['iklim_liat', 'TANAH_LIAT', 'Kandungan Tanah Liat',
+    'Kandungan liat tanah lapisan atas (0-5 cm) dari ISRIC SoilGrids 2.0; tambak garam membutuhkan sedikitnya 30%.'],
+  ['iklim_angin', 'ANGIN_100M', 'Kecepatan Angin 100 m',
+    'Kecepatan angin rata-rata 10 tahun pada ketinggian 100 m dari Global Wind Atlas 3; PLTB lepas pantai '
+      + 'membutuhkan sedikitnya 6,5 m/s.'],
+  ['iklim_ghi', 'GHI', 'Iradiasi Surya (GHI)',
+    'Iradiasi surya global horizontal rata-rata tahunan dari NASA POWER; PLTS terapung membutuhkan sedikitnya '
+      + '4,8 kWh/m² per hari.'],
+  ['risiko_pga', 'PGA', 'Percepatan Tanah Gempa (PGA)',
+    'Percepatan tanah puncak pada batuan dasar dengan peluang terlampaui 10% dalam 50 tahun dari GEM Global Seismic '
+      + 'Hazard Map 2023; infrastruktur laut membutuhkan paling tinggi 0,35 g.'],
+  ['risiko_laju_abrasi', 'ABRASI_PANTAI', 'Laju Abrasi Garis Pantai',
+    'Rata-rata laju mundurnya garis pantai 1984-2015 dari transek citra Landsat JRC (Mentaschi dkk., 2018); '
+      + 'konservasi dan rehabilitasi pesisir mensyaratkan paling tinggi 1,5 m per tahun.'],
+  ['pesisir_eks_mangrove', 'LUAS_EKS_MANGROVE', 'Eks-Mangrove 1996-2020',
+    'Hamparan mangrove yang hilang antara 1996 dan 2020 menurut Global Mangrove Watch v3, diwarnai menurut luas '
+      + 'hamparan kontigu; konservasi dan rehabilitasi pesisir membutuhkan hamparan sedikitnya 100 ha.'],
+  ['osea_shannon', 'SHANNON', 'Keanekaragaman Hayati Laut (Shannon)',
+    'Indeks Shannon-Wiener dari catatan spesies OBIS per sel 0,5°; bioteknologi kelautan membutuhkan '
+      + 'sedikitnya 2. Sel dengan catatan terlalu sedikit dikosongkan.'],
 ];
 
 export const LAYER_WMS = {};
