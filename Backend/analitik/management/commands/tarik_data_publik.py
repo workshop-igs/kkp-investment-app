@@ -36,6 +36,8 @@ WOA = ('https://www.ncei.noaa.gov/data/oceans/woa/WOA23/DATA/temperature/netcdf/
 HYCOM = 'https://ncss.hycom.org/thredds/ncss/GLBy0.08/expt_93.0/{d}'
 AKHIR_HYCOM = datetime(2024, 9, 1, tzinfo=timezone.utc)
 LANGKAH_HYCOM = 40
+LAPIS_ARUS_DASAR_M = (10, 20, 30, 40, 50, 70, 100, 150, 200, 300, 500, 1000)
+SAMPEL_ARUS_DASAR = 4
 WW3 = 'https://upwell.pfeg.noaa.gov/erddap/griddap/NWW3_Global_Best.nc'
 TAHUN_AWAL_WW3 = 2018
 PERIODE_ULANG_TAHUN = 50
@@ -305,20 +307,26 @@ class Command(BaseCommand):
                                        'darat pesisir diisi dari perairan terdekat', f'{periode}, sampel tiap 5 hari')
 
     def _arus_dasar(self):
-        berkas, periode = self._hycom('uv3z', ['water_u', 'water_v'], 'uv_dasar', 240)
-        kecepatan, acuan = [], None
+        awal, akhir = AKHIR_HYCOM - timedelta(days=322), AKHIR_HYCOM - timedelta(days=48)
+        langkah = (akhir - awal) // timedelta(hours=3) // (SAMPEL_ARUS_DASAR - 1)
+        berkas = paralel([
+            (HYCOM.format(d='uv3z'), os.path.join(SIMPANAN, f'hycom_dasar_{m}.nc'), {
+                'north': BATAS[3], 'south': BATAS[1], 'west': BATAS[0], 'east': BATAS[2], 'horizStride': 1,
+                'time_start': f'{awal:%Y-%m-%dT%H:%M:%SZ}', 'time_end': f'{akhir:%Y-%m-%dT%H:%M:%SZ}',
+                'timeStride': langkah, 'vertCoord': m, 'var': ['water_u', 'water_v'], 'accept': 'netcdf4',
+            })
+            for m in LAPIS_ARUS_DASAR_M
+        ], 2)
+        terdalam, acuan = None, None
         for b in berkas:
             u, acuan = pita(b, 'water_u')
-            v = pita(b, 'water_v')[0]
-            ada = ~np.isnan(u)
-            dasar = u.shape[0] - 1 - np.argmax(ada[::-1], axis=0)
-            baris, kolom = np.indices(dasar.shape)
-            nilai = np.hypot(u[dasar, baris, kolom], v[dasar, baris, kolom])
-            kecepatan.append(np.where(ada.any(axis=0), nilai, np.nan))
-        data = grid_dari(np.nanmean(kecepatan, axis=0), acuan, 0.08)
+            kecepatan = np.nanmean(np.hypot(u, pita(b, 'water_v')[0]), axis=0)
+            terdalam = kecepatan if terdalam is None else np.where(np.isnan(kecepatan), terdalam, kecepatan)
+        data = grid_dari(terdalam, acuan, 0.08)
         yield 'ARUS_DASAR', simpan_grid('ARUS_DASAR', data, 0.08, 'm/s',
-                                        'HYCOM GOFS 3.1 GLBy0.08 (1/12°, 40 lapis kedalaman), rata-rata kecepatan arus pada lapis '
-                                        'terdalam yang berair, satu sampel per bulan', f'{periode}, 12 sampel bulanan')
+                                        'HYCOM GOFS 3.1 GLBy0.08 (1/12°): kecepatan arus pada lapis terdalam yang berair '
+                                        f'di antara {len(LAPIS_ARUS_DASAR_M)} lapis 10-1.000 m, rata-rata '
+                                        f'{SAMPEL_ARUS_DASAR} sampel musiman', f'{awal:%d-%m-%Y} sampai {akhir:%d-%m-%Y}')
 
     def _gelombang_ekstrem(self):
         tahun = range(TAHUN_AWAL_WW3, datetime.now(timezone.utc).year)
