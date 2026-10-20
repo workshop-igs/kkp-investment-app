@@ -207,7 +207,7 @@ const PanelDaftarLapisan = ({
   };
 
   return (
-    <div className="pointer-events-none absolute right-full mr-3 inset-y-0 flex items-center w-[19.5rem] max-w-[calc(100vw-6.5rem)]">
+    <div className="pointer-events-none absolute right-full mr-3 top-20 bottom-0 flex items-center w-[19.5rem] max-w-[calc(100vw-6.5rem)]">
     <div
       className="pointer-events-auto w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden
                  animate-fade-in flex flex-col
