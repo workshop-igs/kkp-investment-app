@@ -30,7 +30,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
     class Meta:  # type: ignore
         model = User
         fields = [
-            'id', 'username', 'email', 'first_name', 'last_name', 
+            'id', 'username', 'email', 'first_name', 'last_name',
             'is_active', 'is_staff', 'is_superuser', 'date_joined',
             'profil', 'role_display', 'provinsi_nama'
         ]
@@ -57,6 +57,9 @@ class AdminUserSerializer(serializers.ModelSerializer):
             )
         request = self.context.get('request')
         if (self.instance is not None and request is not None
+                and self.instance.is_superuser and not request.user.is_superuser):
+            raise PermissionDenied('Akun superadmin hanya dapat diubah oleh superadmin.')
+        if (self.instance is not None and request is not None
                 and self.instance.pk == request.user.pk and attrs.get('is_active') is False):
             raise serializers.ValidationError(
                 {'is_active': ['Anda tidak dapat menonaktifkan akun Anda sendiri.']}
@@ -65,7 +68,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         data_profil = validated_data.pop('profil', None)
-        
+
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()

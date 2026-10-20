@@ -375,16 +375,13 @@ class PetaRisikoViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
-    BATAS_FITUR = 2000
+    BATAS_FITUR = 5000
+    BATAS_JAUH = 0
 
     HANYA_TITIK = True
     permission_classes = [AllowAny]
 
-    SKALA = [
-        (30.0, 0.0005, 1200),
-        (10.0, 0.0002, 1500),
-        (2.0, 0.0001, 1800),
-    ]
+    SKALA = []
 
     queryset = LokasiPotensial.objects.select_related('provinsi', 'sektor').all()
 

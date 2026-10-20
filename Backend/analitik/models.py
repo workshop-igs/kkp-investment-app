@@ -408,6 +408,8 @@ class RasterOseanografi(models.Model):
         ('ABRASI_PANTAI', 'Laju abrasi garis pantai'),
         ('EKS_MANGROVE', 'Eks-mangrove 1996-2020'),
         ('LUAS_EKS_MANGROVE', 'Luas hamparan eks-mangrove'),
+        ('PRODUKSI_KABUPATEN', 'Perkiraan produksi ikan kabupaten/kota'),
+        ('PRODUKSI_KABUPATEN', 'Perkiraan produksi ikan kabupaten/kota'),
     ]
 
     parameter = models.CharField(max_length=20, choices=PARAMETER_CHOICES, db_index=True)
