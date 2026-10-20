@@ -58,6 +58,15 @@ const OSEANOGRAFI = [
   ['osea_salinitas', 'SALINITAS', 'Salinitas Permukaan Laut',
     'Rata-rata salinitas permukaan setahun (September 2023 sampai Agustus 2024) dari HYCOM GOFS 3.1; budidaya laut membutuhkan 27 sampai '
       + '34 ppt, tambak garam sedikitnya 30 ppt.'],
+  ['osea_arus_dasar', 'ARUS_DASAR', 'Kecepatan Arus Dasar',
+    'Rata-rata kecepatan arus pada lapisan air terdalam (dekat dasar laut) dari HYCOM GOFS 3.1, satu sampel per '
+      + 'bulan; kabel, pipa, dan bangunan laut membutuhkan paling tinggi 0,8 m/s.'],
+  ['osea_gelombang_ekstrem', 'GELOMBANG_EKSTREM', 'Gelombang Ekstrem 50 Tahunan',
+    'Perkiraan tinggi gelombang terbesar yang terjadi rata-rata sekali dalam 50 tahun, dihitung dari data '
+      + 'WaveWatch III 2018-2025; infrastruktur laut membutuhkan paling tinggi 4 m.'],
+  ['osea_pasut', 'PASUT', 'Tunggang Pasang Surut',
+    'Selisih muka air saat pasang tertinggi dan surut terendah dari model EOT20; jasa maritim dan kepelabuhanan '
+      + 'membutuhkan paling tinggi 3 m.'],
   ['osea_beda_suhu', 'BEDA_SUHU_1000M', 'Beda Suhu Permukaan dan 1.000 m',
     'Selisih suhu permukaan dan kedalaman 1.000 m dari klimatologi NOAA World Ocean Atlas 2023; energi panas laut '
       + '(OTEC) membutuhkan sedikitnya 20 °C.'],
