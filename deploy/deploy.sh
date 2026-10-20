@@ -10,5 +10,5 @@ python manage.py collectstatic --noinput
 cd ../Frontend
 npm ci --silent
 npm run build
-sudo systemctl restart kkp-gunicorn kkp-celery kkp-celerybeat
+sudo systemctl restart kkp-gunicorn kkp-asisten kkp-celery kkp-celerybeat
 echo "Deploy selesai: $(git rev-parse --short HEAD)"
