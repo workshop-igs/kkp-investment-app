@@ -719,17 +719,27 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     if (Array.isArray(sc.sub_sektor)) {
       k.teks(`Kecocokan fisik ${sc.sektor_nama.toLowerCase()} per sub-sektor`, { tebal: true, warna: GELAP, ukuran: 7.5 });
       k.teks('Setelah lolos matriks Perda, tiap sub-sektor dinilai dengan kriterianya sendiri: cocok bila semua kriteria '
-        + 'yang terukur memenuhi syarat dan sedikitnya separuh kriteria terukur; kriteria tanpa data dilewati.', { ukuran: 6.4 });
+        + 'yang terukur memenuhi syarat dan sedikitnya separuh kriteria terukur; kriteria tanpa data dilewati. Kolom Unggulan '
+        + 'memuat batas lokasi unggulan yang dipakai Peta Sebaran: area unggulan bila semua kriteria yang datanya tersedia '
+        + 'terukur dan memenuhinya.', { ukuran: 6.4 });
       if (!sc.sub_sektor.length) k.teks(fisik?.alasan || '', { ukuran: 7 });
+      const STATUS = (l) => (l === true ? 'Terpenuhi' : l === false ? 'Tidak terpenuhi' : 'Dilewati');
       sc.sub_sektor.forEach((h) => {
+        const unggul = Object.fromEntries((h.unggulan?.kriteria || []).map((x) => [x.kunci, x]));
+        const khusus = (h.unggulan?.kriteria || []).filter((x) => !h.kriteria.some((y) => y.kunci === x.kunci));
         k.teks(`${h.nama}: ${h.cocok ? 'cocok' : h.gagal.length ? 'tidak cocok' : 'data belum cukup'} `
-          + `(${h.terukur} dari ${h.total} kriteria terukur)`, { tebal: true, warna: h.cocok ? HIJAU_TEKS : MERAH_TEKS, ukuran: 7 });
+          + `(${h.terukur} dari ${h.total} kriteria terukur)${h.unggulan?.lolos ? ', lokasi unggulan' : ''}`,
+        { tebal: true, warna: h.cocok ? HIJAU_TEKS : MERAH_TEKS, ukuran: 7 });
         k.tabel(
-          ['Kriteria', 'Di lokasi', 'Syarat', 'Status'],
-          [...h.kriteria, ...h.umum].map((x) => [x.label,
-            x.nilai_teks || (x.data_ada === false ? 'belum ada data' : 'tidak terukur'), x.ambang_teks,
-            x.lulus === true ? 'Terpenuhi' : x.lulus === false ? 'Tidak terpenuhi' : 'Dilewati']),
-          [(LEBAR - 8) * 0.42, (LEBAR - 8) * 0.2, (LEBAR - 8) * 0.2, (LEBAR - 8) * 0.18]
+          ['Kriteria', 'Di lokasi', 'Syarat', 'Status', 'Unggulan'],
+          [...h.kriteria, ...khusus, ...h.umum].map((x) => {
+            const layak = !khusus.includes(x);
+            const u = unggul[x.kunci];
+            return [x.label, x.nilai_teks || (x.data_ada === false ? 'belum ada data' : 'tidak terukur'),
+              layak ? x.ambang_teks : '-', layak ? STATUS(x.lulus) : '-',
+              u ? `${u.ambang_teks} (${STATUS(u.lulus).toLowerCase()})` : ''];
+          }),
+          [(LEBAR - 8) * 0.3, (LEBAR - 8) * 0.16, (LEBAR - 8) * 0.16, (LEBAR - 8) * 0.14, (LEBAR - 8) * 0.24]
         );
       });
       const kl = kelengkapanScreening(sc);

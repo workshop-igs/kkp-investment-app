@@ -203,13 +203,13 @@ export const useStatusHitungUlang = (awal) => {
 
 const kelasInput = 'w-full rounded-md border border-slate-200 px-2 py-1 text-sm focus:border-sky-500 focus:outline-none';
 
-const Angka = ({ nilai, onUbah, kosong = false, readOnly = false }) => (
+const Angka = ({ nilai, onUbah, kosong = false, readOnly = false, petunjuk }) => (
   <input
     type="number"
     step="any"
     value={nilai ?? ''}
     readOnly={readOnly}
-    placeholder={kosong ? 'tanpa batas' : ''}
+    placeholder={petunjuk ?? (kosong ? 'tanpa batas' : '')}
     onChange={(e) => onUbah(e.target.value === '' ? (kosong ? null : '') : Number(e.target.value))}
     className={`${kelasInput} tabular-nums ${readOnly ? 'bg-slate-50 text-slate-500' : ''}`}
   />
@@ -293,8 +293,14 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
         {data.sektor.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
       </select>
       {Object.entries(subs).map(([sub, isi]) => {
+        const unggulan = isi.unggulan || {};
         const ubahKriteria = (k, ambang) => ubahSub(sub, { ...isi, kriteria: { ...isi.kriteria, [k]: ambang } });
-        const sisa = Object.keys(parameter).filter((k) => !(k in isi.kriteria));
+        const ubahUnggulan = (k, ambang) => {
+          const { [k]: _, ...lain } = unggulan;
+          ubahSub(sub, { ...isi, unggulan: ambang.every((x) => x === null) ? lain : { ...unggulan, [k]: ambang } });
+        };
+        const kunci = [...new Set([...Object.keys(isi.kriteria), ...Object.keys(unggulan)])];
+        const sisa = Object.keys(parameter).filter((k) => !kunci.includes(k));
         return (
           <div key={sub} className="rounded-lg border border-slate-100 p-3 space-y-2">
             <div className="flex flex-wrap items-center gap-3">
@@ -315,25 +321,34 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
                     <th className="pr-3 pb-1 font-semibold">Kriteria</th>
                     <th className="px-1 pb-1 font-semibold">Batas bawah</th>
                     <th className="px-1 pb-1 font-semibold">Batas atas</th>
+                    <th className="px-1 pb-1 font-semibold text-kkp-700" title="Dipakai Peta Sebaran; kosongkan untuk memakai batas layak">Unggulan bawah</th>
+                    <th className="px-1 pb-1 font-semibold text-kkp-700" title="Dipakai Peta Sebaran; kosongkan untuk memakai batas layak">Unggulan atas</th>
                     <th />
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(isi.kriteria).map(([k, [bawah, atas]]) => (
+                  {kunci.map((k) => {
+                    const [bawah, atas] = isi.kriteria[k] || [null, null];
+                    const [ubawah, uatas] = unggulan[k] || [null, null];
+                    return (
                     <tr key={k}>
                       <td className="pr-3 py-0.5 text-xs font-medium text-slate-600">
                         {parameter[k]?.label || k}{parameter[k]?.satuan ? ` (${parameter[k].satuan})` : ''}
                       </td>
                       <td className="px-1 py-0.5 w-32"><Angka nilai={bawah} kosong onUbah={(x) => ubahKriteria(k, [x, atas])} /></td>
                       <td className="px-1 py-0.5 w-32"><Angka nilai={atas} kosong onUbah={(x) => ubahKriteria(k, [bawah, x])} /></td>
+                      <td className="px-1 py-0.5 w-32"><Angka nilai={ubawah} kosong petunjuk="ikut layak" onUbah={(x) => ubahUnggulan(k, [x, uatas])} /></td>
+                      <td className="px-1 py-0.5 w-32"><Angka nilai={uatas} kosong petunjuk="ikut layak" onUbah={(x) => ubahUnggulan(k, [ubawah, x])} /></td>
                       <td>
                         <button type="button" title="Hapus kriteria" onClick={() => {
                           const { [k]: _, ...lain } = isi.kriteria;
-                          ubahSub(sub, { ...isi, kriteria: lain });
+                          const { [k]: __, ...lainUnggulan } = unggulan;
+                          ubahSub(sub, { ...isi, kriteria: lain, unggulan: lainUnggulan });
                         }} className="p-1 text-rose-500 hover:bg-rose-50 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

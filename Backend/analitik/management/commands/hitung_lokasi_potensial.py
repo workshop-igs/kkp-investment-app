@@ -22,8 +22,10 @@ from analitik.services.kriteria import (
     PARAMETER,
     RASTER_DATA,
     dari_raster,
+    data_ada,
     lulus,
     sumber_tersedia,
+    syarat_unggulan,
     teks_ambang,
     teks_nilai,
 )
@@ -92,8 +94,9 @@ class Command(BaseCommand):
     help = (
         'Bentuk Peta Sebaran Wilayah Potensial Investasi: zona yang peruntukannya mengizinkan dibagi ke sel 250 m; '
         'sel harus lolos gerbang (matriks Perda, wilayah adat, alur pelayaran/ALKI, ekosistem sensitif, jarak aman '
-        'kabel/pipa/alur, KKPRL, bangunan) lalu memenuhi seluruh kriteria sub-sektor yang terukur; sel yang '
-        'bersebelahan digabung dan dalam radius 10 km hanya lokasi terbaik yang disimpan.'
+        'kabel/pipa/alur, KKPRL, bangunan) lalu memenuhi batas unggulan seluruh kriteria sub-sektor; kriteria yang '
+        'datanya tersedia wajib terukur di sel itu dan sedikitnya separuh kriteria terukur. Sel yang bersebelahan '
+        'digabung dan dalam radius 10 km hanya lokasi terbaik yang disimpan.'
     )
 
     stealth_options = ('progres',)
@@ -115,6 +118,13 @@ class Command(BaseCommand):
                 'FROM inti_provinsi WHERE geometry IS NOT NULL'
             )
             c.execute('CREATE INDEX ON darat_terbagi USING gist (g)')
+            if 'jarak_dari_pantai_km' in self._kunci_dipakai():
+                c.execute('DROP TABLE IF EXISTS pantai_terbagi')
+                c.execute(
+                    'CREATE TEMP TABLE pantai_terbagi AS SELECT ST_Subdivide(ST_Boundary(ST_MakeValid(geometry)), 128) AS g '
+                    'FROM inti_provinsi WHERE geometry IS NOT NULL'
+                )
+                c.execute('CREATE INDEX ON pantai_terbagi USING gist (g)')
         total = Counter()
         daftar = list(provinsi)
         for i, prov in enumerate(daftar, 1):
@@ -167,7 +177,7 @@ class Command(BaseCommand):
         return Counter(lok.sektor.kode for lok in lokasi)
 
     def _kunci_dipakai(self):
-        return {k for s in self.sektor for sub in atur('KRITERIA_JENIS').get(s.kode, {}).values() for k in sub['kriteria']}
+        return {k for s in self.sektor for sub in atur('KRITERIA_JENIS').get(s.kode, {}).values() for k in syarat_unggulan(sub)}
 
     def _data_sel(self, c, banyak, cakupan, prov):
         d = {k: [None] * (banyak + 1) for k in ('zona', 'ekosistem', 'bencana', 'jarak_pantai_km', *RASTER_DATA)}
@@ -199,6 +209,11 @@ class Command(BaseCommand):
         c.execute(TERDEKAT.format(kolom='kotak', tabel='darat_terbagi', saring=''), [calon])
         for i, jarak in c.fetchall():
             d['jarak_pantai_km'][i] = jarak * KM_PER_DERAJAT if jarak is not None else None
+        if 'jarak_dari_pantai_km' in dipakai:
+            c.execute(TERDEKAT.format(kolom='titik', tabel='pantai_terbagi', saring=''), [calon])
+            d['jarak_dari_pantai_km'] = [None] * (banyak + 1)
+            for i, jarak in c.fetchall():
+                d['jarak_dari_pantai_km'][i] = jarak * KM_PER_DERAJAT if jarak is not None else None
 
         c.execute(
             """
@@ -375,10 +390,12 @@ class Command(BaseCommand):
         return None if v is None else round(v, 2)
 
     @staticmethod
-    def _cocok(kriteria, nilai, bencana, tambahan, minimal):
+    def _cocok(kriteria, nilai, bencana, tambahan, wajib, minimal):
         terukur = 0
-        for (_, ambang), v in zip(kriteria, nilai):
+        for (_, ambang), v, harus in zip(kriteria, nilai, wajib):
             if v is None:
+                if harus:
+                    return None
                 continue
             if not lulus(v, ambang):
                 return None
@@ -394,7 +411,8 @@ class Command(BaseCommand):
         tanpa_alur = pengecualian.alur_terlarang(sektor.kode)
         unsur = d['unsur'] if tanpa_alur else d['unsur_tanpa_alur']
         ekosistem_terlarang = pengecualian.ekosistem_terlarang(sektor.kode)
-        kriteria = list(sub['kriteria'].items())
+        kriteria = list(syarat_unggulan(sub).items())
+        wajib = tuple(data_ada(k, d['tersedia']) for k, _ in kriteria)
         minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
@@ -414,7 +432,7 @@ class Command(BaseCommand):
                 tuple(f(i) for f in dinilai),
             )
             if kunci not in tembolok:
-                tembolok[kunci] = self._cocok(kriteria, *kunci, minimal)
+                tembolok[kunci] = self._cocok(kriteria, *kunci, wajib, minimal)
             if tembolok[kunci] is not None:
                 lolos[i] = (tembolok[kunci], kunci[0], kunci[1])
         return lolos
@@ -490,8 +508,8 @@ class Command(BaseCommand):
         return hasil
 
     def _satu(self, prov, sektor, sub_kode, sub, ewkb, luas, sel, sel_wilayah, lolos, zona, status, d):
-        kriteria = []
-        for j, (kunci, ambang) in enumerate(sub['kriteria'].items()):
+        kriteria, syarat = [], syarat_unggulan(sub)
+        for j, (kunci, ambang) in enumerate(syarat.items()):
             nilai = [lolos[i][1][j] for i in sel if lolos[i][1][j] is not None]
             rata = sum(nilai) / len(nilai) if nilai else None
             kriteria.append({'label': PARAMETER[kunci][0], 'nilai_teks': teks_nilai(kunci, rata),
@@ -518,7 +536,7 @@ class Command(BaseCommand):
                 'syarat_dasar': [LABEL_ADAT, *(pengecualian.label(p, sektor.kode) for p in pengecualian.berlaku(sektor.kode))],
                 'kriteria': kriteria,
                 'terukur': terukur,
-                'total': len(sub['kriteria']),
+                'total': len(syarat),
                 'perlu_dinilai': [k['label'] for k in kriteria if k['lulus'] is None],
                 'peringatan': [
                     'Dekat wilayah kelola masyarakat hukum adat: berisiko konflik tenurial, libatkan masyarakat adat '

@@ -355,33 +355,41 @@ const KriteriaSubSektor = ({ s }) => {
       <Judul>Kecocokan fisik {s.sektor_nama.toLowerCase()}</Judul>
       <p className="-mt-1 mb-2 text-[11px] text-slate-400">
         Setelah lolos matriks Perda, tiap sub-sektor dinilai dengan kriterianya sendiri. Area cocok bila semua kriteria
-        yang terukur memenuhi syarat dan sedikitnya separuh kriterianya terukur; kriteria tanpa data dilewati. Data global
-        beresolusi kasar, pastikan dengan survei lapangan.
+        yang terukur memenuhi syarat dan sedikitnya separuh kriterianya terukur; kriteria tanpa data dilewati. Kolom
+        Unggulan memuat batas lokasi unggulan yang dipakai Peta Sebaran: area unggulan bila semua kriteria yang datanya
+        tersedia terukur dan memenuhinya. Data global beresolusi kasar, pastikan dengan survei lapangan.
       </p>
       {s.sub_sektor.length === 0 && <p className="text-xs leading-snug text-slate-700">{s.kecocokan_fisik?.alasan}</p>}
       <div className="space-y-3">
         {s.sub_sektor.map((h) => {
           const [kode, label] = statusSub(h);
+          const unggul = Object.fromEntries((h.unggulan?.kriteria || []).map((k) => [k.kunci, k]));
+          const khusus = (h.unggulan?.kriteria || []).filter((k) => !h.kriteria.some((x) => x.kunci === k.kunci));
           return (
             <div key={h.kode} className="overflow-x-auto rounded-lg border border-slate-200 bg-white text-xs">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
                 <span className="font-semibold text-slate-800">{h.nama}</span>
                 <span className="flex items-center gap-2 text-[10.5px] text-slate-500">
                   {h.terukur} dari {h.total} kriteria terukur
+                  {h.unggulan?.lolos && <Pil kode="DIIZINKAN">Lokasi unggulan</Pil>}
                   <Pil kode={kode}>{label}</Pil>
                 </span>
               </div>
-              <table className="w-full min-w-[28rem]">
+              <table className="w-full min-w-[34rem]">
                 <thead>
                   <tr className="text-left text-[10.5px] text-slate-500">
                     <th className="px-3 py-1.5 font-semibold">Kriteria</th>
                     <th className="px-3 py-1.5 font-semibold">Di lokasi</th>
                     <th className="px-3 py-1.5 font-semibold">Syarat</th>
                     <th className="w-8" />
+                    <th className="px-3 py-1.5 font-semibold">Unggulan</th>
+                    <th className="w-8" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {[...h.kriteria, ...h.umum].map((k) => {
+                  {[...h.kriteria, ...khusus, ...h.umum].map((k) => {
+                    const layak = !khusus.includes(k);
+                    const u = unggul[k.kunci];
                     const [kd, tanda, ket] = TANDA_FISIK[k.lulus];
                     return (
                       <tr key={k.kunci}>
@@ -389,8 +397,12 @@ const KriteriaSubSektor = ({ s }) => {
                         <td className="px-3 py-1.5 tabular-nums text-slate-800">
                           {k.nilai_teks || (k.data_ada === false ? 'belum ada data' : 'tidak terukur')}
                         </td>
-                        <td className="px-3 py-1.5 text-slate-500">{k.ambang_teks}</td>
-                        <td className="px-3 py-1.5"><Tanda kode={kd} tanda={tanda} title={ket} /></td>
+                        <td className="px-3 py-1.5 text-slate-500">{layak ? k.ambang_teks : '—'}</td>
+                        <td className="px-3 py-1.5">{layak && <Tanda kode={kd} tanda={tanda} title={ket} />}</td>
+                        <td className="px-3 py-1.5 text-slate-500">{u?.ambang_teks}</td>
+                        <td className="px-3 py-1.5">
+                          {u && <Tanda kode={TANDA_FISIK[u.lulus][0]} tanda={TANDA_FISIK[u.lulus][1]} title={`Unggulan: ${TANDA_FISIK[u.lulus][2]}`} />}
+                        </td>
                       </tr>
                     );
                   })}
