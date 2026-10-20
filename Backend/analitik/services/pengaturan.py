@@ -33,12 +33,16 @@ SKOR_0_1 = dict(batas=(0, 1))
 
 DAFTAR = [
     _d('KRITERIA_JENIS', 'karakter', 'Kriteria kesesuaian per jenis dan sub-sektor',
-       'Parameter fisik dan aksesibilitas per sub-sektor beserta ambang bawah dan atasnya. Lokasi dinyatakan cocok '
-       'bila semua kriteria yang terukur memenuhi ambang; kriteria yang datanya belum tersedia dilewati.',
+       'Parameter fisik dan aksesibilitas per sub-sektor dengan dua tingkat batas. Batas layak dipakai analisis area: '
+       'area cocok bila semua kriteria yang terukur memenuhinya. Batas unggulan dipakai Peta Sebaran: lokasi tampil '
+       'bila semua kriteria yang datanya tersedia terukur dan memenuhinya; kriteria tanpa batas unggulan memakai batas '
+       'layaknya.',
        dampak=(PETA, SKOR)),
     _d('PROPORSI_MINIMAL_KRITERIA_TERUKUR', 'karakter', 'Bagian minimal kriteria yang harus terukur',
-       'Lokasi baru dapat dinyatakan cocok bila sedikitnya bagian ini dari kriteria sub-sektornya terukur; sisanya '
-       'dilewati dan bobotnya dibagi ke kriteria lain.', 'proporsi (0-1)', (PETA, SKOR), (0, 1)),
+       'Lokasi baru dapat dinyatakan cocok bila sedikitnya bagian ini dari kriteria sub-sektornya terukur. Pada analisis '
+       'area sisanya dilewati dan bobotnya dibagi ke kriteria lain. Peta Sebaran juga mewajibkan semua kriteria yang '
+       'datanya tersedia terukur; angka ini menjadi pengaman bila sebagian data belum dimuat.',
+       'proporsi (0-1)', (PETA, SKOR), (0, 1)),
     _d('RADIUS_ADAT_DEKAT_M', 'karakter', 'Jarak peringatan wilayah adat',
        'Lokasi di atas wilayah kelola masyarakat hukum adat tidak sesuai secara tata ruang; lokasi dalam jarak ini '
        'darinya diberi peringatan risiko konflik tenurial tanpa memengaruhi penilaian.', 'm', (PETA,), (0, 20000),
@@ -256,15 +260,18 @@ def _kriteria(nilai, sektor):
             raise NilaiTidakSah(f'{kode}: sedikitnya satu sub-sektor.')
         for sub, isi in per_sub.items():
             jalur = f'{kode} > {sub}'
-            if not isinstance(isi, dict) or set(isi) != {'nama', 'ranah', 'kriteria'}:
-                raise NilaiTidakSah(f'{jalur}: isian harus nama, ranah, dan kriteria.')
+            if not isinstance(isi, dict) or not {'nama', 'ranah', 'kriteria'} <= set(isi) <= {'nama', 'ranah', 'kriteria', 'unggulan'}:
+                raise NilaiTidakSah(f'{jalur}: isian harus nama, ranah, kriteria, dan (bila ada) unggulan.')
             if not isinstance(isi['nama'], str) or not isi['nama'].strip():
                 raise NilaiTidakSah(f'{jalur}: nama sub-sektor wajib diisi.')
             if not isinstance(isi['ranah'], list) or not isi['ranah'] or not set(isi['ranah']) <= {'LAUT', 'DARAT'}:
                 raise NilaiTidakSah(f'{jalur}: pilih perairan dan/atau darat.')
             if not isinstance(isi['kriteria'], dict) or not isi['kriteria'] or not set(isi['kriteria']) <= set(PARAMETER):
                 raise NilaiTidakSah(f'{jalur}: sedikitnya satu kriteria yang dikenal.')
-            for k, ambang in isi['kriteria'].items():
+            unggulan = isi.get('unggulan', {})
+            if not isinstance(unggulan, dict) or not set(unggulan) <= set(PARAMETER):
+                raise NilaiTidakSah(f'{jalur}: kriteria unggulan harus kriteria yang dikenal.')
+            for k, ambang in [*isi['kriteria'].items(), *unggulan.items()]:
                 if not isinstance(ambang, list) or len(ambang) != 2 or ambang == [None, None]:
                     raise NilaiTidakSah(f'{jalur} > {PARAMETER[k][0]}: isi batas bawah dan/atau atas.')
                 for batas in ambang:

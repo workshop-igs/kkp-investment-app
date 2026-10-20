@@ -15,6 +15,7 @@ PARAMETER = {
     'kd490': ('Kecerahan perairan (Kd490)', '1/m', 'KD490'),
     'curah_hujan': ('Curah hujan tahunan', 'mm/tahun', 'CURAH_HUJAN'),
     'jarak_pantai_km': ('Jarak ke garis pantai', 'km', None),
+    'jarak_dari_pantai_km': ('Jarak lahan dari garis pantai (sempadan)', 'km', None),
     'karang': ('Terumbu karang di lokasi', 'ada/tidak', 'TERUMBU_KARANG'),
     'jarak_pelabuhan_perikanan_km': ('Jarak ke pelabuhan perikanan (PP/TPI)', 'km', ('PELABUHAN_PERIKANAN',)),
     'jarak_jalan_nasional_km': ('Jarak ke jalan arteri/nasional', 'km', ('JALAN_NASIONAL',)),
@@ -190,15 +191,22 @@ def kena_bencana(data):
     return data['ranah'] == 'DARAT' or (data.get('jarak_pantai_km') or 0) <= 0
 
 
+def syarat_unggulan(sub):
+    return {**sub['kriteria'], **sub.get('unggulan', {})}
+
+
+def _baris(kunci, ambang, data, tersedia):
+    v = data.get(kunci)
+    return {
+        'kunci': kunci, 'label': PARAMETER[kunci][0], 'nilai': None if v is None else round(float(v), 3),
+        'nilai_teks': teks_nilai(kunci, v), 'ambang': list(ambang), 'ambang_teks': teks_ambang(kunci, ambang),
+        'lulus': None if v is None else lulus(v, ambang), 'data_ada': data_ada(kunci, tersedia),
+    }
+
+
 def nilai_sub(sub, data, tersedia):
-    kriteria = []
-    for kunci, ambang in sub['kriteria'].items():
-        v = data.get(kunci)
-        kriteria.append({
-            'kunci': kunci, 'label': PARAMETER[kunci][0], 'nilai': None if v is None else round(float(v), 3),
-            'nilai_teks': teks_nilai(kunci, v), 'ambang': list(ambang), 'ambang_teks': teks_ambang(kunci, ambang),
-            'lulus': None if v is None else lulus(v, ambang), 'data_ada': data_ada(kunci, tersedia),
-        })
+    kriteria = [_baris(k, a, data, tersedia) for k, a in sub['kriteria'].items()]
+    unggulan = [_baris(k, a, data, tersedia) for k, a in syarat_unggulan(sub).items()]
     umum = []
     if kena_bencana(data):
         for jenis, label in BENCANA:
@@ -214,6 +222,7 @@ def nilai_sub(sub, data, tersedia):
     return {
         'nama': sub['nama'], 'kriteria': kriteria, 'umum': umum, 'terukur': terukur, 'total': len(kriteria),
         'gagal': [k['label'] for k in gagal], 'cukup_data': cukup, 'cocok': not gagal and cukup,
+        'unggulan': {'kriteria': unggulan, 'lolos': not gagal and cukup and all(k['lulus'] for k in unggulan if k['data_ada'])},
     }
 
 

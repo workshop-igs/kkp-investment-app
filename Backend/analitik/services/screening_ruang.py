@@ -184,6 +184,14 @@ def karakter_area(c, geom):
         )
         jarak = c.fetchone()[0]
         data['jarak_pantai_km'] = (jarak if jarak is not None else BATAS_JARAK_PANTAI_DERAJAT) * KM_PER_DERAJAT
+    else:
+        c.execute(
+            'SELECT MIN(ST_Distance(ST_Boundary(p.geometry), a.g)) FROM inti_provinsi p, (SELECT ST_GeomFromEWKT(%s) AS g) a '
+            'WHERE p.geometry && ST_Expand(a.g, %s)',
+            [geom.ewkt, BATAS_JARAK_PANTAI_DERAJAT],
+        )
+        jarak = c.fetchone()[0]
+        data['jarak_dari_pantai_km'] = (jarak if jarak is not None else BATAS_JARAK_PANTAI_DERAJAT) * KM_PER_DERAJAT
     data.update(jarak_area(c, geom.ewkt, tersedia))
     return data
 
