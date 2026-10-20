@@ -93,6 +93,10 @@ const OSEANOGRAFI = [
   ['pesisir_eks_mangrove', 'LUAS_EKS_MANGROVE', 'Eks-Mangrove 1996-2020',
     'Hamparan mangrove yang hilang antara 1996 dan 2020 menurut Global Mangrove Watch v3, diwarnai menurut luas '
       + 'hamparan kontigu; konservasi dan rehabilitasi pesisir membutuhkan hamparan sedikitnya 100 ha.'],
+  ['pesisir_produksi_kab', 'PRODUKSI_KABUPATEN', 'Perkiraan Produksi Ikan Kabupaten',
+    'Perkiraan produksi perikanan tangkap laut per kabupaten/kota: angka provinsi BPS dibagi menurut kapasitas '
+      + 'pendaratan kelas pelabuhan perikanan di tiap kabupaten; pengolahan hasil laut membutuhkan sedikitnya 20.000 '
+      + 'ton per tahun.'],
   ['osea_shannon', 'SHANNON', 'Keanekaragaman Hayati Laut (Shannon)',
     'Indeks Shannon-Wiener dari catatan spesies OBIS per sel 0,5°; bioteknologi kelautan membutuhkan '
       + 'sedikitnya 2. Sel dengan catatan terlalu sedikit dikosongkan.'],

@@ -31,7 +31,7 @@ PARAMETER = {
     'salinitas': ('Salinitas air laut', 'ppt', 'SALINITAS'),
     'tss': ('Padatan tersuspensi (TSS)', 'mg/L', 'TSS'),
     'kemiringan_lahan': ('Kemiringan lahan', '%', 'KEMIRINGAN'),
-    'produksi_ikan_kabupaten_ton': ('Produksi ikan kabupaten/kota', 'ton/tahun', 'PRODUKSI_KABUPATEN'),
+    'produksi_ikan_kabupaten_ton': ('Produksi ikan kabupaten/kota (perkiraan)', 'ton/tahun', 'PRODUKSI_KABUPATEN'),
     'tunggang_pasut': ('Tunggang pasang surut', 'm', 'PASUT'),
     'pga': ('Percepatan tanah puncak gempa (PGA)', 'g', 'PGA'),
     'kemiringan_dasar_laut': ('Kemiringan dasar laut', '°', 'KEMIRINGAN_DASAR'),
@@ -57,8 +57,9 @@ RASTER_DATA = {
     'gelombang_ekstrem': 'GELOMBANG_EKSTREM', 'angin_100m': 'ANGIN_100M', 'ghi': 'GHI',
     'beda_suhu_1000m': 'BEDA_SUHU_1000M', 'tanah_liat': 'TANAH_LIAT', 'shannon': 'SHANNON',
     'laju_abrasi': 'ABRASI_PANTAI', 'eks_mangrove_mudflat': 'EKS_MANGROVE', 'luas_hamparan_ha': 'LUAS_EKS_MANGROVE',
+    'produksi_ikan_kabupaten_ton': 'PRODUKSI_KABUPATEN',
 }
-RASTER_DARAT = {'curah_hujan', 'bulan_kering_berturut', 'kemiringan_lahan', 'tanah_liat'}
+RASTER_DARAT = {'curah_hujan', 'bulan_kering_berturut', 'kemiringan_lahan', 'tanah_liat', 'produksi_ikan_kabupaten_ton'}
 RASTER_DUA_RANAH = {'salinitas', 'pga', 'laju_abrasi', 'eks_mangrove_mudflat', 'luas_hamparan_ha'}
 
 

@@ -44,6 +44,8 @@ PALET = {
     'ABRASI_PANTAI': [(0, '#ffffcc'), (0.5, '#fed976'), (1.5, '#fd8d3c'), (3, '#e31a1c'), (6, '#800026')],
     'EKS_MANGROVE': [(0, '#ffffff'), (1, '#b45309')],
     'LUAS_EKS_MANGROVE': [(0, '#fef3c7'), (30, '#fbbf24'), (100, '#d97706'), (500, '#92400e'), (2000, '#451a03')],
+    'PRODUKSI_KABUPATEN': [(0, '#f7fbff'), (5000, '#c6dbef'), (20000, '#6baed6'), (60000, '#2171b5'),
+                           (200000, '#08306b')],
 }
 SKALA_LOG = {'KLOROFIL', 'KD490'}
 DIBALIK = {'KEDALAMAN'}

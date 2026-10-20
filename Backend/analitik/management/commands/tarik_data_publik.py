@@ -53,6 +53,9 @@ GMW = 'https://zenodo.org/api/records/6894273/files/gmw_v3_f1996_t2020_gtiff.zip
 NILAI_HILANG_GMW = 1
 RESOLUSI_MANGROVE = 0.005
 FRAKSI_EKS_MANGROVE = 0.25
+RESOLUSI_PRODUKSI = 0.01
+PENDARATAN_TON_HARI = (('Samudera', 60), ('Nusantara', 30), ('Pangkalan Pendaratan', 2))
+PENDARATAN_LAIN_TON_HARI = 5
 SRTM = 'https://upwell.pfeg.noaa.gov/erddap/griddap/srtm15plus.nc'
 RESOLUSI_BATIMETRI = 1 / 120
 COPERNICUS = 'https://copernicus-dem-90m.s3.amazonaws.com'
@@ -84,7 +87,12 @@ def unduh(url, tujuan, params=None, ulang=False):
         return tujuan
     os.makedirs(os.path.dirname(tujuan), exist_ok=True)
     sementara = tujuan + '.sebagian'
-    info = httpx.head(url, headers=KEPALA, timeout=60, follow_redirects=True) if params is None else None
+    info = None
+    if params is None and '?' not in url:
+        try:
+            info = httpx.head(url, headers=KEPALA, timeout=60, follow_redirects=True)
+        except httpx.HTTPError:
+            info = None
     ukuran = int(info.headers.get('content-length', 0)) if info is not None and info.status_code == 200 else 0
     if ukuran > 64 << 20 and info.headers.get('accept-ranges') == 'bytes':
         catatan = sementara + '.bagian'
@@ -161,7 +169,7 @@ class Command(BaseCommand):
             'salinitas (HYCOM GOFS 3.1).')
 
     SUMBER = ('BATIMETRI', 'KEMIRINGAN', 'PGA', 'GHI', 'ANGIN_100M', 'TANAH_LIAT', 'BEDA_SUHU_1000M', 'ARUS_SALINITAS',
-              'ARUS_DASAR', 'GELOMBANG_EKSTREM', 'PASUT', 'MUARA', 'ABRASI', 'SHANNON', 'MANGROVE')
+              'ARUS_DASAR', 'GELOMBANG_EKSTREM', 'PASUT', 'MUARA', 'ABRASI', 'SHANNON', 'MANGROVE', 'PRODUKSI')
 
     def add_arguments(self, parser):
         parser.add_argument('--sumber', choices=self.SUMBER, action='append')
@@ -465,8 +473,44 @@ class Command(BaseCommand):
                           out_shape=eks.shape, transform=transform, fill=0, dtype='int32')
         luas = np.bincount(label.ravel(), weights=luas_sel_ha.ravel())
         luas[0] = 0
-        sumber = ('Global Mangrove Watch v3.0 (Bunting dkk., 2022), perubahan 1996-2020: mangrove yang hilang, '
-                  f'sel 0,005° dihitung eks-mangrove bila sedikitnya {FRAKSI_EKS_MANGROVE:.0%} luasnya hilang')
+        sumber = ('Global Mangrove Watch v3.0, mangrove yang hilang 1996-2020; sel 0,005° dihitung eks-mangrove bila '
+                  f'sedikitnya {FRAKSI_EKS_MANGROVE:.0%} luasnya hilang')
         yield 'EKS_MANGROVE', simpan_grid('EKS_MANGROVE', eks.astype('float32'), RESOLUSI_MANGROVE, 'ada/tidak', sumber)
         yield 'LUAS_EKS_MANGROVE', simpan_grid('LUAS_EKS_MANGROVE', luas[label].astype('float32'), RESOLUSI_MANGROVE, 'ha',
                                                sumber + '; nilai = luas hamparan kontigu tempat sel berada')
+
+    def _produksi(self):
+        kelas = ' '.join(f"WHEN i.kelas ILIKE '%%{k}%%' THEN {t}" for k, t in PENDARATAN_TON_HARI)
+        with connection.cursor() as c:
+            c.execute(f"""
+                WITH bobot AS (
+                    SELECT kab.id, SUM(CASE {kelas} ELSE {PENDARATAN_LAIN_TON_HARI} END) AS ton
+                    FROM inventarisasi_infrastruktur_pendukung i
+                    CROSS JOIN LATERAL (SELECT k.id FROM inti_kabupaten_kota k WHERE k.geometry IS NOT NULL
+                                        ORDER BY k.geometry <-> i.geometry LIMIT 1) kab
+                    WHERE i.kategori = 'PELABUHAN_PERIKANAN'
+                    GROUP BY kab.id
+                ), provinsi AS (
+                    SELECT DISTINCT ON (provinsi_id) provinsi_id, produksi_ton, tahun
+                    FROM penarikan_data_produksi_perikanan_bps
+                    WHERE kelompok = 'TANGKAP_LAUT' AND komoditas ILIKE 'jumlah%%' AND produksi_ton > 0
+                    ORDER BY provinsi_id, tahun DESC
+                )
+                SELECT ST_AsGeoJSON(k.geometry),
+                       p.produksi_ton * COALESCE(b.ton, 0) / NULLIF(SUM(COALESCE(b.ton, 0)) OVER (PARTITION BY k.provinsi_id), 0),
+                       p.tahun
+                FROM inti_kabupaten_kota k
+                JOIN provinsi p ON p.provinsi_id = k.provinsi_id
+                LEFT JOIN bobot b ON b.id = k.id
+                WHERE k.geometry IS NOT NULL
+            """)
+            baris = [(json.loads(g), v, t) for g, v, t in c.fetchall() if v is not None]
+        acuan = grid_wilayah(RESOLUSI_PRODUKSI)
+        data = rasterize(((g, v) for g, v, _ in baris), out_shape=(acuan.height, acuan.width), fill=np.nan,
+                         transform=Affine(RESOLUSI_PRODUKSI, 0, BATAS[0], 0, -RESOLUSI_PRODUKSI, BATAS[3]),
+                         dtype='float32')
+        tahun = max(t for _, _, t in baris)
+        yield 'PRODUKSI_KABUPATEN', simpan_grid(
+            'PRODUKSI_KABUPATEN', data, RESOLUSI_PRODUKSI, 'ton/tahun',
+            f'Perkiraan: produksi tangkap laut provinsi BPS {tahun} dibagi ke kabupaten/kota menurut kapasitas '
+            'pendaratan kelas pelabuhan perikanan terdekat (Permen KP 8/2012)', str(tahun))

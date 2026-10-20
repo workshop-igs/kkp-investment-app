@@ -78,6 +78,7 @@ const KATEGORI = [
       { id: 'iklim_angin', nama: 'Kecepatan Angin 100 m', warna: '#238b45' },
       { id: 'iklim_ghi', nama: 'Iradiasi Surya (GHI)', warna: '#fd8d3c' },
       { id: 'pesisir_eks_mangrove', nama: 'Eks-Mangrove 1996-2020', warna: '#b45309' },
+      { id: 'pesisir_produksi_kab', nama: 'Perkiraan Produksi Ikan Kabupaten', warna: '#2171b5' },
     ],
   },
   {
@@ -206,13 +207,13 @@ const PanelDaftarLapisan = ({
   };
 
   return (
-    <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 w-[19.5rem] max-w-[calc(100vw-6.5rem)]">
+    <div className="pointer-events-none absolute right-full mr-3 inset-y-0 flex items-center w-[19.5rem] max-w-[calc(100vw-6.5rem)]">
     <div
-      className="bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-fade-in
-                 flex flex-col
-                 max-h-[max(220px,calc(100vh-33rem))]
-                 sm:max-h-[max(220px,calc(100vh-28rem))]
-                 xl:max-h-[calc(100vh-11rem)]"
+      className="pointer-events-auto w-full bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden
+                 animate-fade-in flex flex-col
+                 max-h-[min(100%,max(220px,calc(100vh-33rem)))]
+                 sm:max-h-[min(100%,max(220px,calc(100vh-28rem)))]
+                 xl:max-h-full"
     >
       <div className="flex items-center gap-2 px-4 py-3 bg-kkp-800 text-white shrink-0">
         <Layers className="w-4 h-4 shrink-0" />
