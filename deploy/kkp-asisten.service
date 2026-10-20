@@ -1,0 +1,12 @@
+[Unit]
+Description=KKP Investment App - gunicorn obrolan asisten (gthread)
+After=network.target postgresql.service redis-server.service
+
+[Service]
+User=deploy
+WorkingDirectory=/home/deploy/kkp/Backend
+ExecStart=/home/deploy/kkp/Backend/venv_django/bin/gunicorn kkp_investasi.wsgi:application --bind 127.0.0.1:8002 --worker-class gthread --workers 2 --threads 16 --timeout 180 --graceful-timeout 30 --max-requests 500 --max-requests-jitter 50 --access-logfile - --error-logfile -
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
