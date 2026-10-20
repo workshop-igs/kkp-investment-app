@@ -129,6 +129,27 @@ def _detail_proyek(request, proyek_id):
     }
 
 
+def _profil(request, nama, jenis):
+    provinsi = _provinsi(nama)
+    kode, data = _api(request, 'GET', f'/api/v1/inti/provinsi/{provinsi.id}/profil-investasi/', {'jenis': jenis})
+    if kode != 200:
+        return kode, data
+    proyek, halaman = [], 1
+    while True:
+        _, daftar = _api(request, 'GET', '/api/v1/pipeline/proyek/', {'provinsi': provinsi.id, 'page': halaman})
+        proyek += daftar.get('results') or []
+        if not daftar.get('next'):
+            break
+        halaman += 1
+    return kode, {
+        'proyek_investasi': {
+            'jumlah_proyek': len(proyek),
+            'nilai_rencana_miliar': round(sum(p['nilai_investasi_miliar'] or 0 for p in proyek), 1),
+        },
+        **data,
+    }
+
+
 def _jenis_investasi(request):
     kode, data = _api(request, 'GET', '/api/v1/inti/sektor/')
     if kode != 200:
@@ -271,16 +292,14 @@ ALAT = {
     'profil_investasi_provinsi': (
         'Profil investasi satu provinsi: luas laut, jumlah penduduk, jumlah nelayan, komoditas unggulan menurut '
         'produksi BPS, ruang laut yang sesuai dan kriteria per jenis investasi, lokasi prioritas dari Peta Sebaran '
-        'Wilayah Potensial Investasi, kondisi oseanografi, dan sosial-ketenagakerjaan. Pakai untuk pertanyaan jumlah penduduk, jumlah nelayan, atau komoditas unggulan '
-        'sebuah provinsi.',
+        'Wilayah Potensial Investasi, kondisi oseanografi, sosial-ketenagakerjaan, serta jumlah dan nilai rencana '
+        'proyek investasi di provinsi itu. Pakai untuk pertanyaan jumlah penduduk, jumlah nelayan, komoditas unggulan, '
+        'atau nilai investasi sebuah provinsi.',
         _skema({
             'provinsi': PROVINSI,
             'jenis_investasi': JENIS,
         }, ['provinsi']),
-        lambda r, a: _api(
-            r, 'GET', f"/api/v1/inti/provinsi/{_provinsi(a['provinsi']).id}/profil-investasi/",
-            {'jenis': a.get('jenis_investasi')},
-        ),
+        lambda r, a: _profil(r, a['provinsi'], a.get('jenis_investasi')),
     ),
     'statistik_ketenagakerjaan': (
         'Statistik ketenagakerjaan BPS: hanya jumlah penganggur dan tingkat pengangguran terbuka provinsi, atau '
@@ -464,8 +483,8 @@ SISTEM = (
     '6. Nilai uang dari alat sudah ditulis lengkap dengan satuannya; salin apa adanya tanpa menghitung ulang.\n'
     '7. Jangan menyebut nama alat atau fungsi kepada pengguna dan jangan meminta pengguna menjalankannya; '
     'panggil sendiri alat yang diperlukan.\n'
-    '8. Pertanyaan tentang aplikasi ini, datanya, serta istilah, angka, dan satuan di dalamnya selalu dijawab, dalam '
-    'bahasa apa pun. Pertanyaan yang tidak berkaitan dengan aplikasi, misalnya pengetahuan umum, berita, cuaca, '
+    '8. Pertanyaan tentang aplikasi ini, datanya, serta istilah, singkatan pada aturan 11, angka, dan satuan di '
+    'dalamnya selalu dijawab, dalam bahasa apa pun. Pertanyaan yang tidak berkaitan dengan aplikasi, misalnya pengetahuan umum, berita, cuaca, '
     'harga pasar, tokoh, resep, kesehatan, puisi atau lagu, kode program, terjemahan, dan hitungan umum, jangan '
     'dijawab sama sekali, juga bila pengguna mendesak; jawab persis: "Maaf, pertanyaan itu di luar cakupan aplikasi '
     'ini. Saya hanya dapat membantu pertanyaan seputar aplikasi ini, misalnya cara memakai fitur, kesesuaian lokasi, '
