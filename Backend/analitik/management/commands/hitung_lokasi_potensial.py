@@ -99,7 +99,7 @@ class Command(BaseCommand):
         'digabung dan dalam radius 10 km hanya lokasi terbaik yang disimpan.'
     )
 
-    stealth_options = ('progres',)
+    stealth_options = ('progres', 'selesai')
 
     def add_arguments(self, parser):
         parser.add_argument('--provinsi', help='Kode BPS provinsi, dipisah koma')
@@ -132,6 +132,8 @@ class Command(BaseCommand):
                 opsi['progres'](i, len(daftar), prov.nama)
             t = time.time()
             jumlah = self._provinsi(prov)
+            if opsi.get('selesai'):
+                opsi['selesai']([p.kode_bps for p in daftar[i:]])
             total.update(jumlah)
             if jumlah:
                 self.stdout.write(
