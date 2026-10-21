@@ -3,8 +3,10 @@ import { CircleMarker, Marker, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Check, Ruler, RotateCcw, Trash2, Undo2 } from 'lucide-react';
 import { azimut, formatJarak, jarakLatLng } from '../../utils/koordinat';
+import PanelAlat from './PanelAlat';
 
 const WARNA = '#dc2626';
+const KBD = 'rounded border border-slate-300 bg-slate-50 px-1 py-px font-mono-custom text-[10.5px] text-slate-700';
 
 const ikonLabel = (teks) =>
   L.divIcon({
@@ -147,102 +149,99 @@ const AlatUkur = ({ aktif, onTutup }) => {
         />
       ))}
 
-      <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2 w-[19.5rem] max-w-[calc(100vw-6.5rem)] z-[1200]">
-        <div className="bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden animate-fade-in flex flex-col max-h-[calc(100vh-11rem)]">
-          <div className="flex items-center gap-2 px-4 py-3 bg-kkp-800 text-white shrink-0">
-            <Ruler className="w-4 h-4 shrink-0" />
-            <span className="text-[13px] font-bold tracking-wide uppercase">Ukur Jarak</span>
-          </div>
-
-          <div className="px-4 py-3 bg-kkp-100 border-b border-kkp-200 shrink-0">
-            <div className="text-[10px] uppercase tracking-wider text-kkp-700 font-bold mb-0.5">
-              {terkunci ? 'Jarak total' : 'Jarak berjalan'}
+      <PanelAlat
+        ikon={Ruler}
+        warnaIkon="bg-rose-600"
+        judul="Ukur jarak"
+        keterangan={terkunci ? 'Pengukuran selesai' : titik.length ? 'Klik lagi untuk menambah ruas' : 'Klik di peta untuk menaruh titik pertama'}
+        kepala={(
+          <div className="flex items-end justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11.5px] text-slate-500">{terkunci ? 'Jarak total' : 'Jarak berjalan'}</p>
+              <p className="font-mono-custom text-[28px] font-semibold leading-tight text-kkp-900 tabular-nums">{tampil.utama}</p>
+              <p className="font-mono-custom text-[12px] text-slate-500">{tampil.kedua}</p>
             </div>
-            <div className="text-2xl font-bold text-kkp-800 font-mono-custom leading-tight">
-              {tampil.utama}
-            </div>
-            <div className="text-[12px] text-slate-500 font-mono-custom">{tampil.kedua}</div>
             {titik.length > 0 && (
-              <div className="text-[11px] text-slate-400 mt-1">
-                {titik.length} titik · {ruas.length} ruas
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-            {titik.length === 0 && (
-              <p className="px-4 py-4 text-[11.5px] text-slate-500 leading-relaxed">
-                Klik di peta untuk menaruh titik pertama, lalu klik lagi untuk menambah
-                ruas. Klik ganda atau <b>Enter</b> untuk mengakhiri, <b>Esc</b> untuk keluar.
+              <p className="shrink-0 text-right text-[11.5px] leading-snug text-slate-500 tabular-nums">
+                {titik.length} titik
+                <br />
+                {ruas.length} ruas
               </p>
             )}
-
-            {ruas.map((r) => {
-              const f = formatJarak(r.meter);
-              return (
-                <div
-                  key={r.ke}
-                  className="flex items-baseline gap-2 px-3.5 py-2 border-b border-slate-100 last:border-0"
-                >
-                  <span className="text-[10px] font-bold text-slate-400 w-8 shrink-0">R{r.ke}</span>
-                  <span className="flex-1 min-w-0">
-                    <span className="block text-[12.5px] text-slate-700 font-semibold font-mono-custom">
-                      {f.utama}
-                    </span>
-                    <span className="block text-[10.5px] text-slate-400 font-mono-custom">
-                      {f.kedua} · azimut {r.arah.toFixed(1)}°
-                    </span>
-                  </span>
-                </div>
-              );
-            })}
           </div>
-
-          <div className="p-2 border-t border-slate-100 bg-slate-50 shrink-0 grid grid-cols-3 gap-1.5">
+        )}
+        kaki={(
+          <div className="p-2.5 border-t border-slate-100 shrink-0 grid grid-cols-3 gap-1.5">
             <button
+              type="button"
               onClick={batalTitik}
               disabled={!titik.length}
-              className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11px] font-semibold
-                         border border-slate-200 bg-white text-slate-600 hover:text-kkp-700 hover:border-kkp-200
-                         transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11.5px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 bg-white text-slate-600 hover:text-kkp-700 hover:border-kkp-200"
             >
               <Undo2 className="w-3.5 h-3.5" />
-              Batal
+              Batal titik
             </button>
             <button
+              type="button"
               onClick={bersihkan}
               disabled={!titik.length}
-              className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11px] font-semibold
-                         border border-slate-200 bg-white text-slate-600 hover:text-rose-600 hover:border-rose-200
-                         transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11.5px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed border border-slate-200 bg-white text-slate-600 hover:text-rose-600 hover:border-rose-200"
             >
               <Trash2 className="w-3.5 h-3.5" />
               Hapus
             </button>
             {terkunci ? (
-              <button
-                onClick={bersihkan}
-                className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11px] font-semibold
-                           bg-kkp-700 text-white hover:bg-kkp-800 transition-colors"
-              >
+              <button type="button" onClick={bersihkan} className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11.5px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-kkp-700 text-white hover:bg-kkp-800">
                 <RotateCcw className="w-3.5 h-3.5" />
-                Ulangi
+                Ukur lagi
               </button>
             ) : (
               <button
+                type="button"
                 onClick={selesai}
                 disabled={ruas.length === 0}
-                className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11px] font-semibold
-                           bg-kkp-700 text-white hover:bg-kkp-800 transition-colors
-                           disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed"
+                className="inline-flex items-center justify-center gap-1 px-2 py-2 rounded-lg text-[11.5px] font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed bg-kkp-700 text-white hover:bg-kkp-800 disabled:bg-slate-100 disabled:text-slate-400"
               >
                 <Check className="w-3.5 h-3.5" />
                 Selesai
               </button>
             )}
           </div>
-        </div>
-      </div>
+        )}
+      >
+        {titik.length === 0 ? (
+          <ul className="px-4 py-3.5 space-y-2 text-[12px] leading-relaxed text-slate-600">
+            <li>Klik di peta untuk menaruh titik, lalu klik lagi untuk menambah ruas.</li>
+            <li>
+              Klik ganda atau <kbd className={KBD}>Enter</kbd> untuk mengakhiri,{' '}
+              <kbd className={KBD}>Ctrl</kbd>+<kbd className={KBD}>Z</kbd> untuk membatalkan titik terakhir.
+            </li>
+            <li><kbd className={KBD}>Esc</kbd> untuk keluar dari mode ukur.</li>
+          </ul>
+        ) : (
+          <ol className="py-1.5">
+            {ruas.map((r) => {
+              const f = formatJarak(r.meter);
+              return (
+                <li key={r.ke} className="flex items-center gap-2.5 px-3.5 py-1.5">
+                  <span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-rose-50 text-[11px] font-bold text-rose-600 tabular-nums">
+                    {r.ke}
+                  </span>
+                  <span className="min-w-0 flex-1 font-mono-custom">
+                    <span className="block text-[12.5px] font-semibold text-slate-800">{f.utama}</span>
+                    <span className="block text-[11px] text-slate-500">{f.kedua}</span>
+                  </span>
+                  <span className="shrink-0 text-right text-[11px] leading-snug text-slate-500">
+                    azimut
+                    <br />
+                    <span className="font-mono-custom text-slate-700">{r.arah.toFixed(1)}°</span>
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+        )}
+      </PanelAlat>
     </>
   );
 };
