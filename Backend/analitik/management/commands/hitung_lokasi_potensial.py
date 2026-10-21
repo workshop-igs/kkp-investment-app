@@ -23,6 +23,7 @@ from analitik.services.kriteria import (
     RASTER_DATA,
     dari_raster,
     data_ada,
+    kedekatan,
     lulus,
     sumber_tersedia,
     syarat_unggulan,
@@ -95,8 +96,10 @@ class Command(BaseCommand):
         'Bentuk Peta Sebaran Wilayah Potensial Investasi: zona yang peruntukannya mengizinkan dibagi ke sel 250 m; '
         'sel harus lolos gerbang (matriks Perda, wilayah adat, alur pelayaran/ALKI, ekosistem sensitif, jarak aman '
         'kabel/pipa/alur, KKPRL, bangunan) lalu memenuhi batas unggulan seluruh kriteria sub-sektor; kriteria yang '
-        'datanya tersedia wajib terukur di sel itu dan sedikitnya separuh kriteria terukur. Sel yang bersebelahan '
-        'digabung dan dalam radius 10 km hanya lokasi terbaik yang disimpan.'
+        'datanya tersedia wajib terukur di sel itu dan sedikitnya separuh kriteria terukur. Skor mutu sel = rata-rata '
+        'kedekatan nilai kriteria ke kondisi ideal, dikali bobot zona bersyarat; sel di bawah skor minimal dibuang. '
+        'Sel yang bersebelahan digabung dan untuk setiap jenis hanya lokasi berskor mutu tertinggi dalam radius jarak '
+        'antartitik yang disimpan.'
     )
 
     stealth_options = ('progres', 'selesai')
@@ -392,7 +395,7 @@ class Command(BaseCommand):
         return None if v is None else round(v, 2)
 
     @staticmethod
-    def _cocok(kriteria, nilai, bencana, tambahan, wajib, minimal):
+    def _cocok(kriteria, layak, nilai, bencana, tambahan, wajib, minimal):
         terukur = 0
         for (_, ambang), v, harus in zip(kriteria, nilai, wajib):
             if v is None:
@@ -404,7 +407,8 @@ class Command(BaseCommand):
             terukur += 1
         if terukur < minimal or any(kelas == 'TINGGI' for _, kelas in bencana) or False in tambahan:
             return None
-        return 100 * terukur / len(kriteria)
+        mutu = [kedekatan(k, v, ambang, batas) for (k, ambang), v, batas in zip(kriteria, nilai, layak) if v is not None]
+        return 100 * sum(mutu) / len(mutu) if mutu else 0.0
 
     def _nilai_sel(self, sektor, sub, zona, status, d):
         berlaku = [t for t in d['tambahan'] if not t[2] or sektor.kode in t[2]]
@@ -414,8 +418,10 @@ class Command(BaseCommand):
         unsur = d['unsur'] if tanpa_alur else d['unsur_tanpa_alur']
         ekosistem_terlarang = pengecualian.ekosistem_terlarang(sektor.kode)
         kriteria = list(syarat_unggulan(sub).items())
+        layak = tuple(sub['kriteria'].get(k) for k, _ in kriteria)
         wajib = tuple(data_ada(k, d['tersedia']) for k, _ in kriteria)
         minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
+        bobot, skor_minimal = atur('BOBOT_RUANG_BERSYARAT'), atur('SKOR_MINIMAL_LOKASI_UNGGULAN')
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
@@ -434,9 +440,12 @@ class Command(BaseCommand):
                 tuple(f(i) for f in dinilai),
             )
             if kunci not in tembolok:
-                tembolok[kunci] = self._cocok(kriteria, *kunci, wajib, minimal)
-            if tembolok[kunci] is not None:
-                lolos[i] = (tembolok[kunci], kunci[0], kunci[1])
+                tembolok[kunci] = self._cocok(kriteria, layak, *kunci, wajib, minimal)
+            if tembolok[kunci] is None:
+                continue
+            skor = tembolok[kunci] * (bobot if 'BERSYARAT' in st else 1)
+            if skor >= skor_minimal:
+                lolos[i] = (skor, kunci[0], kunci[1])
         return lolos
 
     @staticmethod
@@ -484,23 +493,24 @@ class Command(BaseCommand):
     def _lokasi(self, c, prov, zona, status, d):
         hasil = []
         for sektor in self.sektor:
+            calon = []
             for sub_kode, sub in atur('KRITERIA_JENIS').get(sektor.kode, {}).items():
                 lolos = self._nilai_sel(sektor, sub, zona, status, d)
-                if not lolos:
-                    continue
-                calon = []
                 for w in self._wilayah(lolos, d['ij']):
                     sel = self._inti(w, lolos, d)
                     calon.append((
                         self._mutu(sel, lolos),
                         sum(d['ij'][i][0] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
                         sum(d['ij'][i][1] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
-                        (sel, len(w)),
+                        (sel, len(w), sub_kode, sub, lolos),
                     ))
-                inti = self._tersebar(calon)
-                c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for sel, _ in inti for i in sel]])
-                for k, ewkb, luas in c.fetchall():
-                    hasil.append(self._satu(prov, sektor, sub_kode, sub, ewkb, luas, *inti[k], lolos, zona, status, d))
+            inti = self._tersebar(calon)
+            if not inti:
+                continue
+            c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for t in inti for i in t[0]]])
+            for k, ewkb, luas in c.fetchall():
+                sel, banyak, sub_kode, sub, lolos = inti[k]
+                hasil.append(self._satu(prov, sektor, sub_kode, sub, ewkb, luas, sel, banyak, lolos, zona, status, d))
         with transaction.atomic():
             LokasiPotensial.objects.filter(provinsi=prov).delete()
             LokasiPotensial.objects.bulk_create(hasil)
@@ -514,8 +524,10 @@ class Command(BaseCommand):
         for j, (kunci, ambang) in enumerate(syarat.items()):
             nilai = [lolos[i][1][j] for i in sel if lolos[i][1][j] is not None]
             rata = sum(nilai) / len(nilai) if nilai else None
+            mutu = kedekatan(kunci, rata, ambang, sub['kriteria'].get(kunci))
             kriteria.append({'label': PARAMETER[kunci][0], 'nilai_teks': teks_nilai(kunci, rata),
-                             'ambang_teks': teks_ambang(kunci, ambang), 'lulus': True if nilai else None})
+                             'ambang_teks': teks_ambang(kunci, ambang), 'lulus': True if nilai else None,
+                             'mutu': None if mutu is None else round(100 * mutu)})
         terukur = sum(k['lulus'] is True for k in kriteria)
         bencana = {jenis for i in sel for jenis, _ in lolos[i][2]}
         kriteria += [{'label': label, 'nilai_teks': None, 'ambang_teks': 'rendah–sedang', 'lulus': True}

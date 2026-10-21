@@ -280,7 +280,7 @@ const LegendaDisarankan = ({ sektor, onPilih }) => {
         )}
         <p className="text-[11px] leading-snug text-white/85">
           <b className="block text-[12px] text-white">lokasi potensial investasi</b>
-          lolos matriks Perda dan memenuhi semua batas unggulan sub-sektornya
+          lolos matriks Perda, memenuhi semua batas unggulan sub-sektornya, dan skor mutunya tinggi
         </p>
       </div>
 
@@ -334,7 +334,7 @@ const LegendaDisarankan = ({ sektor, onPilih }) => {
           Klik titik lalu Analisis lokasi ini untuk memuat batas lokasinya, atau gambar area sendiri.
         </li>
         <li className="pl-5">
-          Skala nasional menampilkan lokasi dengan persentase tertinggi; Konservasi &amp; Rehabilitasi Pesisir tampil bila
+          Skala nasional menampilkan lokasi dengan skor mutu tertinggi; Konservasi &amp; Rehabilitasi Pesisir tampil bila
           dipilih.
         </li>
       </ul>

@@ -203,7 +203,7 @@ def gambar_peta(kode):
     versi = RasterOseanografi.objects.filter(parameter=kode).aggregate(t=Max('ditarik_pada'))['t']
     if versi is None:
         return None
-    kunci = f'oseanografi:png:{kode}:{int(versi.timestamp())}'
+    kunci = f'oseanografi:gambar:{kode}:{int(versi.timestamp())}'
     isi = cache.get(kunci)
     if isi is None:
         grid, res = _mosaik(kode)
@@ -211,9 +211,14 @@ def gambar_peta(kode):
         lebar = min(nx, LEBAR_MAKS_PNG)
         atas, bawah = _merc(BATAS[3]), _merc(BATAS[1])
         tinggi = round(lebar * (atas - bawah) / math.radians(BATAS[2] - BATAS[0]))
-        lintang = np.degrees(np.arctan(np.sinh(atas - (np.arange(tinggi) + 0.5) * (atas - bawah) / tinggi)))
+        geser = 0 if kode in NOL_TRANSPARAN else 0.5
+        lintang = np.degrees(np.arctan(np.sinh(atas - (np.arange(tinggi) + geser) * (atas - bawah) / tinggi)))
         baris = np.clip(((BATAS[3] - lintang) / res).astype(int), 0, ny - 1)
-        kolom = np.clip(((np.arange(lebar) + 0.5) / lebar * nx).astype(int), 0, nx - 1)
-        isi = _png(_warnai(grid[baris][:, kolom], kode))
+        kolom = np.clip(((np.arange(lebar) + geser) / lebar * nx).astype(int), 0, nx - 1)
+        if kode in NOL_TRANSPARAN:
+            data = np.fmax.reduceat(np.fmax.reduceat(grid, baris, axis=0), kolom, axis=1)
+        else:
+            data = grid[baris][:, kolom]
+        isi = _png(_warnai(data, kode))
         cache.set(kunci, isi, CACHE_PNG_DETIK)
     return isi
