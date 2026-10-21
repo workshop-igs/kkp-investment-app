@@ -422,6 +422,7 @@ class Command(BaseCommand):
         wajib = tuple(data_ada(k, d['tersedia']) for k, _ in kriteria)
         minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
         bobot, skor_minimal = atur('BOBOT_RUANG_BERSYARAT'), atur('SKOR_MINIMAL_LOKASI_UNGGULAN')
+        khusus = {r: any(status[(z, sektor.kode)] == 'DIIZINKAN' for z in zona if zona[z][3] == r) for r in sub['ranah']}
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
@@ -443,7 +444,7 @@ class Command(BaseCommand):
                 tembolok[kunci] = self._cocok(kriteria, layak, *kunci, wajib, minimal)
             if tembolok[kunci] is None:
                 continue
-            skor = tembolok[kunci] * (bobot if 'BERSYARAT' in st else 1)
+            skor = tembolok[kunci] * (bobot if 'BERSYARAT' in st and khusus[next(iter(ranah))] else 1)
             if skor >= skor_minimal:
                 lolos[i] = (skor, kunci[0], kunci[1])
         return lolos
