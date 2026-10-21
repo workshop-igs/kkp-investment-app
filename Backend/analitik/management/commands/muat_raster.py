@@ -1,13 +1,15 @@
 import os
 import subprocess
 import tempfile
+from types import SimpleNamespace
 
 import numpy as np
 from django.contrib.gis.gdal import GDALRaster
 from django.contrib.gis.geos import Polygon
 from django.core.cache import cache
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from rasterio.fill import fillnodata
 
 from analitik.models import RasterOseanografi
 
@@ -25,15 +27,43 @@ def warp(sumber, tujuan, resolusi, metode='average', tambahan=()):
     )
 
 
-def warp_baca(sumber, resolusi, metode='average', isi_kosong=0, tambahan=()):
+def warp_baca(sumber, resolusi, metode='average', isi_kosong=0, tambahan=(), hanya_laut=False):
     with tempfile.TemporaryDirectory() as d:
         tif = os.path.join(d, 'raster.tif')
         warp(sumber, tif, resolusi, metode, tambahan)
-        if isi_kosong:
-            terisi = os.path.join(d, 'terisi.tif')
-            subprocess.run(['gdal_fillnodata.py', '-q', '-md', str(isi_kosong), tif, terisi], check=True)
-            tif = terisi
-        return baca_grid(tif)
+        data = baca_grid(tif)
+    if isi_kosong:
+        acuan = SimpleNamespace(origin=(BATAS[0], BATAS[3]), scale=(resolusi, -resolusi))
+        data = isi_celah(data, acuan, isi_kosong, hanya_laut)
+    return data
+
+
+def isi_celah(data, acuan, jarak_piksel, hanya_laut=False):
+    ada = ~np.isnan(data)
+    terisi = fillnodata(np.where(ada, data, KOSONG).astype('float32'), mask=ada.astype('uint8'),
+                        max_search_distance=jarak_piksel)
+    hasil = np.where(ada, data, np.where(terisi == KOSONG, np.nan, terisi))
+    if hanya_laut:
+        hasil[~ada & ~perairan(acuan, data.shape)] = np.nan
+    return hasil
+
+
+def perairan(acuan, bentuk):
+    laut = np.zeros(bentuk, dtype=bool)
+    for r in RasterOseanografi.objects.filter(parameter='KEDALAMAN').only('rast'):
+        g, pita = r.rast, r.rast.bands[0]
+        baris, kolom = np.nonzero(pita.data().reshape(g.height, g.width) != pita.nodata_value)
+        i = np.floor((g.origin.y + (baris + 0.5) * g.scale.y - acuan.origin[1]) / acuan.scale[1]).astype(int)
+        j = np.floor((g.origin.x + (kolom + 0.5) * g.scale.x - acuan.origin[0]) / acuan.scale[0]).astype(int)
+        di = (i >= 0) & (i < bentuk[0]) & (j >= 0) & (j < bentuk[1])
+        laut[i[di], j[di]] = True
+    if not laut.any():
+        raise CommandError('Raster KEDALAMAN belum dimuat; jalankan tarik_data_publik --sumber BATIMETRI lebih dulu.')
+    return laut
+
+
+def catatan_isi(jarak_piksel, resolusi):
+    return f'; perairan dekat pantai tanpa data diisi dari sel terdekat sejauh ±{jarak_piksel * resolusi * 111:.0f} km'
 
 
 def simpan_grid(kode, data, resolusi, satuan, sumber, periode=''):
