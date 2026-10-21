@@ -68,7 +68,7 @@ DAFTAR = [
        'Skor 0-100 dari kedekatan nilai tiap kriteria ke kondisi ideal; di bawah angka ini lokasi bukan unggulan.',
        'skor (0-100)', (PETA,), (0, 100)),
     _d('BOBOT_RUANG_BERSYARAT', 'peta', 'Bobot zona bersyarat',
-       'Pengali skor mutu untuk zona yang mengizinkan dengan syarat.', 'pengali (0-1)', (PETA,), (0, 1)),
+       'Pengali skor mutu untuk zona bersyarat, bila provinsi punya zona yang mengizinkan jenis itu tanpa syarat.', 'pengali (0-1)', (PETA,), (0, 1)),
     _d('SEL_PER_SISI_INTI_LOKASI', 'peta', 'Ukuran inti lokasi',
        'Jumlah sel 250 m per sisi; 4 berarti inti paling luas 1 km x 1 km.', 'sel', (PETA,), (1, 20), bulat=True),
     _d('INFRASTRUKTUR_AKSESIBILITAS', 'lokasi_risiko', 'Jarak infrastruktur pendukung',

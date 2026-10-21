@@ -2,6 +2,7 @@ import json
 from typing import Any, Dict, List, Optional
 
 from django.contrib.gis.geos import GeometryCollection, GEOSException, GEOSGeometry
+from django.core.cache import cache
 from django.db import connection
 
 from analitik.models import KetentuanRuang
@@ -34,6 +35,7 @@ from analitik.services.laporan_spasial import _arah
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.parameter_tambahan import nilai_area
 from analitik.services.pengaturan import atur
+from analitik.services.profil_investasi import _saring_sumber_utama
 from inti.models import SektorInvestasi
 from inventarisasi.klasifikasi import KATA_SEKTOR, PENANDA_MATRIKS, rincian_kegiatan, status_rincian, syarat_rincian
 from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
@@ -334,6 +336,18 @@ def _kkprl(c, geom) -> List[Dict[str, Any]]:
     ]
 
 
+def ada_zona_diizinkan(provinsi_ids, sektor, ranah) -> bool:
+    kunci = f"zona-diizinkan:{sektor.id}:{ranah}:{'-'.join(map(str, sorted(provinsi_ids)))}"
+    hasil = cache.get(kunci)
+    if hasil is None:
+        zona = _saring_sumber_utama(ZonasiRuangLaut.objects.filter(provinsi_id__in=provinsi_ids, ranah=ranah), prefiks='')
+        zona = list(zona.values('jenis_zona', 'sub_zona', 'provinsi_id', 'matriks_id').distinct())
+        aturan = _aturan_per_sektor({z['matriks_id'] for z in zona if z['matriks_id']}).get(sektor.id, {})
+        hasil = any(_ketentuan(aturan, z)['status'] == 'DIIZINKAN' for z in zona)
+        cache.set(kunci, hasil, 86400)
+    return hasil
+
+
 def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
     c.execute(
         """
@@ -557,7 +571,8 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         provinsi_ids = {z['provinsi_id'] for z in zona_efektif}
         tambahan = nilai_area(c, geom, sektor.kode, provinsi_ids)
         karakter['tambahan'] = {t['nama']: t['hasil'] for t in tambahan if t['peran'] == 'DINILAI'}
-        fisik = penilaian(sektor.kode, karakter, bersyarat=status == 'SESUAI_BERSYARAT')
+        bersyarat = status == 'SESUAI_BERSYARAT' and ada_zona_diizinkan(provinsi_ids, sektor, karakter['ranah'])
+        fisik = penilaian(sektor.kode, karakter, bersyarat=bersyarat)
         terbaik = fisik[0] if fisik else None
         cocok = bool(terbaik and terbaik['cocok'])
         data_kurang = bool(terbaik) and not cocok and not terbaik['gagal']
