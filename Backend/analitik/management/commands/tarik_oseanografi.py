@@ -3,6 +3,7 @@ import io
 import math
 import time
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 
 import httpx
 import numpy as np
@@ -11,6 +12,7 @@ from django.contrib.gis.geos import Polygon
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from analitik.management.commands.muat_raster import catatan_isi, isi_celah
 from analitik.models import RasterOseanografi
 from analitik.services.konstanta import BULAN
 from analitik.services.pengaturan import atur
@@ -54,22 +56,22 @@ PARAMETER = {
     },
     'KLOROFIL': {
         'dataset': 'erdMH1chlamday', 'variabel': 'chlorophyll', 'satuan': 'mg/m³', 'waktu': '[last-11:1:last]',
-        'resolusi': 1 / 24, 'langkah': 3, 'bulanan': True,
+        'resolusi': 1 / 24, 'langkah': 3, 'bulanan': True, 'isi_kosong': 2,
         'sumber': 'NASA MODIS-Aqua klorofil-a bulanan via NOAA ERDDAP, 12 bulan terakhir yang tersedia',
     },
     'GELOMBANG': {
         'dataset': 'NWW3_Global_Best', 'variabel': 'Thgt', 'satuan': 'm', 'waktu_tahunan': 40,
-        'tambahan': '[(0.0)]', 'resolusi': 0.5,
+        'tambahan': '[(0.0)]', 'resolusi': 0.5, 'isi_kosong': 1,
         'sumber': 'NOAA WaveWatch III (0,5°), tinggi gelombang signifikan, sampel tiap 40 jam selama 12 bulan',
     },
     'PERIODE_GLB': {
         'dataset': 'NWW3_Global_Best', 'variabel': 'Tper', 'satuan': 's', 'waktu_tahunan': 40,
-        'tambahan': '[(0.0)]', 'resolusi': 0.5,
+        'tambahan': '[(0.0)]', 'resolusi': 0.5, 'isi_kosong': 1,
         'sumber': 'NOAA WaveWatch III (0,5°), periode puncak gelombang, sampel tiap 40 jam selama 12 bulan',
     },
     'KD490': {
         'server': COASTWATCH, 'dataset': 'erdMH1kd490mday_R2022NRT', 'variabel': 'Kd_490', 'satuan': '1/m',
-        'waktu': '[last-11:1:last]', 'resolusi': 1 / 24, 'langkah': 3, 'bulanan': True,
+        'waktu': '[last-11:1:last]', 'resolusi': 1 / 24, 'langkah': 3, 'bulanan': True, 'isi_kosong': 2,
         'sumber': 'NASA MODIS-Aqua koefisien atenuasi Kd490 bulanan (R2022) via NOAA ERDDAP, 12 bulan terakhir',
     },
     'CURAH_HUJAN': {
@@ -133,7 +135,7 @@ def _grid(teks, variabel):
     return sel, waktu, satuan[i_nilai] if i_nilai < len(satuan) else ''
 
 
-def _raster(sel, resolusi, pita):
+def _raster(sel, resolusi, pita, isi_kosong=0):
     lintang = sorted({k[0] for k in sel}, reverse=True)
     bujur = sorted({k[1] for k in sel})
     if not lintang:
@@ -141,16 +143,20 @@ def _raster(sel, resolusi, pita):
     y0, x0 = lintang[0], bujur[0]
     tinggi = round((lintang[0] - lintang[-1]) / resolusi) + 1
     lebar = round((bujur[-1] - bujur[0]) / resolusi) + 1
-    data = np.full((len(pita), tinggi, lebar), KOSONG, dtype='float32')
+    data = np.full((len(pita), tinggi, lebar), np.nan)
     for (lat, lon), nilai in sel.items():
         r, k = round((y0 - lat) / resolusi), round((lon - x0) / resolusi)
         arr = np.asarray(nilai)
         for i, fungsi in enumerate(pita):
             data[i, r, k] = fungsi(arr)
     kiri, atas = x0 - resolusi / 2, y0 + resolusi / 2
+    if isi_kosong:
+        acuan = SimpleNamespace(origin=(kiri, atas), scale=(resolusi, -resolusi))
+        data = np.array([isi_celah(b, acuan, isi_kosong, hanya_laut=True) for b in data])
     rast = GDALRaster({
         'srid': 4326, 'width': lebar, 'height': tinggi, 'origin': [kiri, atas], 'scale': [resolusi, -resolusi],
-        'datatype': 6, 'bands': [{'data': data[i].ravel(), 'nodata_value': KOSONG} for i in range(len(pita))],
+        'datatype': 6,
+        'bands': [{'data': np.where(np.isnan(b), KOSONG, b).astype('float32').ravel(), 'nodata_value': KOSONG} for b in data],
     })
     cakupan = Polygon.from_bbox((kiri, atas - tinggi * resolusi, kiri + lebar * resolusi, atas))
     cakupan.srid = 4326
@@ -193,7 +199,10 @@ class Command(BaseCommand):
         sel, waktu, satuan = _grid(teks, p['variabel'])
         if p.get('per_bulan') and 'day' in satuan.lower():
             sel = {k: [x * 30.44 for x in v] for k, v in sel.items()}
-        rast, cakupan = _raster(sel, p['resolusi'] * langkah, [np.mean, np.min, np.max])
+        isi = p.get('isi_kosong', 0)
+        rast, cakupan = _raster(sel, p['resolusi'] * langkah, [np.mean, np.min, np.max], isi)
+        if isi:
+            p = {**p, 'sumber': p['sumber'] + catatan_isi(isi, p['resolusi'] * langkah)}
         periode = _periode(waktu, p.get('bulanan'))
         with transaction.atomic():
             RasterOseanografi.objects.filter(parameter=kode).delete()

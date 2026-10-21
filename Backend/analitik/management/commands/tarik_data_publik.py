@@ -20,7 +20,7 @@ from django.db import connection, transaction
 from rasterio.features import rasterize, shapes
 from rasterio.warp import Resampling, reproject
 
-from analitik.management.commands.muat_raster import BATAS, simpan_grid, warp_baca
+from analitik.management.commands.muat_raster import BATAS, catatan_isi, simpan_grid, warp_baca
 from inventarisasi.models import InfrastrukturPendukung
 
 KEPALA = {'User-Agent': 'kkp-investasi-ruang-laut/1.0'}
@@ -36,6 +36,8 @@ WOA = ('https://www.ncei.noaa.gov/data/oceans/woa/WOA23/DATA/temperature/netcdf/
 HYCOM = 'https://ncss.hycom.org/thredds/ncss/GLBy0.08/expt_93.0/{d}'
 AKHIR_HYCOM = datetime(2024, 9, 1, tzinfo=timezone.utc)
 LANGKAH_HYCOM = 40
+ISI_HYCOM = 3
+ISI_WW3 = 1
 LAPIS_ARUS_DASAR_M = (10, 20, 30, 40, 50, 70, 100, 150, 200, 300, 500, 1000)
 SAMPEL_ARUS_DASAR = 4
 WW3 = 'https://upwell.pfeg.noaa.gov/erddap/griddap/NWW3_Global_Best.nc'
@@ -153,7 +155,7 @@ def grid_wilayah(resolusi):
                            origin=(BATAS[0], BATAS[3]), scale=(resolusi, -resolusi))
 
 
-def grid_dari(data, acuan, resolusi, metode='average', isi_kosong=0):
+def grid_dari(data, acuan, resolusi, metode='average', isi_kosong=0, hanya_laut=False):
     with tempfile.TemporaryDirectory() as d:
         asal = os.path.join(d, 'asal.tif')
         GDALRaster({
@@ -161,7 +163,7 @@ def grid_dari(data, acuan, resolusi, metode='average', isi_kosong=0):
             'origin': list(acuan.origin), 'scale': list(acuan.scale), 'datatype': 6,
             'bands': [{'data': np.where(np.isnan(data), -9999.0, data).astype('float32').ravel(), 'nodata_value': -9999.0}],
         })
-        return warp_baca(asal, resolusi, metode, isi_kosong)
+        return warp_baca(asal, resolusi, metode, isi_kosong, hanya_laut=hanya_laut)
 
 
 class Command(BaseCommand):
@@ -224,7 +226,7 @@ class Command(BaseCommand):
                                         '(±550 m)')
 
     def _pga(self):
-        yield 'PGA', simpan_grid('PGA', warp_baca(GEM, 0.05, isi_kosong=20), 0.05, 'g',
+        yield 'PGA', simpan_grid('PGA', warp_baca(GEM, 0.05, isi_kosong=20, hanya_laut=True), 0.05, 'g',
                                  'GEM Global Seismic Hazard Map v2023.1, PGA batuan dasar peluang terlampaui 10% dalam '
                                  '50 tahun (periode ulang 475 tahun); perairan diisi dari daratan terdekat sejauh ±100 km')
 
@@ -295,10 +297,10 @@ class Command(BaseCommand):
         for b in berkas:
             u, acuan = pita(b, 'water_u')
             kecepatan.append(np.hypot(u, pita(b, 'water_v')[0]))
-        data = grid_dari(np.nanmean(np.concatenate(kecepatan), axis=0), acuan, 0.08)
+        data = grid_dari(np.nanmean(np.concatenate(kecepatan), axis=0), acuan, 0.08, isi_kosong=ISI_HYCOM, hanya_laut=True)
         yield 'ARUS', simpan_grid('ARUS', data, 0.08, 'm/s',
-                                  'HYCOM GOFS 3.1 GLBy0.08 (1/12°), rata-rata kecepatan arus permukaan 12 bulan terakhir arsip',
-                                  f'{periode}, sampel tiap 5 hari')
+                                  'HYCOM GOFS 3.1 GLBy0.08 (1/12°), rata-rata kecepatan arus permukaan 12 bulan terakhir arsip'
+                                  + catatan_isi(ISI_HYCOM, 0.08), f'{periode}, sampel tiap 5 hari')
         berkas, periode = self._hycom('ts3z', 'salinity', 's', LANGKAH_HYCOM, vertCoord=0)
         lapis = [pita(b, 'salinity') for b in berkas]
         data = grid_dari(np.nanmean(np.concatenate([x for x, _ in lapis]), axis=0), lapis[0][1], 0.08, isi_kosong=6)
@@ -322,11 +324,12 @@ class Command(BaseCommand):
             u, acuan = pita(b, 'water_u')
             kecepatan = np.nanmean(np.hypot(u, pita(b, 'water_v')[0]), axis=0)
             terdalam = kecepatan if terdalam is None else np.where(np.isnan(kecepatan), terdalam, kecepatan)
-        data = grid_dari(terdalam, acuan, 0.08)
+        data = grid_dari(terdalam, acuan, 0.08, isi_kosong=ISI_HYCOM, hanya_laut=True)
         yield 'ARUS_DASAR', simpan_grid('ARUS_DASAR', data, 0.08, 'm/s',
                                         'HYCOM GOFS 3.1 GLBy0.08 (1/12°): kecepatan arus pada lapis terdalam yang berair '
                                         f'di antara {len(LAPIS_ARUS_DASAR_M)} lapis 10-1.000 m, rata-rata '
-                                        f'{SAMPEL_ARUS_DASAR} sampel musiman', f'{awal:%d-%m-%Y} sampai {akhir:%d-%m-%Y}')
+                                        f'{SAMPEL_ARUS_DASAR} sampel musiman' + catatan_isi(ISI_HYCOM, 0.08),
+                                        f'{awal:%d-%m-%Y} sampai {akhir:%d-%m-%Y}')
 
     def _gelombang_ekstrem(self):
         tahun = range(TAHUN_AWAL_WW3, datetime.now(timezone.utc).year)
@@ -344,11 +347,11 @@ class Command(BaseCommand):
         reduksi = -np.log(-np.log(1 - 1 / PERIODE_ULANG_TAHUN))
         ekstrem = np.nanmean(maksimum, axis=0) + np.nanstd(maksimum, axis=0, ddof=1) * np.sqrt(6) / np.pi * (
             reduksi - 0.5772)
-        data = grid_dari(ekstrem, acuan, 0.5, 'near')
+        data = grid_dari(ekstrem, acuan, 0.5, 'near', isi_kosong=ISI_WW3, hanya_laut=True)
         yield 'GELOMBANG_EKSTREM', simpan_grid(
             'GELOMBANG_EKSTREM', data, 0.5, 'm',
             f'NOAA WaveWatch III (0,5°): tinggi gelombang signifikan periode ulang {PERIODE_ULANG_TAHUN} tahun, distribusi '
-            f'Gumbel dari maksimum tahunan {tahun[0]}-{tahun[-1]} (sampel tiap 3 jam)')
+            f'Gumbel dari maksimum tahunan {tahun[0]}-{tahun[-1]} (sampel tiap 3 jam)' + catatan_isi(ISI_WW3, 0.5))
 
     def _pasut(self):
         arsip = unduh(EOT20, os.path.join(SIMPANAN, 'eot20.zip'))
