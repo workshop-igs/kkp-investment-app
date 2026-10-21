@@ -543,8 +543,8 @@ const LandingPage = () => {
       <div className="border-b border-slate-200 bg-[#F6F8FB]">
         <div className="relative">
           <LatarLaut />
-          <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-28 pt-14 sm:px-6 lg:grid-cols-12 lg:gap-10 lg:px-8 lg:pb-32 lg:pt-20">
-            <div className="lg:col-span-6">
+          <section className="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pb-28 pt-14 sm:px-6 xl:grid-cols-12 xl:gap-10 lg:px-8 lg:pb-32 lg:pt-20">
+            <div className="xl:col-span-6">
               <Label>Analisis kelayakan ruang laut</Label>
               <h1 className="mt-7 text-balance text-[2.75rem] font-extrabold leading-[1.02] tracking-[-0.035em] text-kkp-900 sm:text-6xl xl:text-[4.25rem]">
                 Platform Manajemen Investasi Ruang Laut
@@ -559,7 +559,7 @@ const LandingPage = () => {
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2 lg:col-span-6">
+            <div className="grid gap-3 sm:grid-cols-2 xl:col-span-6">
               <div className="flex flex-col rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
                 <KartuCekLokasi />
                 <div className="mt-5 flex items-center justify-between gap-2">

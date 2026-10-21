@@ -230,7 +230,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
   return (
     <div className="w-full h-full bg-white flex flex-col font-sans">
       
-      <div className="p-8 pb-4">
+      <div className="p-5 pb-4 sm:p-8 sm:pb-4">
         <h2 className="text-2xl font-bold text-slate-800">Analisis Kelayakan Investasi</h2>
         <p className="text-slate-500 mt-1">
           Isi identitas proyek, periksa kesesuaian ruang, lalu analisis finansial bila lokasi
@@ -238,7 +238,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
         </p>
       </div>
 
-      <div className="px-8 pb-8 flex-1 flex flex-col gap-6">
+      <div className="px-5 sm:px-8 pb-8 flex-1 flex flex-col gap-6">
         
         {!result && !loading && (
           <div className="space-y-6">
@@ -250,7 +250,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                 return (
                   <li
                     key={l}
-                    className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg border ${
+                    className={`flex flex-col sm:flex-row items-center gap-1.5 sm:gap-2.5 px-2 sm:px-3 py-2 sm:py-2.5 text-center sm:text-left rounded-lg border ${
                       aktif ? 'border-kkp-700 bg-kkp-100' : selesai ? 'border-emerald-200 bg-emerald-50' : 'border-slate-200 bg-white'
                     }`}
                   >

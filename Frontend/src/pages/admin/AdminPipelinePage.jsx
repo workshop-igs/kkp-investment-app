@@ -79,7 +79,7 @@ const AdminPipelinePage = () => {
                       <MapPin className="w-3 h-3" /> {p.provinsi_nama}
                     </div>
                   </td>
-                  <td className="px-6 py-4 font-mono">{rupiahMiliar(p.nilai_investasi_miliar)}</td>
+                  <td className="px-6 py-4 font-mono whitespace-nowrap">{rupiahMiliar(p.nilai_investasi_miliar)}</td>
                   
                   <td className="px-6 py-4">
                     {editingId === p.id ? (
@@ -94,7 +94,7 @@ const AdminPipelinePage = () => {
                         <span className="text-slate-400">miliar</span>
                       </div>
                     ) : (
-                      <span className="font-mono font-medium text-teal-600">{rupiahMiliar(p.nilai_realisasi_miliar)}</span>
+                      <span className="font-mono font-medium text-teal-600 whitespace-nowrap">{rupiahMiliar(p.nilai_realisasi_miliar)}</span>
                     )}
                   </td>
 

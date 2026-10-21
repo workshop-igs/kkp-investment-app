@@ -530,21 +530,23 @@ const PetaInteraktif = ({
         <TurPeta aktif={turAktif} setAktif={setTurAktif} peraga={peragakanProvinsi} />
 
         {isDrawing && (
-          <div className="absolute top-24 left-1/2 -translate-x-1/2 z-[1001] flex flex-col items-center gap-3">
-            <div className="bg-white/95 backdrop-blur-md rounded-xl px-5 py-3 flex items-center gap-4 shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-slate-200">
+          <div className="absolute top-[9.5rem] left-4 right-[4.5rem] md:top-24 md:left-[22rem] xl:left-1/2 xl:right-auto xl:-translate-x-1/2 z-[1150] flex xl:w-max xl:max-w-[calc(100vw-10rem)] flex-col items-center gap-3">
+            <div className="bg-white/95 backdrop-blur-md rounded-xl px-5 py-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-slate-200">
               <span className="relative flex h-3 w-3">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-sky-600 text-white hover:bg-sky-700" />
               </span>
               <span className="text-sky-600 font-bold text-sm uppercase tracking-wider">Mode Menggambar</span>
               <div className="w-px h-5 bg-slate-300" />
-              <span className="text-slate-800 text-lg font-bold">{vertexCount}</span>
-              <span className="text-slate-500 text-xs">titik</span>
-              <div className="w-px h-5 bg-slate-300" />
-              <span className="text-slate-500 text-xs font-medium">Klik peta = tambah titik &nbsp;•&nbsp; Enter = selesai</span>
+              <span className="inline-flex items-baseline gap-1 whitespace-nowrap">
+                <span className="text-slate-800 text-lg font-bold">{vertexCount}</span>
+                <span className="text-slate-500 text-xs">titik</span>
+              </span>
+              <div className="hidden sm:block w-px h-5 bg-slate-300" />
+              <span className="text-slate-500 text-xs font-medium">Klik peta = tambah titik<span className="hidden sm:inline"> &nbsp;•&nbsp; Enter = selesai</span></span>
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               <button onClick={handleUndo} disabled={vertexCount === 0}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border transition-all ${vertexCount > 0 ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50 hover:text-sky-600 shadow-sm' : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'}`}>
                 Undo
@@ -564,7 +566,7 @@ const PetaInteraktif = ({
         {!isDrawing && (
           <div
             data-aksi-peta
-            className="absolute bottom-24 left-1/2 -translate-x-1/2 z-[1000] flex flex-col gap-3 w-max max-w-[calc(100vw-2rem)]"
+            className="absolute bottom-24 left-4 right-[4.5rem] sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex flex-col gap-3 sm:w-max sm:max-w-[calc(100vw-10rem)]"
           >
             {!hasPolygon && (
               <div className="flex flex-wrap justify-center gap-3">
@@ -619,7 +621,7 @@ const PetaInteraktif = ({
         )}
 
         {peringatanUnggah.length > 0 && !error && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-md px-4 sm:px-0">
+          <div className="absolute top-[9.5rem] left-4 right-[4.5rem] md:top-24 md:left-[22rem] xl:left-1/2 xl:right-auto xl:-translate-x-1/2 z-[1150] xl:w-full xl:max-w-md">
             <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm flex items-start gap-3 shadow-lg">
               <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
@@ -636,8 +638,8 @@ const PetaInteraktif = ({
         )}
 
         {error && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] w-full max-w-md">
-            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-3">
+          <div className="absolute top-[9.5rem] left-4 right-[4.5rem] md:top-24 md:left-[22rem] xl:left-1/2 xl:right-auto xl:-translate-x-1/2 z-[1150] xl:w-full xl:max-w-md">
+            <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-600 text-sm flex items-start gap-3 shadow-lg">
               <svg className="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
               </svg>
