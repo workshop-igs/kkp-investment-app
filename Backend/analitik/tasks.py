@@ -1,4 +1,5 @@
 import logging
+import threading
 from datetime import timedelta
 
 from celery import shared_task
@@ -12,7 +13,7 @@ from analitik.models import StatusHitungUlang
 
 logger = logging.getLogger('analitik')
 
-BATAS_TANPA_KABAR = timedelta(minutes=45)
+BATAS_TANPA_KABAR = timedelta(minutes=15)
 
 
 def _macet(s):
@@ -46,6 +47,19 @@ def _progres(tahap):
     return catat
 
 
+def _sisa(versi):
+    def catat(sisa):
+        if sisa:
+            StatusHitungUlang.objects.filter(pk=1, versi=versi).update(perlu_lokasi=sisa)
+    return catat
+
+
+def _detak(berhenti):
+    while not berhenti.wait(BATAS_TANPA_KABAR.total_seconds() / 3):
+        StatusHitungUlang.objects.filter(pk=1).update(diperbarui=timezone.now())
+    connection.close()
+
+
 @shared_task
 def hitung_ulang():
     sekarang = timezone.now()
@@ -53,6 +67,8 @@ def hitung_ulang():
         berjalan=True, mulai=sekarang, diperbarui=sekarang, selesai=None, galat='', tahap='Menyiapkan', ke=0, dari=0,
     ):
         return
+    berhenti = threading.Event()
+    threading.Thread(target=_detak, args=(berhenti,), daemon=True).start()
     try:
         while True:
             s = StatusHitungUlang.objects.get(pk=1)
@@ -61,7 +77,7 @@ def hitung_ulang():
                 break
             if lokasi is not None:
                 call_command('hitung_lokasi_potensial', provinsi=','.join(lokasi) or None,
-                             progres=_progres('Lokasi potensial'))
+                             progres=_progres('Lokasi potensial'), selesai=_sisa(versi))
                 cache.clear()
             if skor:
                 call_command('hitung_skor_zona', progres=_progres('Skor kelayakan zona'))
@@ -71,6 +87,7 @@ def hitung_ulang():
         logger.exception('[HITUNG ULANG] gagal')
         StatusHitungUlang.objects.filter(pk=1).update(galat=f'{type(e).__name__}: {e}'[:2000])
     finally:
+        berhenti.set()
         StatusHitungUlang.objects.filter(pk=1).update(
             berjalan=False, selesai=timezone.now(), tahap='', ke=0, dari=0,
         )
