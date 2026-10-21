@@ -6,7 +6,7 @@ import { useAuth } from '../context/KonteksAuth';
 
 const SARAN_HALAMAN = {
   '/peta': ['Bagaimana cara menggambar area proyek?', 'Bagaimana kesesuaian ruang diperiksa?'],
-  '/dashboard': ['Bagaimana cara ekspor CSV?', 'Apa arti kartu Eksplorasi Potensi?'],
+  '/dashboard': ['Bagaimana cara ekspor CSV?', 'Apa saja isi bagian Potensi ruang laut?'],
   '/pipeline': ['Bagaimana cara memperbarui tahap proyek?'],
   '/profil-investasi': ['Bagaimana lokasi prioritas ditentukan?'],
   '/admin': ['Apa saja isi menu Administrator?'],
@@ -144,32 +144,26 @@ const AsistenMengambang = () => {
             </button>
           </header>
 
-          {!isAuthenticated ? (
-            <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-kkp-100 text-kkp-800">
-                <Bot className="h-6 w-6" />
-              </span>
-              <p className="text-[13px] leading-relaxed text-slate-600">
-                Masuk terlebih dahulu untuk bertanya kepada asisten.
-              </p>
-              <Link
-                to="/login"
-                onClick={() => setBuka(false)}
-                className="rounded-lg bg-kkp-700 px-4 py-2 text-[13px] font-semibold text-white hover:bg-kkp-800"
-              >
-                Masuk
-              </Link>
-            </div>
-          ) : (
-            <>
+          <>
               <div className="flex-1 space-y-4 overflow-y-auto px-3.5 py-4 custom-scrollbar">
                 <div className="flex items-start gap-2.5">
                   <AvatarAsisten />
                   <p className="rounded-2xl rounded-tl-md bg-slate-100 px-3 py-2 text-[13px] leading-relaxed text-slate-700">
-                    {modeObrolan
-                      ? 'Tanyakan cara memakai fitur, cara kerja perhitungan, atau data di aplikasi ini, misalnya proyek, lokasi, dan profil investasi provinsi.'
-                      : 'Tanyakan cara memakai fitur atau cara kerja perhitungan di aplikasi ini. Untuk saat ini jawaban diambil langsung dari panduan aplikasi.'}
-                    {modeObrolan && area && ' Area yang sedang Anda gambar ikut diperiksa.'}
+                    {!modeObrolan
+                      ? 'Tanyakan cara memakai fitur atau cara kerja perhitungan di aplikasi ini. Untuk saat ini jawaban diambil langsung dari panduan aplikasi.'
+                      : isAuthenticated
+                        ? 'Tanyakan cara memakai fitur, cara kerja perhitungan, atau data di aplikasi ini, misalnya proyek, lokasi, dan profil investasi provinsi.'
+                        : 'Tanyakan cara memakai fitur, lokasi di peta, atau profil investasi provinsi.'}
+                    {modeObrolan && area && isAuthenticated && ' Area yang sedang Anda gambar ikut diperiksa.'}
+                    {!isAuthenticated && (
+                      <>
+                        {' '}Data proyek dan pemeriksaan area tersedia setelah Anda{' '}
+                        <Link to="/login" onClick={() => setBuka(false)} className="font-semibold text-kkp-800 underline">
+                          masuk
+                        </Link>
+                        .
+                      </>
+                    )}
                   </p>
                 </div>
 
@@ -177,7 +171,7 @@ const AsistenMengambang = () => {
                   <div className="pl-[2.375rem]">
                     <p className="mb-1.5 text-[12px] font-semibold text-kkp-900">Coba tanyakan</p>
                     <div className="space-y-1">
-                      {saranUntuk(pathname, modeObrolan && area).map((s) => (
+                      {saranUntuk(pathname, modeObrolan && area && isAuthenticated).map((s) => (
                         <button
                           key={s}
                           type="button"
@@ -272,8 +266,7 @@ const AsistenMengambang = () => {
                   </button>
                 </div>
               </form>
-            </>
-          )}
+          </>
         </section>
       )}
 
