@@ -187,6 +187,30 @@ def lulus(nilai, ambang):
     return (bawah is None or nilai >= bawah) and (atas is None or nilai <= atas)
 
 
+def kedekatan(kunci, nilai, ambang, layak=None):
+    if nilai is None:
+        return None
+    if not lulus(nilai, ambang):
+        return 0.0
+    bawah, atas = ambang
+    if kunci in BINER:
+        return 1.0
+    if bawah is not None and atas is not None:
+        return 1.0 if atas == bawah else 1 - abs(2 * nilai - bawah - atas) / (atas - bawah)
+    if atas is not None:
+        return min(1.0, 1 - nilai / atas) if atas > 0 else 1.0
+    langkah = bawah - layak[0] if layak and layak[0] is not None else 0
+    return min(1.0, (nilai - bawah) / langkah) if langkah > 0 else 1.0
+
+
+def skor_mutu(sub, data, bersyarat=False):
+    nilai = [kedekatan(k, data.get(k), a, sub['kriteria'].get(k)) for k, a in syarat_unggulan(sub).items()]
+    nilai = [v for v in nilai if v is not None]
+    if not nilai:
+        return None
+    return 100 * sum(nilai) / len(nilai) * (atur('BOBOT_RUANG_BERSYARAT') if bersyarat else 1)
+
+
 def kena_bencana(data):
     return data['ranah'] == 'DARAT' or (data.get('jarak_pantai_km') or 0) <= 0
 
@@ -204,7 +228,7 @@ def _baris(kunci, ambang, data, tersedia):
     }
 
 
-def nilai_sub(sub, data, tersedia):
+def nilai_sub(sub, data, tersedia, bersyarat=False):
     kriteria = [_baris(k, a, data, tersedia) for k, a in sub['kriteria'].items()]
     unggulan = [_baris(k, a, data, tersedia) for k, a in syarat_unggulan(sub).items()]
     umum = []
@@ -219,19 +243,24 @@ def nilai_sub(sub, data, tersedia):
     terukur = sum(k['lulus'] is not None for k in kriteria)
     gagal = [k for k in kriteria + umum if k['lulus'] is False]
     cukup = terukur >= math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
+    skor = skor_mutu(sub, data, bersyarat)
     return {
         'nama': sub['nama'], 'kriteria': kriteria, 'umum': umum, 'terukur': terukur, 'total': len(kriteria),
         'gagal': [k['label'] for k in gagal], 'cukup_data': cukup, 'cocok': not gagal and cukup,
-        'unggulan': {'kriteria': unggulan, 'lolos': not gagal and cukup and all(k['lulus'] for k in unggulan if k['data_ada'])},
+        'unggulan': {
+            'kriteria': unggulan, 'skor': None if skor is None else round(skor),
+            'lolos': not gagal and cukup and all(k['lulus'] for k in unggulan if k['data_ada'])
+                     and skor is not None and skor >= atur('SKOR_MINIMAL_LOKASI_UNGGULAN'),
+        },
     }
 
 
-def penilaian(sektor_kode, data, tersedia=None):
+def penilaian(sektor_kode, data, tersedia=None, bersyarat=False):
     tersedia = sumber_tersedia() if tersedia is None else tersedia
     hasil = []
     for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items():
         if data['ranah'] in sub['ranah']:
-            hasil.append({'kode': kode, **nilai_sub(sub, data, tersedia)})
+            hasil.append({'kode': kode, **nilai_sub(sub, data, tersedia, bersyarat)})
     return sorted(hasil, key=lambda h: (not h['cocok'], len(h['gagal']), -h['terukur']))
 
 

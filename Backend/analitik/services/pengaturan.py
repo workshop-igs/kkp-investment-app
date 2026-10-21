@@ -35,8 +35,8 @@ DAFTAR = [
     _d('KRITERIA_JENIS', 'karakter', 'Kriteria kesesuaian per jenis dan sub-sektor',
        'Parameter fisik dan aksesibilitas per sub-sektor dengan dua tingkat batas. Batas layak dipakai analisis area: '
        'area cocok bila semua kriteria yang terukur memenuhinya. Batas unggulan dipakai Peta Sebaran: lokasi tampil '
-       'bila semua kriteria yang datanya tersedia terukur dan memenuhinya; kriteria tanpa batas unggulan memakai batas '
-       'layaknya.',
+       'bila semua kriteria yang datanya tersedia terukur dan memenuhinya serta skor mutunya mencapai skor minimal; '
+       'kriteria tanpa batas unggulan memakai batas layaknya.',
        dampak=(PETA, SKOR)),
     _d('PROPORSI_MINIMAL_KRITERIA_TERUKUR', 'karakter', 'Bagian minimal kriteria yang harus terukur',
        'Lokasi baru dapat dinyatakan cocok bila sedikitnya bagian ini dari kriteria sub-sektornya terukur. Pada analisis '
@@ -74,7 +74,16 @@ DAFTAR = [
        'Parameter tambahan bertipe area dari administrator dinilai terpenuhi bila sedikitnya bagian ini dari lokasi '
        'berada di dalam areanya.', 'proporsi (0-1)', (PETA,), (0, 1)),
     _d('JARAK_ANTAR_LOKASI_KM', 'peta', 'Jarak minimal antartitik lokasi',
-       'Dalam radius ini hanya lokasi terbaik yang ditampilkan.', 'km', (PETA,), (0, 200)),
+       'Untuk setiap jenis investasi, dalam radius ini hanya lokasi dengan skor mutu tertinggi yang ditampilkan; '
+       'semua sub-sektor jenis itu dibandingkan bersama.', 'km', (PETA,), (0, 200)),
+    _d('SKOR_MINIMAL_LOKASI_UNGGULAN', 'peta', 'Skor mutu minimal lokasi unggulan',
+       'Skor mutu 0-100 adalah rata-rata kedekatan nilai tiap kriteria ke kondisi ideal: tengah rentang untuk batas '
+       'dua sisi, nol untuk batas atas, dan satu langkah (selisih batas layak ke unggulan) di atas batas bawah. '
+       'Lokasi unggulan di Peta Sebaran dan analisis area harus memenuhi semua batas unggulan dan mencapai skor ini.',
+       'skor (0-100)', (PETA,), (0, 100)),
+    _d('BOBOT_RUANG_BERSYARAT', 'peta', 'Bobot zona bersyarat',
+       'Skor mutu lokasi di zona yang mengizinkan jenis investasi ini dengan syarat dikalikan angka ini; zona yang '
+       'mengizinkan tanpa syarat bernilai 1.', 'pengali (0-1)', (PETA,), (0, 1)),
     _d('SEL_PER_SISI_INTI_LOKASI', 'peta', 'Ukuran inti lokasi',
        'Jumlah sel 250 m per sisi; 4 berarti inti paling luas 1 km x 1 km.', 'sel', (PETA,), (1, 20), bulat=True),
     _d('INFRASTRUKTUR_AKSESIBILITAS', 'lokasi_risiko', 'Jarak infrastruktur pendukung',

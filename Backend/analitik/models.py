@@ -366,7 +366,7 @@ class LokasiPotensial(models.Model):
     geometry = models.MultiPolygonField(srid=4326)
     luas_ha = models.FloatField()
     persen_sesuai = models.FloatField(
-        help_text='Rata-rata persentase kriteria sub-sektor yang terukur (semuanya memenuhi ambang), 0-100')
+        help_text='Skor mutu rata-rata sel inti: kedekatan nilai kriteria ke kondisi ideal dikali bobot zona bersyarat, 0-100')
     jenis = models.JSONField(default=list, help_text='Kode jenis investasi yang cocok di lokasi ini')
     rincian = models.JSONField(default=dict, help_text='Ringkasan parameter dan zona untuk popup peta')
     dihitung_pada = models.DateTimeField(auto_now=True)

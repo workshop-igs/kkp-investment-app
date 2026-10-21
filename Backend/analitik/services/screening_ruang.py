@@ -356,7 +356,7 @@ def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
             'nama': nama,
             'sub_zona_label': sub,
             'provinsi': prov,
-            'status_label': f'{_angka(persen, 0)}% parameter sangat sesuai, ±{_angka(luas, 0)} ha',
+            'status_label': f'skor mutu {_angka(persen, 0)}, ±{_angka(luas, 0)} ha',
             'jarak_km': round(meter / 1000.0, 1),
             'arah': _arah(float(azimut)) if azimut is not None else '',
             'titik': [round(x, 6), round(y, 6)],
@@ -542,6 +542,12 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         semua_aturan = _aturan_per_sektor({z['matriks_id'] for z in zona_efektif if z['matriks_id']})
         aturan = semua_aturan.get(sektor.id, {})
         kkprl = _kkprl(c, geom)
+        toleransi = atur('AMBANG_IRISAN_TEPI_PERSEN')
+        for k in kkprl:
+            k['persen'] = round(k['luas_m2'] / luas_aoi * 100, 2) if luas_aoi else 0.0
+            k['gugur'] = k['persen'] >= toleransi
+        kkprl_gugur = [k for k in kkprl if k['gugur']]
+        status, tepi = _nilai(zona_efektif, aturan, cakupan, luas_aoi, bool(kkprl_gugur))
         informasi_ruang = _informasi_ruang(
             c, zona_efektif, semua_aturan,
             list(SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama')),
@@ -551,18 +557,12 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         provinsi_ids = {z['provinsi_id'] for z in zona_efektif}
         tambahan = nilai_area(c, geom, sektor.kode, provinsi_ids)
         karakter['tambahan'] = {t['nama']: t['hasil'] for t in tambahan if t['peran'] == 'DINILAI'}
-        fisik = penilaian(sektor.kode, karakter)
+        fisik = penilaian(sektor.kode, karakter, bersyarat=status == 'SESUAI_BERSYARAT')
         terbaik = fisik[0] if fisik else None
         cocok = bool(terbaik and terbaik['cocok'])
         data_kurang = bool(terbaik) and not cocok and not terbaik['gagal']
         alasan_karakter = alasan_fisik(sektor.kode, karakter, fisik)
         adat_di, adat_dekat = _adat_area(c, geom)
-        toleransi = atur('AMBANG_IRISAN_TEPI_PERSEN')
-        for k in kkprl:
-            k['persen'] = round(k['luas_m2'] / luas_aoi * 100, 2) if luas_aoi else 0.0
-            k['gugur'] = k['persen'] >= toleransi
-        kkprl_gugur = [k for k in kkprl if k['gugur']]
-        status, tepi = _nilai(zona_efektif, aturan, cakupan, luas_aoi, bool(kkprl_gugur))
         if (not cocok and not data_kurang) or adat_di or any(k['gugur'] for k in kena):
             status = 'TIDAK_SESUAI'
         elif data_kurang and status in ('SESUAI', 'SESUAI_BERSYARAT'):

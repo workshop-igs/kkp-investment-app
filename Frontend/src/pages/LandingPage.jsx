@@ -608,7 +608,7 @@ const LandingPage = () => {
                   <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
                     {angka(ringkas?.lokasi_potensial)}
                   </span>
-                  <span className="mt-3 block text-sm text-white/80">Lokasi potensial untuk minimal satu jenis investasi: lolos matriks Perda dan pengecualian (wilayah adat, alur pelayaran, ekosistem sensitif, jarak aman kabel/pipa, KKPRL, bangunan) serta memenuhi semua batas unggulan sub-sektornya</span>
+                  <span className="mt-3 block text-sm text-white/80">Lokasi potensial untuk minimal satu jenis investasi: lolos matriks Perda dan pengecualian (wilayah adat, alur pelayaran, ekosistem sensitif, jarak aman kabel/pipa, KKPRL, bangunan) serta memenuhi semua batas unggulan sub-sektornya dengan skor mutu tinggi</span>
                 </Link>
                 <KartuKecil to="/peta?mulai=gambar" judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
                 <KartuKecil to="/profil-investasi" judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />

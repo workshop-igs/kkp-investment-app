@@ -316,8 +316,11 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       + 'Kriteria yang datanya tersedia wajib terukur di sel itu; hanya kriteria yang belum punya data nasional (misalnya '
       + 'padatan tersuspensi dan zona intertidal) yang dilewati. Risiko tsunami, abrasi, atau banjir '
       + 'yang tinggi menggugurkan lokasi di darat atau yang menyentuh darat. Ambang kriteria dapat diubah administrator. '
-      + 'Setiap wilayah sel yang bersambung ditampilkan sebagai satu titik dengan batas berupa inti terbaiknya, paling '
-      + 'luas 1 km x 1 km (100 ha); dalam radius 10 km hanya lokasi terbaik tiap sub-sektor yang ditampilkan. Pada '
+      + 'Tiap sel lalu diberi SKOR MUTU 0–100: rata-rata kedekatan nilai setiap kriteria ke kondisi ideal (tengah '
+      + 'rentang, atau sejauh mungkin dari batas satu sisi), dikali 0,75 bila zonanya hanya mengizinkan bersyarat; sel '
+      + 'dengan skor di bawah 60 tidak ditampilkan. Setiap wilayah sel yang bersambung ditampilkan sebagai satu titik '
+      + 'dengan batas berupa inti berskor tertinggi, paling luas 1 km x 1 km (100 ha); untuk setiap jenis, dalam radius '
+      + '10 km hanya lokasi berskor mutu tertinggi yang ditampilkan, dari sub-sektor mana pun. Pada '
       + 'pilihan semua jenis, lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; Konservasi & '
       + 'Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Kriteria finansial (NPV, IRR, payback) tidak ikut; '
       + 'penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
@@ -334,7 +337,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           const nilai = k.nilai_teks ? `: <b class="font-semibold">${aman(k.nilai_teks)}</b>` : k.lulus ? '' : ': belum terukur';
           return `<li class="flex gap-1.5 leading-snug">
              <span class="${kelasTanda} font-bold shrink-0 w-3">${tanda}</span>
-             <span>${aman(k.label)}${nilai} <span class="text-slate-400">(syarat unggulan ${aman(k.ambang_teks)})</span></span>
+             <span>${aman(k.label)}${nilai} <span class="text-slate-400">(syarat unggulan ${aman(k.ambang_teks)}${k.mutu != null ? `; mutu ${k.mutu}` : ''})</span></span>
            </li>`;
         })
         .join('');
@@ -355,7 +358,8 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           ? `<div class="mt-2 flex flex-wrap gap-1">${nama.map((n, i) => `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] font-medium text-slate-700"><span class="h-2 w-2 rounded-full" style="background:${warnaJenisInvestasi((p.jenis_sub || jenis)[i] || jenis[0])}"></span>${aman(n)}</span>`).join('')}</div>`
           : ''}
         <div class="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
-          <p class="text-[11px] font-semibold" style="color:${warna}">&check; Semua kriteria terukur terpenuhi${p.total ? ` (${p.terukur} dari ${p.total} kriteria terukur)` : ''}</p>
+          <p class="flex items-baseline justify-between gap-2 text-[11px] font-semibold" style="color:${warna}"><span>Skor mutu lokasi</span><span class="text-[15px] tabular-nums">${Math.round(Number(p.persen_sesuai || 0))}<span class="text-[10px] font-medium text-slate-400">/100</span></span></p>
+          <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Semua batas unggulan terpenuhi${p.total ? ` (${p.terukur} dari ${p.total} kriteria terukur)` : ''}</p>
           <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Inti lokasi &plusmn;${aman(luas)} ha${p.luas_wilayah_ha > p.luas_ha ? ` dari wilayah sesuai &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha` : ''}</p>
         </div>
         ${gerbang.length

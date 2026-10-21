@@ -1018,7 +1018,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
     dek.gaya(7.4, C.navy, true);
     d.text(bersih(namaRapi(l.nama, 38)), x + 11.6, yy);
     const warnaKelas = C.tinggi;
-    const teksKelas = l.sub_sektor || `${angka(l.persen_sesuai)}% kriteria terukur`;
+    const teksKelas = l.sub_sektor || `skor mutu ${angka(l.persen_sesuai)}`;
     dek.gaya(5.6, gelap(warnaKelas, 0.8), true);
     const lebarPil = d.getTextWidth(teksKelas) + 3.6;
     dek.pil(x + lebar - 5 - lebarPil, yy, teksKelas, campur(warnaKelas, 0.16), gelap(warnaKelas, 0.8), 5.6);
