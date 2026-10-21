@@ -13,7 +13,7 @@ from django.utils import timezone
 from rest_framework import permissions, status
 from rest_framework.decorators import api_view, permission_classes, throttle_classes
 from rest_framework.response import Response
-from rest_framework.throttling import SimpleRateThrottle
+from rest_framework.throttling import AnonRateThrottle, SimpleRateThrottle
 
 from analitik.services.ahp import _rupiah
 
@@ -136,8 +136,10 @@ def _profil(request, nama, jenis):
         return kode, data
     proyek, halaman = [], 1
     while True:
-        _, daftar = _api(request, 'GET', '/api/v1/pipeline/proyek/', {'provinsi': provinsi.id, 'page': halaman})
-        proyek += daftar.get('results') or []
+        kode_daftar, daftar = _api(request, 'GET', '/api/v1/pipeline/proyek/', {'provinsi': provinsi.id, 'page': halaman})
+        if kode_daftar != 200:
+            return kode, data
+        proyek += daftar['results']
         if not daftar.get('next'):
             break
         halaman += 1
@@ -417,6 +419,12 @@ def daftar_alat(request):
     })
 
 
+DITOLAK = {
+    False: 'Data ini hanya tersedia bagi pengguna yang sudah masuk ke aplikasi.',
+    True: 'Akun Anda tidak memiliki akses ke data ini.',
+}
+
+
 def _eksekusi(request, nama, argumen):
     if nama not in ALAT:
         return status.HTTP_404_NOT_FOUND, {'detail': f'Alat "{nama}" tidak dikenal.'}
@@ -428,13 +436,15 @@ def _eksekusi(request, nama, argumen):
         kode, data = jalankan(request, argumen)
     except LookupError as e:
         return status.HTTP_404_NOT_FOUND, {'alat': nama, 'detail': str(e)}
+    if kode in (status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN):
+        return kode, {'alat': nama, 'detail': DITOLAK[request.user.is_authenticated]}
     if kode >= 400:
         return kode, {'alat': nama, 'detail': data.get('detail', data) if isinstance(data, dict) else data}
     return kode, {'alat': nama, 'hasil': _pangkas(data)}
 
 
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([permissions.AllowAny])
 def pakai_alat(request, nama):
     argumen = request.data.get('argumen', {}) if isinstance(request.data, dict) else None
     kode, isi = _eksekusi(request, nama, argumen)
@@ -480,7 +490,7 @@ TEGURAN_CAKUPAN = ('Pertanyaan itu termasuk cakupan aplikasi karena menyangkut i
                    '(lihat aturan 11). Jawab pertanyaan terakhir pengguna.')
 SISTEM = (
     'Anda adalah Asisten KKP, asisten aplikasi internal Kementerian Kelautan dan Perikanan untuk penilaian investasi '
-    'ruang laut; sebut aplikasi ini sebagai "aplikasi ini". Penggunanya pegawai KKP. Aturan:\n'
+    'ruang laut; sebut aplikasi ini sebagai "aplikasi ini". {pengguna} Aturan:\n'
     '1. Jawab dalam bahasa Indonesia yang baku, singkat, dan jelas, tanpa format Markdown (tanpa tanda bintang atau '
     'pagar); pakai daftar bernomor bila perlu.\n'
     '2. Untuk pertanyaan cara memakai aplikasi atau cara kerja perhitungannya, panggil panduan_aplikasi dan jawab '
@@ -527,11 +537,25 @@ KALIMAT_AREA = {
 }
 
 
+PENGGUNA = {
+    True: 'Pengguna sudah masuk ke aplikasi.',
+    False: 'Pengguna adalah pengunjung umum yang belum masuk ke aplikasi. Sebagian data hanya tersedia setelah masuk; '
+           'bila alat menolak karena itu, sampaikan bahwa data tersebut tersedia setelah pengguna masuk ke aplikasi, '
+           'tanpa mengarang isinya.',
+}
+
+
 class ThrottleAsisten(SimpleRateThrottle):
     scope = 'asisten'
 
     def get_cache_key(self, request, view):
+        if not request.user.is_authenticated:
+            return None
         return self.cache_format % {'scope': self.scope, 'ident': request.user.pk}
+
+
+class ThrottleAsistenPublik(AnonRateThrottle):
+    scope = 'asisten_publik'
 
 
 def _alat_obrolan(ada_area):
@@ -632,8 +656,8 @@ def _riwayat_sah(pesan):
 
 
 @api_view(['POST'])
-@permission_classes([permissions.IsAuthenticated])
-@throttle_classes([ThrottleAsisten])
+@permission_classes([permissions.AllowAny])
+@throttle_classes([ThrottleAsisten, ThrottleAsistenPublik])
 def obrolan(request):
     if not settings.ASISTEN_LLM_URL:
         return Response({'detail': 'Model asisten belum terhubung.'}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
@@ -645,7 +669,8 @@ def obrolan(request):
     geometri = data.get('geometri')
     ada_area = isinstance(geometri, dict) and geometri.get('type') in ('Polygon', 'MultiPolygon')
     alat = _alat_obrolan(ada_area)
-    sistem = SISTEM.format(area=KALIMAT_AREA[ada_area], halaman=halaman, tanggal=timezone.localdate().isoformat())
+    sistem = SISTEM.format(area=KALIMAT_AREA[ada_area], halaman=halaman, tanggal=timezone.localdate().isoformat(),
+                           pengguna=PENGGUNA[request.user.is_authenticated])
     bagian = cari_panduan(riwayat[-1]['content'], halaman)['bagian'][:JUMLAH_PANDUAN_KONTEKS]
     if bagian:
         sistem += PENGANTAR_PANDUAN + ''.join(f"\n- {b['judul']}: {b['isi']}" for b in bagian)
@@ -683,8 +708,8 @@ def obrolan(request):
                         argumen['geometri'] = geometri
                     if nama == 'panduan_aplikasi':
                         argumen.setdefault('halaman', halaman)
-                _, isi = _eksekusi(request, nama, argumen)
-                if nama in LABEL_ALAT and LABEL_ALAT[nama] not in dipakai:
+                kode_alat, isi = _eksekusi(request, nama, argumen)
+                if kode_alat < 400 and nama in LABEL_ALAT and LABEL_ALAT[nama] not in dipakai:
                     dipakai.append(LABEL_ALAT[nama])
                 riwayat.append({'role': 'tool', 'tool_call_id': p.get('id', ''), 'content': _untuk_model(isi)})
             if time.monotonic() >= batas:

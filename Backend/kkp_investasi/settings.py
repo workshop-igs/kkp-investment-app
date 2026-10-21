@@ -179,7 +179,9 @@ REST_FRAMEWORK = {
         'user': os.getenv('THROTTLE_USER', '6000/hour'),
         'peta': os.getenv('THROTTLE_PETA', '6000/hour'),
         'asisten': os.getenv('THROTTLE_ASISTEN', '120/hour'),
+        'asisten_publik': os.getenv('THROTTLE_ASISTEN_PUBLIK', '30/hour'),
     },
+    'NUM_PROXIES': int(os.getenv('NUM_PROXIES', '1')),
     'DEFAULT_RENDERER_CLASSES': (
         [
             'rest_framework.renderers.JSONRenderer',
