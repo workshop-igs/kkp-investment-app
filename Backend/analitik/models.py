@@ -417,7 +417,7 @@ class RasterOseanografi(models.Model):
     cakupan = models.PolygonField(srid=4326)
     satuan = models.CharField(max_length=20)
     periode = models.CharField(max_length=80, blank=True)
-    sumber = models.CharField(max_length=200)
+    sumber = models.CharField(max_length=400)
     ditarik_pada = models.DateTimeField(auto_now=True)
 
     class Meta:
