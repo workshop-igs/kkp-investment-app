@@ -419,7 +419,7 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
   if (aktif.length === 0 && aktifLokal.length === 0) return null;
 
   return (
-    <div data-tur="legenda" className="absolute left-4 top-24 z-[1100] w-[min(20rem,calc(100vw-2rem))] max-w-full">
+    <div data-tur="legenda" className="absolute left-4 top-24 z-[1100] w-[min(20rem,calc(100vw-6rem))] max-w-full">
       <button
         onClick={() => setTerbuka((v) => !v)}
         className="w-full flex items-center justify-between gap-2 px-4 py-2.5 bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl shadow-lg text-sm font-semibold text-slate-700 hover:text-kkp-700 transition-colors"

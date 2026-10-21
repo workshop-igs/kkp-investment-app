@@ -1,5 +1,5 @@
 const PanelAlat = ({ ikon: Ikon, warnaIkon = 'bg-kkp-800', judul, keterangan, kepala, kaki, children, className = '' }) => (
-  <div className="pointer-events-none absolute right-full mr-3 top-20 bottom-0 flex items-center w-[21rem] max-w-[calc(100vw-6.5rem)]">
+  <div className="pointer-events-none absolute right-full mr-3 top-4 bottom-0 flex items-center w-[21rem] max-w-[calc(100vw-6.5rem)]">
     <section
       aria-label={judul}
       className={`pointer-events-auto w-full bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden

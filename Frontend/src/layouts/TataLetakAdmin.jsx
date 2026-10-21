@@ -52,8 +52,8 @@ const TataLetakAdmin = () => {
   ];
 
   const SidebarContent = () => (
-    <div className="h-full flex flex-col bg-slate-900 text-slate-100">
-      <div className="p-6 flex items-center gap-3 border-b border-slate-800">
+    <div className="h-full flex flex-col bg-slate-900 text-slate-100 [@media(max-height:760px)]:overflow-y-auto">
+      <div className="p-6 [@media(max-height:760px)]:py-4 flex items-center gap-3 border-b border-slate-800">
         <img src="/logo-kkp.png" alt="KKP" className="w-10 h-10 object-contain" />
         <div>
           <h2 className="font-bold text-sm leading-tight text-white">KKP Super Admin</h2>
@@ -61,9 +61,9 @@ const TataLetakAdmin = () => {
         </div>
       </div>
 
-      <div className="flex-1 px-4 py-6 overflow-y-auto">
+      <div className="flex-1 px-4 py-6 overflow-y-auto [@media(max-height:760px)]:flex-none [@media(max-height:760px)]:overflow-visible [@media(max-height:760px)]:py-4">
         {navGroups.map((grup) => (
-          <div key={grup.judul} className="mb-6 last:mb-0">
+          <div key={grup.judul} className="mb-6 [@media(max-height:760px)]:mb-4 last:mb-0">
             <div className="text-[10px] font-semibold text-slate-500 uppercase tracking-[0.12em] mb-2 px-2">
               {grup.judul}
             </div>

@@ -325,7 +325,7 @@ const PipelinePage = () => {
                   const badge = { label: LABEL_TAHAPAN[p.status] || p.status, style: GAYA_TAHAP[p.status] || 'bg-slate-100 text-slate-600 border border-slate-200' };
                   return (
                     <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-4 px-6 font-mono text-xs text-teal-600 font-semibold">{p.kode_proyek || `PRJ-${p.id.toString().padStart(4, '0')}`}</td>
+                      <td className="py-4 px-6 font-mono text-xs text-teal-600 font-semibold whitespace-nowrap">{p.kode_proyek || `PRJ-${p.id.toString().padStart(4, '0')}`}</td>
                       <td className="py-4 px-6 font-semibold text-slate-800">{p.nama}</td>
                       <td className="py-4 px-6 text-slate-500 text-xs">{p.provinsi_nama || p.lokasi_detail || '-'}</td>
                       <td className="py-4 px-6 text-slate-500 text-sm">{p.sektor_nama}</td>
@@ -334,7 +334,7 @@ const PipelinePage = () => {
                           {badge.label}
                         </span>
                       </td>
-                      <td className="py-4 px-6 font-medium text-slate-800">{rupiahMiliar(p.nilai_investasi_miliar)}</td>
+                      <td className="py-4 px-6 font-medium text-slate-800 whitespace-nowrap">{rupiahMiliar(p.nilai_investasi_miliar)}</td>
                       <td className="py-4 px-6 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link 
