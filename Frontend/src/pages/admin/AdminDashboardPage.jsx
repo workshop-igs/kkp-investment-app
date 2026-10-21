@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Activity, AlertTriangle, ArrowUpRight, Briefcase, CheckCircle2,
-  ShieldAlert, UserCheck, Users, XOctagon,
+  Activity, AlertTriangle, ArrowUpRight, Briefcase, CheckCircle2, Layers, Map as IkonPeta, ScrollText,
+  ShieldAlert, SlidersHorizontal, UserCheck, Users, XOctagon,
 } from 'lucide-react';
 import { api, ambilDaftar } from '../../api/klien';
 import { formatNumber, rupiahMiliar } from '../../utils/pemformat';
@@ -36,13 +36,13 @@ const Panel = ({ judul, keterangan, tautan, tautanTeks, children }) => (
   <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
     <div className="px-6 py-4 border-b border-slate-100 flex items-start justify-between gap-4">
       <div>
-        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">{judul}</h2>
+        <h2 className="text-[15px] font-bold text-slate-900">{judul}</h2>
         {keterangan && <p className="text-xs text-slate-400 mt-0.5">{keterangan}</p>}
       </div>
       {tautan && (
         <Link
           to={tautan}
-          className="text-xs font-semibold text-sky-700 hover:text-sky-900 flex items-center gap-1 shrink-0 mt-0.5"
+          className="text-xs font-semibold text-kkp-700 hover:text-kkp-900 flex items-center gap-1 shrink-0 mt-0.5"
         >
           {tautanTeks} <ArrowUpRight className="w-3.5 h-3.5" />
         </Link>
@@ -113,7 +113,7 @@ const KondisiAplikasi = ({ status, gagal, diperbarui }) => {
           <tema.Ikon className="w-6 h-6" />
         </div>
         <div className={`min-w-0 flex-1 ${tema.teks}`}>
-          <p className="text-[11px] font-bold uppercase tracking-wider opacity-70">Kondisi Aplikasi</p>
+          <p className="text-xs font-semibold opacity-70">Kondisi aplikasi</p>
           <h2 className="text-lg font-bold mt-0.5">{tema.judul}</h2>
           <p className="text-sm opacity-80">{tema.sub}</p>
           {masalah.length > 0 && (
@@ -165,11 +165,13 @@ const WARNA_AKSI = {
   DITOLAK: 'bg-red-100 text-red-700',
 };
 
-const PETUNJUK_ADMIN = [
-  'Kondisi Aplikasi: hijau berarti normal, kuning berarti ada peringatan, merah berarti ada masalah. Untuk kuning dan merah, penyebabnya tertulis di panel.',
-  'Manajemen Pengguna: menambah administrator, mengubah data profil pengguna, menonaktifkan, dan menghapus akun.',
-  'Sektor Investasi: menambah jenis investasi baru, lalu melalui tombol daftar-periksa pada barisnya menetapkan ketentuan pemanfaatan per sub-zona dan kompetensi tenaga kerja yang dibutuhkan. Tanpa ketentuan, hasil screening jenis itu berstatus belum terverifikasi.',
-  'Log Aktivitas: memantau jejak aktivitas pengguna, termasuk upaya akses yang ditolak.',
+const MENU_ADMIN = [
+  ['/admin/pipeline', Briefcase, 'Proyek Investasi', 'Perbarui realisasi dan tahap proyek.'],
+  ['/admin/sectors', IkonPeta, 'Sektor Investasi', 'Tambah jenis investasi dan atur ketentuan zonanya.'],
+  ['/admin/pengaturan-analisis', SlidersHorizontal, 'Pengaturan Analisis', 'Ubah ambang, bobot, dan skor yang dipakai analisis.'],
+  ['/admin/parameter-tambahan', Layers, 'Parameter Tambahan', 'Tambah area atau nilai wilayah khusus untuk analisis.'],
+  ['/admin/users', Users, 'Pengguna & Peran', 'Tambah admin, ubah profil, atau nonaktifkan akun.'],
+  ['/admin/log-aktivitas', ScrollText, 'Log Aktivitas', 'Lihat siapa melakukan apa, termasuk akses yang ditolak.'],
 ];
 
 const AdminDashboardPage = () => {
@@ -237,11 +239,8 @@ const AdminDashboardPage = () => {
   return (
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-6 animate-in fade-in duration-300">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 font-syne">Panel Administrasi Platform</h1>
-        <p className="text-slate-500 text-sm mt-1">
-          Kondisi aplikasi, pengguna, dan tata kelola akses — Modul Manajemen Investasi Ruang
-          Laut, Kementerian Kelautan dan Perikanan.
-        </p>
+        <h1 className="text-2xl font-bold text-slate-900">Panel Administrasi</h1>
+        <p className="text-slate-500 text-sm mt-1">Kondisi aplikasi dan ringkasan data platform.</p>
       </div>
 
       <KondisiAplikasi status={status} gagal={statusGagal} diperbarui={statusPada} />
@@ -309,8 +308,8 @@ const AdminDashboardPage = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Panel
-          judul="Tahap Proyek"
-          keterangan="Sebaran proyek menurut tahap, dari perencanaan sampai operasi"
+          judul="Tahap proyek"
+          keterangan="Jumlah dan nilai proyek per tahap"
           tautan="/admin/pipeline"
           tautanTeks="Kelola proyek"
         >
@@ -325,7 +324,7 @@ const AdminDashboardPage = () => {
                 </div>
                 <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
                   <div
-                    className="h-full bg-sky-500 rounded-full"
+                    className="h-full bg-kkp-700 rounded-full"
                     style={{ width: `${((s.count || 0) / totalTahap) * 100}%` }}
                   />
                 </div>
@@ -338,8 +337,7 @@ const AdminDashboardPage = () => {
         </Panel>
 
         <Panel
-          judul="Komposisi Peran Pengguna"
-          keterangan="Peran Pusat dan Daerah hanya dapat ditetapkan administrator"
+          judul="Peran pengguna"
           tautan="/admin/users"
           tautanTeks="Kelola pengguna"
         >
@@ -360,10 +358,10 @@ const AdminDashboardPage = () => {
       </div>
 
       <Panel
-        judul="Aktivitas Terkini"
-        keterangan="Delapan kejadian terakhir; upaya yang ditolak ikut tercatat"
+        judul="Aktivitas terkini"
+        keterangan="Delapan kejadian terakhir"
         tautan="/admin/log-aktivitas"
-        tautanTeks="Jejak audit lengkap"
+        tautanTeks="Lihat semua"
       >
         <div className="divide-y divide-slate-100">
           {log.map((l) => (
@@ -395,10 +393,20 @@ const AdminDashboardPage = () => {
         </div>
       </Panel>
 
-      <Panel judul="Petunjuk Administrator" keterangan="Fungsi setiap menu administrator">
-        <ul className="px-6 py-5 pl-11 space-y-2 text-sm text-slate-700 leading-relaxed list-disc">
-          {PETUNJUK_ADMIN.map((t) => <li key={t}>{t}</li>)}
-        </ul>
+      <Panel judul="Menu administrator">
+        <div className="grid gap-px bg-slate-100 sm:grid-cols-2 xl:grid-cols-3">
+          {MENU_ADMIN.map(([tautan, Ikon, nama, fungsi]) => (
+            <Link key={tautan} to={tautan} className="group flex items-start gap-3 bg-white px-6 py-4 hover:bg-slate-50">
+              <span className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-kkp-100 text-kkp-800">
+                <Ikon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-slate-900 group-hover:text-kkp-800">{nama}</span>
+                <span className="block text-xs text-slate-500 leading-snug">{fungsi}</span>
+              </span>
+            </Link>
+          ))}
+        </div>
       </Panel>
     </div>
   );

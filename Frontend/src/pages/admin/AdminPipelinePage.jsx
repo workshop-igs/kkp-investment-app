@@ -49,8 +49,8 @@ const AdminPipelinePage = () => {
   return (
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 font-syne">Kelola Proyek Investasi</h1>
-        <p className="text-slate-500 text-sm mt-1">Perbarui nilai realisasi dan tahap seluruh proyek investasi ruang laut. Tahap mengikuti tahapan Proyek Strategis Nasional (KPPIP).</p>
+        <h1 className="text-2xl font-bold text-slate-900">Proyek Investasi</h1>
+        <p className="text-slate-500 text-sm mt-1">Perbarui realisasi dan tahap proyek.</p>
       </div>
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">

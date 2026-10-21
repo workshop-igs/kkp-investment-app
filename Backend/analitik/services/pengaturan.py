@@ -33,35 +33,25 @@ SKOR_0_1 = dict(batas=(0, 1))
 
 DAFTAR = [
     _d('KRITERIA_JENIS', 'karakter', 'Kriteria kesesuaian per jenis dan sub-sektor',
-       'Parameter fisik dan aksesibilitas per sub-sektor dengan dua tingkat batas. Batas layak dipakai analisis area: '
-       'area cocok bila semua kriteria yang terukur memenuhinya. Batas unggulan dipakai Peta Sebaran: lokasi tampil '
-       'bila semua kriteria yang datanya tersedia terukur dan memenuhinya serta skor mutunya mencapai skor minimal; '
-       'kriteria tanpa batas unggulan memakai batas layaknya.',
+       'Batas layak dipakai analisis area; batas unggulan dipakai Peta Sebaran.',
        dampak=(PETA, SKOR)),
     _d('PROPORSI_MINIMAL_KRITERIA_TERUKUR', 'karakter', 'Bagian minimal kriteria yang harus terukur',
-       'Lokasi baru dapat dinyatakan cocok bila sedikitnya bagian ini dari kriteria sub-sektornya terukur. Pada analisis '
-       'area sisanya dilewati dan bobotnya dibagi ke kriteria lain. Peta Sebaran juga mewajibkan semua kriteria yang '
-       'datanya tersedia terukur; angka ini menjadi pengaman bila sebagian data belum dimuat.',
+       'Lokasi baru dinilai bila sedikitnya bagian ini dari kriterianya terukur.',
        'proporsi (0-1)', (PETA, SKOR), (0, 1)),
     _d('RADIUS_ADAT_DEKAT_M', 'karakter', 'Jarak peringatan wilayah adat',
-       'Lokasi di atas wilayah kelola masyarakat hukum adat tidak sesuai secara tata ruang; lokasi dalam jarak ini '
-       'darinya diberi peringatan risiko konflik tenurial tanpa memengaruhi penilaian.', 'm', (PETA,), (0, 20000),
+       'Lokasi dalam jarak ini dari wilayah adat diberi peringatan, tanpa mengubah penilaian.', 'm', (PETA,), (0, 20000),
        bulat=True),
     _d('BUFFER_UNSUR_TERLARANG_M', 'karakter', 'Jarak aman kabel, pipa, dan alur pelayaran',
-       'Pengecualian keras: lokasi tidak boleh berada dalam jarak ini dari kabel bawah laut, pipa bawah laut, dan '
-       'alur pelayaran pada Rencana Tata Ruang Laut.', 'm', (PETA,), (0, 20000)),
+       'Lokasi tidak boleh berada dalam jarak ini dari kabel, pipa, dan alur pelayaran.', 'm', (PETA,), (0, 20000)),
     _d('AMBANG_IRISAN_PENGECUALIAN_PERSEN', 'analisis_area', 'Toleransi irisan pengecualian pada screening',
-       'Pada screening area, irisan dengan alur pelayaran/ALKI, ekosistem sensitif, atau jarak '
-       'aman kabel/pipa/alur yang lebih kecil dari bagian ini ditandai perlu verifikasi batas dan tidak '
-       'menggugurkan area.', '%', (), (0, 100)),
+       'Irisan kecil dengan alur pelayaran, ekosistem sensitif, atau jarak aman ditandai perlu verifikasi, tidak '
+       'menggugurkan.', '%', (), (0, 100)),
     _d('AMBANG_IRISAN_TEPI_PERSEN', 'analisis_area', 'Toleransi irisan tepi zona pada screening',
-       'Zona yang tidak mengizinkan jenis investasi (atau belum memiliki ketentuan) dan KKPRL terbit yang hanya '
-       'mengiris area lebih kecil dari bagian ini ditandai perlu verifikasi batas, bukan langsung menggugurkan; '
-       'batas peta tata ruang skala 1:50.000-1:250.000 dapat bergeser puluhan hingga ratusan meter.', '%', (),
+       'Irisan kecil di tepi zona yang tidak mengizinkan atau KKPRL terbit ditandai perlu verifikasi, tidak '
+       'menggugurkan.', '%', (),
        (0, 50)),
     _d('PORSI_DARAT_MINIMAL', 'analisis_area', 'Porsi daratan agar area dinilai sebagai darat',
-       'Area yang digambar atau diunggah dinilai dengan kriteria jenis darat (misalnya tambak dan garam) bila '
-       'sedikitnya bagian ini dari luasnya berupa daratan; bila kurang, area dinilai sebagai perairan.',
+       'Area dinilai sebagai darat bila sedikitnya bagian ini berupa daratan.',
        'proporsi (0-1)', (), (0, 1)),
     _d('LUAS_AREA_MIN_HA', 'analisis_area', 'Luas area paling kecil',
        'Area yang digambar atau diunggah harus seluas ini atau lebih.', 'ha', (), (0, 100)),
@@ -71,19 +61,14 @@ DAFTAR = [
        'Bulan dengan curah hujan di bawah ini dihitung bulan kering (parameter tambak garam).', 'mm/bulan', (PETA,),
        (0, 500)),
     _d('AMBANG_KECOCOKAN', 'peta', 'Bagian area minimal di dalam area parameter tambahan',
-       'Parameter tambahan bertipe area dari administrator dinilai terpenuhi bila sedikitnya bagian ini dari lokasi '
-       'berada di dalam areanya.', 'proporsi (0-1)', (PETA,), (0, 1)),
+       'Parameter tambahan bertipe area terpenuhi bila sedikitnya bagian ini dari lokasi berada di dalamnya.', 'proporsi (0-1)', (PETA,), (0, 1)),
     _d('JARAK_ANTAR_LOKASI_KM', 'peta', 'Jarak minimal antartitik lokasi',
-       'Untuk setiap jenis investasi, dalam radius ini hanya lokasi dengan skor mutu tertinggi yang ditampilkan; '
-       'semua sub-sektor jenis itu dibandingkan bersama.', 'km', (PETA,), (0, 200)),
+       'Dalam radius ini hanya lokasi berskor mutu tertinggi tiap jenis yang ditampilkan.', 'km', (PETA,), (0, 200)),
     _d('SKOR_MINIMAL_LOKASI_UNGGULAN', 'peta', 'Skor mutu minimal lokasi unggulan',
-       'Skor mutu 0-100 adalah rata-rata kedekatan nilai tiap kriteria ke kondisi ideal: tengah rentang untuk batas '
-       'dua sisi, nol untuk batas atas, dan satu langkah (selisih batas layak ke unggulan) di atas batas bawah. '
-       'Lokasi unggulan di Peta Sebaran dan analisis area harus memenuhi semua batas unggulan dan mencapai skor ini.',
+       'Skor 0-100 dari kedekatan nilai tiap kriteria ke kondisi ideal; di bawah angka ini lokasi bukan unggulan.',
        'skor (0-100)', (PETA,), (0, 100)),
     _d('BOBOT_RUANG_BERSYARAT', 'peta', 'Bobot zona bersyarat',
-       'Skor mutu lokasi di zona yang mengizinkan jenis investasi ini dengan syarat dikalikan angka ini; zona yang '
-       'mengizinkan tanpa syarat bernilai 1.', 'pengali (0-1)', (PETA,), (0, 1)),
+       'Pengali skor mutu untuk zona yang mengizinkan dengan syarat.', 'pengali (0-1)', (PETA,), (0, 1)),
     _d('SEL_PER_SISI_INTI_LOKASI', 'peta', 'Ukuran inti lokasi',
        'Jumlah sel 250 m per sisi; 4 berarti inti paling luas 1 km x 1 km.', 'sel', (PETA,), (1, 20), bulat=True),
     _d('INFRASTRUKTUR_AKSESIBILITAS', 'lokasi_risiko', 'Jarak infrastruktur pendukung',
@@ -112,8 +97,7 @@ DAFTAR = [
     _d('WORST_CASE_OPEX_MULTIPLIER', 'finansial', 'Skenario terburuk: pengali biaya operasi', '', 'kali',
        batas=(0, 5)),
     _d('MATRIKS_PERBANDINGAN_BAWAAN', 'ahp', 'Matriks perbandingan berpasangan AHP',
-       'Baris dibandingkan dengan kolom (skala Saaty 1/9 sampai 9); bobot kriteria dihitung dari matriks ini dan '
-       'konsistensinya wajib di bawah ambang.', batas=(1 / 9, 9),
+       'Baris dibandingkan dengan kolom (skala Saaty 1/9 sampai 9).', batas=(1 / 9, 9),
        kolom=['Finansial', 'Risiko', 'Lokasi', 'Prediksi', 'Rekomendasi'],
        baris=['Finansial', 'Risiko', 'Lokasi', 'Prediksi', 'Rekomendasi']),
     _d('AMBANG_KONSISTENSI_AHP', 'ahp', 'Ambang rasio konsistensi (CR)', '', batas=(0.01, 0.5)),
