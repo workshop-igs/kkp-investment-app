@@ -35,80 +35,39 @@ export const BATAS_OSEANOGRAFI = [[-11, 94], [7, 142]];
 export const urlCitraOseanografi = (kode) => `${API_V1_URL}/analitik/oseanografi/${kode}.png`;
 
 const OSEANOGRAFI = [
-  ['osea_suhu', 'SUHU', 'Suhu Permukaan Laut',
-    'Rata-rata suhu permukaan laut 12 bulan terakhir dari NOAA Coral Reef Watch, dataset yang juga '
-      + 'ditayangkan Sidako KKP. Perairan yang terlalu hangat perlu diperhatikan untuk budidaya.'],
+  ['osea_suhu', 'SUHU', 'Suhu Permukaan Laut', 'Rata-rata suhu permukaan laut 12 bulan terakhir (NOAA Coral Reef Watch).'],
   ['osea_anomali', 'ANOMALI_SUHU', 'Anomali Suhu Permukaan Laut',
-    'Selisih suhu permukaan laut terhadap rata-rata jangka panjangnya (NOAA Coral Reef Watch, juga '
-      + 'ditayangkan Sidako KKP), dirata-rata 12 bulan terakhir. Anomali positif yang tinggi menandai '
-      + 'stres panas bagi terumbu karang dan biota budidaya.'],
-  ['osea_klorofil', 'KLOROFIL', 'Klorofil-a',
-    'Klorofil-a dari satelit NASA MODIS-Aqua sebagai petunjuk kesuburan perairan; nilainya tinggi di '
-      + 'perairan dekat muara dan pesisir.'],
-  ['osea_gelombang', 'GELOMBANG', 'Tinggi Gelombang Signifikan',
-    'Rata-rata tinggi gelombang signifikan 12 bulan terakhir dari model NOAA WaveWatch III (resolusi '
-      + '0,5°), penentu desain bangunan laut dan sarana budidaya.'],
-  ['osea_kedalaman', 'KEDALAMAN', 'Kedalaman Laut',
-    'Kedalaman laut dari batimetri SRTM15+ v2.6 (Scripps), dirata-rata ke 30 detik busur (sekitar 0,9 km).'],
-  ['osea_kemiringan_dasar', 'KEMIRINGAN_DASAR', 'Kemiringan Dasar Laut',
-    'Kemiringan dasar laut yang dihitung dari batimetri SRTM15+; infrastruktur laut membutuhkan paling tinggi 5°.'],
-  ['osea_arus', 'ARUS', 'Kecepatan Arus Permukaan',
-    'Rata-rata kecepatan arus permukaan setahun (September 2023 sampai Agustus 2024) dari model HYCOM GOFS 3.1 (1/12°); budidaya laut '
-      + 'membutuhkan 0,15 sampai 0,45 m/s, wisata bahari paling tinggi 0,3 m/s.'],
-  ['osea_salinitas', 'SALINITAS', 'Salinitas Permukaan Laut',
-    'Rata-rata salinitas permukaan setahun (September 2023 sampai Agustus 2024) dari HYCOM GOFS 3.1; budidaya laut membutuhkan 27 sampai '
-      + '34 ppt, tambak garam sedikitnya 30 ppt.'],
+    'Selisih suhu dari rata-rata jangka panjangnya; nilai positif tinggi menandai stres panas bagi karang dan budidaya.'],
+  ['osea_klorofil', 'KLOROFIL', 'Klorofil-a', 'Petunjuk kesuburan perairan dari satelit MODIS; makin tinggi makin subur.'],
+  ['osea_gelombang', 'GELOMBANG', 'Tinggi Gelombang Signifikan', 'Rata-rata tinggi gelombang 12 bulan terakhir (WaveWatch III).'],
+  ['osea_kedalaman', 'KEDALAMAN', 'Kedalaman Laut', 'Kedalaman laut dari batimetri SRTM15+.'],
+  ['osea_kemiringan_dasar', 'KEMIRINGAN_DASAR', 'Kemiringan Dasar Laut', 'Kemiringan dasar laut dari batimetri SRTM15+.'],
+  ['osea_arus', 'ARUS', 'Kecepatan Arus Permukaan', 'Rata-rata kecepatan arus permukaan setahun (HYCOM).'],
+  ['osea_salinitas', 'SALINITAS', 'Salinitas Permukaan Laut', 'Rata-rata kadar garam air laut setahun (HYCOM).'],
   ['osea_arus_dasar', 'ARUS_DASAR', 'Kecepatan Arus Dasar',
-    'Rata-rata kecepatan arus pada lapisan air terdalam (dekat dasar laut) dari HYCOM GOFS 3.1, satu sampel per '
-      + 'bulan; kabel, pipa, dan bangunan laut membutuhkan paling tinggi 0,8 m/s.'],
+    'Kecepatan arus di dekat dasar laut (HYCOM); penting untuk kabel, pipa, dan bangunan laut.'],
   ['osea_gelombang_ekstrem', 'GELOMBANG_EKSTREM', 'Gelombang Ekstrem 50 Tahunan',
-    'Perkiraan tinggi gelombang terbesar yang terjadi rata-rata sekali dalam 50 tahun, dihitung dari data '
-      + 'WaveWatch III 2018-2025; infrastruktur laut membutuhkan paling tinggi 4 m.'],
-  ['osea_pasut', 'PASUT', 'Tunggang Pasang Surut',
-    'Selisih muka air saat pasang tertinggi dan surut terendah dari model EOT20; jasa maritim dan kepelabuhanan '
-      + 'membutuhkan paling tinggi 3 m.'],
+    'Perkiraan gelombang terbesar yang terjadi sekali dalam 50 tahun (WaveWatch III).'],
+  ['osea_pasut', 'PASUT', 'Tunggang Pasang Surut', 'Selisih muka air pasang tertinggi dan surut terendah (EOT20).'],
   ['osea_beda_suhu', 'BEDA_SUHU_1000M', 'Beda Suhu Permukaan dan 1.000 m',
-    'Selisih suhu permukaan dan kedalaman 1.000 m dari klimatologi NOAA World Ocean Atlas 2023; energi panas laut '
-      + '(OTEC) membutuhkan sedikitnya 20 °C.'],
-  ['osea_kd490', 'KD490', 'Kecerahan Perairan (Kd490)',
-    'Koefisien atenuasi cahaya Kd490 dari NASA MODIS-Aqua, rata-rata 12 bulan terakhir; makin kecil makin jernih. '
-      + 'Wisata bahari mensyaratkan paling tinggi 0,08 per meter, dan 0,05 untuk lokasi unggulan.'],
-  ['osea_periode', 'PERIODE_GLB', 'Periode Gelombang',
-    'Rata-rata periode puncak gelombang 12 bulan terakhir dari NOAA WaveWatch III; energi gelombang membutuhkan '
-      + 'periode 5 sampai 10 detik.'],
-  ['iklim_hujan', 'CURAH_HUJAN', 'Curah Hujan Bulanan',
-    'Rata-rata curah hujan bulanan 12 bulan terakhir dari CHIRPS v2.0; tambak garam membutuhkan curah hujan '
-      + 'tahunan paling tinggi 1.500 mm.'],
+    'Selisih suhu permukaan dan kedalaman 1.000 m (World Ocean Atlas), dasar energi panas laut (OTEC).'],
+  ['osea_kd490', 'KD490', 'Kecerahan Perairan (Kd490)', 'Kejernihan air dari satelit MODIS; makin kecil makin jernih.'],
+  ['osea_periode', 'PERIODE_GLB', 'Periode Gelombang', 'Rata-rata periode gelombang 12 bulan terakhir (WaveWatch III).'],
+  ['iklim_hujan', 'CURAH_HUJAN', 'Curah Hujan Bulanan', 'Rata-rata curah hujan bulanan 12 bulan terakhir (CHIRPS).'],
   ['iklim_kering', 'BULAN_KERING', 'Bulan Kering Berturut-turut',
-    'Rangkaian bulan berturut-turut terpanjang dengan curah hujan di bawah 50 mm dalam 12 bulan terakhir '
-      + '(CHIRPS v2.0); tambak garam membutuhkan sedikitnya 4 bulan.'],
-  ['iklim_kemiringan', 'KEMIRINGAN', 'Kemiringan Lahan',
-    'Kemiringan lahan dari Copernicus DEM GLO-90, dirata-rata per 0,005° (sekitar 550 m); tambak budidaya '
-      + 'membutuhkan paling tinggi 3%, tambak garam paling tinggi 2%.'],
-  ['iklim_liat', 'TANAH_LIAT', 'Kandungan Tanah Liat',
-    'Kandungan liat tanah lapisan atas (0-5 cm) dari ISRIC SoilGrids 2.0; tambak garam membutuhkan sedikitnya 30%.'],
-  ['iklim_angin', 'ANGIN_100M', 'Kecepatan Angin 100 m',
-    'Kecepatan angin rata-rata 10 tahun pada ketinggian 100 m dari Global Wind Atlas 3; PLTB lepas pantai '
-      + 'membutuhkan sedikitnya 6,5 m/s.'],
-  ['iklim_ghi', 'GHI', 'Iradiasi Surya (GHI)',
-    'Iradiasi surya global horizontal rata-rata tahunan dari NASA POWER; PLTS terapung membutuhkan sedikitnya '
-      + '4,8 kWh/m² per hari.'],
-  ['risiko_pga', 'PGA', 'Percepatan Tanah Gempa (PGA)',
-    'Percepatan tanah puncak pada batuan dasar dengan peluang terlampaui 10% dalam 50 tahun dari GEM Global Seismic '
-      + 'Hazard Map 2023; infrastruktur laut membutuhkan paling tinggi 0,35 g.'],
-  ['risiko_laju_abrasi', 'ABRASI_PANTAI', 'Laju Abrasi Garis Pantai',
-    'Rata-rata laju mundurnya garis pantai 1984-2015 dari transek citra Landsat JRC (Mentaschi dkk., 2018); '
-      + 'konservasi dan rehabilitasi pesisir mensyaratkan paling tinggi 1,5 m per tahun.'],
+    'Jumlah bulan berturut-turut dengan hujan di bawah 50 mm dalam setahun terakhir (CHIRPS).'],
+  ['iklim_kemiringan', 'KEMIRINGAN', 'Kemiringan Lahan', 'Kemiringan lahan darat dari Copernicus DEM.'],
+  ['iklim_liat', 'TANAH_LIAT', 'Kandungan Tanah Liat', 'Kandungan liat tanah lapisan atas (SoilGrids).'],
+  ['iklim_angin', 'ANGIN_100M', 'Kecepatan Angin 100 m', 'Kecepatan angin rata-rata pada ketinggian 100 m (Global Wind Atlas).'],
+  ['iklim_ghi', 'GHI', 'Iradiasi Surya (GHI)', 'Rata-rata energi matahari harian (NASA POWER).'],
+  ['risiko_pga', 'PGA', 'Percepatan Tanah Gempa (PGA)', 'Guncangan tanah akibat gempa yang mungkin terjadi dalam 50 tahun (GEM).'],
+  ['risiko_laju_abrasi', 'ABRASI_PANTAI', 'Laju Abrasi Garis Pantai', 'Laju mundurnya garis pantai 1984–2015 (JRC).'],
   ['pesisir_eks_mangrove', 'LUAS_EKS_MANGROVE', 'Eks-Mangrove 1996-2020',
-    'Hamparan mangrove yang hilang antara 1996 dan 2020 menurut Global Mangrove Watch v3, diwarnai menurut luas '
-      + 'hamparan kontigu; konservasi dan rehabilitasi pesisir membutuhkan hamparan sedikitnya 100 ha.'],
+    'Mangrove yang hilang antara 1996 dan 2020 (Global Mangrove Watch), diwarnai menurut luas hamparannya.'],
   ['pesisir_produksi_kab', 'PRODUKSI_KABUPATEN', 'Perkiraan Produksi Ikan Kabupaten',
-    'Perkiraan produksi perikanan tangkap laut per kabupaten/kota: angka provinsi BPS dibagi menurut kapasitas '
-      + 'pendaratan kelas pelabuhan perikanan di tiap kabupaten; pengolahan hasil laut membutuhkan sedikitnya 20.000 '
-      + 'ton per tahun.'],
+    'Perkiraan produksi perikanan tangkap per kabupaten/kota, dibagi dari angka provinsi BPS.'],
   ['osea_shannon', 'SHANNON', 'Keanekaragaman Hayati Laut (Shannon)',
-    'Indeks Shannon-Wiener dari catatan spesies OBIS per sel 0,5°; bioteknologi kelautan membutuhkan '
-      + 'sedikitnya 2. Sel dengan catatan terlalu sedikit dikosongkan.'],
+    'Indeks keanekaragaman spesies laut dari catatan OBIS; sel dengan catatan terlalu sedikit dikosongkan.'],
 ];
 
 export const LAYER_WMS = {};
@@ -133,15 +92,15 @@ const INFRASTRUKTUR = [
   ['infra_kpbpb', 'KAWASAN_PERDAGANGAN_BEBAS', 'Kawasan Perdagangan Bebas', '#15803d', null,
    'Kawasan Perdagangan Bebas dan Pelabuhan Bebas (KPBPB)'],
   ['infra_bandara', 'BANDARA', 'Bandar Udara', '#0f766e', 'pesawat',
-   'Bandar udara berkode IATA/ICAO dari OpenStreetMap; acuan waktu tempuh wisata bahari, ekspor, dan bioteknologi'],
+   'Bandar udara berkode IATA/ICAO (OpenStreetMap)'],
   ['infra_gardu_induk', 'GARDU_INDUK', 'Gardu Induk', '#9a3412', 'gardu',
-   'Gardu induk listrik dari OpenStreetMap (bukan gardu distribusi); energi kelautan mensyaratkan paling jauh 20 km'],
+   'Gardu induk listrik (OpenStreetMap)'],
   ['infra_listrik_tm', 'JARINGAN_LISTRIK_TM', 'Jaringan Listrik 20 kV', '#ca8a04', null,
-   'Jaringan listrik tegangan menengah 20 kV dari OpenStreetMap; pengolahan hasil laut mensyaratkan paling jauh 3 km'],
+   'Jaringan listrik tegangan menengah 20 kV (OpenStreetMap)'],
   ['infra_kampus_riset', 'KAMPUS_RISET', 'Kampus & Lembaga Riset', '#4338ca', 'toga',
-   'Perguruan tinggi dan lembaga riset dari OpenStreetMap, pendekatan fasilitas laboratorium bioteknologi'],
+   'Perguruan tinggi dan lembaga riset (OpenStreetMap)'],
   ['infra_muara', 'MUARA_SUNGAI', 'Muara Sungai Besar', '#0284c7', 'sungai',
-   'Muara sungai besar dari HydroRIVERS (HydroSHEDS); jasa maritim dan bioteknologi mensyaratkan jarak minimum'],
+   'Muara sungai besar (HydroRIVERS)'],
 ];
 
 export const warnaInfrastruktur = (kategori) =>
@@ -236,16 +195,14 @@ export const LAYER_LOKAL = {
         'ABRASI',
         'Risiko Gelombang Ekstrem & Abrasi',
         'RISIKO',
-        'BNPB menerbitkan gelombang ekstrem dan abrasi sebagai satu indeks gabungan; '
-          + 'keduanya tidak dipisahkan di sumbernya.',
+        'Gelombang ekstrem dan abrasi diterbitkan BNPB sebagai satu indeks.',
       ],
       [
         'risiko_banjir',
         'BANJIR',
         'Risiko Banjir',
         'RISIKO',
-        'InaRISK tidak menerbitkan indeks banjir rob tersendiri; indeks ini mencakup '
-          + 'banjir sungai maupun genangan pesisir tanpa memisahkannya.',
+        'Mencakup banjir sungai dan genangan pesisir.',
       ],
     ].map(([id, jenis, label, varian, catatan]) => [
       id,
@@ -255,16 +212,8 @@ export const LAYER_LOKAL = {
         label,
         legenda: 'risiko',
         keteranganLegenda:
-          `Indeks ${varian === 'BAHAYA' ? 'bahaya' : 'risiko'} BNPB InaRISK `
-          + 'dikelompokkan menurut ambangnya sendiri: rendah di bawah 0,33, '
-          + 'sedang di bawah 0,67, selebihnya tinggi.'
-          + (varian === 'RISIKO'
-            ? ' Pesisir yang kosong berarti risikonya NOL, bukan datanya hilang: '
-              + 'risiko = bahaya x kerentanan / kapasitas, sehingga pantai tanpa '
-              + 'penduduk atau aset bernilai nol meskipun bahayanya tinggi. '
-              + 'Diperiksa pada pesisir selatan Jawa Timur — bahaya tsunami 0,283, '
-              + 'risikonya 0.'
-            : '')
+          `Indeks ${varian === 'BAHAYA' ? 'bahaya' : 'risiko'} BNPB InaRISK.`
+          + (varian === 'RISIKO' ? ' Pesisir tanpa warna berarti risikonya nol karena tidak ada penduduk atau aset, bukan data hilang.' : '')
           + (catatan ? ` ${catatan}` : ''),
         gaya: (f) => {
           const warna = warnaKelasRisiko(f && f.properties ? f.properties.kelas : null);
@@ -302,28 +251,9 @@ export const LAYER_LOKAL = {
 ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     zoomPin: 8,
     keteranganLegenda:
-      'Setiap titik adalah lokasi potensial untuk satu sub-sektor investasi; warnanya menunjukkan jenisnya dan titik '
-      + 'berwarna ganda cocok untuk beberapa jenis. Ini bukan rekomendasi pasti dan bukan pengganti Persetujuan KKPRL. '
-      + 'Mulai tingkat provinsi titik menjadi penanda berlambang jenis, dan batas lokasinya dimuat sebagai area analisis '
-      + 'saat tombol Analisis lokasi ini di popup diklik; analisis itu memakai aturan yang sama. Lokasi dibentuk dari sel '
-      + '250 m (sekitar 6,25 ha) di zona ruang laut atau kawasan Pola Ruang darat RTRW Provinsi di pesisir. Sel harus '
-      + 'lolos GERBANG: matriks KKPRL Perda mengizinkan jenis itu (langsung atau bersyarat), tidak berada di wilayah '
-      + 'kelola masyarakat hukum adat, di luar alur pelayaran/ALKI (kecuali jasa maritim dan infrastruktur laut), tidak '
-      + 'menempati mangrove, lamun, atau terumbu karang bagi jenis yang dapat merusaknya, di luar jarak aman kabel, pipa, '
-      + 'dan alur pelayaran, tidak beririsan KKPRL terbit, dan tidak tertutup bangunan. Sesudah itu sel harus memenuhi '
-      + 'BATAS UNGGULAN semua kriteria sub-sektornya, misalnya klorofil-a 0,3–0,5 mg/m³, suhu permukaan 28–30 °C, '
-      + 'gelombang paling tinggi 1,25 m, dan jarak ke pelabuhan perikanan paling jauh 50 km untuk perikanan tangkap. '
-      + 'Kriteria yang datanya tersedia wajib terukur di sel itu; hanya kriteria yang belum punya data nasional (misalnya '
-      + 'padatan tersuspensi dan zona intertidal) yang dilewati. Risiko tsunami, abrasi, atau banjir '
-      + 'yang tinggi menggugurkan lokasi di darat atau yang menyentuh darat. Ambang kriteria dapat diubah administrator. '
-      + 'Tiap sel lalu diberi SKOR MUTU 0–100: rata-rata kedekatan nilai setiap kriteria ke kondisi ideal (tengah '
-      + 'rentang, atau sejauh mungkin dari batas satu sisi), dikali 0,75 bila zonanya hanya mengizinkan bersyarat; sel '
-      + 'dengan skor di bawah 60 tidak ditampilkan. Setiap wilayah sel yang bersambung ditampilkan sebagai satu titik '
-      + 'dengan batas berupa inti berskor tertinggi, paling luas 1 km x 1 km (100 ha); untuk setiap jenis, dalam radius '
-      + '10 km hanya lokasi berskor mutu tertinggi yang ditampilkan, dari sub-sektor mana pun. Pada '
-      + 'pilihan semua jenis, lokasi yang bertumpuk digabung dan popup menyebut jenis yang cocok; Konservasi & '
-      + 'Rehabilitasi Pesisir hanya tampil bila jenis itu dipilih. Kriteria finansial (NPV, IRR, payback) tidak ikut; '
-      + 'penilaian proyek tetap dilakukan lewat Analisis lokasi ini.',
+      'Lokasi yang diizinkan matriks Perda dan memenuhi kriteria unggulan jenis investasinya dengan skor mutu tinggi. '
+      + 'Warna titik menunjukkan jenis investasi. Klik titik lalu Analisis lokasi ini untuk penilaian lengkap. '
+      + 'Bukan pengganti Persetujuan KKPRL.',
     popup: (p) => {
       const jenis = p.jenis?.length ? p.jenis : [p.sektor_kode];
       const nama = p.jenis_nama?.length ? p.jenis_nama : [p.sub_sektor || p.sektor || ''];
@@ -387,11 +317,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     urlWilayah: '/inventarisasi/kkprl/wilayah/',
     label: 'KKPRL Nasional',
     legenda: 'jenis',
-    keteranganLegenda:
-      'Izin kesesuaian kegiatan pemanfaatan ruang laut yang telah terbit, diwarnai menurut jenis investasi. '
-      + 'Jenis investasi ditetapkan dari teks kegiatan pada izin. '
-      + 'Ditandai titik saat peta masih jauh dan penanda ikon mulai tingkat provinsi — '
-      + 'luas rata-ratanya hanya 50 ha sehingga bentuk aslinya baru tergambar setelah diperbesar.',
+    keteranganLegenda: 'Izin pemanfaatan ruang laut yang sudah terbit, diwarnai menurut jenis investasinya.',
     zoomPin: 8,
     pilihan: {
       param: 'sektor',
@@ -443,17 +369,8 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     warnaTitik: () => ['#b45309'],
     zoomPin: 8,
     keteranganLegenda:
-      'Setiap wilayah ditandai titik, dan mulai tingkat provinsi berganti menjadi penanda, agar wilayah yang kecil '
-      + 'mudah ditemukan; batas poligonnya tetap tergambar. '
-      + 'Perairan yang berada di bawah hak kelola masyarakat hukum adat — wilayah '
-      + 'sasi, penangkapan tradisional, dan kegiatan adat — dari Sidako KKP (2024, lengkap '
-      + 'dengan nama MHA dan SK penetapannya) dan Portal Satu Data KKP, ditambah zona RTRW '
-      + 'Provinsi Papua yang ditandai berada di wilayah kelola '
-      + 'adat (data RTRW tidak mencantumkan nama masyarakatnya). Irisan dengan wilayah ini MENAIKKAN risiko sosial sebuah rencana '
-      + 'investasi karena ada pihak yang sudah memegang hak atas perairan itu. '
-      + 'CAKUPANNYA BARU ENAM PROVINSI (Papua, Papua Barat, Papua Barat Daya, Maluku, '
-      + 'Sulawesi Tenggara, Sulawesi Utara), jadi perairan tanpa poligon di sini berarti '
-      + 'belum tercatat — bukan berarti tidak ada klaim adat.',
+      'Perairan yang dikelola masyarakat hukum adat (Sidako dan Portal Satu Data KKP). Baru mencakup enam provinsi; '
+      + 'perairan tanpa poligon belum tentu bebas klaim adat.',
     gaya: () => ({
       color: '#78350f',
       weight: 1.2,
@@ -479,14 +396,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     params: { tingkat: 'RTRW_PROVINSI' },
     label: 'RTRW Provinsi (Perda RTRW, PKKPRL & RZWP-3-K)',
     keteranganLegenda:
-      'Alokasi ruang laut provinsi dari tiga instrumen. Zona laut dari geodatabase '
-      + 'Perda RTRW Provinsi (KKP) menjadi acuan utama; peta arahan PKKPRL dan '
-      + 'RZWP-3-K yang lebih lama mengisi perairan yang belum diatur RTRW. Sejak UU '
-      + 'Cipta Kerja zonasi laut diintegrasikan ke dalam RTRW provinsi, sehingga '
-      + 'RTRWP sebelum 2021 tidak memuat zona laut. Ketiganya disajikan sebagai satu '
-      + 'lapisan dan dapat bertumpuk; popup tiap zona menyebutkan instrumen dasarnya, '
-      + 'dan screening memakai acuan teratas yang tersedia. Rencana Zonasi KAW '
-      + 'disajikan pada lapisan tersendiri.',
+      'Zonasi ruang laut provinsi dari Perda RTRW, dilengkapi PKKPRL dan RZWP-3-K untuk perairan yang belum diatur.',
   },
 
   polaruang_darat: {
@@ -496,10 +406,8 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     pilihan: { ...POLA_RUANG.pilihan, opsi: URUTAN_KATEGORI_DARAT.map((kode) => [kode, KATEGORI_ZONA[kode].label]) },
     label: 'Pola Ruang Darat Pesisir (RTRW Provinsi)',
     keteranganLegenda:
-      'Peruntukan ruang darat dari geodatabase Perda RTRW Provinsi (KKP) pada jalur pesisir 100 m sampai 4 km '
-      + 'dari zona laut. Dipakai untuk jenis investasi yang berlokasi di darat, misalnya tambak garam di Kawasan '
-      + 'Pergaraman, tambak di Kawasan Perikanan, dan unit pengolahan di Kawasan Peruntukan Industri. Sempadan '
-      + 'pantai 100 m tidak dimuat. Provinsi yang geodatabase RTRW-nya tidak memuat Pola Ruang belum tersedia.',
+      'Peruntukan lahan pesisir (100 m–4 km dari laut) dari Perda RTRW Provinsi, untuk investasi di darat seperti tambak '
+      + 'dan pengolahan.',
   },
 
   polaruang_kaw: {
@@ -507,10 +415,6 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     params: { tingkat: 'KAW' },
     label: 'Rencana Zonasi Kawasan Antarwilayah (KAW)',
     keteranganLegenda:
-      'Rencana zonasi untuk perairan yang melintasi lebih dari satu provinsi, '
-      + 'ditetapkan dengan Peraturan Presiden. Yang tersedia di basis data baru '
-      + 'Perpres No. 83/2020 (perairan Kalimantan Timur, Kalimantan Selatan, Sulawesi '
-      + 'Barat, Sulawesi Selatan, dan Sulawesi Tengah). Screening memakai KAW untuk '
-      + 'bagian area yang tidak diatur RTRW Provinsi.',
+      'Rencana zonasi perairan lintas provinsi (Perpres 83/2020: Kaltim, Kalsel, Sulbar, Sulsel, dan Sulteng).',
   },
 };

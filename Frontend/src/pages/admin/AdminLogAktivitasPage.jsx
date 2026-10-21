@@ -49,11 +49,9 @@ const AdminLogAktivitasPage = () => {
   return (
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 font-syne">Log Aktivitas Pengguna</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Log Aktivitas</h1>
         <p className="text-slate-500 text-sm mt-1">
-          Jejak audit: siapa melakukan apa, kapan, dan dari alamat mana. Upaya yang{' '}
-          <span className="font-semibold text-red-700">ditolak</span> ikut tercatat — bukan hanya
-          yang berhasil.
+          Siapa melakukan apa dan kapan, termasuk akses yang ditolak.
         </p>
       </div>
 

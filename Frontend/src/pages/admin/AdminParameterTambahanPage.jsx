@@ -168,7 +168,7 @@ const Formulir = ({ awal, sektor, provinsi, onBatal, onTersimpan }) => {
       {galat && <p className="text-xs font-medium text-rose-600">{galat}</p>}
       <div className="flex justify-end gap-2">
         <button type="button" onClick={onBatal} className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Batal</button>
-        <button type="button" onClick={simpan} className="px-4 py-2 rounded-lg bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700">Simpan</button>
+        <button type="button" onClick={simpan} className="px-4 py-2 rounded-lg bg-kkp-800 text-white text-sm font-semibold hover:bg-kkp-900">Simpan</button>
       </div>
     </div>
   );
@@ -206,16 +206,13 @@ const AdminParameterTambahanPage = () => {
         <div className="flex items-center gap-3">
           <div className="p-2 bg-sky-50 rounded-xl text-sky-600"><Layers className="w-5 h-5" /></div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 font-syne">Parameter Analisis Tambahan</h1>
-            <p className="text-slate-500 text-sm mt-1">
-              Tambahkan area khusus (mis. area cadangan perikanan tangkap) atau nilai per wilayah sebagai parameter analisis area,
-              Peta Sebaran Wilayah Potensial Investasi, dan laporan.
-            </p>
+            <h1 className="text-2xl font-bold text-slate-900">Parameter Tambahan</h1>
+            <p className="text-slate-500 text-sm mt-1">Area atau nilai wilayah khusus yang ikut dinilai dalam analisis.</p>
           </div>
         </div>
         {!form && (
           <button type="button" onClick={() => setForm(KOSONG)}
-            className="px-4 py-2 rounded-lg bg-sky-600 text-white text-sm font-semibold hover:bg-sky-700 flex items-center gap-2">
+            className="px-4 py-2 rounded-lg bg-kkp-800 text-white text-sm font-semibold hover:bg-kkp-900 flex items-center gap-2">
             <Plus className="w-4 h-4" /> Parameter baru
           </button>
         )}
