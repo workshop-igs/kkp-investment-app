@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { useMap } from 'react-leaflet';
 import { api } from '../../api/klien';
+import PanelAlat from './PanelAlat';
 import PemilihSektor from './PemilihSektor';
 import PemilihWilayah from './PemilihWilayah';
 
@@ -227,233 +228,216 @@ const PanelDaftarLapisan = ({
   const jumlahAktif = idSemua.filter((id) => activeLayers.includes(id)).length;
 
   return (
-    <div className="pointer-events-none absolute right-full mr-3 top-20 bottom-0 flex items-center w-[21rem] max-w-[calc(100vw-6.5rem)]">
-    <div
-      className="pointer-events-auto w-full bg-white border border-slate-200 rounded-2xl shadow-xl overflow-hidden
-                 animate-fade-in flex flex-col
-                 max-h-[min(100%,max(220px,calc(100vh-33rem)))]
-                 sm:max-h-[min(100%,max(220px,calc(100vh-28rem)))]
-                 xl:max-h-full"
-    >
-      <div className="shrink-0 px-3.5 pt-3.5 pb-3 space-y-3 border-b border-slate-100">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-kkp-800 text-white">
-            <Layers className="h-4 w-4" />
-          </span>
-          <div className="min-w-0">
-            <p className="text-[14px] font-bold leading-tight text-kkp-900">Daftar layer</p>
-            <p className="text-[11.5px] leading-snug text-slate-500">
-              {jumlahAktif ? `${jumlahAktif} layer tampil di peta` : 'Nyalakan layer untuk menampilkannya di peta'}
-            </p>
-          </div>
-        </div>
-        <div className="relative">
-          <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-          <input
-            type="text"
-            value={cari}
-            onChange={(e) => setCari(e.target.value)}
-            placeholder="Cari layer, misalnya pelabuhan"
-            aria-label="Cari nama layer"
-            className="w-full text-[13px] bg-slate-100 border border-transparent rounded-lg pl-8 pr-8 py-2
-                       text-slate-700 placeholder:text-slate-400 transition-colors
-                       focus:bg-white focus:border-kkp-700 focus:outline-none focus:ring-2 focus:ring-kkp-700/15"
-          />
-          {cari && (
-            <button
-              type="button"
-              onClick={() => setCari('')}
-              aria-label="Kosongkan pencarian"
-              className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
-            >
-              <X className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar">
-        {kategoriTampil.length === 0 && (
-          <p className="px-4 py-6 text-[12px] text-slate-400 text-center">
-            Tidak ada layer bernama “{cari}”.
-          </p>
-        )}
-
-        {kategoriTampil.map((kategori) => {
-          const dilipat = !kataKunci && !dibuka[kategori.judul];
-          const aktifDiKategori = kategori.layer.filter((l) => activeLayers.includes(l.id)).length;
-          const IkonGrup = kategori.ikon;
-          return (
-            <section key={kategori.judul} className="border-b border-slate-100 last:border-0">
+    <PanelAlat
+      ikon={Layers}
+      judul="Daftar layer"
+      keterangan={jumlahAktif ? `${jumlahAktif} layer tampil di peta` : 'Nyalakan layer untuk menampilkannya di peta'}
+      kepala={(
+          <div className="relative">
+            <Search className="w-4 h-4 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={cari}
+              onChange={(e) => setCari(e.target.value)}
+              placeholder="Cari layer, misalnya pelabuhan"
+              aria-label="Cari nama layer"
+              className="w-full text-[13px] bg-slate-100 border border-transparent rounded-lg pl-8 pr-8 py-2
+                         text-slate-700 placeholder:text-slate-400 transition-colors
+                         focus:bg-white focus:border-kkp-700 focus:outline-none focus:ring-2 focus:ring-kkp-700/15"
+            />
+            {cari && (
               <button
                 type="button"
-                aria-expanded={!dilipat}
-                onClick={() =>
-                  setDibuka((s) => ({ ...s, [kategori.judul]: !s[kategori.judul] }))
-                }
-                className="sticky top-0 z-[1] w-full flex items-center gap-2.5 px-3.5 py-2.5 bg-white/95 backdrop-blur-sm
-                           text-left transition-colors hover:bg-slate-50
-                           focus-visible:outline-none focus-visible:bg-kkp-100/60"
+                onClick={() => setCari('')}
+                aria-label="Kosongkan pencarian"
+                className="absolute right-1.5 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 hover:bg-slate-200 hover:text-slate-600"
               >
-                <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-kkp-100 text-kkp-800">
-                  <IkonGrup className="h-4 w-4" />
-                </span>
-                <span className="flex-1 min-w-0 text-[13px] font-semibold leading-snug text-kkp-900">
-                  {kategori.judul}
-                </span>
-                {aktifDiKategori > 0 && (
-                  <span
-                    className="shrink-0 rounded-full bg-kkp-toska/20 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-kkp-800"
-                    title={`${aktifDiKategori} dari ${kategori.layer.length} layer tampil`}
-                  >
-                    {aktifDiKategori}/{kategori.layer.length}
-                  </span>
-                )}
-                <ChevronDown
-                  className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${dilipat ? '-rotate-90' : ''}`}
-                />
+                <X className="h-3.5 w-3.5" />
               </button>
+            )}
+          </div>
+      )}
+      kaki={(
+        <p className="px-4 py-2 text-[10.5px] text-slate-400 bg-slate-50 border-t border-slate-100 shrink-0">
+          Sumber: Portal Satu Data KKP
+        </p>
+      )}
+    >
+      {kategoriTampil.length === 0 && (
+        <p className="px-4 py-6 text-[12px] text-slate-400 text-center">
+          Tidak ada layer bernama “{cari}”.
+        </p>
+      )}
 
-              {!dilipat && (
-                <div className="pb-1.5">
-                  {kategori.layer.map((layer) => {
-                    const aktif = activeLayers.includes(layer.id);
-                    const def = daftarLapisan[layer.id] || {};
-                    const Ikon = layer.ikon;
-                    return (
-                      <div key={layer.id}>
-                        <div
-                          className={`mx-1.5 flex items-center gap-1 rounded-lg pr-1.5 transition-colors ${
-                            aktif ? 'bg-kkp-100/70' : 'hover:bg-slate-50'
-                          }`}
+      {kategoriTampil.map((kategori) => {
+        const dilipat = !kataKunci && !dibuka[kategori.judul];
+        const aktifDiKategori = kategori.layer.filter((l) => activeLayers.includes(l.id)).length;
+        const IkonGrup = kategori.ikon;
+        return (
+          <section key={kategori.judul} className="border-b border-slate-100 last:border-0">
+            <button
+              type="button"
+              aria-expanded={!dilipat}
+              onClick={() =>
+                setDibuka((s) => ({ ...s, [kategori.judul]: !s[kategori.judul] }))
+              }
+              className="sticky top-0 z-[1] w-full flex items-center gap-2.5 px-3.5 py-2.5 bg-white/95 backdrop-blur-sm
+                         text-left transition-colors hover:bg-slate-50
+                         focus-visible:outline-none focus-visible:bg-kkp-100/60"
+            >
+              <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-kkp-100 text-kkp-800">
+                <IkonGrup className="h-4 w-4" />
+              </span>
+              <span className="flex-1 min-w-0 text-[13px] font-semibold leading-snug text-kkp-900">
+                {kategori.judul}
+              </span>
+              {aktifDiKategori > 0 && (
+                <span
+                  className="shrink-0 rounded-full bg-kkp-toska/20 px-2 py-0.5 text-[11px] font-semibold tabular-nums text-kkp-800"
+                  title={`${aktifDiKategori} dari ${kategori.layer.length} layer tampil`}
+                >
+                  {aktifDiKategori}/{kategori.layer.length}
+                </span>
+              )}
+              <ChevronDown
+                className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${dilipat ? '-rotate-90' : ''}`}
+              />
+            </button>
+
+            {!dilipat && (
+              <div className="pb-1.5">
+                {kategori.layer.map((layer) => {
+                  const aktif = activeLayers.includes(layer.id);
+                  const def = daftarLapisan[layer.id] || {};
+                  const Ikon = layer.ikon;
+                  return (
+                    <div key={layer.id}>
+                      <div
+                        className={`mx-1.5 flex items-center gap-1 rounded-lg pr-1.5 transition-colors ${
+                          aktif ? 'bg-kkp-100/70' : 'hover:bg-slate-50'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={aktif}
+                          onClick={() => toggleLayer(layer.id)}
+                          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg py-2 pl-2 text-left
+                                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kkp-700/30"
                         >
-                          <button
-                            type="button"
-                            role="switch"
-                            aria-checked={aktif}
-                            onClick={() => toggleLayer(layer.id)}
-                            className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg py-2 pl-2 text-left
-                                       focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kkp-700/30"
+                          <span
+                            className="grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors"
+                            style={aktif ? { backgroundColor: layer.warna, color: '#fff' } : { backgroundColor: `${layer.warna}1A`, color: layer.warna }}
                           >
-                            <span
-                              className="grid h-7 w-7 shrink-0 place-items-center rounded-lg transition-colors"
-                              style={aktif ? { backgroundColor: layer.warna, color: '#fff' } : { backgroundColor: `${layer.warna}1A`, color: layer.warna }}
-                            >
-                              <Ikon className="h-4 w-4" />
-                            </span>
-                            <span
-                              className={`text-[12.5px] leading-snug ${
-                                aktif ? 'text-kkp-900 font-semibold' : 'text-slate-700'
-                              }`}
-                            >
-                              {layer.nama}
-                            </span>
-                          </button>
-
-                          {def.url && (
-                            <button
-                              type="button"
-                              onClick={() => zoomKeLapisan(layer.id)}
-                              title="Zoom ke sebaran layer"
-                              aria-label={`Zoom ke sebaran ${layer.nama}`}
-                              className={`shrink-0 p-1.5 rounded-md text-slate-400 hover:text-kkp-700 hover:bg-white
-                                          transition-colors ${sedangZoom === layer.id ? 'animate-pulse text-kkp-700' : ''}`}
-                            >
-                              <ZoomIn className="w-3.5 h-3.5" />
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setKeterangan((k) => (k === layer.id ? null : layer.id))
-                            }
-                            title="Keterangan layer"
-                            aria-label={`Keterangan ${layer.nama}`}
-                            aria-expanded={keterangan === layer.id}
-                            className={`shrink-0 p-1.5 rounded-md transition-colors hover:bg-white ${
-                              keterangan === layer.id
-                                ? 'text-kkp-700 bg-white'
-                                : 'text-slate-400 hover:text-kkp-700'
+                            <Ikon className="h-4 w-4" />
+                          </span>
+                          <span
+                            className={`text-[12.5px] leading-snug ${
+                              aktif ? 'text-kkp-900 font-semibold' : 'text-slate-700'
                             }`}
                           >
-                            <Info className="w-3.5 h-3.5" />
-                          </button>
+                            {layer.nama}
+                          </span>
+                        </button>
+
+                        {def.url && (
                           <button
                             type="button"
-                            tabIndex={-1}
-                            aria-hidden="true"
-                            onClick={() => toggleLayer(layer.id)}
-                            className="shrink-0 py-2 pl-1"
+                            onClick={() => zoomKeLapisan(layer.id)}
+                            title="Zoom ke sebaran layer"
+                            aria-label={`Zoom ke sebaran ${layer.nama}`}
+                            className={`shrink-0 p-1.5 rounded-md text-slate-400 hover:text-kkp-700 hover:bg-white
+                                        transition-colors ${sedangZoom === layer.id ? 'animate-pulse text-kkp-700' : ''}`}
+                          >
+                            <ZoomIn className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setKeterangan((k) => (k === layer.id ? null : layer.id))
+                          }
+                          title="Keterangan layer"
+                          aria-label={`Keterangan ${layer.nama}`}
+                          aria-expanded={keterangan === layer.id}
+                          className={`shrink-0 p-1.5 rounded-md transition-colors hover:bg-white ${
+                            keterangan === layer.id
+                              ? 'text-kkp-700 bg-white'
+                              : 'text-slate-400 hover:text-kkp-700'
+                          }`}
+                        >
+                          <Info className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          type="button"
+                          tabIndex={-1}
+                          aria-hidden="true"
+                          onClick={() => toggleLayer(layer.id)}
+                          className="shrink-0 py-2 pl-1"
+                        >
+                          <span
+                            className={`relative block h-4 w-7 rounded-full transition-colors ${
+                              aktif ? 'bg-kkp-700' : 'bg-slate-300'
+                            }`}
                           >
                             <span
-                              className={`relative block h-4 w-7 rounded-full transition-colors ${
-                                aktif ? 'bg-kkp-700' : 'bg-slate-300'
+                              className={`absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
+                                aktif ? 'translate-x-3' : ''
                               }`}
-                            >
-                              <span
-                                className={`absolute top-0.5 left-0.5 h-3 w-3 rounded-full bg-white shadow-sm transition-transform ${
-                                  aktif ? 'translate-x-3' : ''
-                                }`}
-                              />
-                            </span>
-                          </button>
-                        </div>
-
-                        {aktif && statusLapisan[layer.id] && (
-                          <StatusLapisan status={statusLapisan[layer.id]} />
-                        )}
-
-                        {keterangan === layer.id && (
-                          <p className="pl-[3.25rem] pr-3.5 pt-1 pb-2 text-[11px] text-slate-500 leading-snug">
-                            {def.keteranganLegenda ||
-                              'Data Portal Satu Data KKP yang disimpan dan digambar dari server aplikasi ini.'}
-                          </p>
-                        )}
-
-                        {aktif && def.params && 'sektor' in def.params && (
-                          <PemilihSektor
-                            nilai={def.semuaJenis ? sektorLapisan[layer.id] : sektorLapisan[layer.id] || def.params.sektor}
-                            onPilih={(kode) => setSektorLapisan && setSektorLapisan(layer.id, kode)}
-                            label={def.semuaJenis ? 'Jenis investasi' : undefined}
-                            semua={def.semuaJenis}
-                          />
-                        )}
-
-                        {aktif && def.pilihan && (
-                          <PemilihSektor
-                            nilai={sektorLapisan[layer.id]}
-                            onPilih={(kode) => setSektorLapisan && setSektorLapisan(layer.id, kode)}
-                            label={def.pilihan.label}
-                            opsi={def.pilihan.opsi}
-                            semua={def.pilihan.semua}
-                          />
-                        )}
-
-                        {aktif && def.urlWilayah && (
-                          <PemilihWilayah
-                            urlWilayah={def.urlWilayah}
-                            params={sektorLapisan[layer.id]
-                              ? { ...(def.params || {}), [def.pilihan?.param || 'sektor']: sektorLapisan[layer.id] }
-                              : def.params}
-                            nilai={wilayahLapisan[layer.id]}
-                            onPilih={(id) => setWilayahLapisan(layer.id, id)}
-                          />
-                        )}
+                            />
+                          </span>
+                        </button>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </section>
-          );
-        })}
-      </div>
 
-      <p className="px-4 py-2 text-[10.5px] text-slate-400 bg-slate-50 border-t border-slate-100 shrink-0">
-        Sumber: Portal Satu Data KKP
-      </p>
-    </div>
-    </div>
+                      {aktif && statusLapisan[layer.id] && (
+                        <StatusLapisan status={statusLapisan[layer.id]} />
+                      )}
+
+                      {keterangan === layer.id && (
+                        <p className="pl-[3.25rem] pr-3.5 pt-1 pb-2 text-[11px] text-slate-500 leading-snug">
+                          {def.keteranganLegenda ||
+                            'Data Portal Satu Data KKP yang disimpan dan digambar dari server aplikasi ini.'}
+                        </p>
+                      )}
+
+                      {aktif && def.params && 'sektor' in def.params && (
+                        <PemilihSektor
+                          nilai={def.semuaJenis ? sektorLapisan[layer.id] : sektorLapisan[layer.id] || def.params.sektor}
+                          onPilih={(kode) => setSektorLapisan && setSektorLapisan(layer.id, kode)}
+                          label={def.semuaJenis ? 'Jenis investasi' : undefined}
+                          semua={def.semuaJenis}
+                        />
+                      )}
+
+                      {aktif && def.pilihan && (
+                        <PemilihSektor
+                          nilai={sektorLapisan[layer.id]}
+                          onPilih={(kode) => setSektorLapisan && setSektorLapisan(layer.id, kode)}
+                          label={def.pilihan.label}
+                          opsi={def.pilihan.opsi}
+                          semua={def.pilihan.semua}
+                        />
+                      )}
+
+                      {aktif && def.urlWilayah && (
+                        <PemilihWilayah
+                          urlWilayah={def.urlWilayah}
+                          params={sektorLapisan[layer.id]
+                            ? { ...(def.params || {}), [def.pilihan?.param || 'sektor']: sektorLapisan[layer.id] }
+                            : def.params}
+                          nilai={wilayahLapisan[layer.id]}
+                          onPilih={(id) => setWilayahLapisan(layer.id, id)}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </PanelAlat>
   );
 };
 

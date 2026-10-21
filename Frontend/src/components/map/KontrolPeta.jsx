@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Plus, Minus, Compass, Layers, Download, Keyboard, Ruler, Search, X, CircleHelp, Loader2 } from 'lucide-react';
+import { Bot, CircleHelp, Download, Keyboard, Layers, Loader2, Map as IkonPeta, Minus, Plus, Ruler, Search, X } from 'lucide-react';
 import PanelDaftarLapisan from './PanelDaftarLapisan';
 import PanelKoordinat from './PanelKoordinat';
 import PanelPencarian from './PanelPencarian';
@@ -9,6 +9,20 @@ import AlatUkur from './AlatUkur';
 import PenandaTujuan from './PenandaTujuan';
 import { mulaiMemuat } from '../OverlayMemuat';
 import { unduhPdfPeta } from '../../utils/pdfPetaSpasial';
+
+const TOMBOL = 'grid place-items-center rounded-xl border p-2.5 shadow-sm backdrop-blur-md transition-colors '
+  + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kkp-700/40';
+const kelasTombol = (aktif, warnaAktif = 'bg-kkp-800 border-kkp-800') => `${TOMBOL} ${
+  aktif ? `${warnaAktif} text-white` : 'bg-white/95 border-slate-200 text-slate-600 hover:text-kkp-700 hover:border-kkp-200'
+}`;
+const asisten = (buka) => window.dispatchEvent(new CustomEvent('kkp:asisten', { detail: buka }));
+
+const ARAH = [
+  ['U', 'Utara', 'top-1 left-1/2 -translate-x-1/2', 'text-kkp-800'],
+  ['T', 'Timur', 'right-1 top-1/2 -translate-y-1/2', 'text-slate-500'],
+  ['S', 'Selatan', 'bottom-1 left-1/2 -translate-x-1/2', 'text-slate-500'],
+  ['B', 'Barat', 'left-1 top-1/2 -translate-y-1/2', 'text-slate-500'],
+];
 
 const KontrolPeta = ({
   fokus,
@@ -32,10 +46,18 @@ const KontrolPeta = ({
   const [panelAktif, setPanelAktif] = useState(lapisanAwal.length ? 'layer' : null);
   const [tujuan, setTujuan] = useState(null);
   const [mengunduh, setMengunduh] = useState(false);
+  const [asistenBuka, setAsistenBuka] = useState(false);
+
+  useEffect(() => {
+    const catat = (e) => setAsistenBuka(Boolean(e.detail));
+    window.addEventListener('kkp:asisten-status', catat);
+    return () => window.removeEventListener('kkp:asisten-status', catat);
+  }, []);
 
   const bukaPanel = (nama) => {
     setPanelAktif((s) => (s === nama ? null : nama));
     if (modeUkur) setModeUkur?.(false);
+    asisten(false);
   };
 
   const tujuLokasi = ({ lat, lng, bbox, label, keterangan, zoom = 13 }) => {
@@ -113,13 +135,13 @@ const KontrolPeta = ({
         data-tur="alat"
         className="pointer-events-auto flex flex-col gap-4 [@media(max-height:760px)]:gap-2 [@media(max-height:760px)]:[&>button]:p-2 [@media(max-height:760px)]:[&>div>button]:p-2"
       >
-        
-        <div data-tur="zoom" className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-1 shadow-sm flex flex-col">
-          <button onClick={handleZoomIn} className="p-2 text-slate-600 hover:text-sky-600 hover:bg-slate-100 rounded transition-colors" title="Zoom In">
+
+        <div data-tur="zoom" className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl p-1 shadow-sm flex flex-col">
+          <button onClick={handleZoomIn} className="p-2 text-slate-600 hover:text-kkp-700 hover:bg-kkp-100/60 rounded-lg transition-colors" title="Perbesar peta">
             <Plus className="w-5 h-5" />
           </button>
-          <div className="w-full h-px bg-slate-200 my-1"></div>
-          <button onClick={handleZoomOut} className="p-2 text-slate-600 hover:text-sky-600 hover:bg-slate-100 rounded transition-colors" title="Zoom Out">
+          <div className="mx-1.5 h-px bg-slate-200 my-0.5"></div>
+          <button onClick={handleZoomOut} className="p-2 text-slate-600 hover:text-kkp-700 hover:bg-kkp-100/60 rounded-lg transition-colors" title="Perkecil peta">
             <Minus className="w-5 h-5" />
           </button>
         </div>
@@ -127,13 +149,13 @@ const KontrolPeta = ({
       <div>
         <button
           data-tur="lapisan"
-          onClick={() => bukaPanel('layer')} 
-          className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
-          title="Data Layers"
+          onClick={() => bukaPanel('layer')}
+          className={kelasTombol(panelAktif === 'layer')}
+          title="Daftar layer"
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" /></svg>
+          <Layers className="w-5 h-5" />
         </button>
-        
+
         {panelAktif === 'layer' && (
           <PanelDaftarLapisan
             activeLayers={activeLayers}
@@ -150,18 +172,18 @@ const KontrolPeta = ({
       </div>
 
       <div className="relative">
-        <button 
+        <button
           data-tur="basemap"
-          onClick={() => bukaPanel('basemap')} 
-          className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
-          title="Basemap Gallery"
+          onClick={() => bukaPanel('basemap')}
+          className={kelasTombol(panelAktif === 'basemap')}
+          title="Peta dasar"
         >
-          <Layers className="w-5 h-5" />
+          <IkonPeta className="w-5 h-5" />
         </button>
-        
+
         {panelAktif === 'basemap' && (
-          <div className="absolute right-full mr-3 bottom-0 animate-fade-in rounded-xl border border-slate-200 bg-white/95 p-2 shadow-lg backdrop-blur-md">
-            <p className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-500">Peta dasar</p>
+          <div className="absolute right-full mr-3 bottom-0 animate-fade-in rounded-2xl border border-slate-200 bg-white p-2.5 shadow-xl">
+            <p className="px-1 pb-2 text-[13px] font-bold text-kkp-900">Peta dasar</p>
             <div className="flex gap-2">
               {basemaps.map((bg) => {
                 const aktif = currentBasemap === bg.id;
@@ -174,10 +196,10 @@ const KontrolPeta = ({
                       setBasemap(bg.id);
                       setPanelAktif(null);
                     }}
-                    className={`w-24 rounded-lg p-1 text-left transition ${aktif ? 'bg-sky-50 ring-2 ring-sky-500' : 'hover:bg-slate-100'}`}
+                    className={`w-24 rounded-xl p-1 text-left transition ${aktif ? 'bg-kkp-100 ring-2 ring-kkp-700' : 'hover:bg-slate-100'}`}
                   >
                     <img src={bg.pratinjau} alt={`Pratinjau peta dasar ${bg.name}`} loading="lazy" className="h-16 w-full rounded-md bg-slate-100 object-cover" />
-                    <span className={`mt-1 block px-0.5 text-xs ${aktif ? 'font-semibold text-sky-700' : 'text-slate-600'}`}>{bg.name}</span>
+                    <span className={`mt-1 block px-0.5 text-xs ${aktif ? 'font-semibold text-kkp-800' : 'text-slate-600'}`}>{bg.name}</span>
                   </button>
                 );
               })}
@@ -186,62 +208,51 @@ const KontrolPeta = ({
         )}
       </div>
 
-      <div className="relative">
+      <div>
         <button
           data-tur="koordinat"
           onClick={() => bukaPanel('koordinat')}
-          className={`backdrop-blur-md border rounded-lg p-2.5 shadow-sm transition-all flex items-center justify-center ${
-            panelAktif === 'koordinat'
-              ? 'bg-kkp-700 border-kkp-700 text-white'
-              : 'bg-white/90 border-slate-200 text-slate-600 hover:text-sky-600 hover:border-sky-300'
-          }`}
-          title="Input Koordinat"
+          className={kelasTombol(panelAktif === 'koordinat')}
+          title="Input koordinat"
         >
           <Keyboard className="w-5 h-5" />
         </button>
         {panelAktif === 'koordinat' && <PanelKoordinat onTuju={tujuLokasi} />}
       </div>
 
-      <div className="relative">
+      <div>
         <button
           data-tur="cari"
           onClick={() => bukaPanel('cari')}
-          className={`backdrop-blur-md border rounded-lg p-2.5 shadow-sm transition-all flex items-center justify-center ${
-            panelAktif === 'cari'
-              ? 'bg-kkp-700 border-kkp-700 text-white'
-              : 'bg-white/90 border-slate-200 text-slate-600 hover:text-sky-600 hover:border-sky-300'
-          }`}
-          title="Cari Lokasi"
+          className={kelasTombol(panelAktif === 'cari')}
+          title="Cari lokasi"
         >
           <Search className="w-5 h-5" />
         </button>
         {panelAktif === 'cari' && <PanelPencarian onTuju={tujuLokasi} />}
       </div>
 
-      <div className="relative">
+      <div>
         <button
           data-tur="ukur"
           onClick={() => {
             setPanelAktif(null);
+            asisten(false);
             setModeUkur?.(!modeUkur);
           }}
-          className={`backdrop-blur-md border rounded-lg p-2.5 shadow-sm transition-all flex items-center justify-center ${
-            modeUkur
-              ? 'bg-rose-600 border-rose-600 text-white'
-              : 'bg-white/90 border-slate-200 text-slate-600 hover:text-sky-600 hover:border-sky-300'
-          }`}
-          title={modeUkur ? 'Keluar dari mode ukur' : 'Ukur Jarak'}
+          className={kelasTombol(modeUkur, 'bg-rose-600 border-rose-600')}
+          title={modeUkur ? 'Keluar dari mode ukur' : 'Ukur jarak'}
         >
           {modeUkur ? <X className="w-5 h-5" /> : <Ruler className="w-5 h-5" />}
         </button>
         <AlatUkur aktif={modeUkur} onTutup={() => setModeUkur?.(false)} />
       </div>
 
-      <button 
+      <button
         onClick={handleExport}
         disabled={mengunduh}
-        className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
-        title="Unduh PDF Peta"
+        className={kelasTombol(false)}
+        title="Unduh PDF peta"
       >
         {mengunduh ? <Loader2 className="w-5 h-5 animate-spin" /> : <Download className="w-5 h-5" />}
       </button>
@@ -252,27 +263,65 @@ const KontrolPeta = ({
           onClick={() => {
             setPanelAktif(null);
             if (modeUkur) setModeUkur?.(false);
+            asisten(false);
             onTur();
           }}
-          className="bg-white/90 backdrop-blur-md border border-slate-200 rounded-lg p-2.5 shadow-sm text-slate-600 hover:text-sky-600 hover:border-sky-300 transition-all flex items-center justify-center"
-          title="Tur Peta"
+          className={kelasTombol(false)}
+          title="Tur peta"
         >
           <CircleHelp className="w-5 h-5" />
         </button>
       )}
+
+      <button
+        type="button"
+        data-tur="asisten"
+        onClick={() => {
+          setPanelAktif(null);
+          if (modeUkur) setModeUkur?.(false);
+          asisten(!asistenBuka);
+        }}
+        aria-label={asistenBuka ? 'Tutup asisten' : 'Buka asisten'}
+        aria-expanded={asistenBuka}
+        title="Asisten KKP"
+        className={`relative ${TOMBOL} ${asistenBuka ? 'bg-kkp-900 border-kkp-900' : 'bg-kkp-800 border-kkp-800 hover:bg-kkp-900'} text-white`}
+      >
+        {asistenBuka ? <X className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+        {!asistenBuka && (
+          <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-kkp-toska ring-2 ring-white" aria-hidden="true" />
+        )}
+      </button>
 
       </div>
       </div>
 
       <PenandaTujuan tujuan={tujuan} onTutup={() => setTujuan(null)} />
 
-      <div ref={refKompas} data-tur="kompas" className="absolute bottom-6 right-6 z-[1000] bg-white/90 backdrop-blur-md border border-slate-200 rounded-full p-2 shadow-sm w-16 h-16 flex items-center justify-center">
-        <Compass className="w-5 h-5 text-sky-600 absolute drop-shadow-sm" />
-        
-        <button onClick={() => handlePan('U')} className="absolute top-0 text-[10px] font-bold text-slate-500 hover:text-sky-600 hover:-translate-y-0.5 transition-all p-1" title="Utara">U</button>
-        <button onClick={() => handlePan('S')} className="absolute bottom-0 text-[10px] font-bold text-slate-500 hover:text-sky-600 hover:translate-y-0.5 transition-all p-1" title="Selatan">S</button>
-        <button onClick={() => handlePan('T')} className="absolute right-1 text-[10px] font-bold text-slate-500 hover:text-sky-600 hover:translate-x-0.5 transition-all p-1" title="Timur">T</button>
-        <button onClick={() => handlePan('B')} className="absolute left-1 text-[10px] font-bold text-slate-500 hover:text-sky-600 hover:-translate-x-0.5 transition-all p-1" title="Barat">B</button>
+      <div
+        ref={refKompas}
+        data-tur="kompas"
+        className="absolute bottom-6 right-6 z-[1000] h-[72px] w-[72px] rounded-full bg-white/95 shadow-md ring-1 ring-slate-200 backdrop-blur-md"
+      >
+        <svg viewBox="0 0 72 72" className="absolute inset-0 h-full w-full" aria-hidden="true">
+          <circle cx="36" cy="36" r="22" fill="none" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="1.2 4.56" />
+          <circle cx="36" cy="36" r="22" fill="none" stroke="#e7effa" strokeWidth="5" opacity="0.6" />
+          <path d="M36 17 L40.5 36 L31.5 36 Z" fill="#004584" />
+          <path d="M36 55 L40.5 36 L31.5 36 Z" fill="#cbd5e1" />
+          <circle cx="36" cy="36" r="2.6" fill="#ffffff" stroke="#004584" strokeWidth="1.4" />
+        </svg>
+        {ARAH.map(([huruf, nama, posisi, warna]) => (
+          <button
+            key={huruf}
+            type="button"
+            onClick={() => handlePan(huruf)}
+            title={`Geser peta ke ${nama.toLowerCase()}`}
+            aria-label={`Geser peta ke ${nama.toLowerCase()}`}
+            className={`absolute ${posisi} grid h-5 w-5 place-items-center rounded-full text-[10px] font-bold ${warna}
+                        hover:bg-kkp-100 hover:text-kkp-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kkp-700/40`}
+          >
+            {huruf}
+          </button>
+        ))}
       </div>
     </>
   );
