@@ -10,8 +10,10 @@ import PenandaTujuan from './PenandaTujuan';
 import { mulaiMemuat } from '../OverlayMemuat';
 import { unduhPdfPeta } from '../../utils/pdfPetaSpasial';
 
-const TOMBOL = 'grid place-items-center rounded-xl border p-2.5 shadow-sm backdrop-blur-md transition-colors '
-  + 'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kkp-700/40';
+const TOMBOL = 'grid h-11 w-11 [@media(max-height:760px)]:h-9 [@media(max-height:760px)]:w-9 shrink-0 place-items-center '
+  + 'rounded-xl border shadow-sm backdrop-blur-md transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-kkp-700/40';
+const TOMBOL_ZOOM = 'grid h-9 [@media(max-height:760px)]:h-7 w-full place-items-center rounded-lg text-slate-600 hover:text-kkp-700 '
+  + 'hover:bg-kkp-100/60 transition-colors';
 const kelasTombol = (aktif, warnaAktif = 'bg-kkp-800 border-kkp-800') => `${TOMBOL} ${
   aktif ? `${warnaAktif} text-white` : 'bg-white/95 border-slate-200 text-slate-600 hover:text-kkp-700 hover:border-kkp-200'
 }`;
@@ -129,19 +131,19 @@ const KontrolPeta = ({
 
   return (
     <>
-      <div className="pointer-events-none absolute right-6 top-4 bottom-[104px] z-[1100] flex items-center">
+      <div className="pointer-events-none absolute right-4 sm:right-6 top-20 bottom-[104px] z-[1100] flex items-center">
       <div
         ref={refKontrol}
         data-tur="alat"
-        className="pointer-events-auto flex flex-col gap-4 [@media(max-height:760px)]:gap-2 [@media(max-height:760px)]:[&>button]:p-2 [@media(max-height:760px)]:[&>div>button]:p-2"
+        className="pointer-events-auto flex max-h-full flex-col flex-wrap-reverse gap-4 [@media(max-height:760px)]:gap-1.5"
       >
 
-        <div data-tur="zoom" className="bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl p-1 shadow-sm flex flex-col">
-          <button onClick={handleZoomIn} className="p-2 text-slate-600 hover:text-kkp-700 hover:bg-kkp-100/60 rounded-lg transition-colors" title="Perbesar peta">
+        <div data-tur="zoom" className="flex w-11 [@media(max-height:760px)]:w-9 shrink-0 flex-col rounded-xl border border-slate-200 bg-white/95 p-1 shadow-sm backdrop-blur-md">
+          <button onClick={handleZoomIn} className={TOMBOL_ZOOM} title="Perbesar peta">
             <Plus className="w-5 h-5" />
           </button>
-          <div className="mx-1.5 h-px bg-slate-200 my-0.5"></div>
-          <button onClick={handleZoomOut} className="p-2 text-slate-600 hover:text-kkp-700 hover:bg-kkp-100/60 rounded-lg transition-colors" title="Perkecil peta">
+          <div className="mx-1 h-px bg-slate-200 my-0.5"></div>
+          <button onClick={handleZoomOut} className={TOMBOL_ZOOM} title="Perkecil peta">
             <Minus className="w-5 h-5" />
           </button>
         </div>
@@ -300,7 +302,7 @@ const KontrolPeta = ({
       <div
         ref={refKompas}
         data-tur="kompas"
-        className="absolute bottom-6 right-6 z-[1000] h-[72px] w-[72px] rounded-full bg-white/95 shadow-md ring-1 ring-slate-200 backdrop-blur-md"
+        className="absolute bottom-6 right-4 sm:right-6 z-[1000] h-[72px] w-[72px] rounded-full bg-white/95 shadow-md ring-1 ring-slate-200 backdrop-blur-md"
       >
         <svg viewBox="0 0 72 72" className="absolute inset-0 h-full w-full" aria-hidden="true">
           <circle cx="36" cy="36" r="22" fill="none" stroke="#cbd5e1" strokeWidth="1" strokeDasharray="1.2 4.56" />

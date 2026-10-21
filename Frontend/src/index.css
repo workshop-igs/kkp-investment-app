@@ -342,6 +342,12 @@ body {
   box-shadow: 0 2px 6px rgba(15, 23, 42, 0.15);
 }
 
+@media (max-width: 1023px), (max-height: 560px) {
+  .leaflet-control-minimap {
+    display: none;
+  }
+}
+
 @media print {
   html, body, #root {
     height: auto !important;
