@@ -27,7 +27,7 @@ const ADMIN_MENU = {
   ikon: ShieldCheck,
   submenus: [
     { label: 'Dashboard Admin', link: '/admin' },
-    { label: 'Manajemen Pengguna', link: '/admin/users' },
+    { label: 'Pengguna & Peran', link: '/admin/users' },
     { label: 'Proyek Investasi', link: '/admin/pipeline' },
     { label: 'Sektor Investasi', link: '/admin/sectors' },
     { label: 'Pengaturan Analisis', link: '/admin/pengaturan-analisis' },
@@ -102,12 +102,16 @@ const HeaderPeta = () => {
         <div className="absolute inset-x-0 top-0 h-[72px] bg-white/85 backdrop-blur-md border-b border-slate-200/70 pointer-events-auto" />
       )}
 
-      <div className="relative h-[72px] px-3 sm:px-4 lg:px-6 flex items-center justify-between gap-3 max-w-[1800px] mx-auto">
+      <div
+        className={`relative h-[72px] flex items-center justify-between gap-3 ${
+          diPeta ? 'pl-4 pr-4 sm:pr-6' : 'px-3 sm:px-4 lg:px-6 max-w-[1800px] mx-auto'
+        }`}
+      >
         <Link
           to="/"
-          className={`pointer-events-auto flex min-w-0 items-center gap-2.5 group ${FOKUS} ${diPeta ? `${UBIN} py-1.5 pl-1.5 pr-3.5` : 'rounded-xl'}`}
+          className={`pointer-events-auto flex min-w-0 items-center gap-3 group ${FOKUS} ${diPeta ? `${UBIN} h-[52px] pl-2.5 pr-4` : 'rounded-xl'}`}
         >
-          <img src="/logo-kkp.png" alt="Logo KKP" className="w-10 h-10 shrink-0 object-contain group-hover:scale-105 transition-transform" />
+          <img src="/logo-kkp.png" alt="Logo KKP" className="w-9 h-9 shrink-0 object-contain group-hover:scale-105 transition-transform" />
           <div className="flex min-w-0 flex-col">
             <span className="text-kkp-900 font-bold text-sm sm:text-base xl:text-sm 2xl:text-base leading-tight tracking-tight md:whitespace-nowrap">
               KEMENTERIAN KELAUTAN DAN PERIKANAN
@@ -120,7 +124,7 @@ const HeaderPeta = () => {
 
         <nav
           data-tur="menu"
-          className={`${isAuthenticated ? 'hidden xl:flex' : 'hidden lg:flex'} pointer-events-auto items-center gap-0.5 p-1 ${
+          className={`${isAuthenticated ? 'hidden xl:flex' : 'hidden lg:flex'} pointer-events-auto h-[52px] items-center gap-0.5 p-[5px] ${
             diPeta ? UBIN : 'rounded-2xl border border-slate-200/70 bg-slate-100/80'
           }`}
         >
@@ -173,7 +177,7 @@ const HeaderPeta = () => {
             <div className="relative" ref={userMenuRef}>
               <button
                 onClick={() => setUserMenuOpen((prev) => !prev)}
-                className={`flex h-12 items-center gap-2.5 pl-1.5 pr-2.5 transition-colors ${FOKUS} ${
+                className={`flex h-[52px] items-center gap-2.5 pl-2 pr-2.5 transition-colors ${FOKUS} ${
                   diPeta ? `${UBIN} hover:bg-white` : 'rounded-2xl hover:bg-slate-100'
                 }`}
                 aria-expanded={userMenuOpen}
@@ -247,7 +251,7 @@ const HeaderPeta = () => {
               )}
             </div>
           ) : (
-            <div className={`flex items-center gap-1 ${diPeta ? `${UBIN} p-1` : ''}`}>
+            <div className={`flex items-center gap-1 ${diPeta ? `${UBIN} h-[52px] p-[5px]` : ''}`}>
               <Link
                 to="/register"
                 className={`hidden sm:inline-flex h-10 items-center gap-1.5 px-3.5 text-xs font-semibold text-slate-700 hover:text-kkp-800 hover:bg-slate-100 rounded-xl transition-colors ${FOKUS}`}
@@ -267,7 +271,7 @@ const HeaderPeta = () => {
 
           <button
             onClick={() => setMobileMenuOpen((prev) => !prev)}
-            className={`${sembunyiKecil} grid h-12 w-12 place-items-center text-slate-700 transition-colors ${FOKUS} ${
+            className={`${sembunyiKecil} grid h-[52px] w-[52px] place-items-center text-slate-700 transition-colors ${FOKUS} ${
               diPeta ? `${UBIN} hover:bg-white` : 'rounded-2xl hover:bg-slate-100'
             }`}
             aria-label={mobileMenuOpen ? 'Tutup menu' : 'Buka menu'}

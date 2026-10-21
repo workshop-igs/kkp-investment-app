@@ -24,12 +24,11 @@ def cek_basis_data():
         with connection.cursor() as c:
             c.execute('SELECT 1')
     except Exception as e:
-        return _hasil('Basis data', MERAH, 'tidak terhubung',
-                      f'PostgreSQL tidak dapat diakses ({type(e).__name__}); aplikasi tidak bisa membaca atau menyimpan data.')
+        logger.warning(f'[KESEHATAN] Basis data gagal: {type(e).__name__}: {e}')
+        return _hasil('Basis data', MERAH, 'tidak terhubung', 'Data tidak bisa dibaca atau disimpan.')
     ms = (time.perf_counter() - mulai) * 1000
     if ms > 500:
-        return _hasil('Basis data', KUNING, f'{ms:.0f} ms',
-                      'Basis data lambat merespons; halaman dan analisis akan terasa lambat.')
+        return _hasil('Basis data', KUNING, f'{ms:.0f} ms', 'Lambat merespons; halaman dan analisis terasa lambat.')
     return _hasil('Basis data', HIJAU, f'{ms:.0f} ms')
 
 
@@ -42,16 +41,14 @@ def cek_redis():
         klien.ping()
         ms = (time.perf_counter() - mulai) * 1000
     except Exception as e:
-        return _hasil('Redis', MERAH, 'tidak merespons',
-                      f'Redis tidak terjangkau ({type(e).__name__}); antrean tugas latar berhenti dan simpanan '
-                      'cache tidak dipakai sehingga aplikasi lebih lambat.')
-    return _hasil('Redis', HIJAU, f'{ms:.0f} ms')
+        logger.warning(f'[KESEHATAN] Redis gagal: {type(e).__name__}: {e}')
+        return _hasil('Antrean tugas', MERAH, 'tidak berjalan', 'Hitung ulang tertunda dan aplikasi lebih lambat.')
+    return _hasil('Antrean tugas', HIJAU, f'{ms:.0f} ms')
 
 
 def cek_celery(redis_hidup):
     if not redis_hidup:
-        return _hasil('Worker Celery', MERAH, 'tidak dapat diperiksa',
-                      'Worker Celery tidak bisa menerima tugas karena Redis mati.')
+        return _hasil('Pekerja latar', MERAH, 'tidak dapat diperiksa', 'Menunggu antrean tugas berjalan kembali.')
     try:
         from kkp_investasi.celery import app
 
@@ -60,10 +57,9 @@ def cek_celery(redis_hidup):
         logger.warning(f'[KESEHATAN] Ping Celery gagal: {type(e).__name__}: {e}')
         balasan = []
     if not balasan:
-        return _hasil('Worker Celery', MERAH, 'tidak berjalan',
-                      'Tidak ada worker Celery yang merespons; hitung ulang skor dan tugas terjadwal tidak diproses. '
-                      'Layanan kkp-celery perlu dijalankan ulang.')
-    return _hasil('Worker Celery', HIJAU, f'{len(balasan)} worker aktif')
+        return _hasil('Pekerja latar', MERAH, 'tidak berjalan',
+                      'Hitung ulang dan tugas terjadwal tertunda; jalankan ulang layanan kkp-celery.')
+    return _hasil('Pekerja latar', HIJAU, f'{len(balasan)} aktif')
 
 
 def cek_cpu():
@@ -74,13 +70,10 @@ def cek_cpu():
     persen = satu / inti * 100
     nilai = f'{persen:.0f}% ({inti} inti)'
     if satu / inti >= 1.5 and lima / inti >= 1.2:
-        return _hasil('Beban CPU', MERAH, nilai,
-                      f'VPS overload: beban CPU {persen:.0f}% dari kapasitas {inti} inti selama beberapa menit; '
-                      'aplikasi lambat atau tidak merespons.')
+        return _hasil('Beban server', MERAH, nilai, 'Server kelebihan beban; aplikasi lambat atau tidak merespons.')
     if satu / inti >= 0.9:
-        return _hasil('Beban CPU', KUNING, nilai,
-                      f'Beban CPU tinggi ({persen:.0f}% dari kapasitas); bila berlanjut VPS akan kewalahan.')
-    return _hasil('Beban CPU', HIJAU, nilai)
+        return _hasil('Beban server', KUNING, nilai, 'Beban server tinggi; bila berlanjut aplikasi melambat.')
+    return _hasil('Beban server', HIJAU, nilai)
 
 
 def cek_memori():
@@ -93,10 +86,9 @@ def cek_memori():
     persen = (1 - tersedia / total) * 100
     nilai = f'{persen:.0f}% dari {total / 1024 / 1024:.1f} GB'
     if persen >= 95:
-        return _hasil('Memori', MERAH, nilai,
-                      f'Memori VPS hampir habis ({persen:.0f}%); sistem bisa menghentikan proses aplikasi secara paksa.')
+        return _hasil('Memori', MERAH, nilai, 'Hampir habis; aplikasi bisa terhenti.')
     if persen >= 85:
-        return _hasil('Memori', KUNING, nilai, f'Pemakaian memori tinggi ({persen:.0f}%).')
+        return _hasil('Memori', KUNING, nilai, 'Pemakaian memori tinggi.')
     return _hasil('Memori', HIJAU, nilai)
 
 
@@ -108,10 +100,9 @@ def cek_disk():
     persen = d.used / d.total * 100
     nilai = f'{persen:.0f}% dari {d.total / 1024 ** 3:.0f} GB'
     if persen >= 95:
-        return _hasil('Ruang disk', MERAH, nilai,
-                      f'Disk hampir penuh ({persen:.0f}%); unggahan berkas dan penulisan basis data bisa gagal.')
+        return _hasil('Ruang disk', MERAH, nilai, 'Hampir penuh; unggahan dan penyimpanan data bisa gagal.')
     if persen >= 85:
-        return _hasil('Ruang disk', KUNING, nilai, f'Disk mulai penuh ({persen:.0f}%); kosongkan ruang sebelum habis.')
+        return _hasil('Ruang disk', KUNING, nilai, 'Mulai penuh; kosongkan ruang sebelum habis.')
     return _hasil('Ruang disk', HIJAU, nilai)
 
 
@@ -126,11 +117,9 @@ def cek_akses_ditolak():
     nilai = f'{jumlah} dalam 15 menit'
     if gagal_masuk >= 50:
         return _hasil('Akses ditolak', MERAH, nilai,
-                      f'{gagal_masuk} percobaan masuk gagal dalam 15 menit; kemungkinan serangan tebak kata sandi. '
-                      'Periksa Log Aktivitas.')
+                      f'{gagal_masuk} percobaan masuk gagal; kemungkinan tebak kata sandi. Periksa Log Aktivitas.')
     if jumlah >= 50:
-        return _hasil('Akses ditolak', KUNING, nilai,
-                      f'{jumlah} upaya akses ditolak dalam 15 menit, di atas kewajaran. Periksa Log Aktivitas.')
+        return _hasil('Akses ditolak', KUNING, nilai, 'Akses ditolak di atas kewajaran. Periksa Log Aktivitas.')
     return _hasil('Akses ditolak', HIJAU, nilai)
 
 
@@ -141,11 +130,10 @@ def cek_hitung_ulang():
     if s is None:
         return None
     if s.berjalan:
-        return _hasil('Hitung ulang skor', HIJAU, f'berjalan {s.ke}/{s.dari}')
+        return _hasil('Hitung ulang', HIJAU, f'berjalan {s.ke}/{s.dari}')
     if s.galat:
-        return _hasil('Hitung ulang skor', KUNING, 'gagal',
-                      f'Hitung ulang skor terakhir gagal: {s.galat.strip().splitlines()[-1][:200]}')
-    return _hasil('Hitung ulang skor', HIJAU, 'selesai' if s.selesai else 'siaga')
+        return _hasil('Hitung ulang', KUNING, 'gagal', f'Hitung ulang terakhir gagal: {s.galat.strip().splitlines()[-1][:200]}')
+    return _hasil('Hitung ulang', HIJAU, 'selesai' if s.selesai else 'siaga')
 
 
 def periksa_semua():

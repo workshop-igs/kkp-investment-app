@@ -269,8 +269,8 @@ const AdminSectorsPage = () => {
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 font-syne">Master Data Sektor Investasi</h1>
-          <p className="text-slate-500 text-sm mt-1">Kelola daftar jenis investasi yang dapat dipilih pengguna saat menganalisis lokasi.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Sektor Investasi</h1>
+          <p className="text-slate-500 text-sm mt-1">Jenis investasi yang bisa dipilih saat menganalisis lokasi.</p>
         </div>
         {!baru && (
           <button

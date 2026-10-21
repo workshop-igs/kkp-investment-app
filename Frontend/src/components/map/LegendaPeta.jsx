@@ -330,13 +330,7 @@ const LegendaDisarankan = ({ sektor, onPilih }) => {
           />
           Titik berwarna ganda cocok untuk beberapa jenis
         </li>
-        <li className="pl-5">
-          Klik titik lalu Analisis lokasi ini untuk memuat batas lokasinya, atau gambar area sendiri.
-        </li>
-        <li className="pl-5">
-          Skala nasional menampilkan lokasi dengan skor mutu tertinggi; Konservasi &amp; Rehabilitasi Pesisir tampil bila
-          dipilih.
-        </li>
+        <li className="pl-5">Konservasi &amp; Rehabilitasi Pesisir tampil bila jenisnya dipilih.</li>
       </ul>
     </div>
   );

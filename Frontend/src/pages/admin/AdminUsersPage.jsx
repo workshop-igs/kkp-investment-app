@@ -201,8 +201,8 @@ const AdminUsersPage = () => {
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 font-syne">Manajemen Pengguna</h1>
-          <p className="text-slate-500 text-sm mt-1">Kelola akses, peran, dan status akun pengguna platform.</p>
+          <h1 className="text-2xl font-bold text-slate-900">Pengguna &amp; Peran</h1>
+          <p className="text-slate-500 text-sm mt-1">Kelola akun, peran, dan status pengguna.</p>
         </div>
         {!formAdmin && (
           <button
