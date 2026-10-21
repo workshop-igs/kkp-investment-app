@@ -357,7 +357,8 @@ const KriteriaSubSektor = ({ s }) => {
         Setelah lolos matriks Perda, tiap sub-sektor dinilai dengan kriterianya sendiri. Area cocok bila semua kriteria
         yang terukur memenuhi syarat dan sedikitnya separuh kriterianya terukur; kriteria tanpa data dilewati. Kolom
         Unggulan memuat batas lokasi unggulan yang dipakai Peta Sebaran: area unggulan bila semua kriteria yang datanya
-        tersedia terukur dan memenuhinya. Data global beresolusi kasar, pastikan dengan survei lapangan.
+        tersedia terukur dan memenuhinya, dan skor mutunya (kedekatan nilai ke kondisi ideal, 0–100, dikurangi di zona
+        bersyarat) mencapai batas minimal. Data global beresolusi kasar, pastikan dengan survei lapangan.
       </p>
       {s.sub_sektor.length === 0 && <p className="text-xs leading-snug text-slate-700">{s.kecocokan_fisik?.alasan}</p>}
       <div className="space-y-3">
@@ -371,6 +372,7 @@ const KriteriaSubSektor = ({ s }) => {
                 <span className="font-semibold text-slate-800">{h.nama}</span>
                 <span className="flex items-center gap-2 text-[10.5px] text-slate-500">
                   {h.terukur} dari {h.total} kriteria terukur
+                  {h.unggulan?.skor != null && <span className="tabular-nums">· skor mutu {h.unggulan.skor}</span>}
                   {h.unggulan?.lolos && <Pil kode="DIIZINKAN">Lokasi unggulan</Pil>}
                   <Pil kode={kode}>{label}</Pil>
                 </span>
