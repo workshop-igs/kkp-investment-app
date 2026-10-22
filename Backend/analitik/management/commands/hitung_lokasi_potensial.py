@@ -79,6 +79,20 @@ FROM sel s WHERE s.id = ANY(%s)
 """
 
 
+def siapkan_infra_terbagi(c):
+    c.execute('DROP TABLE IF EXISTS infra_terbagi')
+    c.execute(
+        'CREATE TEMP TABLE infra_terbagi AS SELECT kategori, ST_Subdivide(ST_MakeValid(geometry), 128) AS g '
+        'FROM inventarisasi_infrastruktur_pendukung WHERE ST_Dimension(geometry) > 0 '
+        'UNION ALL SELECT kategori, (ST_Dump(geometry)).geom FROM inventarisasi_infrastruktur_pendukung '
+        'WHERE ST_Dimension(geometry) = 0'
+    )
+    c.execute('SELECT DISTINCT kategori FROM infra_terbagi')
+    for (kategori,) in c.fetchall():
+        c.execute('CREATE INDEX ON infra_terbagi USING gist (g) WHERE kategori = %s', [kategori])
+    c.execute('ANALYZE infra_terbagi')
+
+
 def _di_area(i, kena, dalam):
     return (i in kena) == dalam
 
@@ -128,15 +142,7 @@ class Command(BaseCommand):
                     'FROM inti_provinsi WHERE geometry IS NOT NULL'
                 )
                 c.execute('CREATE INDEX ON pantai_terbagi USING gist (g)')
-            c.execute('DROP TABLE IF EXISTS infra_terbagi')
-            c.execute(
-                'CREATE TEMP TABLE infra_terbagi AS SELECT kategori, ST_Subdivide(ST_MakeValid(geometry), 128) AS g '
-                'FROM inventarisasi_infrastruktur_pendukung'
-            )
-            c.execute('SELECT DISTINCT kategori FROM infra_terbagi')
-            for (kategori,) in c.fetchall():
-                c.execute('CREATE INDEX ON infra_terbagi USING gist (g) WHERE kategori = %s', [kategori])
-            c.execute('ANALYZE infra_terbagi')
+            siapkan_infra_terbagi(c)
         total = Counter()
         daftar = list(provinsi)
         for i, prov in enumerate(daftar, 1):
