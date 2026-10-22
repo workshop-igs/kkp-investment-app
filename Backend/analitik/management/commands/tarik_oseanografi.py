@@ -15,7 +15,6 @@ from django.db import transaction
 from analitik.management.commands.muat_raster import catatan_isi, isi_celah
 from analitik.models import RasterOseanografi
 from analitik.services.konstanta import BULAN
-from analitik.services.pengaturan import atur
 
 ERDDAP = 'https://upwell.pfeg.noaa.gov/erddap/griddap'
 COASTWATCH = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap'
@@ -74,29 +73,7 @@ PARAMETER = {
         'waktu': '[last-11:1:last]', 'resolusi': 1 / 24, 'langkah': 3, 'bulanan': True, 'isi_kosong': 2,
         'sumber': 'NASA MODIS-Aqua koefisien atenuasi Kd490 bulanan (R2022) via NOAA ERDDAP, 12 bulan terakhir',
     },
-    'CURAH_HUJAN': {
-        'server': COASTWATCH, 'dataset': 'chirps20GlobalMonthlyP05', 'variabel': 'precip', 'satuan': 'mm/bulan',
-        'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'bulanan': True, 'per_bulan': True,
-        'sumber': 'CHIRPS v2.0 curah hujan bulanan (0,05°, dicuplik 0,1°) via NOAA ERDDAP, 12 bulan terakhir',
-    },
 }
-
-BULAN_KERING = {
-    'satuan': 'bulan',
-    'sumber': 'Dihitung dari CHIRPS v2.0: rangkaian bulan berturut-turut terpanjang dengan curah hujan di bawah ambang '
-              'bulan kering dalam 12 bulan terakhir',
-}
-
-
-def kering_berturut(bulanan, ambang):
-    kering = np.asarray(bulanan) < ambang
-    if kering.all():
-        return float(len(kering))
-    terpanjang = jalan = 0
-    for k in np.concatenate([kering, kering]):
-        jalan = jalan + 1 if k else 0
-        terpanjang = max(terpanjang, jalan)
-    return float(terpanjang)
 
 
 def _unduh(url, percobaan=6):
@@ -165,7 +142,7 @@ def _raster(sel, resolusi, pita, isi_kosong=0):
 
 class Command(BaseCommand):
     help = ('Tarik kondisi oseanografi (suhu permukaan dan anomalinya, klorofil-a, kekeruhan Kd490, tinggi dan periode '
-            'gelombang) serta curah hujan CHIRPS dari NOAA ERDDAP ke raster lokal. Kedalaman: tarik_data_publik.')
+            'gelombang) dari NOAA ERDDAP ke raster lokal. Kedalaman dan curah hujan: tarik_data_publik.')
 
     def add_arguments(self, parser):
         parser.add_argument('--parameter', choices=list(PARAMETER), action='append',
@@ -196,9 +173,7 @@ class Command(BaseCommand):
             teks = _unduh(url)
             if teks:
                 break
-        sel, waktu, satuan = _grid(teks, p['variabel'])
-        if p.get('per_bulan') and 'day' in satuan.lower():
-            sel = {k: [x * 30.44 for x in v] for k, v in sel.items()}
+        sel, waktu, _ = _grid(teks, p['variabel'])
         isi = p.get('isi_kosong', 0)
         rast, cakupan = _raster(sel, p['resolusi'] * langkah, [np.mean, np.min, np.max], isi)
         if isi:
@@ -207,9 +182,4 @@ class Command(BaseCommand):
         with transaction.atomic():
             RasterOseanografi.objects.filter(parameter=kode).delete()
             self._simpan(kode, p, rast, cakupan, periode)
-            if kode == 'CURAH_HUJAN':
-                ambang = atur('AMBANG_BULAN_KERING_MM')
-                kering, cakupan = _raster(sel, p['resolusi'] * langkah, [lambda a: kering_berturut(a, ambang)])
-                RasterOseanografi.objects.filter(parameter='BULAN_KERING').delete()
-                self._simpan('BULAN_KERING', BULAN_KERING, kering, cakupan, periode)
         return 1

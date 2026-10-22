@@ -1,7 +1,8 @@
 import math
 import time
-from collections import Counter
+from collections import Counter, defaultdict
 from functools import partial
+from itertools import zip_longest
 
 import numpy as np
 from django.contrib.gis.geos import GEOSGeometry
@@ -14,21 +15,24 @@ from analitik.services import pengecualian
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
     KM_PER_DERAJAT,
+    KRITERIA_PELENGKAP,
     SEKTOR_TERSENDIRI_DI_PETA,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
 from analitik.services.kriteria import (
     BENCANA,
+    KARANG,
     PARAMETER,
     RASTER_DATA,
+    cek,
     dari_raster,
-    data_ada,
+    karang_dari_jarak,
     kedekatan,
-    lulus,
     sumber_tersedia,
     syarat_unggulan,
     teks_ambang,
     teks_nilai,
+    wajib,
 )
 from analitik.services.oseanografi import nilai_titik
 from analitik.services.parameter_tambahan import sesuai_ambang
@@ -158,6 +162,7 @@ class Command(BaseCommand):
                     f'  {prov.nama:28s} {sum(jumlah.values()):6d} lokasi ({time.time() - t:.0f} dtk) {dict(jumlah)}'
                 )
         self.stdout.write(self.style.SUCCESS(f'Lokasi per jenis: {dict(total.most_common())}'))
+        self._seleksi_nasional()
 
     def _provinsi(self, prov):
         zona = {
@@ -248,6 +253,19 @@ class Command(BaseCommand):
         for i, jenis in c.fetchall():
             d['ekosistem'][i] = frozenset(jenis)
 
+        if 'karang' in dipakai and 'TERUMBU_KARANG' in d['tersedia']:
+            c.execute('DROP TABLE IF EXISTS karang_terbagi')
+            c.execute(
+                f'CREATE TEMP TABLE karang_terbagi AS SELECT ST_Subdivide(ST_MakeValid(geometry), 128) AS g '
+                f'FROM inventarisasi_sumber_daya_alam WHERE {KARANG} AND geometry && ST_Expand(%s::geometry, %s)',
+                [cakupan, atur('KARANG_TERPETAKAN_KM') / KM_PER_DERAJAT],
+            )
+            c.execute('CREATE INDEX ON karang_terbagi USING gist (g)')
+            c.execute(TERDEKAT.format(kolom='kotak', tabel='karang_terbagi', saring=''), [calon])
+            d['karang'] = [None] * (banyak + 1)
+            for i, jarak in c.fetchall():
+                d['karang'][i] = karang_dari_jarak(None if jarak is None else jarak * KM_PER_DERAJAT)
+
         km = {}
         for kategori in sorted({k for kunci in dipakai if isinstance(PARAMETER[kunci][2], tuple)
                                 for k in PARAMETER[kunci][2]} & d['tersedia']):
@@ -321,14 +339,20 @@ class Command(BaseCommand):
             'SELECT DISTINCT s.id FROM sel s JOIN unsur_sel u ON u.g && s.kotak AND ST_Intersects(u.g, s.kotak) '
             "AND u.kode <> 'ALUR_PELAYARAN'"
         )
-        d['adat'] = himpunan(
-            "SELECT DISTINCT s.id FROM sel s JOIN inventarisasi_unsur_ruang_laut u ON u.kelompok = 'MHA' "
-            'AND u.geometry && s.kotak AND ST_Intersects(u.geometry, s.kotak)'
-        )
         radius = atur('RADIUS_ADAT_DEKAT_M') / 1000 / KM_PER_DERAJAT
+        c.execute('DROP TABLE IF EXISTS adat_terbagi')
+        c.execute(
+            "CREATE TEMP TABLE adat_terbagi AS SELECT ST_Subdivide(ST_MakeValid(geometry), 128) AS g "
+            "FROM inventarisasi_unsur_ruang_laut WHERE kelompok = 'MHA' AND geometry && ST_Expand(%s::geometry, %s)",
+            [cakupan, radius],
+        )
+        c.execute('CREATE INDEX ON adat_terbagi USING gist (g)')
+        d['adat'] = himpunan(
+            'SELECT DISTINCT s.id FROM sel s JOIN adat_terbagi u ON u.g && s.kotak AND ST_Intersects(u.g, s.kotak)'
+        )
         d['adat_dekat'] = himpunan(
-            "SELECT DISTINCT s.id FROM sel s JOIN inventarisasi_unsur_ruang_laut u ON u.kelompok = 'MHA' "
-            'AND u.geometry && ST_Expand(s.kotak, %s) AND ST_DWithin(u.geometry, s.kotak, %s)',
+            'SELECT DISTINCT s.id FROM sel s JOIN adat_terbagi u '
+            'ON u.g && ST_Expand(s.kotak, %s) AND ST_DWithin(u.g, s.kotak, %s)',
             [radius, radius],
         ) - d['adat']
         c.execute(
@@ -403,25 +427,23 @@ class Command(BaseCommand):
 
     @staticmethod
     def _nilai_kriteria(kunci, i, d):
-        if kunci == 'karang':
-            return int('TERUMBU_KARANG' in (d['ekosistem'][i] or ())) if 'TERUMBU_KARANG' in d['tersedia'] else None
         v = d[kunci][i] if kunci in d else None
         return None if v is None else round(v, 2)
 
     @staticmethod
-    def _cocok(kriteria, layak, nilai, bencana, tambahan, wajib, minimal):
-        terukur = 0
-        for (_, ambang), v, harus in zip(kriteria, nilai, wajib):
-            if v is None:
-                if harus:
+    def _cocok(kriteria, layak, nilai, bencana, tambahan, harus, minimal):
+        mutu = []
+        for (k, ambang), v, perlu, batas in zip(kriteria, nilai, harus, layak):
+            hasil = cek(k, v, ambang)
+            if hasil is False:
+                return None
+            if hasil is None:
+                if perlu and v is None:
                     return None
                 continue
-            if not lulus(v, ambang):
-                return None
-            terukur += 1
-        if terukur < minimal or any(kelas == 'TINGGI' for _, kelas in bencana) or False in tambahan:
+            mutu.append(kedekatan(k, v, ambang, batas))
+        if len(mutu) < minimal or any(kelas == 'TINGGI' for _, kelas in bencana) or False in tambahan:
             return None
-        mutu = [kedekatan(k, v, ambang, batas) for (k, ambang), v, batas in zip(kriteria, nilai, layak) if v is not None]
         return 100 * sum(mutu) / len(mutu) if mutu else 0.0
 
     def _nilai_sel(self, sektor, sub, zona, status, d):
@@ -433,7 +455,7 @@ class Command(BaseCommand):
         ekosistem_terlarang = pengecualian.ekosistem_terlarang(sektor.kode)
         kriteria = list(syarat_unggulan(sub).items())
         layak = tuple(sub['kriteria'].get(k) for k, _ in kriteria)
-        wajib = tuple(data_ada(k, d['tersedia']) for k, _ in kriteria)
+        harus = tuple(wajib(k, d['tersedia']) for k, _ in kriteria)
         minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
         bobot, skor_minimal = atur('BOBOT_RUANG_BERSYARAT'), atur('SKOR_MINIMAL_LOKASI_UNGGULAN')
         khusus = {r: any(status[(z, sektor.kode)] == 'DIIZINKAN' for z in zona if zona[z][3] == r) for r in sub['ranah']}
@@ -455,7 +477,7 @@ class Command(BaseCommand):
                 tuple(f(i) for f in dinilai),
             )
             if kunci not in tembolok:
-                tembolok[kunci] = self._cocok(kriteria, layak, *kunci, wajib, minimal)
+                tembolok[kunci] = self._cocok(kriteria, layak, *kunci, harus, minimal)
             if tembolok[kunci] is None:
                 continue
             skor = tembolok[kunci] * (bobot if 'BERSYARAT' in st and khusus[next(iter(ranah))] else 1)
@@ -496,10 +518,17 @@ class Command(BaseCommand):
         return max(blok.values(), key=lambda sel: self._mutu(sel, lolos))
 
     @staticmethod
+    def _bergiliran(calon):
+        per_sub = defaultdict(list)
+        for c in sorted(calon, key=lambda c: c[0], reverse=True):
+            per_sub[c[3][2]].append(c)
+        return [c for giliran in zip_longest(*per_sub.values()) for c in giliran if c]
+
+    @staticmethod
     def _tersebar(calon):
         batas = (atur('JARAK_ANTAR_LOKASI_KM') / KM_PER_DERAJAT) ** 2
         pusat, hasil = [], []
-        for _, x, y, isi in sorted(calon, key=lambda c: c[0], reverse=True):
+        for _, x, y, isi in calon:
             if all((x - a) ** 2 + (y - b) ** 2 >= batas for a, b in pusat):
                 pusat.append((x, y))
                 hasil.append(isi)
@@ -519,7 +548,7 @@ class Command(BaseCommand):
                         sum(d['ij'][i][1] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
                         (sel, len(w), sub_kode, sub, lolos),
                     ))
-            inti = self._tersebar(calon)
+            inti = self._tersebar(self._bergiliran(calon))[:atur('MAKS_LOKASI_PER_PROVINSI')]
             if not inti:
                 continue
             c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for t in inti for i in t[0]]])
@@ -541,8 +570,9 @@ class Command(BaseCommand):
             rata = sum(nilai) / len(nilai) if nilai else None
             mutu = kedekatan(kunci, rata, ambang, sub['kriteria'].get(kunci))
             kriteria.append({'label': PARAMETER[kunci][0], 'nilai_teks': teks_nilai(kunci, rata),
-                             'ambang_teks': teks_ambang(kunci, ambang), 'lulus': True if nilai else None,
-                             'mutu': None if mutu is None else round(100 * mutu)})
+                             'ambang_teks': teks_ambang(kunci, ambang), 'lulus': cek(kunci, rata, ambang),
+                             'mutu': None if mutu is None else round(100 * mutu),
+                             'pelengkap': kunci in KRITERIA_PELENGKAP})
         terukur = sum(k['lulus'] is True for k in kriteria)
         bencana = {jenis for i in sel for jenis, _ in lolos[i][2]}
         kriteria += [{'label': label, 'nilai_teks': None, 'ambang_teks': 'rendah–sedang', 'lulus': True}
@@ -587,10 +617,31 @@ class Command(BaseCommand):
         for g in gabungan.values():
             urut = sorted(g['anggota'], key=lambda lok: -lok.persen_sesuai)
             jenis = list(dict.fromkeys(lok.sektor.kode for lok in urut))
-            sub = list(dict.fromkeys((lok.rincian['sub_sektor'], lok.sektor.kode) for lok in urut))
+            sub = list(dict.fromkeys((lok.rincian.get('sub_sektor') or lok.sektor.nama, lok.sektor.kode) for lok in urut))
             calon.append(((urut[0].persen_sesuai, len(sub), g['luas']), g['x'], g['y'], LokasiPotensial(
                 sektor=None, provinsi=prov, geometry=GEOSGeometry(memoryview(g['geom'])), luas_ha=g['luas'],
                 persen_sesuai=urut[0].persen_sesuai, jenis=jenis,
                 rincian={**urut[0].rincian, 'jenis_nama': [n for n, _ in sub], 'jenis_sub': [k for _, k in sub]},
             )))
-        return self._tersebar(calon)
+        return self._tersebar(sorted(calon, key=lambda c: c[0], reverse=True))
+
+    def _seleksi_nasional(self):
+        per_sub = defaultdict(lambda: defaultdict(list))
+        for i, sektor, sub, skor in LokasiPotensial.objects.exclude(sektor=None).values_list(
+                'id', 'sektor_id', 'rincian__sub_sektor_kode', 'persen_sesuai'):
+            per_sub[sektor][sub].append((-skor, i))
+        tampil = []
+        for subs in per_sub.values():
+            giliran = zip_longest(*map(sorted, subs.values()))
+            tampil += [i for kelompok in giliran for _, i in filter(None, kelompok)][:atur('MAKS_LOKASI_NASIONAL')]
+        per_prov = defaultdict(list)
+        for lok in LokasiPotensial.objects.filter(id__in=tampil).select_related('sektor'):
+            if lok.sektor.kode not in SEKTOR_TERSENDIRI_DI_PETA:
+                per_prov[lok.provinsi_id].append(lok)
+        with transaction.atomic(), connection.cursor() as c:
+            LokasiPotensial.objects.exclude(sektor=None).update(tampil=False)
+            LokasiPotensial.objects.filter(id__in=tampil).update(tampil=True)
+            LokasiPotensial.objects.filter(sektor=None).delete()
+            for prov_id, lokasi in per_prov.items():
+                LokasiPotensial.objects.bulk_create(self._semua(c, Provinsi(id=prov_id), lokasi))
+        self.stdout.write(self.style.SUCCESS(f'Lokasi unggulan nasional ditampilkan: {len(tampil)}'))

@@ -21,6 +21,7 @@ from rasterio.features import rasterize, shapes
 from rasterio.warp import Resampling, reproject
 
 from analitik.management.commands.muat_raster import BATAS, catatan_isi, simpan_grid, warp_baca
+from analitik.services.pengaturan import atur
 from inventarisasi.models import InfrastrukturPendukung
 
 KEPALA = {'User-Agent': 'kkp-investasi-ruang-laut/1.0'}
@@ -54,10 +55,13 @@ OBIS = 'https://api.obis.org/v3/checklist'
 RESOLUSI_SHANNON = 0.5
 MINIMAL_SPESIES_SHANNON = 30
 GMW = 'https://zenodo.org/api/records/6894273/files/gmw_v3_f1996_t2020_gtiff.zip/content'
-NILAI_HILANG_GMW = 1
+NILAI_HILANG_GMW = 2
 RESOLUSI_MANGROVE = 0.005
 FRAKSI_EKS_MANGROVE = 0.25
 RESOLUSI_PRODUKSI = 0.01
+CHIRPS = 'https://coastwatch.pfeg.noaa.gov/erddap/griddap/chirps20GlobalMonthlyP05.nc'
+TAHUN_IKLIM = (1991, 2020)
+RESOLUSI_IKLIM = 0.05
 PENDARATAN_TON_HARI = (('Samudera', 60), ('Nusantara', 30), ('Pangkalan Pendaratan', 2))
 PENDARATAN_LAIN_TON_HARI = 5
 SRTM = 'https://upwell.pfeg.noaa.gov/erddap/griddap/srtm15plus.nc'
@@ -150,6 +154,15 @@ def pita(berkas, subdataset):
         return np.array(lapis), r
 
 
+def kering_berturut(bulanan, ambang):
+    kering = np.asarray(bulanan) < ambang
+    jalan = terpanjang = np.zeros(kering.shape[1:])
+    for k in np.concatenate([kering, kering]):
+        jalan = (jalan + 1) * k
+        terpanjang = np.maximum(terpanjang, jalan)
+    return np.minimum(terpanjang, len(kering))
+
+
 def grid_wilayah(resolusi):
     return SimpleNamespace(width=round((BATAS[2] - BATAS[0]) / resolusi), height=round((BATAS[3] - BATAS[1]) / resolusi),
                            origin=(BATAS[0], BATAS[3]), scale=(resolusi, -resolusi))
@@ -169,11 +182,11 @@ def grid_dari(data, acuan, resolusi, metode='average', isi_kosong=0, hanya_laut=
 class Command(BaseCommand):
     help = ('Tarik data publik untuk kriteria kesesuaian per jenis: batimetri dan kemiringan dasar laut (SRTM15+), '
             'kemiringan lahan (Copernicus DEM), PGA gempa (GEM), iradiasi surya (NASA POWER), angin 100 m (Global Wind '
-            'Atlas), tanah liat (SoilGrids), beda suhu permukaan dan 1.000 m (WOA23), serta arus permukaan dan '
-            'salinitas (HYCOM GOFS 3.1).')
+            'Atlas), tanah liat (SoilGrids), beda suhu permukaan dan 1.000 m (WOA23), arus permukaan dan salinitas '
+            '(HYCOM GOFS 3.1), serta curah hujan dan bulan kering normal 1991-2020 (CHIRPS).')
 
     SUMBER = ('BATIMETRI', 'KEMIRINGAN', 'PGA', 'GHI', 'ANGIN_100M', 'TANAH_LIAT', 'BEDA_SUHU_1000M', 'ARUS_SALINITAS',
-              'ARUS_DASAR', 'GELOMBANG_EKSTREM', 'PASUT', 'MUARA', 'ABRASI', 'SHANNON', 'MANGROVE', 'PRODUKSI')
+              'ARUS_DASAR', 'GELOMBANG_EKSTREM', 'PASUT', 'MUARA', 'ABRASI', 'SHANNON', 'MANGROVE', 'PRODUKSI', 'IKLIM')
 
     def add_arguments(self, parser):
         parser.add_argument('--sumber', choices=self.SUMBER, action='append')
@@ -267,6 +280,31 @@ class Command(BaseCommand):
         yield 'TANAH_LIAT', simpan_grid('TANAH_LIAT', data, 0.005, '%',
                                         'ISRIC SoilGrids 2.0, kandungan liat lapisan 0-5 cm, resolusi 250 m dirata-rata ke '
                                         '0,005°')
+
+    def _iklim(self):
+        awal, akhir = TAHUN_IKLIM
+        berkas = paralel([
+            (f'{CHIRPS}?precip[({t}-01-01):1:({t}-12-01)][({BATAS[1]}):1:({BATAS[3]})][({BATAS[0]}):1:({BATAS[2]})]',
+             os.path.join(SIMPANAN, 'chirps', f'{t}.nc'))
+            for t in range(awal, akhir + 1)
+        ])
+        ambang = atur('AMBANG_BULAN_KERING_MM')
+        jumlah = kering = acuan = None
+        for b in berkas:
+            bulanan, acuan = pita(b, 'precip')
+            jumlah = bulanan if jumlah is None else jumlah + bulanan
+            run = np.where(np.isnan(bulanan).all(axis=0), np.nan, kering_berturut(bulanan, ambang))
+            kering = run if kering is None else kering + run
+        periode = f'{awal}-{akhir} (normal iklim 30 tahun)'
+        sumber = f'CHIRPS v2.0 curah hujan bulanan (0,05°) via NOAA ERDDAP, rata-rata {awal}-{akhir}'
+        catatan = f'; tepi pantai tanpa data diisi dari sel darat terdekat sejauh ±{RESOLUSI_IKLIM * 111:.0f} km'
+        yield 'CURAH_HUJAN', simpan_grid(
+            'CURAH_HUJAN', grid_dari(np.mean(jumlah, axis=0) / len(berkas), acuan, RESOLUSI_IKLIM, isi_kosong=1),
+            RESOLUSI_IKLIM, 'mm/bulan', sumber + catatan, periode)
+        yield 'BULAN_KERING', simpan_grid(
+            'BULAN_KERING', grid_dari(kering / len(berkas), acuan, RESOLUSI_IKLIM, isi_kosong=1), RESOLUSI_IKLIM, 'bulan',
+            f'Dihitung dari {sumber}: rata-rata tahunan rangkaian bulan berturut-turut terpanjang dengan curah hujan di '
+            f'bawah ambang bulan kering' + catatan, periode)
 
     def _beda_suhu_1000m(self):
         berkas = unduh(WOA, os.path.join(SIMPANAN, 'woa23_t00_04.nc'))

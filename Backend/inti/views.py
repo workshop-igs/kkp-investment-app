@@ -448,7 +448,7 @@ def dashboard_stats(request):
             'lokasi': r['lokasi'],
             'luas_ha': round(float(r['luas'] or 0), 1),
         }
-        for r in LokasiPotensial.objects.values('provinsi_id', 'provinsi__nama', 'sektor__kode')
+        for r in LokasiPotensial.objects.filter(tampil=True).values('provinsi_id', 'provinsi__nama', 'sektor__kode')
         .annotate(lokasi=Count('id'), luas=Sum('luas_ha')).order_by()
     ]
 
@@ -508,7 +508,8 @@ def ringkasan_publik(request):
         'kkprl_luas_ha': round(float(kkprl['luas'] or 0)),
         'lokasi_potensial': LokasiPotensial.objects.filter(sektor=None).count(),
         'peluang_per_jenis': list(
-            LokasiPotensial.objects.exclude(sektor=None).values(kode=F('sektor__kode'), nama=F('sektor__nama'))
+            LokasiPotensial.objects.filter(tampil=True).exclude(sektor=None)
+            .values(kode=F('sektor__kode'), nama=F('sektor__nama'))
             .annotate(lokasi=Count('id'))
             .order_by('-lokasi')
         ),

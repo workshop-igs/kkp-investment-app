@@ -395,7 +395,9 @@ const KriteriaSubSektor = ({ s }) => {
                     const [kd, tanda, ket] = TANDA_FISIK[k.lulus];
                     return (
                       <tr key={k.kunci}>
-                        <td className="px-3 py-1.5 leading-snug text-slate-700">{k.label}</td>
+                        <td className="px-3 py-1.5 leading-snug text-slate-700">
+                          {k.label}{k.pelengkap && <span className="text-slate-400"> (pelengkap)</span>}
+                        </td>
                         <td className="px-3 py-1.5 tabular-nums text-slate-800">
                           {k.nilai_teks || (k.data_ada === false ? 'belum ada data' : 'tidak terukur')}
                         </td>
