@@ -267,7 +267,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           const nilai = k.nilai_teks ? `: <b class="font-semibold">${aman(k.nilai_teks)}</b>` : k.lulus ? '' : ': belum terukur';
           return `<li class="flex gap-1.5 leading-snug">
              <span class="${kelasTanda} font-bold shrink-0 w-3">${tanda}</span>
-             <span>${aman(k.label)}${nilai} <span class="text-slate-400">(syarat unggulan ${aman(k.ambang_teks)}${k.mutu != null ? `; mutu ${k.mutu}` : ''})</span></span>
+             <span>${aman(k.label)}${k.pelengkap ? ' <span class="text-slate-400">(pelengkap)</span>' : ''}${nilai} <span class="text-slate-400">(syarat unggulan ${aman(k.ambang_teks)}${k.mutu != null ? `; mutu ${k.mutu}` : ''})</span></span>
            </li>`;
         })
         .join('');

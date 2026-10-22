@@ -22,9 +22,11 @@ from analitik.services.konstanta import (
     SUB_ZONA_TANPA_RINCIAN,
 )
 from analitik.services.kriteria import (
+    KARANG,
     RASTER_DATA,
     dari_raster,
     jarak_area,
+    karang_dari_jarak,
     penilaian,
     raster_ranah,
     sumber_tersedia,
@@ -177,7 +179,13 @@ def karakter_area(c, geom):
         data[k] = dari_raster(k, (stat.get(RASTER_DATA[k]) or {}).get('rata2'))
     if not darat:
         if 'TERUMBU_KARANG' in tersedia:
-            data['karang'] = int('TERUMBU_KARANG' in data['ekosistem'])
+            c.execute(
+                f'SELECT MIN(ST_Distance(geometry, a.g)) FROM inventarisasi_sumber_daya_alam, '
+                f'(SELECT ST_GeomFromEWKT(%s) AS g) a WHERE {KARANG} AND ST_DWithin(geometry, a.g, %s)',
+                [geom.ewkt, atur('KARANG_TERPETAKAN_KM') / KM_PER_DERAJAT],
+            )
+            jarak = c.fetchone()[0]
+            data['karang'] = karang_dari_jarak(None if jarak is None else jarak * KM_PER_DERAJAT)
         c.execute(
             'SELECT MIN(ST_Distance(COALESCE(v.geometry_tampilan, v.geometry), a.g)) '
             'FROM inti_provinsi v, (SELECT ST_GeomFromEWKT(%s) AS g) a '

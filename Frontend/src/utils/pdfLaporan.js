@@ -737,7 +737,8 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
           [...h.kriteria, ...khusus, ...h.umum].map((x) => {
             const layak = !khusus.includes(x);
             const u = unggul[x.kunci];
-            return [x.label, x.nilai_teks || (x.data_ada === false ? 'belum ada data' : 'tidak terukur'),
+            return [x.pelengkap ? `${x.label} (pelengkap)` : x.label,
+              x.nilai_teks || (x.data_ada === false ? 'belum ada data' : 'tidak terukur'),
               layak ? x.ambang_teks : '-', layak ? STATUS(x.lulus) : '-',
               u ? `${u.ambang_teks} (${STATUS(u.lulus).toLowerCase()})` : ''];
           }),

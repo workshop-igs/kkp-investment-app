@@ -383,7 +383,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
 
     SKALA = []
 
-    queryset = LokasiPotensial.objects.select_related('provinsi', 'sektor').all()
+    queryset = LokasiPotensial.objects.select_related('provinsi', 'sektor').filter(tampil=True)
 
     def retrieve(self, request, pk=None):
         lok = self.get_object()

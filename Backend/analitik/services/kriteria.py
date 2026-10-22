@@ -3,6 +3,7 @@ import math
 from django.core.cache import cache
 from django.db import connection
 
+from analitik.services.konstanta import KRITERIA_PELENGKAP
 from analitik.services.oseanografi import raster_tersedia
 from analitik.services.pengaturan import atur
 
@@ -16,7 +17,7 @@ PARAMETER = {
     'curah_hujan': ('Curah hujan tahunan', 'mm/tahun', 'CURAH_HUJAN'),
     'jarak_pantai_km': ('Jarak ke garis pantai', 'km', None),
     'jarak_dari_pantai_km': ('Jarak lahan dari garis pantai (sempadan)', 'km', None),
-    'karang': ('Terumbu karang di lokasi', 'ada/tidak', 'TERUMBU_KARANG'),
+    'karang': ('Terumbu karang di sekitar lokasi', 'ada/tidak', 'TERUMBU_KARANG'),
     'jarak_pelabuhan_perikanan_km': ('Jarak ke pelabuhan perikanan (PP/TPI)', 'km', ('PELABUHAN_PERIKANAN',)),
     'jarak_jalan_nasional_km': ('Jarak ke jalan arteri/nasional', 'km', ('JALAN_NASIONAL',)),
     'jarak_listrik_km': ('Jarak ke jaringan listrik', 'km', ('JARINGAN_LISTRIK_TM', 'JARINGAN_LISTRIK')),
@@ -148,6 +149,24 @@ def data_ada(kunci, tersedia):
     return sumber in tersedia
 
 
+KARANG = "jenis = 'TERUMBU_KARANG' AND sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-KARANG')"
+
+
+def karang_dari_jarak(km):
+    return None if km is None or km > atur('KARANG_TERPETAKAN_KM') else int(km <= atur('RADIUS_KARANG_KM'))
+
+
+def wajib(kunci, tersedia):
+    return data_ada(kunci, tersedia) and kunci != 'karang' and kunci not in KRITERIA_PELENGKAP
+
+
+def cek(kunci, nilai, ambang):
+    if nilai is None:
+        return None
+    hasil = lulus(nilai, ambang)
+    return None if not hasil and kunci in KRITERIA_PELENGKAP else hasil
+
+
 def _angka(v):
     if abs(v) >= 100:
         return f'{v:,.0f}'.replace(',', '.')
@@ -204,8 +223,8 @@ def kedekatan(kunci, nilai, ambang, layak=None):
 
 
 def skor_mutu(sub, data, bersyarat=False):
-    nilai = [kedekatan(k, data.get(k), a, sub['kriteria'].get(k)) for k, a in syarat_unggulan(sub).items()]
-    nilai = [v for v in nilai if v is not None]
+    nilai = [kedekatan(k, data.get(k), a, sub['kriteria'].get(k)) for k, a in syarat_unggulan(sub).items()
+             if cek(k, data.get(k), a) is not None]
     if not nilai:
         return None
     return 100 * sum(nilai) / len(nilai) * (atur('BOBOT_RUANG_BERSYARAT') if bersyarat else 1)
@@ -224,7 +243,8 @@ def _baris(kunci, ambang, data, tersedia):
     return {
         'kunci': kunci, 'label': PARAMETER[kunci][0], 'nilai': None if v is None else round(float(v), 3),
         'nilai_teks': teks_nilai(kunci, v), 'ambang': list(ambang), 'ambang_teks': teks_ambang(kunci, ambang),
-        'lulus': None if v is None else lulus(v, ambang), 'data_ada': data_ada(kunci, tersedia),
+        'lulus': cek(kunci, v, ambang), 'data_ada': data_ada(kunci, tersedia), 'wajib': wajib(kunci, tersedia),
+        'pelengkap': kunci in KRITERIA_PELENGKAP,
     }
 
 
@@ -249,7 +269,8 @@ def nilai_sub(sub, data, tersedia, bersyarat=False):
         'gagal': [k['label'] for k in gagal], 'cukup_data': cukup, 'cocok': not gagal and cukup,
         'unggulan': {
             'kriteria': unggulan, 'skor': None if skor is None else round(skor),
-            'lolos': not gagal and cukup and all(k['lulus'] for k in unggulan if k['data_ada'])
+            'lolos': not gagal and cukup and all(k['lulus'] for k in unggulan if k['wajib'])
+                     and not any(k['lulus'] is False for k in unggulan)
                      and skor is not None and skor >= atur('SKOR_MINIMAL_LOKASI_UNGGULAN'),
         },
     }
