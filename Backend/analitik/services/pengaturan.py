@@ -41,6 +41,11 @@ DAFTAR = [
     _d('RADIUS_ADAT_DEKAT_M', 'karakter', 'Jarak peringatan wilayah adat',
        'Lokasi dalam jarak ini dari wilayah adat diberi peringatan, tanpa mengubah penilaian.', 'm', (PETA,), (0, 20000),
        bulat=True),
+    _d('RADIUS_KARANG_KM', 'karakter', 'Radius terumbu karang',
+       'Terumbu karang dihitung ada bila tercatat dalam jarak ini dari lokasi.', 'km', (PETA,), (0, 20)),
+    _d('KARANG_TERPETAKAN_KM', 'karakter', 'Jarak wilayah karang terpetakan',
+       'Bila tidak ada terumbu karang tercatat dalam jarak ini, wilayah dianggap belum terpetakan dan syarat karang '
+       'dilewati.', 'km', (PETA,), (1, 500)),
     _d('BUFFER_UNSUR_TERLARANG_M', 'karakter', 'Jarak aman kabel, pipa, dan alur pelayaran',
        'Lokasi tidak boleh berada dalam jarak ini dari kabel, pipa, dan alur pelayaran.', 'm', (PETA,), (0, 20000)),
     _d('AMBANG_IRISAN_PENGECUALIAN_PERSEN', 'analisis_area', 'Toleransi irisan pengecualian pada screening',
@@ -64,6 +69,11 @@ DAFTAR = [
        'Parameter tambahan bertipe area terpenuhi bila sedikitnya bagian ini dari lokasi berada di dalamnya.', 'proporsi (0-1)', (PETA,), (0, 1)),
     _d('JARAK_ANTAR_LOKASI_KM', 'peta', 'Jarak minimal antartitik lokasi',
        'Dalam radius ini hanya lokasi berskor mutu tertinggi tiap jenis yang ditampilkan.', 'km', (PETA,), (0, 200)),
+    _d('MAKS_LOKASI_NASIONAL', 'peta', 'Jumlah lokasi unggulan per jenis se-Indonesia',
+       'Hanya lokasi berskor tertinggi sebanyak ini yang ditampilkan untuk tiap jenis; sub-sektor mendapat giliran '
+       'bergantian.', 'lokasi', (PETA,), (1, 1000), bulat=True),
+    _d('MAKS_LOKASI_PER_PROVINSI', 'peta', 'Jumlah lokasi unggulan per jenis per provinsi',
+       'Satu provinsi paling banyak menyumbang sebanyak ini untuk tiap jenis.', 'lokasi', (PETA,), (1, 100), bulat=True),
     _d('SKOR_MINIMAL_LOKASI_UNGGULAN', 'peta', 'Skor mutu minimal lokasi unggulan',
        'Skor 0-100 dari kedekatan nilai tiap kriteria ke kondisi ideal; di bawah angka ini lokasi bukan unggulan.',
        'skor (0-100)', (PETA,), (0, 100)),
