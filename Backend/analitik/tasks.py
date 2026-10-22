@@ -85,6 +85,7 @@ def hitung_ulang():
             StatusHitungUlang.objects.filter(pk=1, versi=versi).update(perlu_lokasi=None, perlu_skor=False)
     except Exception as e:
         logger.exception('[HITUNG ULANG] gagal')
+        connection.close()
         StatusHitungUlang.objects.filter(pk=1).update(galat=f'{type(e).__name__}: {e}'[:2000])
     finally:
         berhenti.set()
