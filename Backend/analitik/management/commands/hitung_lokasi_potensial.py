@@ -128,6 +128,15 @@ class Command(BaseCommand):
                     'FROM inti_provinsi WHERE geometry IS NOT NULL'
                 )
                 c.execute('CREATE INDEX ON pantai_terbagi USING gist (g)')
+            c.execute('DROP TABLE IF EXISTS infra_terbagi')
+            c.execute(
+                'CREATE TEMP TABLE infra_terbagi AS SELECT kategori, ST_Subdivide(ST_MakeValid(geometry), 128) AS g '
+                'FROM inventarisasi_infrastruktur_pendukung'
+            )
+            c.execute('SELECT DISTINCT kategori FROM infra_terbagi')
+            for (kategori,) in c.fetchall():
+                c.execute('CREATE INDEX ON infra_terbagi USING gist (g) WHERE kategori = %s', [kategori])
+            c.execute('ANALYZE infra_terbagi')
         total = Counter()
         daftar = list(provinsi)
         for i, prov in enumerate(daftar, 1):
@@ -237,8 +246,7 @@ class Command(BaseCommand):
         for kategori in sorted({k for kunci in dipakai if isinstance(PARAMETER[kunci][2], tuple)
                                 for k in PARAMETER[kunci][2]} & d['tersedia']):
             c.execute(
-                TERDEKAT.format(kolom='titik', tabel='(SELECT geometry AS g, kategori FROM inventarisasi_infrastruktur_pendukung)',
-                                saring='WHERE t.kategori = %s'),
+                TERDEKAT.format(kolom='titik', tabel='infra_terbagi', saring='WHERE t.kategori = %s'),
                 [kategori, calon],
             )
             km[kategori] = {i: jarak * KM_PER_DERAJAT for i, jarak in c.fetchall() if jarak is not None}
