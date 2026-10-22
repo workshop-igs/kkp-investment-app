@@ -411,6 +411,38 @@ def _adat_area(c, geom):
     return c.fetchone()
 
 
+def _penyebab_utama(geom, luas_aoi, sektor, status, zona_efektif, aturan, tepi, kkprl, adat_di, kena, gerbang_gagal,
+                    fisik_gagal) -> List[str]:
+    if status != 'TIDAK_SESUAI':
+        return []
+    nama_tepi = {t['nama'] for t in tepi}
+    tolak = sum(z['persen'] for z in zona_efektif
+                if z['nama'] not in nama_tepi and _ketentuan(aturan, z)['status'] == 'TIDAK_DIIZINKAN')
+    penyebab = [
+        *(['tumpang tindih dengan KKPRL yang sudah terbit'] if kkprl else []),
+        *([f'berada di wilayah kelola masyarakat hukum adat ({adat_di})'] if adat_di else []),
+        *([f'{_persen_area(tolak)} area berada di zona yang tidak mengizinkan {sektor.nama}'] if tolak else []),
+        *(f"{_persen_area(k['persen'])} area berada di {k['keterangan']}" for k in kena if k['gugur']),
+        *(f"tidak memenuhi parameter wajib {t['nama']}" for t in gerbang_gagal),
+        *(['kondisi fisik perairan atau lahan tidak cocok'] if fisik_gagal else []),
+    ]
+    teks = f"Penyebab tidak sesuai: {'; '.join(penyebab) or 'ketentuan ruang tidak terpenuhi'}."
+    with connection.cursor() as c:
+        c.execute(
+            'SELECT rincian->>%s, luas_ha FROM analitik_lokasi_potensial WHERE sektor_id = %s '
+            'AND geometry && ST_GeomFromEWKT(%s) AND ST_Intersects(geometry, ST_GeomFromEWKT(%s)) '
+            'ORDER BY persen_sesuai DESC LIMIT 1',
+            ['nama', sektor.id, geom.ewkt, geom.ewkt],
+        )
+        rekomendasi = c.fetchone()
+    if rekomendasi and luas_aoi / 10000 > 1.5 * rekomendasi[1]:
+        teks += (f' Area ini memuat lokasi rekomendasi Peta Sebaran ({rekomendasi[0]}, ±{_angka(rekomendasi[1], 0)} ha) '
+                 f'yang lolos Perda; ketidaksesuaian berasal dari bagian area di luar lokasi itu yang bersinggungan '
+                 f'dengan peruntukan lain. Persempit area ke batas lokasi rekomendasi atau gunakan "Analisis lokasi '
+                 f'ini" pada titiknya di Peta Sebaran.')
+    return [teks]
+
+
 def _alasan_pengecualian(kena, sektor_nama):
     gugur, batas = [], []
     for k in kena:
@@ -685,7 +717,9 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'kkprl': kkprl,
         'verifikasi_batas': tepi,
         'parameter_tambahan': tambahan,
-        'alasan': _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi) + alasan_adat + alasan_gugur + [
+        'alasan': _penyebab_utama(geom, luas_aoi, sektor, status, zona_efektif, aturan, tepi, kkprl_gugur, adat_di, kena,
+                                  gerbang_gagal, not cocok and not data_kurang)
+        + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi) + alasan_adat + alasan_gugur + [
             f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
         ] + [alasan_karakter] * (not cocok and not data_kurang) + [
             'Sebagian kecil area perlu verifikasi batas (lihat peringatan), sehingga kesesuaiannya bersyarat: bagian '

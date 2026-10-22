@@ -1,3 +1,4 @@
+import json
 import math
 import time
 from collections import Counter, defaultdict
@@ -38,7 +39,7 @@ from analitik.services.oseanografi import nilai_titik
 from analitik.services.parameter_tambahan import sesuai_ambang
 from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
-from analitik.services.screening_ruang import BOLEH, LABEL_ADAT, _aturan_per_sektor, _ketentuan
+from analitik.services.screening_ruang import BOLEH, LABEL_ADAT, _aturan_per_sektor, _ketentuan, screening_ruang
 from inti.models import Provinsi, SektorInvestasi
 from inventarisasi.klasifikasi import jenis_unsur
 from inventarisasi.models import ZonasiRuangLaut
@@ -630,10 +631,16 @@ class Command(BaseCommand):
         for i, sektor, sub, skor in LokasiPotensial.objects.exclude(sektor=None).values_list(
                 'id', 'sektor_id', 'rincian__sub_sektor_kode', 'persen_sesuai'):
             per_sub[sektor][sub].append((-skor, i))
-        tampil = []
+        tampil, ditolak = [], 0
         for subs in per_sub.values():
-            giliran = zip_longest(*map(sorted, subs.values()))
-            tampil += [i for kelompok in giliran for _, i in filter(None, kelompok)][:atur('MAKS_LOKASI_NASIONAL')]
+            pilih = []
+            for kelompok in zip_longest(*map(sorted, subs.values())):
+                for _, i in filter(None, kelompok):
+                    if len(pilih) < atur('MAKS_LOKASI_NASIONAL'):
+                        lolos = self._lolos_ruang(i)
+                        pilih += [i] * lolos
+                        ditolak += not lolos
+            tampil += pilih
         per_prov = defaultdict(list)
         for lok in LokasiPotensial.objects.filter(id__in=tampil).select_related('sektor'):
             if lok.sektor.kode not in SEKTOR_TERSENDIRI_DI_PETA:
@@ -644,4 +651,16 @@ class Command(BaseCommand):
             LokasiPotensial.objects.filter(sektor=None).delete()
             for prov_id, lokasi in per_prov.items():
                 LokasiPotensial.objects.bulk_create(self._semua(c, Provinsi(id=prov_id), lokasi))
-        self.stdout.write(self.style.SUCCESS(f'Lokasi unggulan nasional ditampilkan: {len(tampil)}'))
+        self.stdout.write(self.style.SUCCESS(
+            f'Lokasi unggulan nasional ditampilkan: {len(tampil)}; tidak lolos analisis ruang: {ditolak}'))
+
+    @staticmethod
+    def _lolos_ruang(i):
+        lok = LokasiPotensial.objects.select_related('sektor').get(id=i)
+        if 'lolos_ruang' not in lok.rincian:
+            try:
+                lok.rincian['lolos_ruang'] = screening_ruang(json.loads(lok.geometry.geojson), lok.sektor.kode)['lanjut']
+            except ValueError:
+                lok.rincian['lolos_ruang'] = False
+            LokasiPotensial.objects.filter(id=i).update(rincian=lok.rincian)
+        return lok.rincian['lolos_ruang']
