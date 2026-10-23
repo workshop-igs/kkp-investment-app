@@ -1,11 +1,11 @@
 import { useMemo, useState } from 'react';
 import {
   Activity, AlertTriangle, Anchor, ArrowDownToLine, BadgeDollarSign, BarChart3, Building2, ChevronDown, CloudRain,
-  CloudSun, Compass, Container, Droplets, Eye, Factory, FileCheck, Fish, FlaskConical, GitFork, GraduationCap, Info,
+  CloudSun, Compass, Container, Droplets, Eye, Factory, FileCheck, Fish, Flower2, FlaskConical, GitFork, GraduationCap, Info,
   LandPlot, Layers, Layers3, Leaf, Loader2, Map as IkonPeta, MapPinned, Moon, Mountain, MoveDownRight, Navigation,
   Navigation2, Plane, Plug, PlugZap, Route, ScrollText, Search, Shell, ShieldAlert, Ship, Shrink, Sprout, Sun,
   SunMedium, Target, Thermometer, ThermometerSnowflake, ThermometerSun, Timer, Trees, TrendingDown, Users,
-  UtilityPole, Waves, Waypoints, Wind, X, Zap, ZoomIn,
+  TreePalm, UtilityPole, Waves, Waypoints, Wind, X, Zap, ZoomIn,
 } from 'lucide-react';
 import { useMap } from 'react-leaflet';
 import { api } from '../../api/klien';
@@ -61,6 +61,15 @@ const KATEGORI = [
       { id: 'risiko_banjir', nama: 'Risiko Banjir', warna: '#2563eb', ikon: Droplets },
       { id: 'risiko_pga', nama: 'Percepatan Tanah Gempa (PGA)', warna: '#f03b20', ikon: Activity },
       { id: 'risiko_laju_abrasi', nama: 'Laju Abrasi Garis Pantai', warna: '#e31a1c', ikon: Shrink },
+    ],
+  },
+  {
+    judul: 'Ekosistem Pesisir',
+    ikon: Flower2,
+    layer: [
+      { id: 'eko_karang', nama: 'Terumbu Karang', warna: '#f43f5e', ikon: Flower2 },
+      { id: 'eko_lamun', nama: 'Padang Lamun', warna: '#16a34a', ikon: Sprout },
+      { id: 'eko_mangrove', nama: 'Mangrove', warna: '#065f46', ikon: TreePalm },
     ],
   },
   {
