@@ -1,5 +1,7 @@
+from django.db.models import Q
 from rest_framework import viewsets
 
+from analitik.services.konstanta import GMW_TAHUN_AKHIR
 from inti.peta_bbox import PetaBBoxMixin
 
 from .models import (
@@ -243,7 +245,25 @@ class ProgramKKPViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_fields = ['status', 'sektor']
 
 
-class SumberDayaAlamViewSet(viewsets.ReadOnlyModelViewSet):
+class SumberDayaAlamViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
     queryset = SumberDayaAlam.objects.select_related('provinsi').all()
     serializer_class = SumberDayaAlamSerializer
     filterset_fields = ['provinsi', 'jenis']
+
+    PETA_KOLOM = ('nama', 'jenis', 'kondisi', 'tahun_data', 'sumber_data', 'luas_ha', 'provinsi__nama')
+
+    def peta_queryset_tambahan(self, qs, request):
+        qs = qs.filter(jenis=request.query_params.get('jenis', 'TERUMBU_KARANG'))
+        return qs.filter(Q(sumber_data__in=['KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG'])
+                         | Q(sumber_data='GMW-MANGROVE', tahun_data=GMW_TAHUN_AKHIR))
+
+    def properti_peta(self, r):
+        return {
+            'nama': r['nama'],
+            'jenis': self.label_peta('jenis', r['jenis']),
+            'kondisi': r['kondisi'] or None,
+            'tahun': r['tahun_data'],
+            'sumber': r['sumber_data'],
+            'luas_ha': round(r['luas_ha'] or 0, 2),
+            'provinsi': r['provinsi__nama'],
+        }

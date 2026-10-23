@@ -359,6 +359,35 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       </div>`,
   },
 
+  ...Object.fromEntries(
+    [
+      ['eko_karang', 'TERUMBU_KARANG', 'Terumbu Karang', '#f43f5e', 'Sebaran terumbu karang Sidako KKP; dipakai untuk wisata bahari, bioteknologi, dan larangan budidaya.'],
+      ['eko_lamun', 'LAMUN', 'Padang Lamun', '#16a34a', 'Sebaran padang lamun Sidako KKP; kegiatan yang merusak lamun tidak diizinkan di atasnya.'],
+      ['eko_mangrove', 'MANGROVE', 'Mangrove', '#065f46', 'Mangrove dari peta KKP dan Global Mangrove Watch 2020; kegiatan yang merusak mangrove tidak diizinkan di atasnya.'],
+    ].map(([id, jenis, label, warna, keteranganLegenda]) => [
+      id,
+      {
+        url: '/inventarisasi/sumber-daya/peta/',
+        params: { jenis },
+        label,
+        warnaContoh: warna,
+        keteranganLegenda,
+        gaya: () => ({ color: warna, weight: 0.8, fillColor: warna, fillOpacity: 0.5, opacity: 0.9 }),
+        popup: (p) =>
+          `<div class="font-sans">
+            <h3 class="font-bold mb-1" style="color:${warna}">${aman(p.jenis || label)}</h3>
+            <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.nama || '-')}</p>
+            <div class="text-xs">
+              ${p.kondisi ? `<b>Kondisi:</b> ${aman(p.kondisi)}<br/>` : ''}
+              <b>Luas:</b> ${aman((p.luas_ha ?? 0).toLocaleString('id-ID'))} ha<br/>
+              <b>Provinsi:</b> ${aman(p.provinsi || '-')}<br/>
+              <b>Sumber:</b> ${aman(p.sumber || '-')}${p.tahun ? ` (${aman(p.tahun)})` : ''}
+            </div>
+          </div>`,
+      },
+    ])
+  ),
+
   wilayah_adat: {
     url: '/inventarisasi/unsur-ruang/peta/',
     params: { kelompok: 'MHA' },
