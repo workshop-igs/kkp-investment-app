@@ -1639,7 +1639,7 @@ function finansial(dek, o, b, i, perJenis) {
   const kiri = 118;
   const tinggiAtas = perJenis ? 55 : 64;
   let yy = dek.kartu(TEPI, y, kiri, tinggiAtas, { judul: 'Struktur investasi', ikon: 'finansial', aksen });
-  const ukuranDonut = tinggiAtas - 26;
+  const ukuranDonut = Math.min(tinggiAtas - 26, 29);
   [[h.investasi, `Investasi awal ${rp(h.investasi_total)}`], [h.operasional, `Operasional per tahun ${rp(h.operasional_total)}`]].forEach(([komponen, judul], n) => {
     const x = TEPI + 5 + n * ((kiri - 10) / 2);
     const item = Object.entries(komponen).sort((a1, a2) => a2[1] - a1[1])
