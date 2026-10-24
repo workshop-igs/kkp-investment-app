@@ -3,7 +3,7 @@ import math
 from django.core.cache import cache
 from django.db import connection
 
-from analitik.services.konstanta import KRITERIA_PELENGKAP
+from analitik.services.konstanta import KM_PER_DERAJAT, KRITERIA_PELENGKAP
 from analitik.services.oseanografi import raster_tersedia
 from analitik.services.pengaturan import atur
 
@@ -19,6 +19,10 @@ PARAMETER = {
     'jarak_dari_pantai_km': ('Jarak lahan dari garis pantai (sempadan)', 'km', None),
     'karang': ('Terumbu karang di sekitar lokasi', 'ada/tidak', 'TERUMBU_KARANG'),
     'jarak_pelabuhan_perikanan_km': ('Jarak ke pelabuhan perikanan (PP/TPI)', 'km', ('PELABUHAN_PERIKANAN',)),
+    'jarak_pelabuhan_perikanan_besar_km': ('Jarak ke pelabuhan perikanan samudera/nusantara (PPS/PPN)', 'km',
+                                           ('PELABUHAN_PERIKANAN_BESAR',)),
+    'jarak_zona_budidaya_km': ('Jarak ke zona budidaya laut', 'km', 'ZONA'),
+    'jarak_zona_garam_km': ('Jarak ke zona pergaraman', 'km', 'ZONA'),
     'jarak_jalan_nasional_km': ('Jarak ke jalan arteri/nasional', 'km', ('JALAN_NASIONAL',)),
     'jarak_listrik_km': ('Jarak ke jaringan listrik', 'km', ('JARINGAN_LISTRIK_TM', 'JARINGAN_LISTRIK')),
     'jarak_pelabuhan_ekspor_km': ('Jarak ke pelabuhan ekspor/bandara kargo', 'km', ('PELABUHAN_UMUM', 'BANDARA')),
@@ -62,7 +66,17 @@ RASTER_DATA = {
     'produksi_ikan_kabupaten_ton': 'PRODUKSI_KABUPATEN',
 }
 RASTER_DARAT = {'curah_hujan', 'bulan_kering_berturut', 'kemiringan_lahan', 'tanah_liat', 'produksi_ikan_kabupaten_ton'}
-RASTER_DUA_RANAH = {'salinitas', 'pga', 'laju_abrasi', 'eks_mangrove_mudflat', 'luas_hamparan_ha'}
+RASTER_DUA_RANAH = {'salinitas', 'pga', 'laju_abrasi', 'eks_mangrove_mudflat', 'luas_hamparan_ha', 'ghi'}
+JARAK_ZONA = {
+    'jarak_zona_budidaya_km': ['PERIKANAN_BUDIDAYA'],
+    'jarak_zona_garam_km': ['DARAT_PERGARAMAN', 'PERGARAMAN'],
+}
+BATAS_JARAK_ZONA_DERAJAT = 0.6
+INFRA = (
+    "(SELECT kategori, geometry FROM inventarisasi_infrastruktur_pendukung UNION ALL "
+    "SELECT 'PELABUHAN_PERIKANAN_BESAR', geometry FROM inventarisasi_infrastruktur_pendukung "
+    "WHERE kategori = 'PELABUHAN_PERIKANAN' AND kelas ~ '\\((PPS|PPN)\\)')"
+)
 
 
 def raster_ranah(kunci, darat):
@@ -88,12 +102,12 @@ def sumber_tersedia():
     if hasil is not None:
         return hasil
     with connection.cursor() as c:
-        c.execute('SELECT DISTINCT kategori FROM inventarisasi_infrastruktur_pendukung')
+        c.execute(f'SELECT DISTINCT kategori FROM {INFRA} i')
         hasil = {r[0] for r in c.fetchall()}
         c.execute("SELECT EXISTS (SELECT 1 FROM inventarisasi_sumber_daya_alam WHERE jenis = 'TERUMBU_KARANG')")
         if c.fetchone()[0]:
             hasil.add('TERUMBU_KARANG')
-    hasil |= set(raster_tersedia()) | {'ALUR'}
+    hasil |= set(raster_tersedia()) | {'ALUR', 'ZONA'}
     cache.set('kriteria:sumber', hasil, 600)
     return hasil
 
@@ -126,7 +140,7 @@ def jarak_area(c, ewkt, tersedia):
     if kategori:
         c.execute(
             'SELECT k.kategori, (SELECT MIN(ST_Distance(i.geometry::geography, a.g::geography)) FROM ('
-            '    SELECT geometry FROM inventarisasi_infrastruktur_pendukung WHERE kategori = k.kategori'
+            f'    SELECT geometry FROM {INFRA} i WHERE kategori = k.kategori'
             '    ORDER BY geometry <-> a.g LIMIT 5) i) '
             'FROM unnest(%s::text[]) AS k(kategori), (SELECT ST_GeomFromEWKT(%s) AS g) a',
             [kategori, ewkt],
@@ -137,6 +151,14 @@ def jarak_area(c, ewkt, tersedia):
         if isinstance(sumber, tuple) and any(k in km for k in sumber):
             data[kunci] = min(km[k] for k in sumber if k in km)
     data['jarak_alur_km'] = jarak_alur(c, ewkt)
+    for kunci, sub_zona in JARAK_ZONA.items():
+        c.execute(
+            'SELECT MIN(ST_Distance(z.geometry, a.g)) FROM inventarisasi_zonasi_ruang_laut z, '
+            '(SELECT ST_GeomFromEWKT(%s) AS g) a WHERE z.sub_zona = ANY(%s) AND ST_DWithin(z.geometry, a.g, %s)',
+            [ewkt, sub_zona, BATAS_JARAK_ZONA_DERAJAT],
+        )
+        jarak = c.fetchone()[0]
+        data[kunci] = None if jarak is None else jarak * KM_PER_DERAJAT
     return data
 
 
@@ -193,9 +215,11 @@ def teks_nilai(kunci, nilai):
     return f"{_angka(nilai)}{f' {satuan}' if satuan else ''}"
 
 
-def uraian(sektor_kode):
+def uraian(sektor_kode, sub_kode=None):
     bagian = []
-    for sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).values():
+    for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items():
+        if sub_kode and kode != sub_kode:
+            continue
         syarat = '; '.join(f'{PARAMETER[k][0].lower()} {teks_ambang(k, a)}' for k, a in sub['kriteria'].items())
         bagian.append(f"{sub['nama']}: {syarat}")
     return ' | '.join(bagian)
@@ -276,24 +300,32 @@ def nilai_sub(sub, data, tersedia, bersyarat=False):
     }
 
 
-def penilaian(sektor_kode, data, tersedia=None, bersyarat=False):
+def penilaian(sektor_kode, data, tersedia=None, bersyarat=False, sub_kode=None):
     tersedia = sumber_tersedia() if tersedia is None else tersedia
     hasil = []
     for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items():
-        if data['ranah'] in sub['ranah']:
+        if (not sub_kode or kode == sub_kode) and data['ranah'] in sub['ranah']:
             hasil.append({'kode': kode, **nilai_sub(sub, data, tersedia, bersyarat)})
     return sorted(hasil, key=lambda h: (not h['cocok'], len(h['gagal']), -h['terukur']))
 
 
-def ranah_jenis(sektor_kode):
-    return {r for sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).values() for r in sub['ranah']}
+def ranah_jenis(sektor_kode, sub_kode=None):
+    return {r for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items() if not sub_kode or kode == sub_kode
+            for r in sub['ranah']}
 
 
-def alasan(sektor_kode, data, hasil):
+def sub_jenis(sektor_kode):
+    return [{'kode': kode, 'nama': sub['nama'], 'ranah': sub['ranah']}
+            for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items()]
+
+
+def alasan(sektor_kode, data, hasil, sub_kode=None):
     if not hasil:
         letak = 'perairan' if data['ranah'] == 'LAUT' else 'darat'
-        butuh = ' atau '.join('perairan' if r == 'LAUT' else 'darat pesisir' for r in sorted(ranah_jenis(sektor_kode)))
-        return f'Lokasi berada di {letak}, sedangkan jenis investasi ini membutuhkan {butuh}.'
+        butuh = ' atau '.join('perairan' if r == 'LAUT' else 'darat pesisir'
+                              for r in sorted(ranah_jenis(sektor_kode, sub_kode)))
+        jenis = 'sub-jenis' if sub_kode else 'jenis'
+        return f'Lokasi berada di {letak}, sedangkan {jenis} investasi ini membutuhkan {butuh}.'
     terbaik = hasil[0]
     if terbaik['cocok']:
         return ''

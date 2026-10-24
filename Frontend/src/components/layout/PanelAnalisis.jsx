@@ -58,7 +58,7 @@ const getBbox = (geometry) => {
 
 const LANGKAH = ['Identitas Proyek', 'Analisis Ruang', 'Analisis Finansial'];
 
-const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sektorAwal, onLihatLokasi }) => {
+const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sektorAwal, subAwal, onLihatLokasi }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   
@@ -71,6 +71,15 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
     if (sektorAwal) setSektor(sektorAwal);
   }, [sektorAwal]);
   const daftarSektor = useSektorAktif();
+  const daftarSub = daftarSektor.find((s) => s.id === sektor)?.sub || [];
+  const subPertama = (kode) => daftarSektor.find((s) => s.id === kode)?.sub?.[0]?.kode || '';
+  const [subSektor, setSubSektor] = useState('');
+  useEffect(() => {
+    setSubSektor((lama) => {
+      if (subAwal && daftarSub.some((s) => s.kode === subAwal)) return subAwal;
+      return daftarSub.some((s) => s.kode === lama) ? lama : daftarSub[0]?.kode || '';
+    });
+  }, [sektor, subAwal, daftarSektor]); // eslint-disable-line react-hooks/exhaustive-deps
   const [capex, setCapex] = useState("");
   const [revenue, setRevenue] = useState("");
   const [opex, setOpex] = useState("");
@@ -92,13 +101,13 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
     setLangkah(1);
   }, [geometry]);
 
-  const periksaRuang = async (kode = sektor) => {
+  const periksaRuang = async (kode = sektor, sub = subSektor) => {
     sektorRef.current = kode;
     setScreening(null);
     setMemeriksa(true);
     const selesai = mulaiMemuat('Memeriksa kesesuaian ruang');
     try {
-      const { data } = await api.post('/analitik/screening/', { geometry, sektor: kode });
+      const { data } = await api.post('/analitik/screening/', { geometry, sektor: kode, sub_sektor: sub || undefined });
       if (data.sektor === sektorRef.current) setScreening(data);
     } catch (err) {
       alert(err.response?.data?.detail || 'Screening kesesuaian ruang gagal dijalankan.');
@@ -110,7 +119,8 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
 
   const pilihSektorAlternatif = (kode) => {
     setSektor(kode);
-    periksaRuang(kode);
+    setSubSektor(subPertama(kode));
+    periksaRuang(kode, subPertama(kode));
   };
 
   const lanjutKeRuang = () => {
@@ -130,7 +140,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
       return;
     }
     setLangkah(2);
-    periksaRuang(sektor);
+    periksaRuang(sektor, subSektor);
   };
 
   const handleSaveToPipeline = async () => {
@@ -149,6 +159,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
         investor: investor.trim(),
         lokasi_detail: lokasiDetail.trim(),
         sektor: sektor,
+        sub_sektor: subSektor,
         nilai_investasi_miliar: parseFloat(capex) / 1000000000,
         luas_ha: result.area_hectares || result.area_ha || 0,
         geometry: geometry,
@@ -197,7 +208,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
       return;
     }
 
-    const hasil = await onAnalyze(sektor, {
+    const hasil = await onAnalyze(sektor, subSektor, {
       capex_idr: parseFloat(capex),
       annual_revenue_idr: parseFloat(revenue),
       annual_opex_idr: parseFloat(opex),
@@ -291,6 +302,21 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                       {daftarSektor.map((s) => <option key={s.id} value={s.id}>{s.label}</option>)}
                     </select>
                   </div>
+                  {daftarSub.length > 0 && (
+                    <div>
+                      <label className="block text-sm text-slate-700 mb-1.5">Sub-jenis Investasi <span className="text-red-500">*</span></label>
+                      <select
+                        value={subSektor}
+                        onChange={(e) => setSubSektor(e.target.value)}
+                        className="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700 appearance-none"
+                      >
+                        {daftarSub.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
+                      </select>
+                      <p className="text-xs text-slate-500 mt-1.5">
+                        Kecocokan lokasi dinilai dengan kriteria sub-jenis ini.
+                      </p>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm text-slate-700 mb-1.5">
                       Investor / Badan Usaha <span className="text-red-500">*</span>
@@ -373,7 +399,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
               <div className="bg-slate-50/50 border border-slate-200 rounded-xl p-6">
                 <h3 className="font-bold text-slate-800 mb-1 text-[15px]">Parameter Finansial</h3>
                 <p className="text-xs text-slate-500 mb-5">
-                  Lokasi dinyatakan {screening.status_label.toLowerCase()} secara ruang untuk {screening.sektor_nama}
+                  Lokasi dinyatakan {screening.status_label.toLowerCase()} secara ruang untuk {screening.sub_jenis?.nama || screening.sektor_nama}
                   {screening.status === 'BELUM_TERVERIFIKASI' && '; analisis dilanjutkan dengan label belum terverifikasi'}.
                 </p>
                 <div className="space-y-6">

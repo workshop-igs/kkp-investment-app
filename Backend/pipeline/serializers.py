@@ -53,10 +53,18 @@ class ProyekInvestasiSerializer(serializers.ModelSerializer):
     riwayat_status = RiwayatStatusSerializer(many=True, read_only=True)
     provinsi_nama = serializers.SerializerMethodField()
     sektor_nama = serializers.CharField(source='sektor.nama', read_only=True, default=None)
+    sektor_kode = serializers.CharField(source='sektor.kode', read_only=True, default=None)
+    sub_sektor_nama = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     def get_provinsi_nama(self, obj):
         return obj.provinsi.nama if obj.provinsi_id else LABEL_TANPA_PROVINSI
+
+    def get_sub_sektor_nama(self, obj):
+        from analitik.services.kriteria import sub_jenis
+
+        return next((s['nama'] for s in sub_jenis(obj.sektor.kode) if s['kode'] == obj.sub_sektor), None) \
+            if obj.sektor_id and obj.sub_sektor else None
 
     class Meta:
         model = ProyekInvestasi
@@ -72,6 +80,9 @@ class ProyekInvestasiSerializer(serializers.ModelSerializer):
             'lokasi_detail',
             'sektor',
             'sektor_nama',
+            'sektor_kode',
+            'sub_sektor',
+            'sub_sektor_nama',
             'nilai_investasi_miliar',
             'nilai_realisasi_miliar',
             'status',
