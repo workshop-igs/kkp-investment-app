@@ -508,6 +508,29 @@ KRITERIA_JENIS = {
 }
 AMBANG_BULAN_KERING_MM = 50
 
+SATUAN_PRODUK_SEKTOR = {
+    'PARIWISATA_BAHARI': 'kunjungan', 'JASA_MARITIM': 'layanan', 'INFRASTRUKTUR_LAUT': 'layanan',
+    'ENERGI_KELAUTAN': 'MWh', 'KONSERVASI_PESISIR': 'kunjungan',
+}
+KOMPONEN_INVESTASI = ['Peralatan', 'Sarana dan prasarana', 'Lahan dan bangunan', 'Perizinan KKPRL', 'Perizinan lain']
+KOMPONEN_OPERASIONAL = ['Benih, bibit, atau bahan baku', 'Pakan, BBM, atau energi', 'Operasional alat', 'Tenaga kerja',
+                        'Lain-lain']
+MODEL_USAHA = {
+    sub: {
+        'satuan_usaha': '1 unit usaha',
+        'satuan_produk': 'ton CO2e' if sub == 'KONSERVASI_MANGROVE' else SATUAN_PRODUK_SEKTOR.get(jenis, 'kg'),
+        'harga_per_satuan': None,
+        'volume_per_tahun': {'riil': None, 's1': None, 's2': None},
+        'investasi': dict.fromkeys(KOMPONEN_INVESTASI),
+        'operasional_per_tahun': dict.fromkeys(KOMPONEN_OPERASIONAL),
+    }
+    for jenis, per_sub in KRITERIA_JENIS.items() for sub in per_sub
+}
+ASUMSI_MODEL_USAHA = {
+    'umur_tahun': 10, 'diskonto_persen': 12.0, 'kenaikan_harga_persen': 0.0, 'kenaikan_biaya_persen': 0.0,
+    'csr_persen': 2.5, 'batas_pbp_tahun': 10,
+}
+
 EKOSISTEM_TERLARANG_SEKTOR = {
     'PERIKANAN_BUDIDAYA': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],
     'ENERGI_KELAUTAN': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],

@@ -230,3 +230,79 @@ def jalankan_analisis_finansial(
         'skenario_terbaik': skenario_terbaik,
         'skenario_terburuk': skenario_terburuk,
     }
+
+
+LABEL_SKENARIO = {'riil': 'Kondisi riil', 's1': 'Sangat sesuai (S1)', 's2': 'Sesuai (S2)'}
+
+
+def _metrik_model(volume, harga, opex, capex, a):
+    r = a['diskonto_persen'] / 100
+    umur = int(a['umur_tahun'])
+    pendapatan = volume * harga
+    npv, irr, pbp, _, tercapai = calc_dcf_metrics(
+        pendapatan, opex, capex, a['kenaikan_harga_persen'], a['kenaikan_biaya_persen'], r, umur
+    )
+    arus = _arus_kas(pendapatan, opex, a['kenaikan_harga_persen'], a['kenaikan_biaya_persen'], umur)
+    pv_manfaat = sum(p / (1 + r) ** (t + 1) for t, (p, _) in enumerate(arus))
+    pv_biaya = capex + sum(b / (1 + r) ** (t + 1) for t, (_, b) in enumerate(arus))
+    bcr = round(pv_manfaat / pv_biaya, 2)
+    pbp = pbp if tercapai else None
+    return {
+        'pendapatan': round(pendapatan), 'npv': npv, 'irr': irr, 'bcr': bcr, 'pbp': pbp,
+        'layak': npv > 0 and irr > a['diskonto_persen'] and bcr > 1 and pbp is not None and pbp <= a['batas_pbp_tahun'],
+    }
+
+
+def hitung_model_usaha(model, harga_bawaan=None, asumsi=None):
+    a = asumsi or atur('ASUMSI_MODEL_USAHA')
+    harga = model.get('harga_per_satuan') or harga_bawaan
+    from .konstanta import KOMPONEN_INVESTASI, KOMPONEN_OPERASIONAL
+
+    def urut(isian, kunci):
+        return {k: isian[k] for k in [*kunci, *(k for k in isian if k not in kunci)] if isian.get(k)}
+
+    investasi = urut(model['investasi'], KOMPONEN_INVESTASI)
+    operasional = urut(model['operasional_per_tahun'], KOMPONEN_OPERASIONAL)
+    volume = urut(model['volume_per_tahun'], list(LABEL_SKENARIO))
+    capex, opex = sum(investasi.values()), sum(operasional.values())
+    if not (harga and capex and volume):
+        return None
+
+    dasar = 'riil' if 'riil' in volume else next(iter(volume))
+    skenario = [{'kode': k, 'label': LABEL_SKENARIO[k], 'volume': v, **_metrik_model(v, harga, opex, capex, a)}
+                for k, v in volume.items()]
+    umur = int(a['umur_tahun'])
+    arus = _arus_kas(volume[dasar] * harga, opex, a['kenaikan_harga_persen'], a['kenaikan_biaya_persen'], umur)
+    proyeksi, kumulatif = [], -capex
+    for t, (p, b) in enumerate(arus, start=1):
+        kumulatif += p - b
+        proyeksi.append({'tahun': t, 'pendapatan': round(p), 'pengeluaran': round(b), 'bersih': round(p - b),
+                         'kumulatif': round(kumulatif)})
+    csr = [{'tahun': t + 1, 'nilai': round(max(0.0, proyeksi[t - 1]['bersih']) * a['csr_persen'] / 100) if t else 0}
+           for t in range(umur)]
+    langkah = max((abs(x) for x in atur('SENSITIVITAS_FINANSIAL')), default=0.1) or 0.1
+    persen = round(langkah * 100)
+    v = volume[dasar]
+    sensitivitas = [
+        {'label': f'Harga jual turun {persen}%', **_metrik_model(v, harga * (1 - langkah), opex, capex, a)},
+        {'label': f'Volume produksi turun {persen}%', **_metrik_model(v * (1 - langkah), harga, opex, capex, a)},
+        {'label': f'Biaya operasional naik {persen}%', **_metrik_model(v, harga, opex * (1 + langkah), capex, a)},
+        {'label': f'Biaya investasi naik {persen}%', **_metrik_model(v, harga, opex, capex * (1 + langkah), a)},
+    ]
+    return {
+        'satuan_usaha': model['satuan_usaha'],
+        'satuan_produk': model['satuan_produk'],
+        'harga': round(harga, 2),
+        'harga_dari_bps': not model.get('harga_per_satuan'),
+        'investasi': investasi,
+        'investasi_total': round(capex),
+        'operasional': operasional,
+        'operasional_total': round(opex),
+        'biaya_kkprl': model['investasi'].get('Perizinan KKPRL'),
+        'dasar': dasar,
+        'skenario': skenario,
+        'proyeksi': proyeksi,
+        'csr': csr,
+        'sensitivitas': sensitivitas,
+        'asumsi': a,
+    }

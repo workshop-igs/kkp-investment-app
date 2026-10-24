@@ -7,22 +7,37 @@ from django.db.models import Count, Q, Sum
 from django.utils import timezone
 
 from analitik.models import KetentuanRuang, LokasiPotensial, SkorKelayakanZona
+from analitik.services.finansial import hitung_model_usaha
 from analitik.services.konstanta import (
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
 )
 from analitik.services.kriteria import uraian
 from analitik.services.oseanografi import statistik as statistik_oseanografi
-from analitik.services.pengaturan import atur
+from analitik.services.pengaturan import BAWAAN, atur
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
 from inventarisasi.klasifikasi import KATA_SEKTOR, rincian_kegiatan, status_rincian
-from inventarisasi.models import MatriksKKPRL, RegulasiTataRuang, ZonasiRuangLaut
+from inventarisasi.models import (
+    InfrastrukturPendukung,
+    MatriksKKPRL,
+    RegulasiTataRuang,
+    SumberDayaAlam,
+    ZonasiRuangLaut,
+)
 from penarikan_data.models import ProduksiPerikananBPS
 
 LABEL_SUB_ZONA = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
 LABEL_KELOMPOK = dict(ProduksiPerikananBPS.KELOMPOK_CHOICES)
 SEKTOR_KELOMPOK = {'BUDIDAYA': 'PERIKANAN_BUDIDAYA', 'TANGKAP_LAUT': 'PERIKANAN_TANGKAP'}
-KOMODITAS_LAUT = {'BUDIDAYA': {'Rumput Laut', 'Kerapu', 'Kakap'}, 'TANGKAP_LAUT': {'Tuna', 'Cakalang', 'Tongkol', 'Udang'}}
+SUB_KOMODITAS = {
+    ('TANGKAP_LAUT', 'Tuna'): 'TANGKAP_PELAGIS', ('TANGKAP_LAUT', 'Cakalang'): 'TANGKAP_PELAGIS',
+    ('TANGKAP_LAUT', 'Tongkol'): 'TANGKAP_PELAGIS', ('TANGKAP_LAUT', 'Udang'): 'TANGKAP_DEMERSAL',
+    ('BUDIDAYA', 'Rumput Laut'): 'BUDIDAYA_RUMPUT_LAUT', ('BUDIDAYA', 'Kerapu'): 'BUDIDAYA_LAUT',
+    ('BUDIDAYA', 'Kakap'): 'BUDIDAYA_LAUT', ('BUDIDAYA', 'Udang'): 'BUDIDAYA_TAMBAK',
+}
+NAMA_KOMODITAS = {('TANGKAP_LAUT', 'Udang'): 'Udang Laut', ('BUDIDAYA', 'Udang'): 'Udang Vaname'}
+RANAH_KOMODITAS = {'TANGKAP_LAUT': 'Tangkap laut', 'BUDIDAYA': 'Budidaya laut', 'BUDIDAYA_TAMBAK': 'Budidaya tambak'}
+SUB_ZONA_BERNAMA = {'LAINNYA', 'BELUM_DIATUR', 'TIDAK_DIBAGI', 'DARAT_LAINNYA'}
 BATAS_ZONA_PETA = 600
 BATAS_ZONA_PETA_SEKTOR = 120
 JUMLAH_LOKASI_PRIORITAS = 6
@@ -110,7 +125,10 @@ def _zona(c, provinsi, sumber, tol, sektor=None):
         return {'sumber_label': None, 'label_data': None, 'regulasi': None, 'baris': [], 'total_ha': 0, 'peta': []}
     qs = ZonasiRuangLaut.objects.filter(provinsi=provinsi, sumber_data=sumber, tingkat_acuan='RTRW_PROVINSI')
     if sektor:
-        qs = ZonasiRuangLaut.objects.filter(id__in=skor_sesuai(sektor, provinsi).values('zona_id'))
+        sesuai = skor_sesuai(sektor, provinsi)
+        izin = [z for z, v in _status_sub_zona(provinsi, sektor).items() if v == 'DIIZINKAN']
+        utama = sesuai.filter(zona__sub_zona__in=izin)
+        qs = ZonasiRuangLaut.objects.filter(id__in=(utama if utama.exists() else sesuai).values('zona_id'))
     baris = list(qs.values('sub_zona').annotate(luas=Sum('luas_ha'), n=Count('id')).order_by('-luas'))
     total = sum(b['luas'] or 0 for b in baris)
     ids = list(qs.order_by('-luas_ha').values_list('id', flat=True)[:BATAS_ZONA_PETA])
@@ -202,43 +220,49 @@ def _oseanografi_provinsi(provinsi):
     return _oseanografi(perairan, PARAMETER_OSEANOGRAFI_PROVINSI)
 
 
+def _status_sub_zona(provinsi, sektor):
+    status = {}
+    for k in KetentuanRuang.objects.filter(Q(provinsi__isnull=True) | Q(provinsi=provinsi), sektor=sektor):
+        if k.provinsi_id or k.sub_zona not in status:
+            status[k.sub_zona] = k.status
+    return status
+
+
 def _rincian_matriks(provinsi, sektor):
     if sektor.kode not in KATA_SEKTOR:
         return None
     semua = list(MatriksKKPRL.objects.filter(provinsi=provinsi))
-    blok, butir = Counter(), {}
+    blok, jumlah, letak = Counter(), {}, {}
     for m in semua:
         rincian = rincian_kegiatan(m, sektor.kode)
         status = status_rincian(rincian)
         if status:
             blok[status] += 1
+        zona = m.nama_zona if m.sub_zona in SUB_ZONA_BERNAMA else LABEL_SUB_ZONA.get(m.sub_zona, m.sub_zona)
         for kolom, daftar in rincian.items():
-            butir.setdefault(kolom, Counter()).update(daftar)
+            jumlah.setdefault(kolom, Counter()).update(daftar)
+            for b in daftar:
+                letak.setdefault((kolom, b), set()).add(zona)
     if not blok:
         return None
     return {
         'blok': dict(blok),
         'sumber': semua[0].sumber.split(',')[0],
-        **{kolom: [b for b, _ in c.most_common(JUMLAH_RINCIAN)] for kolom, c in butir.items()},
+        **{kolom: [{'kegiatan': b, 'sub_zona': sorted(letak[(kolom, b)])} for b, _ in c.most_common(JUMLAH_RINCIAN)]
+           for kolom, c in jumlah.items()},
     }
 
 
-def _rinci_jenis(c, provinsi, sektor, tol, luas):
-    from ketenagakerjaan.proyeksi import _matriks
-
-    status = {}
-    for k in KetentuanRuang.objects.filter(Q(provinsi__isnull=True) | Q(provinsi=provinsi), sektor=sektor):
-        if k.provinsi_id or k.sub_zona not in status:
-            status[k.sub_zona] = k.status
-
-    skor = belum_dimanfaatkan(skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG']))
-    lokasi = []
-    for lok in LokasiPotensial.objects.filter(sektor=sektor, provinsi=provinsi).order_by(
-        '-persen_sesuai', '-luas_ha'
-    )[:JUMLAH_LOKASI_PRIORITAS]:
+def _lokasi(c, provinsi, sektor, subs):
+    sesuai = skor_sesuai(sektor, provinsi)
+    hasil = []
+    for lok in LokasiPotensial.objects.filter(
+        sektor=sektor, provinsi=provinsi, tampil=True, rincian__sub_sektor_kode__in=subs,
+    ).order_by('-persen_sesuai', '-luas_ha')[:JUMLAH_LOKASI_PRIORITAS]:
         titik = lok.geometry.point_on_surface
         r = lok.rincian
-        lokasi.append({
+        hasil.append({
+            'id': lok.id,
             'nama': r['nama'],
             'sub_zona_label': r['sub_zona'],
             'peruntukan_utama': r['status_tata_ruang'] == 'DIIZINKAN',
@@ -247,13 +271,39 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
             'luas_wilayah_ha': r.get('luas_wilayah_ha'),
             'persen_sesuai': lok.persen_sesuai,
             'sub_sektor': r.get('sub_sektor'),
+            'sub_sektor_kode': r.get('sub_sektor_kode'),
+            'kelas': sesuai.filter(zona__geometry__intersects=titik).order_by('-skor_total')
+            .values_list('kelas', flat=True).first(),
             'keunggulan': [f"{k['label']} {k['nilai_teks']}" if k['nilai_teks'] else k['label']
                            for k in r.get('kriteria', []) if k['lulus']],
             'pembatas': [f'Perlu dinilai di lapangan: {k[0].lower()}{k[1:]}' for k in r['perlu_dinilai']],
+            'peringatan': r.get('peringatan', []),
             'titik': [round(titik.x, 5), round(titik.y, 5)],
+            'cakupan': list(lok.geometry.extent),
+            'batas': _geojson(lok.geometry.simplify(0.0002).json),
             'oseanografi': {k: v['rata2'] for k, v in _oseanografi(lok.geometry, PARAMETER_OSEANOGRAFI_LOKASI).items()},
         })
+    return hasil
 
+
+def _finansial(subs, nama_sub, harga_kg=None):
+    model = atur('MODEL_USAHA')
+    hasil = []
+    for sub in subs:
+        m = model.get(sub) or BAWAAN['MODEL_USAHA'][sub]
+        hasil.append({
+            'kode': sub,
+            'nama': nama_sub.get(sub, sub),
+            'hasil': hitung_model_usaha(m, harga_kg if m['satuan_produk'] == 'kg' else None),
+        })
+    return hasil
+
+
+def _rinci_jenis(c, provinsi, sektor, tol, luas):
+    from ketenagakerjaan.proyeksi import _matriks
+
+    status = _status_sub_zona(provinsi, sektor)
+    skor = belum_dimanfaatkan(skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG']))
     kelas_zona = dict(skor.order_by('-zona__luas_ha').values_list('zona_id', 'kelas')[:BATAS_ZONA_PETA_SEKTOR])
     c.execute(
         'SELECT id, ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, %s), 4) '
@@ -270,10 +320,19 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         'sub_zona_bersyarat': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'BERSYARAT'),
         'karakter': uraian(sektor.kode),
         'rincian_matriks': _rincian_matriks(provinsi, sektor),
-        'lokasi': lokasi,
         'peta': [{'kelas': kelas_zona[i], 'geometry': _geojson(g)} for i, g in c.fetchall() if g],
         'keahlian': _matriks(sektor.kode)[:JUMLAH_KEAHLIAN],
     }
+
+
+def _infrastruktur(provinsi):
+    return dict(InfrastrukturPendukung.objects.filter(provinsi=provinsi).values('kategori')
+                .annotate(n=Count('id')).values_list('kategori', 'n'))
+
+
+def _ekosistem(provinsi):
+    return {j: round(luas or 0) for j, luas in SumberDayaAlam.objects.filter(provinsi=provinsi)
+            .values('jenis').annotate(luas=Sum('luas_ha')).values_list('jenis', 'luas')}
 
 
 def _harga(b):
@@ -293,7 +352,7 @@ def _baris_produksi():
 def _produksi_komoditas(provinsi, baris=None):
     per_komoditas = {}
     for b in _baris_produksi() if baris is None else baris:
-        if b['komoditas'] in KOMODITAS_LAUT[b['kelompok']]:
+        if (b['kelompok'], b['komoditas']) in SUB_KOMODITAS:
             per_komoditas.setdefault((b['kelompok'], b['komoditas']), []).append(b)
 
     hasil = []
@@ -306,11 +365,14 @@ def _produksi_komoditas(provinsi, baris=None):
         total_ton = sum(b['produksi_ton'] for b in setahun)
         bernilai = [b for b in setahun if b['nilai_ribu_rp']]
         rentang = akhir['tahun'] - awal['tahun']
+        sub = SUB_KOMODITAS[(kelompok, nama)]
         hasil.append({
             'kode': f'{kelompok}:{nama}',
-            'nama': nama,
+            'nama': NAMA_KOMODITAS.get((kelompok, nama), nama),
             'kelompok': kelompok,
             'kelompok_label': LABEL_KELOMPOK[kelompok],
+            'sub_jenis': sub,
+            'ranah_label': RANAH_KOMODITAS.get(sub, RANAH_KOMODITAS[kelompok]),
             'sektor': SEKTOR_KELOMPOK[kelompok],
             'tahun': akhir['tahun'],
             'produksi_ton': akhir['produksi_ton'],
@@ -398,13 +460,17 @@ def profil_provinsi(provinsi, sektor=None):
         bab = [k for k in komoditas if k['sektor'] == sektor.kode][:JUMLAH_UNGGULAN]
     else:
         bab = [{'kode': sektor.kode, 'nama': sektor.nama, 'sektor': sektor.kode}]
-    sektor_bab = {aktif.get(b['sektor']) or sektor for b in bab}
+    sektor_bab = {s.kode: s for s in (aktif.get(b['sektor']) or sektor for b in bab)}
+    kriteria = atur('KRITERIA_JENIS')
+    nama_sub = {sub: isi['nama'] for per_sub in kriteria.values() for sub, isi in per_sub.items()}
+    subs = {b['kode']: [b['sub_jenis']] if 'kelompok' in b else list(kriteria.get(b['sektor'], {})) for b in bab}
 
     with connection.cursor() as c:
         wilayah = _wilayah(c, provinsi)
         tol = _toleransi(wilayah['cakupan']) if wilayah['cakupan'] else 0.003
-        jenis = {s.kode: _rinci_jenis(c, provinsi, s, tol, luas) for s in sektor_bab}
+        jenis = {kode: _rinci_jenis(c, provinsi, s, tol, luas) for kode, s in sektor_bab.items()}
         zona = _zona(c, provinsi, _sumber_utama(provinsi), tol, sektor)
+        lokasi = {b['kode']: _lokasi(c, provinsi, sektor_bab[b['sektor']], subs[b['kode']]) for b in bab}
 
     return {
         'wilayah': wilayah,
@@ -413,9 +479,17 @@ def profil_provinsi(provinsi, sektor=None):
         'oseanografi': _oseanografi_provinsi(provinsi),
         'komoditas': komoditas,
         'jenis_lain': [{'kode': s.kode, 'nama': s.nama, **luas[s.kode]} for s in jenis_lain],
-        'bab': [{'kode': b['kode'], 'nama': b['nama'], 'sektor': b['sektor'],
-                 'komoditas': 'kelompok' in b} for b in bab],
+        'bab': [{
+            'kode': b['kode'], 'nama': b['nama'], 'sektor': b['sektor'], 'komoditas': 'kelompok' in b,
+            'sub_jenis': [{'kode': s, 'nama': nama_sub.get(s, s)} for s in subs[b['kode']]],
+            'lokasi': lokasi[b['kode']],
+            'finansial': _finansial(subs[b['kode']], nama_sub, b.get('harga_rp_kg')),
+        } for b in bab],
         'jenis': jenis,
+        'infrastruktur': _infrastruktur(provinsi),
+        'ekosistem': _ekosistem(provinsi),
+        'alki': ZonasiRuangLaut.objects.filter(provinsi=provinsi, jenis_zona='ALKI').exists(),
+        'asumsi_finansial': atur('ASUMSI_MODEL_USAHA'),
         'sosial': {
             'kabupaten': [k for k in _kabupaten(provinsi) if k['pesisir']],
             'ketenagakerjaan': _ketenagakerjaan(provinsi),
