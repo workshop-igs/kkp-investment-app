@@ -9,8 +9,10 @@ from django.utils import timezone
 from analitik.models import KetentuanRuang, LokasiPotensial, SkorKelayakanZona
 from analitik.services.finansial import hitung_model_usaha
 from analitik.services.konstanta import (
+    KETENTUAN_DARAT_BAWAAN,
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
+    SEKTOR_SUB_ZONA_COCOK,
 )
 from analitik.services.kriteria import uraian
 from analitik.services.oseanografi import statistik as statistik_oseanografi
@@ -126,8 +128,9 @@ def _zona(c, provinsi, sumber, tol, sektor=None):
     qs = ZonasiRuangLaut.objects.filter(provinsi=provinsi, sumber_data=sumber, tingkat_acuan='RTRW_PROVINSI')
     if sektor:
         sesuai = skor_sesuai(sektor, provinsi)
-        izin = [z for z, v in _status_sub_zona(provinsi, sektor).items() if v == 'DIIZINKAN']
-        utama = sesuai.filter(zona__sub_zona__in=izin)
+        peruntukan = [*SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, []),
+                      *(z for z, v in KETENTUAN_DARAT_BAWAAN.get(sektor.kode, {}).items() if v == 'DIIZINKAN')]
+        utama = sesuai.filter(zona__sub_zona__in=peruntukan)
         qs = ZonasiRuangLaut.objects.filter(id__in=(utama if utama.exists() else sesuai).values('zona_id'))
     baris = list(qs.values('sub_zona').annotate(luas=Sum('luas_ha'), n=Count('id')).order_by('-luas'))
     total = sum(b['luas'] or 0 for b in baris)
