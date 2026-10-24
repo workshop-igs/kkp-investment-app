@@ -252,6 +252,10 @@ class SumberDayaAlamViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
     PETA_KOLOM = ('nama', 'jenis', 'kondisi', 'tahun_data', 'sumber_data', 'luas_ha', 'provinsi__nama')
 
+    def kolom_geometri(self, request, lebar):
+        lebur = lebar >= 0.5 and request.query_params.get('jenis', 'TERUMBU_KARANG') in ('TERUMBU_KARANG', 'LAMUN')
+        return 'geometry_tampilan' if lebur else 'geometry'
+
     def peta_queryset_tambahan(self, qs, request):
         qs = qs.filter(jenis=request.query_params.get('jenis', 'TERUMBU_KARANG'))
         return qs.filter(Q(sumber_data__in=['KKP-EKOSISTEM', 'SIDAKO-LAMUN', 'SIDAKO-KARANG'])
