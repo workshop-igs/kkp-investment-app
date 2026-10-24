@@ -16,6 +16,7 @@ KELOMPOK = [
     ('ahp', 'Skor AHP dan keputusan kelayakan'),
     ('lokasi_risiko', 'Skor lokasi dan risiko'),
     ('skor_zona', 'Skor kelayakan zona'),
+    ('model_usaha', 'Model usaha Profil Investasi'),
 ]
 
 
@@ -162,6 +163,11 @@ DAFTAR = [
     _d('AMBANG_TERBANGUN_PERSEN', 'skor_zona', 'Batas bagian zona yang sudah terbangun',
        'Zona yang terbangun sebesar ini atau lebih tidak menjadi lokasi prioritas profil investasi.', '%', (),
        (0, 100)),
+    _d('MODEL_USAHA', 'model_usaha', 'Model usaha per sub-jenis',
+       'Dipakai halaman analisis finansial Profil Investasi. Kosongkan harga untuk memakai harga produsen BPS provinsi; '
+       'sub-jenis tanpa volume, investasi, atau harga ditulis belum memiliki model usaha.'),
+    _d('ASUMSI_MODEL_USAHA', 'model_usaha', 'Asumsi analisis finansial Profil Investasi',
+       'Berlaku untuk semua model usaha. CSR dihitung dari pendapatan bersih tahun sebelumnya.', batas=(0, 100)),
 ]
 TERDAFTAR = {d['kunci']: d for d in DAFTAR}
 
@@ -186,6 +192,9 @@ LABEL_BAGIAN = {
     'PERMUKIMAN': 'Permukiman', 'LAUT': 'Perairan', 'DARAT': 'Darat',
     'KABEL': 'Kabel bawah laut', 'PIPA': 'Pipa bawah laut', 'ALUR_PELAYARAN': 'Alur pelayaran',
     'lokasi_risiko': 'Lokasi dan risiko',
+    'umur_tahun': 'Umur proyek (tahun)', 'diskonto_persen': 'Tingkat diskonto atau MARR (%)',
+    'kenaikan_harga_persen': 'Kenaikan harga per tahun (%)', 'kenaikan_biaya_persen': 'Kenaikan biaya per tahun (%)',
+    'csr_persen': 'CSR (% pendapatan bersih)', 'batas_pbp_tahun': 'Batas masa pengembalian modal (tahun)',
 }
 
 BAWAAN = {kunci: json.loads(json.dumps(getattr(konstanta, kunci))) for kunci in TERDAFTAR}
@@ -283,6 +292,27 @@ def _kriteria(nilai, sektor):
                     raise NilaiTidakSah(f'{jalur} > {PARAMETER[k][0]}: batas bawah melebihi batas atas.')
 
 
+def _model_usaha(nilai):
+    bawaan = BAWAAN['MODEL_USAHA']
+    nama = {sub: isi['nama'] for per_sub in konstanta.KRITERIA_JENIS.values() for sub, isi in per_sub.items()}
+    meta = {'batas': [0, None], 'bulat': False}
+    if not isinstance(nilai, dict) or set(nilai) != set(bawaan):
+        raise NilaiTidakSah('Model usaha: daftar sub-jenis tidak sesuai.')
+    for sub, isi in nilai.items():
+        contoh, jalur = bawaan[sub], nama.get(sub, sub)
+        if not isinstance(isi, dict) or set(isi) != set(contoh):
+            raise NilaiTidakSah(f'{jalur}: susunan isian tidak sesuai.')
+        for k in ('satuan_usaha', 'satuan_produk'):
+            if not isinstance(isi[k], str) or not isi[k].strip() or len(isi[k]) > 40:
+                raise NilaiTidakSah(f'{jalur}: satuan wajib diisi, paling panjang 40 huruf.')
+        _angka(isi['harga_per_satuan'], f'{jalur} > harga', meta, boleh_kosong=True)
+        for bagian in ('volume_per_tahun', 'investasi', 'operasional_per_tahun'):
+            if not isinstance(isi[bagian], dict) or set(isi[bagian]) != set(contoh[bagian]):
+                raise NilaiTidakSah(f'{jalur}: susunan isian tidak sesuai.')
+            for k, v in isi[bagian].items():
+                _angka(v, f'{jalur} > {k}', meta, boleh_kosong=True)
+
+
 def periksa(kunci, nilai):
     from inti.models import SektorInvestasi
 
@@ -290,7 +320,12 @@ def periksa(kunci, nilai):
     if kunci == 'KRITERIA_JENIS':
         _kriteria(nilai, set(SektorInvestasi.objects.values_list('kode', flat=True)))
         return
+    if kunci == 'MODEL_USAHA':
+        _model_usaha(nilai)
+        return
     _sama_bentuk(nilai, BAWAAN[kunci], meta['label'], meta)
+    if kunci == 'ASUMSI_MODEL_USAHA' and (int(nilai['umur_tahun']) != nilai['umur_tahun'] or nilai['umur_tahun'] < 1):
+        raise NilaiTidakSah('Umur proyek harus bilangan bulat sedikitnya 1 tahun.')
     if kunci == 'MATRIKS_PERBANDINGAN_BAWAAN':
         from analitik.services.ahp import hitung_bobot_ahp
 

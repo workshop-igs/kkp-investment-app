@@ -366,6 +366,76 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
   );
 };
 
+const LABEL_VOLUME = { riil: 'Kondisi riil', s1: 'Sangat sesuai (S1)', s2: 'Sesuai (S2)' };
+const URUTAN_MODEL = [
+  'riil', 's1', 's2', 'Peralatan', 'Sarana dan prasarana', 'Lahan dan bangunan', 'Perizinan KKPRL', 'Perizinan lain',
+  'Benih, bibit, atau bahan baku', 'Pakan, BBM, atau energi', 'Operasional alat', 'Tenaga kerja', 'Lain-lain',
+];
+const urutModel = (k) => (URUTAN_MODEL.includes(k) ? URUTAN_MODEL.indexOf(k) : URUTAN_MODEL.length);
+
+const GrupAngka = ({ judul, isi, label = {}, onUbah, petunjuk }) => (
+  <div>
+    <div className="text-xs font-semibold text-slate-600 mb-1">{judul}</div>
+    <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-5">
+      {Object.entries(isi).sort(([a], [b]) => urutModel(a) - urutModel(b)).map(([k, v]) => (
+        <label key={k} className="text-[11px] text-slate-500">
+          {label[k] || k}
+          <Angka nilai={v} kosong petunjuk={petunjuk} onUbah={(x) => onUbah(k, x)} />
+        </label>
+      ))}
+    </div>
+  </div>
+);
+
+const ModelUsahaEditor = ({ nilai, onUbah, data }) => {
+  const kriteria = data.daftar.find((d) => d.kunci === 'KRITERIA_JENIS')?.nilai || {};
+  const [kode, setKode] = useState(data.sektor[0]?.kode);
+  return (
+    <div className="space-y-3">
+      <select value={kode} onChange={(e) => setKode(e.target.value)} className={`${kelasInput} max-w-sm`}>
+        {data.sektor.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
+      </select>
+      {Object.entries(kriteria[kode] || {}).filter(([sub]) => nilai[sub]).map(([sub, isi]) => {
+        const m = nilai[sub];
+        const ubah = (baru) => onUbah({ ...nilai, [sub]: { ...m, ...baru } });
+        const isian = (bagian) => (k, x) => ubah({ [bagian]: { ...m[bagian], [k]: x } });
+        const ada = (o) => Object.values(o).some((v) => v);
+        const lengkap = (m.harga_per_satuan || m.satuan_produk === 'kg') && ada(m.volume_per_tahun) && ada(m.investasi);
+        return (
+          <div key={sub} className="rounded-lg border border-slate-100 p-3 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-sm font-semibold text-slate-800">{isi.nama}</span>
+              <span className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${lengkap ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+                {lengkap ? 'Siap dihitung' : 'Belum lengkap'}
+              </span>
+            </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <label className="text-[11px] text-slate-500">
+                Satuan usaha
+                <input value={m.satuan_usaha} onChange={(e) => ubah({ satuan_usaha: e.target.value })} className={kelasInput} />
+              </label>
+              <label className="text-[11px] text-slate-500">
+                Satuan produk
+                <input value={m.satuan_produk} onChange={(e) => ubah({ satuan_produk: e.target.value })} className={kelasInput} />
+              </label>
+              <label className="text-[11px] text-slate-500">
+                Harga per {m.satuan_produk || 'satuan'} (Rp)
+                <Angka nilai={m.harga_per_satuan} kosong petunjuk={m.satuan_produk === 'kg' ? 'harga BPS provinsi' : 'wajib diisi'}
+                  onUbah={(x) => ubah({ harga_per_satuan: x })} />
+              </label>
+            </div>
+            <GrupAngka judul={`Volume produksi per tahun (${m.satuan_produk || 'satuan'})`} isi={m.volume_per_tahun}
+              label={LABEL_VOLUME} petunjuk="kosong" onUbah={isian('volume_per_tahun')} />
+            <GrupAngka judul="Investasi awal (Rp)" isi={m.investasi} petunjuk="kosong" onUbah={isian('investasi')} />
+            <GrupAngka judul="Biaya operasional per tahun (Rp)" isi={m.operasional_per_tahun} petunjuk="kosong"
+              onUbah={isian('operasional_per_tahun')} />
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const KartuPengaturan = ({ item, data, onTersimpan }) => {
   const [nilai, setNilai] = useState(item.nilai);
   const [galat, setGalat] = useState('');
@@ -386,7 +456,7 @@ const KartuPengaturan = ({ item, data, onTersimpan }) => {
     }
   };
 
-  const khusus = item.kunci === 'KRITERIA_JENIS';
+  const EditorKhusus = { KRITERIA_JENIS: KriteriaEditor, MODEL_USAHA: ModelUsahaEditor }[item.kunci];
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
@@ -419,8 +489,8 @@ const KartuPengaturan = ({ item, data, onTersimpan }) => {
           </button>
         </div>
       </div>
-      {khusus
-        ? <KriteriaEditor nilai={nilai} onUbah={setNilai} data={data} />
+      {EditorKhusus
+        ? <EditorKhusus nilai={nilai} onUbah={setNilai} data={data} />
         : <Editor nilai={nilai} onUbah={setNilai} meta={item} label={data.label_bagian} />}
       {galat && <p className="mt-3 text-xs font-medium text-rose-600">{galat}</p>}
     </div>
