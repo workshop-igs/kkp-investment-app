@@ -29,6 +29,7 @@ from analitik.services.kriteria import (
     karang_dari_jarak,
     penilaian,
     raster_ranah,
+    sub_jenis,
     sumber_tersedia,
     uraian,
 )
@@ -356,7 +357,7 @@ def ada_zona_diizinkan(provinsi_ids, sektor, ranah) -> bool:
     return hasil
 
 
-def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
+def _lokasi_alternatif(c, geom, sektor, sub_kode=None) -> List[Dict[str, Any]]:
     c.execute(
         """
         SELECT l.id, l.rincian->>'nama', l.rincian->>'sub_zona', p.nama, l.persen_sesuai, l.luas_ha,
@@ -364,12 +365,14 @@ def _lokasi_alternatif(c, geom, sektor) -> List[Dict[str, Any]]:
         FROM analitik_lokasi_potensial l
         JOIN inti_provinsi p ON p.id = l.provinsi_id
         CROSS JOIN LATERAL (SELECT ST_PointOnSurface(l.geometry) AS t, ST_Centroid(ST_GeomFromEWKT(%s)) AS a) q
-        WHERE l.sektor_id = %s AND ST_DWithin(l.geometry, ST_GeomFromEWKT(%s), %s)
+        WHERE l.sektor_id = %s AND (%s::text IS NULL OR l.rincian->>'sub_sektor_kode' = %s)
+          AND ST_DWithin(l.geometry, ST_GeomFromEWKT(%s), %s)
           AND NOT ST_Intersects(l.geometry, ST_GeomFromEWKT(%s))
         ORDER BY l.geometry <-> ST_GeomFromEWKT(%s)
         LIMIT %s
         """,
-        [geom.ewkt, sektor.id, geom.ewkt, atur('RADIUS_LOKASI_ALTERNATIF_KM') / KM_PER_DERAJAT, geom.ewkt, geom.ewkt,
+        [geom.ewkt, sektor.id, sub_kode, sub_kode, geom.ewkt, atur('RADIUS_LOKASI_ALTERNATIF_KM') / KM_PER_DERAJAT,
+         geom.ewkt, geom.ewkt,
          atur('JUMLAH_LOKASI_ALTERNATIF')],
     )
     return [
@@ -579,13 +582,16 @@ def periksa_luas(luas_ha: float) -> None:
             f'Luas area {_angka(luas_ha, 0)} ha melebihi batas {_angka(besar, 0)} ha; pecah menjadi beberapa area proyek.')
 
 
-def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any]:
+def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Optional[str] = None) -> Dict[str, Any]:
     geom = GEOSGeometry(json.dumps(geometry), srid=4326)
     if not geom.valid:
         geom = geom.buffer(0)
     sektor = SektorInvestasi.objects.filter(kode=sektor_kode).first()
     if sektor is None:
         raise ValueError(f'Jenis investasi "{sektor_kode}" tidak dikenal.')
+    daftar_sub = {s['kode']: s['nama'] for s in sub_jenis(sektor.kode)}
+    if sub_kode and sub_kode not in daftar_sub:
+        raise ValueError(f'Sub-jenis "{sub_kode}" bukan bagian dari {sektor.nama}.')
 
     with connection.cursor() as c:
         luas_aoi = _luas(c, geom)
@@ -612,11 +618,11 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         tambahan = nilai_area(c, geom, sektor.kode, provinsi_ids)
         karakter['tambahan'] = {t['nama']: t['hasil'] for t in tambahan if t['peran'] == 'DINILAI'}
         bersyarat = status == 'SESUAI_BERSYARAT' and ada_zona_diizinkan(provinsi_ids, sektor, karakter['ranah'])
-        fisik = penilaian(sektor.kode, karakter, bersyarat=bersyarat)
+        fisik = penilaian(sektor.kode, karakter, bersyarat=bersyarat, sub_kode=sub_kode)
         terbaik = fisik[0] if fisik else None
         cocok = bool(terbaik and terbaik['cocok'])
         data_kurang = bool(terbaik) and not cocok and not terbaik['gagal']
-        alasan_karakter = alasan_fisik(sektor.kode, karakter, fisik)
+        alasan_karakter = alasan_fisik(sektor.kode, karakter, fisik, sub_kode)
         adat_di, adat_dekat = _adat_area(c, geom)
         if (not cocok and not data_kurang) or adat_di or any(k['gugur'] for k in kena):
             status = 'TIDAK_SESUAI'
@@ -645,7 +651,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
                         alternatif.append({'kode': s.kode, 'nama': s.nama, 'status_label': f"{LABEL_STATUS[st]} ({lain[0]['nama']})"})
             rekomendasi = {
                 'sektor_alternatif': alternatif,
-                'lokasi_alternatif': _lokasi_alternatif(c, geom, sektor),
+                'lokasi_alternatif': _lokasi_alternatif(c, geom, sektor, sub_kode),
             }
 
     for z in zona_efektif:
@@ -656,7 +662,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         z['sumber_ketentuan'] = ket['sumber']
         z['rincian'] = ket.get('rincian')
 
-    karakter_ringkas = {'kebutuhan': uraian(sektor.kode), 'terukur': _ringkas(karakter, fisik), 'cocok': cocok}
+    karakter_ringkas = {'kebutuhan': uraian(sektor.kode, sub_kode), 'terukur': _ringkas(karakter, fisik), 'cocok': cocok}
     parameter = [
         {'label': k['label'], 'nilai': k['lulus'], 'nilai_teks': k['nilai_teks'], 'ambang_teks': k['ambang_teks'],
          'data_ada': k.get('data_ada', True)}
@@ -696,6 +702,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str) -> Dict[str, Any
         'lanjut': lanjut,
         'sektor': sektor.kode,
         'sektor_nama': sektor.nama,
+        'sub_jenis': {'kode': sub_kode, 'nama': daftar_sub[sub_kode]} if sub_kode else None,
         'luas_m2': luas_aoi,
         'cakupan_persen': round(cakupan * 100, 1),
         'acuan': tingkat_dipakai,

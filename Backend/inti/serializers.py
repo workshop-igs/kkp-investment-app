@@ -33,9 +33,17 @@ class KabupatenKotaSerializer(serializers.ModelSerializer):
 
 
 class SektorInvestasiSerializer(serializers.ModelSerializer):
+    sub_jenis = serializers.SerializerMethodField()
+
     class Meta:
         model = SektorInvestasi
-        fields = ['id', 'kode', 'nama', 'deskripsi', 'ikon', 'warna', 'rasio_tk_per_miliar', 'aktif', 'urutan']
+        fields = ['id', 'kode', 'nama', 'deskripsi', 'ikon', 'warna', 'rasio_tk_per_miliar', 'aktif', 'urutan',
+                  'sub_jenis']
+
+    def get_sub_jenis(self, obj):
+        from analitik.services.kriteria import sub_jenis
+
+        return sub_jenis(obj.kode)
 
     def validate_kode(self, nilai):
         if not re.fullmatch(r'[A-Z][A-Z0-9_]{2,49}', nilai or ''):

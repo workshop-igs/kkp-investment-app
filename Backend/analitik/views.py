@@ -204,11 +204,11 @@ class ZonaRisikoBencanaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         }
 
 
-def _jalankan_screening(geometry, sektor_kode):
+def _jalankan_screening(geometry, sektor_kode, sub_kode=None):
     if not geometry:
         return None, Response({'detail': 'Geometry (GeoJSON) wajib disertakan.'}, status=status.HTTP_400_BAD_REQUEST)
     try:
-        return screening_ruang(geometry, sektor_kode), None
+        return screening_ruang(geometry, sektor_kode, sub_kode or None), None
     except ValueError as e:
         return None, Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
     except Exception as e:
@@ -223,7 +223,8 @@ class ScreeningRuangView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        hasil, galat = _jalankan_screening(request.data.get('geometry'), request.data.get('sektor'))
+        hasil, galat = _jalankan_screening(request.data.get('geometry'), request.data.get('sektor'),
+                                           request.data.get('sub_sektor'))
         return galat or Response(hasil)
 
 
@@ -234,7 +235,7 @@ class RunAnalysisView(APIView):
         data = request.data
         geometry = data.get('geometry')
         sektor_kode = data.get('sektor')
-        screening, galat = _jalankan_screening(geometry, sektor_kode)
+        screening, galat = _jalankan_screening(geometry, sektor_kode, data.get('sub_sektor'))
         if galat:
             return galat
         if not screening['lanjut']:
@@ -388,7 +389,8 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     def retrieve(self, request, pk=None):
         lok = self.get_object()
         sektor = lok.sektor.kode if lok.sektor_id else (lok.jenis[0] if lok.jenis else None)
-        return Response({'geometry': json.loads(lok.geometry.geojson), 'sektor_kode': sektor})
+        return Response({'geometry': json.loads(lok.geometry.geojson), 'sektor_kode': sektor,
+                         'sub_sektor_kode': lok.rincian.get('sub_sektor_kode')})
 
     def peta_urutan(self, qs, request, batas):
         return qs.order_by('-persen_sesuai', '-luas_ha', 'id')
@@ -408,7 +410,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
             'kelas': 'TINGGI',
             'persen_sesuai': round(r['persen_sesuai']),
             'luas_ha': round(r['luas_ha'], 1),
-            'karakter': uraian(r['jenis'][0]) if len(r['jenis']) == 1 else None,
+            'karakter': uraian(r['jenis'][0], r['rincian'].get('sub_sektor_kode')) if len(r['jenis']) == 1 else None,
         }
 
 

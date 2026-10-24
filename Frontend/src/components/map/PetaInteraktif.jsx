@@ -332,7 +332,7 @@ const PetaInteraktif = ({
     if (lokasi) {
       api.get(`${LAYER_LOKAL.potensi.url.replace(/peta\/$/, '')}${encodeURIComponent(lokasi)}/`)
         .then(({ data }) => {
-          if (data?.sektor_kode) onPilihSektor?.(data.sektor_kode);
+          if (data?.sektor_kode) onPilihSektor?.(data.sektor_kode, data.sub_sektor_kode || null);
           drawerRef.current?.loadGeometry(data?.geometry);
         })
         .catch(() => setError('Batas lokasi potensial tidak dapat dimuat.'));
@@ -427,16 +427,18 @@ const PetaInteraktif = ({
                         layer.closePopup();
                         let geometri = feature.geometry;
                         let sektor = p.sektor_kode || p.jenis?.[0] || null;
+                        let sub = p.sub_sektor_kode || null;
                         if (feature.id !== undefined && feature.id !== null) {
                           try {
                             const { data } = await api.get(LAYER_LOKAL[id].url.replace(/peta\/$/, `${feature.id}/`));
                             geometri = data?.geometry || geometri;
                             sektor = data?.sektor_kode || sektor;
+                            sub = data?.sub_sektor_kode || sub;
                           } catch {
                             geometri = feature.geometry;
                           }
                         }
-                        if (sektor) onPilihSektor?.(sektor);
+                        if (sektor) onPilihSektor?.(sektor, sub);
                         drawerRef.current?.loadGeometry(geometri);
                       });
                   });

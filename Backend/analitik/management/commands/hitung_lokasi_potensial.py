@@ -21,7 +21,10 @@ from analitik.services.konstanta import (
     UKURAN_SEL_LOKASI_DERAJAT,
 )
 from analitik.services.kriteria import (
+    BATAS_JARAK_ZONA_DERAJAT,
     BENCANA,
+    INFRA,
+    JARAK_ZONA,
     KARANG,
     PARAMETER,
     RASTER_DATA,
@@ -87,10 +90,9 @@ FROM sel s WHERE s.id = ANY(%s)
 def siapkan_infra_terbagi(c):
     c.execute('DROP TABLE IF EXISTS infra_terbagi')
     c.execute(
-        'CREATE TEMP TABLE infra_terbagi AS SELECT kategori, ST_Subdivide(ST_MakeValid(geometry), 128) AS g '
-        'FROM inventarisasi_infrastruktur_pendukung WHERE ST_Dimension(geometry) > 0 '
-        'UNION ALL SELECT kategori, (ST_Dump(geometry)).geom FROM inventarisasi_infrastruktur_pendukung '
-        'WHERE ST_Dimension(geometry) = 0'
+        f'CREATE TEMP TABLE infra_terbagi AS SELECT kategori, ST_Subdivide(ST_MakeValid(geometry), 128) AS g '
+        f'FROM {INFRA} i WHERE ST_Dimension(geometry) > 0 '
+        f'UNION ALL SELECT kategori, (ST_Dump(geometry)).geom FROM {INFRA} i WHERE ST_Dimension(geometry) = 0'
     )
     c.execute('SELECT DISTINCT kategori FROM infra_terbagi')
     for (kategori,) in c.fetchall():
@@ -283,6 +285,21 @@ class Command(BaseCommand):
             for i in calon:
                 ada = [km[k][i] for k in sumber if i in km.get(k, {})]
                 d[kunci][i] = min(ada) if ada else None
+        for kunci, sub_zona in JARAK_ZONA.items():
+            if kunci not in dipakai:
+                continue
+            c.execute('DROP TABLE IF EXISTS zona_jarak')
+            c.execute(
+                'CREATE TEMP TABLE zona_jarak AS SELECT ST_Subdivide(ST_MakeValid(geometry), 256, 1e-9) AS g '
+                'FROM inventarisasi_zonasi_ruang_laut WHERE sub_zona = ANY(%s) AND geometry && ST_Expand(%s::geometry, %s)',
+                [sub_zona, cakupan, BATAS_JARAK_ZONA_DERAJAT],
+            )
+            c.execute('CREATE INDEX ON zona_jarak USING gist (g)')
+            c.execute(TERDEKAT.format(kolom='titik', tabel='zona_jarak', saring=''), [calon])
+            d[kunci] = [None] * (banyak + 1)
+            for i, jarak in c.fetchall():
+                if jarak is not None and jarak <= BATAS_JARAK_ZONA_DERAJAT:
+                    d[kunci][i] = jarak * KM_PER_DERAJAT
 
         c.execute(
             f'CREATE TEMP TABLE alur_sel AS SELECT ST_Subdivide(ST_MakeValid(z.geometry), 256, 1e-9) AS g '
@@ -659,7 +676,8 @@ class Command(BaseCommand):
         lok = LokasiPotensial.objects.select_related('sektor').get(id=i)
         if 'lolos_ruang' not in lok.rincian:
             try:
-                lok.rincian['lolos_ruang'] = screening_ruang(json.loads(lok.geometry.geojson), lok.sektor.kode)['lanjut']
+                lok.rincian['lolos_ruang'] = screening_ruang(json.loads(lok.geometry.geojson), lok.sektor.kode,
+                                                             lok.rincian.get('sub_sektor_kode'))['lanjut']
             except ValueError:
                 lok.rincian['lolos_ruang'] = False
             LokasiPotensial.objects.filter(id=i).update(rincian=lok.rincian)

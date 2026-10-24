@@ -12,6 +12,7 @@ const AnalisisPage = () => {
   const [geometry, setGeometry] = useState(null);
   const [panelOpen, setPanelOpen] = useState(false);
   const [sektorAwal, setSektorAwal] = useState(null);
+  const [subAwal, setSubAwal] = useState(null);
   const [cari] = useSearchParams();
   const [fokus, setFokus] = useState(() => {
     const lat = Number.parseFloat(cari.get('lat'));
@@ -43,12 +44,17 @@ const AnalisisPage = () => {
     setGeometry(geoJsonGeometry);
   };
 
-  const handleAnalyze = async (sektor, financialParams) => {
+  const pilihSektor = (sektor, sub = null) => {
+    setSektorAwal(sektor);
+    setSubAwal(sub);
+  };
+
+  const handleAnalyze = async (sektor, subSektor, financialParams) => {
     if (!geometry) return null;
     setLoading(true);
     const selesai = mulaiMemuat('Menganalisis kelayakan lokasi');
     try {
-      const data = await jalankanAnalisisKelayakan(geometry, sektor, financialParams);
+      const data = await jalankanAnalisisKelayakan(geometry, sektor, subSektor, financialParams);
       setResult(data);
       return data;
     } catch (error) {
@@ -67,7 +73,7 @@ const AnalisisPage = () => {
       <div className="flex-1 relative bg-slate-50 overflow-hidden">
         <PetaInteraktif 
           onPolygonCompleted={handlePolygonCreated} 
-          onPilihSektor={setSektorAwal}
+          onPilihSektor={pilihSektor}
           panelOpen={panelOpen}
           setPanelOpen={setPanelOpen}
           mapLayers={result?.map_layers}
@@ -92,6 +98,7 @@ const AnalisisPage = () => {
                 hasGeometry={!!geometry} 
                 geometry={geometry}
                 sektorAwal={sektorAwal}
+                subAwal={subAwal}
                 onLihatLokasi={lihatLokasi}
               />
             </div>

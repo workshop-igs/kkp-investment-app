@@ -164,14 +164,15 @@ const DetailProyekPage = () => {
     if (!geom || !proyek?.sektor_kode) return undefined;
     const kontrol = new AbortController();
     api
-      .post('/analitik/screening/', { geometry: geom, sektor: proyek.sektor_kode }, { signal: kontrol.signal })
+      .post('/analitik/screening/', { geometry: geom, sektor: proyek.sektor_kode, sub_sektor: proyek.sub_sektor || undefined },
+        { signal: kontrol.signal })
       .then(({ data }) => setScreening(data))
       .catch((err) => {
         if (err.code === 'ERR_CANCELED' || err.name === 'CanceledError') return;
         setScreening(analisis.screening);
       });
     return () => kontrol.abort();
-  }, [geom, proyek?.sektor_kode]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [geom, proyek?.sektor_kode, proyek?.sub_sektor]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!geom) return undefined;
@@ -282,7 +283,7 @@ const DetailProyekPage = () => {
         subjudul: [proyek.kode_proyek, proyek.sektor_nama, proyek.provinsi_nama]
           .filter(Boolean)
           .join(' · '),
-        jenisInvestasi: proyek.sektor_nama,
+        jenisInvestasi: [proyek.sektor_nama, proyek.sub_sektor_nama].filter(Boolean).join(' — '),
         analisis: { ...analisis, screening: screening || analisis.screening },
         spasial: spasial.data,
         bps: dataBps,
@@ -591,7 +592,7 @@ const DetailProyekPage = () => {
             <>
               {proyek.sektor_nama && (
                 <KartuLaporan judul="Jenis Investasi">
-                  <AngkaBesar item={[{ nilai: proyek.sektor_nama, satuan: 'Sektor investasi' }]} />
+                  <AngkaBesar item={[{ nilai: [proyek.sektor_nama, proyek.sub_sektor_nama].filter(Boolean).join(' — '), satuan: 'Sektor investasi' }]} />
                 </KartuLaporan>
               )}
               <KartuLaporan

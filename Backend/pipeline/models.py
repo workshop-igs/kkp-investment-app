@@ -34,6 +34,7 @@ class ProyekInvestasi(models.Model):
     sektor = models.ForeignKey(
         SektorInvestasi, on_delete=models.SET_NULL, related_name='proyek', null=True, blank=True
     )
+    sub_sektor = models.CharField(max_length=40, blank=True, help_text='Kode sub-jenis investasi')
     nilai_investasi_miliar = models.FloatField(default=0)
     nilai_realisasi_miliar = models.FloatField(default=0, help_text='Realisasi investasi aktual')
 
