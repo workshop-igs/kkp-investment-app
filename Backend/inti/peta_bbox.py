@@ -151,7 +151,8 @@ class PetaBBoxMixin:
             minx, miny, maxx, maxy = self.BBOX_INDONESIA
         kotak = Polygon.from_bbox((minx, miny, maxx, maxy))
         kotak.srid = 4326
-        qs = qs.filter(geometry__intersects=kotak)
+        geometri = self.kolom_geometri(request, abs(maxx - minx))
+        qs = qs.filter(**{f'{geometri}__intersects': kotak})
         toleransi, batas = self._skala(abs(maxx - minx))
         if self.BATAS_JAUH and abs(maxx - minx) >= self.LEBAR_JAUH:
             batas = min(batas, self.BATAS_JAUH)
@@ -163,13 +164,13 @@ class PetaBBoxMixin:
 
         sertakan = self.sertakan_titik(request)
         if sertakan or self.HANYA_TITIK:
-            qs = qs.annotate(titik_wakil=PointOnSurface('geometry'))
+            qs = qs.annotate(titik_wakil=PointOnSurface(geometri))
 
         if toleransi > 0:
             fungsi = Simplify if toleransi >= 0.005 else SimplifyPreserveTopology
-            ekspresi = fungsi('geometry', toleransi)
+            ekspresi = fungsi(geometri, toleransi)
         else:
-            ekspresi = F('geometry')
+            ekspresi = F(geometri)
 
         kolom = ['id', *self.PETA_KOLOM]
         if not self.HANYA_TITIK:
@@ -266,6 +267,9 @@ class PetaBBoxMixin:
             qs = qs.filter(provinsi_id=provinsi)
         kotak = qs.aggregate(batas=Extent('geometry'))['batas']
         return Response({'cakupan': list(kotak) if kotak else None, 'jumlah': qs.count()})
+
+    def kolom_geometri(self, request, lebar):
+        return 'geometry'
 
     def peta_queryset_tambahan(self, qs, request):  # pragma: no cover
         return qs

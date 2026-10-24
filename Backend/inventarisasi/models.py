@@ -389,6 +389,9 @@ class SumberDayaAlam(models.Model):
     jenis = models.CharField(max_length=20, choices=JENIS_CHOICES)
     nama = models.CharField(max_length=255)
     geometry = models.MultiPolygonField(srid=4326, null=True, blank=True)
+    geometry_tampilan = models.MultiPolygonField(
+        srid=4326, null=True, blank=True, help_text='Petak dilebur per piksel ±55 m untuk peta skala kecil'
+    )
     luas_ha = models.FloatField(default=0)
     kondisi = models.CharField(max_length=50, blank=True, help_text='Baik/Sedang/Rusak')
     estimasi_nilai_miliar = models.FloatField(default=0)
