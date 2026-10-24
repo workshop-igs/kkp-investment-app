@@ -63,10 +63,11 @@ api.interceptors.response.use(
   }
 );
 
-export const jalankanAnalisisKelayakan = async (geometry, sektor, parameterFinansial) => {
+export const jalankanAnalisisKelayakan = async (geometry, sektor, subSektor, parameterFinansial) => {
   const { data } = await api.post('/analitik/analisis/', {
     geometry,
     sektor,
+    sub_sektor: subSektor || undefined,
     ...parameterFinansial,
   });
   return data;
@@ -80,7 +81,7 @@ export const useSektorAktif = () => {
     if (!getAccessToken()) return;
     api.get('/inti/sektor/')
       .then(({ data }) => {
-        const aktif = ambilDaftar(data).map((s) => ({ id: s.kode, label: s.nama }));
+        const aktif = ambilDaftar(data).map((s) => ({ id: s.kode, label: s.nama, sub: s.sub_jenis || [] }));
         if (aktif.length) setDaftar(aktif);
       })
       .catch(() => {});
