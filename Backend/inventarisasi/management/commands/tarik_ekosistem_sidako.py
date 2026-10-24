@@ -12,6 +12,10 @@ from inventarisasi.models import SumberDayaAlam
 WFS = 'https://sidako.kkp.go.id/geoserver/ows'
 TAHUN = 2025
 SEL_DERAJAT = 0.1
+GEOMETRI_TAMPILAN = (
+    "ST_Multi(ST_SimplifyPreserveTopology(ST_Polygon(ST_AsRaster(geometry, 0.0005::float8, -0.0005::float8, "
+    "'8BUI'::text, 1::float8, 0::float8, NULL::float8, NULL::float8, 0::float8, 0::float8, true)), 0.0003))"
+)
 
 EKOSISTEM = {
     'LAMUN': ('oceanaccounts:spatial_seagrass_2025', 'SIDAKO-LAMUN', 'Padang lamun'),
@@ -104,5 +108,10 @@ class Command(BaseCommand):
                     'UPDATE inventarisasi_sumber_daya_alam s SET nama = %s || \' \' || p.nama '
                     'FROM inti_provinsi p WHERE s.provinsi_id = p.id AND s.sumber_data = %s',
                     [label, tanda],
+                )
+                c.execute(
+                    f'UPDATE inventarisasi_sumber_daya_alam SET geometry_tampilan = {GEOMETRI_TAMPILAN} '
+                    f'WHERE sumber_data = %s',
+                    [tanda],
                 )
         self.stdout.write(self.style.SUCCESS(f'{label}: {len(baris)} sel tersimpan ({tanda}).'))
