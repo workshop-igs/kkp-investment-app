@@ -68,7 +68,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
         from django.core.cache import cache
         from django.db.models import Max
 
-        from analitik.models import RasterOseanografi
+        from analitik.models import LokasiPotensial, PengaturanAnalisis, RasterOseanografi
         from analitik.services.profil_investasi import profil_provinsi
         from inventarisasi.models import RegulasiTataRuang
         from penarikan_data.models import ProduksiPerikananBPS
@@ -85,9 +85,11 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
                 ProduksiPerikananBPS.objects.aggregate(t=Max('diperbarui_pada'))['t'],
                 RegulasiTataRuang.objects.aggregate(t=Max('ditarik_pada'))['t'],
                 RasterOseanografi.objects.aggregate(t=Max('ditarik_pada'))['t'],
+                LokasiPotensial.objects.aggregate(t=Max('dihitung_pada'))['t'],
+                PengaturanAnalisis.objects.aggregate(t=Max('updated_at'))['t'],
             )
         )
-        kunci = f'profil-provinsi:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi}'
+        kunci = f'profil-provinsi:v2:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi}'
         profil = cache.get(kunci)
         if profil is None:
             profil = profil_provinsi(provinsi, sektor)
