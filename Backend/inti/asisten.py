@@ -41,7 +41,7 @@ SINONIM = {
 }
 JUMLAH_PANDUAN = 3
 BUANG = frozenset({'geometry', 'batas', 'peta', 'grafik', 'map_markers', 'next', 'previous', 'created_at', 'updated_at',
-                   'seri', 'bab', 'sektor_warna', 'sektor_id', 'provinsi_id'})
+                   'seri', 'sektor_warna', 'sektor_id', 'provinsi_id'})
 MAKS_DAFTAR = 40
 TAHAP = ['PERENCANAAN', 'PENYIAPAN', 'TRANSAKSI', 'KONSTRUKSI', 'OPERASI']
 SINGKATAN_PROVINSI = {
