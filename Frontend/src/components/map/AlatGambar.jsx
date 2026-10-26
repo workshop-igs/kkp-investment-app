@@ -9,6 +9,17 @@ const POLYGON_COLORS = {
   DEFAULT:     { color: '#2dd4bf', fillColor: '#2dd4bf', fillOpacity: 0.12, weight: 2, dashArray: '6,4' },
 };
 
+export const BATAS_TITIK_UBAH = 600;
+
+const ikonTitik = (warna, besar) => L.divIcon({
+  className: '',
+  html: `<span style="display:block;width:100%;height:100%;border-radius:9999px;background:${warna};border:2px solid #fff;box-shadow:0 0 0 1px rgba(15,23,42,.45);cursor:grab"></span>`,
+  iconSize: [besar, besar],
+});
+
+const poligonDari = (lapisan) => (lapisan instanceof L.Polygon ? [lapisan] : (lapisan?.getLayers?.() || []).filter((l) => l instanceof L.Polygon));
+const titikDari = (latlngs) => (Array.isArray(latlngs) ? latlngs.flatMap(titikDari) : [latlngs]);
+
 export const MapOverlayLayers = ({ layers, visibility }) => {
   const map = useMap();
   const layerRefs = useRef({});
@@ -91,6 +102,7 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
   const closingLineRef     = useRef(null);
   const guideLineRef       = useRef(null);
   const completedPolyRef   = useRef(null);
+  const ubahRef            = useRef(null);
 
   const PANE_GAMBAR = 'alat-gambar';
   if (!map.getPane(PANE_GAMBAR)) {
@@ -121,8 +133,49 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
     notify(0);
   };
 
+  const lepasPegangan = () => {
+    ubahRef.current?.pegangan.forEach((h) => map.removeLayer(h));
+    ubahRef.current = null;
+  };
+
+  const ubahTitik = () => {
+    const lapisan = poligonDari(completedPolyRef.current);
+    const jumlah = lapisan.reduce((n, p) => n + titikDari(p.getLatLngs()).length, 0);
+    if (!lapisan.length || ubahRef.current || jumlah > BATAS_TITIK_UBAH) return false;
+    const pegangan = lapisan.flatMap((p) => titikDari(p.getLatLngs()).map((ll) => {
+      const h = L.marker(ll, { ...opsiPane, icon: ikonTitik('#ffffff', 12), draggable: true, keyboard: false }).addTo(map);
+      h.on('drag', (ev) => {
+        const baru = ev.target.getLatLng();
+        ll.lat = baru.lat;
+        ll.lng = baru.lng;
+        p.setLatLngs(p.getLatLngs());
+      });
+      return h;
+    }));
+    ubahRef.current = { pegangan, asli: lapisan.map((p) => JSON.parse(JSON.stringify(p.getLatLngs()))) };
+    return true;
+  };
+
+  const selesaiUbah = () => {
+    if (!ubahRef.current) return;
+    lepasPegangan();
+    const bentuk = poligonDari(completedPolyRef.current).map((p) => p.toGeoJSON().geometry);
+    onPolygonCompleted(bentuk.length === 1 ? bentuk[0] : {
+      type: 'MultiPolygon',
+      coordinates: bentuk.flatMap((g) => (g.type === 'Polygon' ? [g.coordinates] : g.coordinates)),
+    }, completedPolyRef.current);
+  };
+
+  const batalUbah = () => {
+    if (!ubahRef.current) return;
+    const { asli } = ubahRef.current;
+    lepasPegangan();
+    poligonDari(completedPolyRef.current).forEach((p, i) => p.setLatLngs(asli[i]));
+  };
+
   const startDrawing = () => {
     cleanupPreview();
+    lepasPegangan();
     if (completedPolyRef.current) { map.removeLayer(completedPolyRef.current); completedPolyRef.current = null; }
     isActiveRef.current = true;
     map.getContainer().style.cursor = 'crosshair';
@@ -148,7 +201,7 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
     const m = vtxMarkersRef.current.pop();
     if (m) map.removeLayer(m);
     if (vtxMarkersRef.current.length > 0) {
-      vtxMarkersRef.current[0].setStyle({ fillColor: verticesRef.current.length >= 3 ? '#2dd4bf' : '#ffffff' });
+      vtxMarkersRef.current[0].setIcon(ikonTitik(verticesRef.current.length >= 3 ? '#2dd4bf' : '#ffffff', 14));
     }
     rebuildLines();
     notify(verticesRef.current.length);
@@ -163,6 +216,7 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
   };
 
   const removePolygon = () => {
+    lepasPegangan();
     if (completedPolyRef.current) { map.removeLayer(completedPolyRef.current); completedPolyRef.current = null; }
   };
 
@@ -174,6 +228,7 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
   const loadGeometry = (geometry) => {
     if (!['Polygon', 'MultiPolygon'].includes(geometry?.type)) return;
     cleanupPreview();
+    lepasPegangan();
     isActiveRef.current = false;
     map.getContainer().style.cursor = '';
     map.doubleClickZoom.enable();
@@ -197,7 +252,7 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
 
   useImperativeHandle(ref, () => ({
     startDrawing, finish, undo, cancel, removePolygon, updatePolygonColor,
-    loadGeometry, sorotPoligon,
+    loadGeometry, sorotPoligon, ubahTitik, selesaiUbah, batalUbah,
   }));
 
   useEffect(() => {
@@ -206,18 +261,21 @@ export const DrawingLayer = forwardRef(function DrawingLayer(
       const verts = verticesRef.current;
       verts.push(e.latlng);
       const isFirst = verts.length === 1;
-      const m = L.circleMarker(e.latlng, {
-        ...opsiPane,
-        radius: isFirst ? 7 : 5, color: '#ffffff',
-        fillColor: (isFirst && verts.length >= 3) ? '#2dd4bf' : '#ffffff',
-        fillOpacity: 1, weight: 2,
+      const urutan = verts.length - 1;
+      const m = L.marker(e.latlng, {
+        ...opsiPane, icon: ikonTitik('#ffffff', isFirst ? 14 : 10), draggable: true, keyboard: false, zIndexOffset: isFirst ? 100 : 0,
       }).addTo(map);
+      m.on('drag', (ev) => {
+        verticesRef.current[urutan] = ev.target.getLatLng();
+        removeLayer(guideLineRef);
+        rebuildLines();
+      });
       if (isFirst) {
         m.on('click', (ev) => { L.DomEvent.stop(ev); if (verticesRef.current.length >= 3) finish(); });
       }
       vtxMarkersRef.current.push(m);
       if (verts.length === 3 && vtxMarkersRef.current[0])
-        vtxMarkersRef.current[0].setStyle({ fillColor: '#2dd4bf' });
+        vtxMarkersRef.current[0].setIcon(ikonTitik('#2dd4bf', 14));
       rebuildLines();
       notify(verts.length);
     };

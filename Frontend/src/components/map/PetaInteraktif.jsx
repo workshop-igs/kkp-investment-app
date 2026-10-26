@@ -2,10 +2,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import L from 'leaflet';
 import { MapContainer, TileLayer, GeoJSON, ImageOverlay, ScaleControl, useMap } from 'react-leaflet';
 import { useSearchParams } from 'react-router-dom';
-import { Crosshair } from 'lucide-react';
+import { Crosshair, Move } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import KontrolPeta from './KontrolPeta';
-import { DrawingLayer, MapOverlayLayers } from './AlatGambar';
+import { BATAS_TITIK_UBAH, DrawingLayer, MapOverlayLayers } from './AlatGambar';
 import UnggahGeospasial from './UnggahGeospasial';
 import PetaMini from './PetaMini';
 import PanelDetailProvinsi from './PanelDetailProvinsi';
@@ -154,7 +154,8 @@ const PetaInteraktif = ({
   const [isDrawing, setIsDrawing] = useState(false);
   const [vertexCount, setVertexCount] = useState(0);
   const [hasPolygon, setHasPolygon] = useState(false);
-  
+  const [modeUbah, setModeUbah] = useState(false);
+
   const [provinsiRingkas, setProvinsiRingkas] = useState(null);
   const [provinsiDetail, setProvinsiDetail] = useState(null);
   const [zoomDekat, setZoomDekat] = useState(false);
@@ -315,6 +316,7 @@ const PetaInteraktif = ({
 
   const handleStartDrawing = () => {
     setModeUkur(false);
+    setModeUbah(false);
     drawerRef.current?.startDrawing();
     setIsDrawing(true);
     setHasPolygon(false);
@@ -346,11 +348,20 @@ const PetaInteraktif = ({
   const handleReset = () => {
     drawerRef.current?.removePolygon();
     setHasPolygon(false);
+    setModeUbah(false);
     setLayerVisibility({});
     setError(null);
     setPeringatanUnggah([]);
     setPanelOpen(false);
   };
+
+  const mulaiUbah = () => {
+    setError(null);
+    if (drawerRef.current?.ubahTitik()) setModeUbah(true);
+    else setError(`Area ini memiliki lebih dari ${BATAS_TITIK_UBAH} titik sehingga tidak dapat digeser satu per satu. Gambar ulang atau unggah ulang berkasnya.`);
+  };
+  const selesaiUbah = () => { setModeUbah(false); drawerRef.current?.selesaiUbah(); };
+  const batalUbah = () => { setModeUbah(false); drawerRef.current?.batalUbah(); };
 
   const canFinish = vertexCount >= 3;
 
@@ -377,7 +388,7 @@ const PetaInteraktif = ({
           />
 
           <PaneBatas onSiap={setKanvasBatas} />
-          <KunciLapisanSaatMenggambar menggambar={isDrawing} />
+          <KunciLapisanSaatMenggambar menggambar={isDrawing || modeUbah} />
 
           {activeDataLayers
             .filter((id) => LAYER_LOKAL[id]?.citra)
@@ -545,7 +556,7 @@ const PetaInteraktif = ({
                 <span className="text-slate-500 text-xs">titik</span>
               </span>
               <div className="hidden sm:block w-px h-5 bg-slate-300" />
-              <span className="text-slate-500 text-xs font-medium">Klik peta = tambah titik<span className="hidden sm:inline"> &nbsp;•&nbsp; Enter = selesai</span></span>
+              <span className="text-slate-500 text-xs font-medium">Klik peta = tambah titik<span className="hidden sm:inline"> &nbsp;•&nbsp; seret titik = geser &nbsp;•&nbsp; Enter = selesai</span></span>
             </div>
 
             <div className="flex flex-wrap justify-center gap-2">
@@ -565,7 +576,28 @@ const PetaInteraktif = ({
           </div>
         )}
 
-        {!isDrawing && (
+        {modeUbah && (
+          <div className="absolute top-[9.5rem] left-4 right-[4.5rem] md:top-24 md:left-[22rem] xl:left-1/2 xl:right-auto xl:-translate-x-1/2 z-[1150] flex xl:w-max xl:max-w-[calc(100vw-10rem)] flex-col items-center gap-3">
+            <div className="bg-white/95 backdrop-blur-md rounded-xl px-5 py-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5 shadow-[0_10px_30px_rgba(0,0,0,0.15)] border border-slate-200">
+              <Move className="w-4 h-4 text-sky-600" />
+              <span className="text-sky-600 font-bold text-sm uppercase tracking-wider">Mode Ubah Titik</span>
+              <div className="w-px h-5 bg-slate-300" />
+              <span className="text-slate-500 text-xs font-medium">Seret titik putih untuk menggeser sudut area</span>
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              <button onClick={batalUbah}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium border border-red-200 text-red-600 bg-white hover:bg-red-50 shadow-sm transition-all">
+                Batal
+              </button>
+              <button onClick={selesaiUbah}
+                className="flex items-center gap-1.5 px-5 py-2 rounded-lg text-sm font-bold border transition-all shadow-sm bg-sky-600 text-white hover:bg-sky-700 border-sky-600">
+                Selesai Mengubah
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!isDrawing && !modeUbah && (
           <div
             data-aksi-peta
             className="absolute bottom-24 left-4 right-[4.5rem] sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex flex-col gap-3 sm:w-max sm:max-w-[calc(100vw-10rem)]"
@@ -604,6 +636,12 @@ const PetaInteraktif = ({
                   className="flex items-center gap-2.5 px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-xs sm:text-sm text-slate-700 bg-white/95 backdrop-blur-md border border-slate-200 hover:text-sky-600 hover:border-sky-300 shadow-lg transition-all whitespace-nowrap">
                   <Crosshair className="w-4 h-4" />
                   Kembali ke Area
+                </button>
+                <button onClick={mulaiUbah}
+                  title="Geser titik sudut area yang sudah digambar atau diunggah"
+                  className="flex items-center gap-2.5 px-4 sm:px-6 py-3 sm:py-3.5 rounded-xl font-bold text-xs sm:text-sm text-slate-700 bg-white/95 backdrop-blur-md border border-slate-200 hover:text-sky-600 hover:border-sky-300 shadow-lg transition-all whitespace-nowrap">
+                  <Move className="w-4 h-4" />
+                  Ubah Titik
                 </button>
                 <UnggahGeospasial
                   onUploadSuccess={(geometry) => drawerRef.current?.loadGeometry(geometry)}
