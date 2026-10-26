@@ -71,6 +71,20 @@ FROM (
 ) q
 """
 
+WILAYAH = """
+SELECT q.k, ST_AsEWKB(ST_Multi(ST_SimplifyPreserveTopology(q.g, %s)))
+FROM (
+    SELECT u.k, ST_Union(s.kotak, 1e-9) AS g
+    FROM unnest(%s::int[], %s::int[]) AS u(k, id) JOIN sel s ON s.id = u.id
+    GROUP BY u.k
+) q
+"""
+
+WILAYAH_GABUNGAN = """
+SELECT ST_AsEWKB(q.g), ST_Area(q.g::geography) / 10000
+FROM (SELECT ST_Multi(ST_Union(wilayah, 1e-9)) AS g FROM analitik_lokasi_potensial WHERE id = ANY(%s)) q
+"""
+
 GABUNGAN = """
 WITH a AS MATERIALIZED (SELECT id, geometry AS g FROM analitik_lokasi_potensial WHERE id = ANY(%s)),
 p AS MATERIALIZED (
@@ -564,15 +578,20 @@ class Command(BaseCommand):
                         self._mutu(sel, lolos),
                         sum(d['ij'][i][0] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
                         sum(d['ij'][i][1] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
-                        (sel, len(w), sub_kode, sub, lolos),
+                        (sel, w, sub_kode, sub, lolos),
                     ))
             inti = self._tersebar(self._bergiliran(calon))[:atur('MAKS_LOKASI_PER_PROVINSI')]
             if not inti:
                 continue
             c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for t in inti for i in t[0]]])
-            for k, ewkb, luas in c.fetchall():
-                sel, banyak, sub_kode, sub, lolos = inti[k]
-                hasil.append(self._satu(prov, sektor, sub_kode, sub, ewkb, luas, sel, banyak, lolos, zona, status, d))
+            bentuk = c.fetchall()
+            c.execute(WILAYAH, [UKURAN_SEL_LOKASI_DERAJAT / 2, [k for k, t in enumerate(inti) for _ in t[1]],
+                                [i for t in inti for i in t[1]]])
+            wilayah = dict(c.fetchall())
+            for k, ewkb, luas in bentuk:
+                sel, w, sub_kode, sub, lolos = inti[k]
+                hasil.append(self._satu(prov, sektor, sub_kode, sub, ewkb, wilayah[k], luas, sel, len(w), lolos, zona,
+                                        status, d))
         with transaction.atomic():
             LokasiPotensial.objects.filter(provinsi=prov).delete()
             LokasiPotensial.objects.bulk_create(hasil)
@@ -581,7 +600,7 @@ class Command(BaseCommand):
             )
         return hasil
 
-    def _satu(self, prov, sektor, sub_kode, sub, ewkb, luas, sel, sel_wilayah, lolos, zona, status, d):
+    def _satu(self, prov, sektor, sub_kode, sub, ewkb, ewkb_wilayah, luas, sel, sel_wilayah, lolos, zona, status, d):
         kriteria, syarat = [], syarat_unggulan(sub)
         for j, (kunci, ambang) in enumerate(syarat.items()):
             nilai = [lolos[i][1][j] for i in sel if lolos[i][1][j] is not None]
@@ -598,7 +617,8 @@ class Command(BaseCommand):
         zona_utama = Counter(z for i in sel for z in d['zona'][i]).most_common(1)[0][0]
         bersyarat = any(status[(z, sektor.kode)] == 'BERSYARAT' for i in sel for z in d['zona'][i])
         return LokasiPotensial(
-            sektor=sektor, provinsi=prov, geometry=GEOSGeometry(memoryview(ewkb)), luas_ha=luas,
+            sektor=sektor, provinsi=prov, geometry=GEOSGeometry(memoryview(ewkb)),
+            wilayah=GEOSGeometry(memoryview(ewkb_wilayah)), luas_ha=luas,
             persen_sesuai=sum(lolos[i][0] for i in sel) / len(sel), jenis=[sektor.kode],
             rincian={
                 'nama': zona[zona_utama][4],
@@ -636,12 +656,18 @@ class Command(BaseCommand):
             urut = sorted(g['anggota'], key=lambda lok: -lok.persen_sesuai)
             jenis = list(dict.fromkeys(lok.sektor.kode for lok in urut))
             sub = list(dict.fromkeys((lok.rincian.get('sub_sektor') or lok.sektor.nama, lok.sektor.kode) for lok in urut))
-            calon.append(((urut[0].persen_sesuai, len(sub), g['luas']), g['x'], g['y'], LokasiPotensial(
+            calon.append(((urut[0].persen_sesuai, len(sub), g['luas']), g['x'], g['y'], (LokasiPotensial(
                 sektor=None, provinsi=prov, geometry=GEOSGeometry(memoryview(g['geom'])), luas_ha=g['luas'],
                 persen_sesuai=urut[0].persen_sesuai, jenis=jenis,
                 rincian={**urut[0].rincian, 'jenis_nama': [n for n, _ in sub], 'jenis_sub': [k for _, k in sub]},
-            )))
-        return self._tersebar(sorted(calon, key=lambda c: c[0], reverse=True))
+            ), [lok.id for lok in urut])))
+        terpilih = self._tersebar(sorted(calon, key=lambda c: c[0], reverse=True))
+        for lok, anggota in terpilih:
+            c.execute(WILAYAH_GABUNGAN, [anggota])
+            ewkb, luas = c.fetchone()
+            lok.wilayah = GEOSGeometry(memoryview(ewkb))
+            lok.rincian['luas_wilayah_ha'] = round(luas)
+        return [lok for lok, _ in terpilih]
 
     def _seleksi_nasional(self):
         per_sub = defaultdict(lambda: defaultdict(list))

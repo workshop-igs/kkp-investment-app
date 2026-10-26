@@ -331,6 +331,10 @@ const LegendaDisarankan = ({ sektor, onPilih }) => {
           />
           Titik berwarna ganda cocok untuk beberapa jenis
         </li>
+        <li className="flex items-center gap-2">
+          <span className="h-3 w-3 shrink-0 rounded-[3px] border-[1.5px] border-dashed border-slate-500 bg-slate-400/25" />
+          Saat diperbesar tampil sebagai area indikatif, bukan batas tapak
+        </li>
         <li className="pl-5">Konservasi &amp; Rehabilitasi Pesisir tampil bila jenisnya dipilih.</li>
       </ul>
     </div>

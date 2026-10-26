@@ -184,6 +184,7 @@ const PetaDashboard = ({ jenis, provinsi, proyek }) => {
       <LapisanVektorBBox
         url={POTENSI.url}
         params={{ ...POTENSI.params, ...(jenis ? { sektor: jenis } : {}), ...(provinsi ? { provinsi } : {}) }}
+        style={POTENSI.gaya}
         ikon={POTENSI.ikon}
         warnaIkon={POTENSI.warnaIkon}
         warnaTitik={POTENSI.warnaTitik}
