@@ -24,7 +24,7 @@ from analitik.models import (
     PengaturanAnalisis,
     StatusHitungUlang,
 )
-from analitik.services import pengaturan
+from analitik.services import konstanta, pengaturan
 from analitik.services.kriteria import PARAMETER
 from analitik.services.parameter_tambahan import kunci_nama
 from analitik.tasks import jadwalkan_hitung_ulang
@@ -216,11 +216,13 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
 
     def list(self, request):
         simpanan = self._simpanan()
+        sektor = list(SektorInvestasi.objects.order_by('urutan', 'nama').values('kode', 'nama'))
         return Response({
             'kelompok': [{'kode': k, 'label': label} for k, label in pengaturan.KELOMPOK],
             'daftar': [self._baris(m, simpanan) for m in pengaturan.DAFTAR],
             'label_bagian': pengaturan.LABEL_BAGIAN,
-            'sektor': list(SektorInvestasi.objects.order_by('urutan', 'nama').values('kode', 'nama')),
+            'sektor': sektor,
+            'templat_model_usaha': {s['kode']: konstanta.model_usaha_kosong(s['kode']) for s in sektor},
             'parameter_kriteria': {k: {'label': label, 'satuan': satuan} for k, (label, satuan, _) in PARAMETER.items()},
             'hitung_ulang': status_hitung_ulang(),
         })

@@ -293,11 +293,11 @@ def _finansial(subs, nama_sub, harga_kg=None):
     model = atur('MODEL_USAHA')
     hasil = []
     for sub in subs:
-        m = model.get(sub) or BAWAAN['MODEL_USAHA'][sub]
+        m = model.get(sub) or BAWAAN['MODEL_USAHA'].get(sub)
         hasil.append({
             'kode': sub,
             'nama': nama_sub.get(sub, sub),
-            'hasil': hitung_model_usaha(m, harga_kg if m['satuan_produk'] == 'kg' else None),
+            'hasil': m and hitung_model_usaha(m, harga_kg if m['satuan_produk'] == 'kg' else None),
         })
     return hasil
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  AlertTriangle, Check, CheckCircle2, Loader2, RefreshCw, RotateCcw, Save, SlidersHorizontal, Trash2,
+  AlertTriangle, Check, CheckCircle2, Loader2, Plus, RefreshCw, RotateCcw, Save, SlidersHorizontal, Trash2,
 } from 'lucide-react';
 import { api } from '../../api/klien';
 
@@ -286,12 +286,31 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
   const [kode, setKode] = useState(data.sektor[0]?.kode);
   const parameter = data.parameter_kriteria;
   const subs = nilai[kode] || {};
+  const bawaan = data.daftar.find((d) => d.kunci === 'KRITERIA_JENIS')?.bawaan?.[kode] || {};
   const ubahSub = (sub, baru) => onUbah({ ...nilai, [kode]: { ...subs, [sub]: baru } });
+  const tambahSub = () => {
+    const terpakai = new Set(Object.values(nilai).flatMap((s) => Object.keys(s)));
+    const awalan = kode.toUpperCase().replace(/[^A-Z0-9_]/g, '_').slice(0, 30);
+    let n = 1;
+    while (terpakai.has(`${awalan}_BARU_${n}`)) n += 1;
+    ubahSub(`${awalan}_BARU_${n}`, { nama: 'Sub-jenis baru', ranah: ['LAUT'], kriteria: {} });
+  };
+  const hapusSub = (sub) => {
+    const { [sub]: _, ...lain } = subs;
+    const { [kode]: __, ...jenisLain } = nilai;
+    onUbah(Object.keys(lain).length ? { ...nilai, [kode]: lain } : jenisLain);
+  };
   return (
     <div className="space-y-3">
-      <select value={kode} onChange={(e) => setKode(e.target.value)} className={`${kelasInput} max-w-sm`}>
-        {data.sektor.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
-      </select>
+      <div className="flex flex-wrap items-center gap-2">
+        <select value={kode} onChange={(e) => setKode(e.target.value)} className={`${kelasInput} max-w-sm`}>
+          {data.sektor.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
+        </select>
+        <button type="button" onClick={tambahSub}
+          className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+          <Plus className="w-3.5 h-3.5" /> Tambah sub-jenis
+        </button>
+      </div>
       {Object.entries(subs).map(([sub, isi]) => {
         const unggulan = isi.unggulan || {};
         const ubahKriteria = (k, ambang) => ubahSub(sub, { ...isi, kriteria: { ...isi.kriteria, [k]: ambang } });
@@ -313,8 +332,15 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
                   {n}
                 </label>
               ))}
+              {!bawaan[sub] && (
+                <button type="button" onClick={() => hapusSub(sub)}
+                  className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50">
+                  <Trash2 className="w-3.5 h-3.5" /> Hapus sub-jenis
+                </button>
+              )}
             </div>
-            <div className="overflow-x-auto">
+            {!kunci.length && <p className="text-xs text-amber-700">Tambahkan sedikitnya satu kriteria sebelum menyimpan.</p>}
+            <div className={`overflow-x-auto ${kunci.length ? '' : 'hidden'}`}>
               <table className="text-sm">
                 <thead>
                   <tr className="text-left text-xs text-slate-500">
@@ -395,8 +421,8 @@ const ModelUsahaEditor = ({ nilai, onUbah, data }) => {
       <select value={kode} onChange={(e) => setKode(e.target.value)} className={`${kelasInput} max-w-sm`}>
         {data.sektor.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
       </select>
-      {Object.entries(kriteria[kode] || {}).filter(([sub]) => nilai[sub]).map(([sub, isi]) => {
-        const m = nilai[sub];
+      {Object.entries(kriteria[kode] || {}).map(([sub, isi]) => {
+        const m = nilai[sub] || data.templat_model_usaha[kode];
         const ubah = (baru) => onUbah({ ...nilai, [sub]: { ...m, ...baru } });
         const isian = (bagian) => (k, x) => ubah({ [bagian]: { ...m[bagian], [k]: x } });
         const ada = (o) => Object.values(o).some((v) => v);
