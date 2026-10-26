@@ -2,7 +2,7 @@ import time
 
 import httpx
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from inti.models import Provinsi, SektorInvestasi
@@ -111,12 +111,9 @@ class Command(BaseCommand):
                 self.stdout.write(f'Tanpa jenis investasi (tampil sebagai "Kegiatan lain"): {", ".join(sorted(set(tanpa)))}')
             return
 
-        terhapus = KKPRL.objects.filter(sumber_data=TANDA).delete()[0]
-        if terhapus:
-            self.stdout.write('Data tarikan sebelumnya dihapus: %d baris.' % terhapus)
-
         if options['hapus']:
-            self.stdout.write(self.style.SUCCESS('Selesai — data tarikan dibuang.'))
+            terhapus = KKPRL.objects.filter(sumber_data=TANDA).delete()[0]
+            self.stdout.write(self.style.SUCCESS(f'Selesai — {terhapus} izin hasil tarikan dibuang.'))
             return
 
         indeks_provinsi = {p.nama.strip().lower(): p for p in Provinsi.objects.all()}
@@ -157,8 +154,8 @@ class Command(BaseCommand):
                 try:
                     fitur = ambil_halaman(klien, mulai, jumlah)
                 except Exception as e:
-                    self.stdout.write(self.style.ERROR('Gagal mengambil halaman pada indeks %d: %s' % (mulai, e)))
-                    break
+                    raise CommandError(
+                        f'Gagal mengambil halaman pada indeks {mulai}: {e}. Data izin lama dipertahankan.') from e
 
                 if not fitur:
                     break
@@ -234,7 +231,10 @@ class Command(BaseCommand):
             terlihat.add(obj.nomor_izin)
             unik.append(obj)
 
+        if not unik:
+            raise CommandError('Portal tidak mengembalikan izin KKPRL. Data izin lama dipertahankan.')
         with transaction.atomic():
+            KKPRL.objects.filter(sumber_data=TANDA).delete()
             KKPRL.objects.bulk_create(unik, batch_size=200, ignore_conflicts=True)
 
         total = KKPRL.objects.filter(sumber_data=TANDA).count()

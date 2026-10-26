@@ -18,6 +18,7 @@ KELOMPOK = [
     ('lokasi_risiko', 'Skor lokasi dan risiko'),
     ('skor_zona', 'Skor kelayakan zona'),
     ('model_usaha', 'Model usaha Profil Investasi'),
+    ('sumber_data', 'Sumber dan masa berlaku data'),
 ]
 
 
@@ -169,6 +170,10 @@ DAFTAR = [
        'sub-jenis tanpa volume, investasi, atau harga ditulis belum memiliki model usaha.'),
     _d('ASUMSI_MODEL_USAHA', 'model_usaha', 'Asumsi analisis finansial Profil Investasi',
        'Berlaku untuk semua model usaha. CSR dihitung dari pendapatan bersih tahun sebelumnya.', batas=(0, 100)),
+    _d('MASA_BERLAKU_DATA', 'sumber_data', 'Masa berlaku data',
+       'Data yang lebih tua dari batas ini ditandai di hasil analisis, laporan, dan legenda peta. 0 berarti tanpa '
+       'batas. Data tarikan otomatis diperiksa tiap minggu dan ditarik ulang setelah 90 hari.', 'tahun',
+       batas=(0, 100), bulat=True),
 ]
 TERDAFTAR = {d['kunci']: d for d in DAFTAR}
 

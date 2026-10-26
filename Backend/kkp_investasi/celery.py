@@ -12,8 +12,8 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
 app.conf.beat_schedule = {
-    'periksa-statistik-bps-bulanan': {
-        'task': 'penarikan_data.tasks.periksa_statistik_bps',
-        'schedule': crontab(minute=0, hour=3, day_of_month=1),
+    'perbarui-sumber-data': {
+        'task': 'penarikan_data.tasks.perbarui_sumber_data',
+        'schedule': crontab(minute=0, hour=1, day_of_week='sun'),
     },
 }

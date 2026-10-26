@@ -31,14 +31,17 @@ KATA_LAUT = (
 POLA = re.compile(r'<a href="https://drive\.google\.com/(file/d|drive/folders)/([A-Za-z0-9_-]+)[^"]*"[^>]*>'
                   r'.*?<div class="flip-entry-title">([^<]*)</div>', re.S)
 
-def _isi_folder(fid):
+def halaman_folder(fid):
     for ke in range(4):
         try:
-            teks = httpx.get(f'https://drive.google.com/embeddedfolderview?id={fid}', timeout=60).text
-            return [(jenis == 'drive/folders', id_, html.unescape(nama)) for jenis, id_, nama in POLA.findall(teks)]
+            return httpx.get(f'https://drive.google.com/embeddedfolderview?id={fid}', timeout=60).text
         except httpx.HTTPError:
             time.sleep(2 ** ke)
     raise RuntimeError(f'Folder Drive {fid} tidak dapat dibaca.')
+
+
+def _isi_folder(fid):
+    return [(jenis == 'drive/folders', id_, html.unescape(nama)) for jenis, id_, nama in POLA.findall(halaman_folder(fid))]
 
 
 def _berkas(fid, jalur=()):
@@ -234,6 +237,9 @@ class Command(BaseCommand):
                     n += 1
                 self.stdout.write(f'  {lap.name}: {n} zona{" (disaring ke laut)" if saring else ""}')
 
+        if not baris:
+            self.stderr.write(f'  {provinsi.nama}: geodatabase tidak berisi zona laut; zonasi lama dipertahankan.')
+            return
         with transaction.atomic():
             ZonasiRuangLaut.objects.filter(provinsi=provinsi, sumber_data=TANDA).delete()
             ZonasiRuangLaut.objects.bulk_create([z for z, _, _ in baris], batch_size=500)
@@ -347,6 +353,11 @@ class Command(BaseCommand):
                 'AND NOT ST_Intersects(v.geometry, ST_PointOnSurface(m.g))',
                 [provinsi.id],
             )
+            c.execute('SELECT EXISTS (SELECT 1 FROM darat_mentah)')
+            if not c.fetchone()[0]:
+                c.execute('DROP TABLE IF EXISTS pita_pesisir, darat_mentah')
+                self.stderr.write(f'  {provinsi.nama}: Pola Ruang darat kosong; zona darat lama dipertahankan.')
+                return
             with transaction.atomic():
                 ZonasiRuangLaut.objects.filter(provinsi=provinsi, sumber_data=SUMBER_ZONASI_DARAT).delete()
                 c.execute(
