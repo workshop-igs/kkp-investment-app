@@ -116,7 +116,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
 
     const terapkan = (fitur, tol) => {
       const berId = fitur.every((f) => f.id !== undefined && f.id !== null);
-      const kunci = (f, i) => (berId ? `${f.id}:${Boolean(f.properties?.titik)}` : i);
+      const kunci = (f, i) => (berId ? `${f.id}:${Boolean(f.properties?.titik)}:${f.geometry?.type}` : i);
       if (!berId || tol !== toleransi) {
         entri.forEach(buang);
         entri.clear();
@@ -206,7 +206,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
           const fc = d && d.type === 'FeatureCollection' ? d : null;
           const tol = fc?.meta?.toleransi_penyederhanaan ?? 0;
           terapkan(fc?.features || [], tol);
-          dimuat = { batas: b, lengkap: !!fc && !fc.meta?.dipangkas && tol === 0 };
+          dimuat = { batas: b, lengkap: !!fc && !fc.meta?.dipangkas && !fc.meta?.sebagai_titik && tol === 0 };
           statusTerakhir = {
             memuat: false,
             galat: null,

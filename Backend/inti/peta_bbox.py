@@ -73,10 +73,11 @@ class PetaBBoxMixin:
 
     SERTAKAN_TITIK = False
 
-    HANYA_TITIK = False
-
     def sertakan_titik(self, request):
         return self.SERTAKAN_TITIK
+
+    def hanya_titik(self, lebar):
+        return False
 
     throttle_scope = 'peta'
 
@@ -163,7 +164,8 @@ class PetaBBoxMixin:
         qs = self.peta_urutan(qs, request, batas)
 
         sertakan = self.sertakan_titik(request)
-        if sertakan or self.HANYA_TITIK:
+        hanya_titik = self.hanya_titik(abs(maxx - minx))
+        if sertakan or hanya_titik:
             qs = qs.annotate(titik_wakil=PointOnSurface(geometri))
 
         if toleransi > 0:
@@ -173,10 +175,10 @@ class PetaBBoxMixin:
             ekspresi = F(geometri)
 
         kolom = ['id', *self.PETA_KOLOM]
-        if not self.HANYA_TITIK:
+        if not hanya_titik:
             qs = qs.annotate(geojson_teks=AsGeoJSON(ekspresi, precision=6))
             kolom.append('geojson_teks')
-        if sertakan or self.HANYA_TITIK:
+        if sertakan or hanya_titik:
             kolom.append('titik_wakil')
 
         fitur = []

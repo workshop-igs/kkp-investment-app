@@ -364,6 +364,8 @@ class LokasiPotensial(models.Model):
     )
     provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
     geometry = models.MultiPolygonField(srid=4326)
+    wilayah = models.MultiPolygonField(
+        srid=4326, help_text='Sel bersambung yang memenuhi kriteria; tampil di peta sebagai area indikatif')
     luas_ha = models.FloatField()
     persen_sesuai = models.FloatField(
         help_text='Skor mutu rata-rata sel inti: kedekatan nilai kriteria ke kondisi ideal dikali bobot zona bersyarat, 0-100')
