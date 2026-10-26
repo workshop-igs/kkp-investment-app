@@ -9,7 +9,7 @@ import httpx
 import numpy as np
 from django.contrib.gis.gdal import GDALRaster
 from django.contrib.gis.geos import Polygon
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from analitik.management.commands.muat_raster import catatan_isi, isi_celah
@@ -149,11 +149,19 @@ class Command(BaseCommand):
                             help='Hanya parameter ini (boleh berulang). Bawaan: semua.')
 
     def handle(self, *args, **opsi):
+        gagal = []
         for kode in opsi['parameter'] or list(PARAMETER):
             p = PARAMETER[kode]
             mulai = time.time()
-            jumlah = self._deret(kode, p)
+            try:
+                jumlah = self._deret(kode, p)
+            except Exception as e:
+                gagal.append(kode)
+                self.stderr.write(f'{kode}: gagal ({type(e).__name__}: {str(e)[:160]}); raster lama dipertahankan.')
+                continue
             self.stdout.write(self.style.SUCCESS(f'{kode}: {jumlah} petak raster ({time.time() - mulai:.0f} dtk)'))
+        if gagal:
+            raise CommandError(f'Parameter yang gagal ditarik: {", ".join(gagal)}.')
 
     def _simpan(self, kode, p, rast, cakupan, periode):
         RasterOseanografi.objects.update_or_create(

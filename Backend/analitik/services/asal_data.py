@@ -1,9 +1,14 @@
+import re
+
 from django.core.cache import cache
-from django.db.models import Max
+from django.db.models import Max, Min
+from django.utils import timezone
 
 from analitik.models import RasterOseanografi, ZonaRisikoBencana
 from analitik.services.konstanta import BULAN, LABEL_SUMBER_ZONASI
-from inventarisasi.models import KKPRL, InfrastrukturPendukung, SumberDayaAlam, UnsurRuangLaut
+from analitik.services.pengaturan import atur
+from inventarisasi.models import KKPRL, InfrastrukturPendukung, SumberDayaAlam, UnsurRuangLaut, ZonasiRuangLaut
+from penarikan_data.models import ProduksiPerikananBPS, StatistikKetenagakerjaanBPS
 
 LABEL_OSEANOGRAFI = {
     'KEDALAMAN': 'Kedalaman perairan',
@@ -35,6 +40,23 @@ LABEL_OSEANOGRAFI = {
     'PRODUKSI_KABUPATEN': 'Perkiraan produksi ikan kabupaten/kota',
 }
 
+OSEANOGRAFI_DINAMIS = {
+    'SUHU', 'ANOMALI_SUHU', 'KLOROFIL', 'GELOMBANG', 'PERIODE_GLB', 'KD490', 'ARUS', 'ARUS_DASAR', 'SALINITAS', 'TSS',
+}
+
+KELOMPOK_DATA = {
+    'tata_ruang': ('Tata ruang (RTRW Provinsi, PKKPRL, RZWP-3-K)', 'Portal Satu Data KKP dan folder data KKP'),
+    'kkprl': ('Izin KKPRL terbit', 'Portal Satu Data KKP'),
+    'infrastruktur': ('Infrastruktur pendukung', 'Portal Satu Data KKP dan OpenStreetMap'),
+    'oseanografi': ('Oseanografi (suhu, klorofil, gelombang, arus, salinitas)', 'NOAA, NASA, HYCOM'),
+    'kondisi_tetap': ('Kondisi fisik dan iklim jangka panjang', 'SRTM15+, EOT20, CHIRPS, GEM, Global Wind Atlas, dan lainnya'),
+    'ekosistem': ('Ekosistem pesisir', 'Sidako KKP dan Global Mangrove Watch'),
+    'bencana': ('Risiko bencana', 'BNPB InaRISK'),
+    'adat': ('Wilayah kelola masyarakat hukum adat', 'Portal Satu Data KKP dan Sidako KKP'),
+    'bps_produksi': ('Produksi perikanan', 'BPS'),
+    'bps_kerja': ('Ketenagakerjaan', 'BPS'),
+}
+
 SUMBER_SKALA_KASAR = {
     LABEL_SUMBER_ZONASI['KKP-RZWP3K'],
     LABEL_SUMBER_ZONASI['KKP-RTRW'],
@@ -45,6 +67,27 @@ CATATAN_DASAR = (
     'Hasil ini adalah penyaringan awal berbasis data spasial, bukan pengganti Persetujuan KKPRL. Kesesuaian '
     'akhir ditetapkan KKP melalui penilaian dokumen permohonan dan verifikasi lapangan.'
 )
+
+
+def tahun_teks(teks):
+    tahun = [int(t) for t in re.findall(r'(?<!\d)(?:19|20)\d{2}(?!\d)', teks or '')]
+    return max(tahun) if tahun else None
+
+
+def kelompok_raster(kode):
+    return 'oseanografi' if kode in OSEANOGRAFI_DINAMIS else 'kondisi_tetap'
+
+
+def lewat_masa(kelompok, tahun=None, waktu=None):
+    batas = atur('MASA_BERLAKU_DATA').get(kelompok) or 0
+    hari_ini = timezone.localdate()
+    if waktu:
+        umur = (hari_ini - timezone.localtime(waktu).date()).days / 365.25
+    elif tahun:
+        umur = hari_ini.year - tahun
+    else:
+        return None
+    return batas if batas and umur > batas else None
 
 
 def _bulan(t):
@@ -60,13 +103,13 @@ def _terbaru():
     if hasil is not None:
         return hasil
     hasil = {
-        'kkprl': _tanggal(KKPRL.objects.aggregate(t=Max('updated_at'))['t']),
-        'ekosistem': _bulan(SumberDayaAlam.objects.aggregate(t=Max('updated_at'))['t']),
-        'bencana': _bulan(ZonaRisikoBencana.objects.aggregate(t=Max('dibuat_pada'))['t']),
-        'infrastruktur': _bulan(InfrastrukturPendukung.objects.aggregate(t=Max('updated_at'))['t']),
-        'adat': _bulan(UnsurRuangLaut.objects.filter(kelompok='MHA').aggregate(t=Max('updated_at'))['t']),
+        'kkprl': KKPRL.objects.aggregate(t=Max('updated_at'))['t'],
+        'ekosistem': SumberDayaAlam.objects.aggregate(t=Max('updated_at'))['t'],
+        'bencana': ZonaRisikoBencana.objects.aggregate(t=Max('dibuat_pada'))['t'],
+        'infrastruktur': InfrastrukturPendukung.objects.aggregate(t=Max('updated_at'))['t'],
+        'adat': UnsurRuangLaut.objects.filter(kelompok='MHA').aggregate(t=Max('updated_at'))['t'],
         'oseanografi': {
-            r['parameter']: _tanggal(r['t'])
+            r['parameter']: r['t']
             for r in RasterOseanografi.objects.values('parameter').annotate(t=Max('ditarik_pada'))
         },
     }
@@ -74,8 +117,8 @@ def _terbaru():
     return hasil
 
 
-def _baris(data, sumber, keterangan=''):
-    return {'data': data, 'sumber': sumber, 'keterangan': keterangan}
+def _baris(data, sumber, keterangan='', kedaluwarsa=None):
+    return {'data': data, 'sumber': sumber, 'keterangan': keterangan, 'kedaluwarsa': kedaluwarsa}
 
 
 def asal_data(zona, karakter, tambahan):
@@ -92,39 +135,35 @@ def asal_data(zona, karakter, tambahan):
             rincian.append(f"ditetapkan {z['tahun_penetapan']}")
         if z.get('diperbarui'):
             rincian.append(f"data per {z['diperbarui']}")
-        baris.append(_baris(f'Tata ruang — {provinsi}', sumber, '; '.join(rincian)))
+        baris.append(_baris(f'Tata ruang — {provinsi}', sumber, '; '.join(rincian),
+                            lewat_masa('tata_ruang', tahun=z.get('tahun_penetapan'))))
     if not zona:
         baris.append(_baris('Tata ruang', 'Tidak ada acuan tata ruang yang mencakup area ini', ''))
 
     baris.append(_baris(
         'Izin KKPRL terbit', 'Portal Satu Data KKP',
-        f"ditarik {terbaru['kkprl']}; permohonan yang masih diproses tidak terlihat" if terbaru['kkprl']
+        f"ditarik {_tanggal(terbaru['kkprl'])}; permohonan yang masih diproses tidak terlihat" if terbaru['kkprl']
         else 'belum pernah ditarik',
+        lewat_masa('kkprl', waktu=terbaru['kkprl']),
     ))
 
     for kode, info in (karakter.get('oseanografi') or {}).items():
         rincian = [info.get('periode') or '']
         if terbaru['oseanografi'].get(kode):
-            rincian.append(f"ditarik {terbaru['oseanografi'][kode]}")
-        baris.append(_baris(LABEL_OSEANOGRAFI.get(kode, kode), info.get('sumber') or '-', '; '.join(filter(None, rincian))))
+            rincian.append(f"ditarik {_tanggal(terbaru['oseanografi'][kode])}")
+        tahun = tahun_teks(info.get('periode')) or tahun_teks(info.get('sumber'))
+        baris.append(_baris(LABEL_OSEANOGRAFI.get(kode, kode), info.get('sumber') or '-',
+                            '; '.join(filter(None, rincian)), lewat_masa(kelompok_raster(kode), tahun=tahun)))
 
-    baris.append(_baris(
-        'Ekosistem pesisir (mangrove, lamun, terumbu karang)',
-        'Portal Satu Data KKP, Sidako Ekosistem KKP, Global Mangrove Watch',
-        f"data per {terbaru['ekosistem']}" if terbaru['ekosistem'] else 'belum tersedia',
-    ))
-    baris.append(_baris(
-        'Risiko bencana (tsunami, abrasi, banjir)', 'BNPB InaRISK',
-        f"data per {terbaru['bencana']}" if terbaru['bencana'] else 'belum tersedia',
-    ))
-    baris.append(_baris(
-        'Infrastruktur pendukung', 'Portal Satu Data KKP',
-        f"data per {terbaru['infrastruktur']}" if terbaru['infrastruktur'] else 'belum tersedia',
-    ))
-    baris.append(_baris(
-        'Wilayah kelola masyarakat hukum adat', 'Portal Satu Data KKP, Sidako KKP',
-        f"data per {terbaru['adat']}" if terbaru['adat'] else 'belum tersedia',
-    ))
+    for kunci, data, sumber in (
+        ('ekosistem', 'Ekosistem pesisir (mangrove, lamun, terumbu karang)',
+         'Portal Satu Data KKP, Sidako Ekosistem KKP, Global Mangrove Watch'),
+        ('bencana', 'Risiko bencana (tsunami, abrasi, banjir)', 'BNPB InaRISK'),
+        ('infrastruktur', 'Infrastruktur pendukung', 'Portal Satu Data KKP'),
+        ('adat', 'Wilayah kelola masyarakat hukum adat', 'Portal Satu Data KKP, Sidako KKP'),
+    ):
+        baris.append(_baris(data, sumber, f'data per {_bulan(terbaru[kunci])}' if terbaru[kunci] else 'belum tersedia',
+                            lewat_masa(kunci, waktu=terbaru[kunci])))
     for t in tambahan or ():
         baris.append(_baris(t['nama'], t.get('sumber') or 'Ditetapkan administrator', t.get('peran_label') or ''))
     return baris
@@ -165,3 +204,76 @@ def catatan_skala(zona, karakter):
             'sehingga bersifat indikatif; survei batimetri dan oseanografi lapangan tetap diperlukan.'
         )
     return catatan
+
+
+def _rentang(a, b):
+    return str(a) if a == b else f'{a}–{b}'
+
+
+def _status(batas, lewat, total):
+    if not batas:
+        return 'TANPA_BATAS'
+    if total == 0:
+        return 'TIDAK_DIKETAHUI'
+    return 'BERLAKU' if not lewat else 'LEWAT' if lewat == total else 'SEBAGIAN'
+
+
+def ringkasan_sumber():
+    from penarikan_data.models import KonfigurasiAPI, LogPenarikan
+    from penarikan_data.tasks import JADWAL, jatuh_tempo
+
+    masa = atur('MASA_BERLAKU_DATA')
+    terbaru = _terbaru()
+    hasil = {}
+
+    zona = list(ZonasiRuangLaut.objects.filter(tahun_penetapan__isnull=False).values('provinsi')
+                .annotate(t=Max('tahun_penetapan')).values_list('t', flat=True))
+    lewat = [t for t in zona if lewat_masa('tata_ruang', tahun=t)]
+    rentang = ZonasiRuangLaut.objects.aggregate(a=Min('tahun_penetapan'), b=Max('tahun_penetapan'))
+    hasil['tata_ruang'] = (f"ditetapkan {_rentang(rentang['a'], rentang['b'])}" if rentang['a'] else 'tahun tidak tercantum',
+                           _status(masa.get('tata_ruang'), len(lewat), len(zona)),
+                           f'{len(lewat)} dari {len(zona)} provinsi melewati masa berlaku' if lewat else '')
+
+    for kunci in ('kkprl', 'infrastruktur', 'ekosistem', 'bencana', 'adat'):
+        t = terbaru[kunci]
+        hasil[kunci] = (f'data per {_tanggal(t)}' if t else 'belum tersedia',
+                        _status(masa.get(kunci), int(bool(lewat_masa(kunci, waktu=t))), int(bool(t))), '')
+
+    raster = {}
+    for r in RasterOseanografi.objects.values('parameter', 'periode', 'sumber').order_by('parameter').distinct():
+        t = tahun_teks(r['periode']) or tahun_teks(r['sumber'])
+        if t:
+            raster[r['parameter']] = max(raster.get(r['parameter'], t), t)
+    for kunci in ('oseanografi', 'kondisi_tetap'):
+        tahun = {k: t for k, t in raster.items() if kelompok_raster(k) == kunci}
+        lewat = [LABEL_OSEANOGRAFI.get(k, k) for k, t in tahun.items() if lewat_masa(kunci, tahun=t)]
+        hasil[kunci] = (f'tahun data {_rentang(min(tahun.values()), max(tahun.values()))}' if tahun else 'tahun tidak tercantum',
+                        _status(masa.get(kunci), len(lewat), len(tahun)), ', '.join(lewat))
+
+    kerja = max(filter(None, map(tahun_teks, StatistikKetenagakerjaanBPS.objects.values_list('tahun', flat=True)
+                                 .distinct())), default=None)
+    for kunci, tahun in (('bps_produksi', ProduksiPerikananBPS.objects.aggregate(t=Max('tahun'))['t']),
+                         ('bps_kerja', kerja)):
+        hasil[kunci] = (f'tahun {tahun}' if tahun else 'belum tersedia',
+                        _status(masa.get(kunci), int(bool(lewat_masa(kunci, tahun=tahun))), int(bool(tahun))), '')
+
+    konfigurasi = {c.kode: c for c in KonfigurasiAPI.objects.filter(kode__in=[j[0] for j in JADWAL])}
+    log = {}
+    for g in (LogPenarikan.objects.filter(api_config__kode__in=konfigurasi).select_related('api_config')
+              .order_by('api_config__kode', '-started_at')):
+        log.setdefault(g.api_config.kode, g)
+    baris = []
+    for kunci, (label, sumber) in KELOMPOK_DATA.items():
+        data, status, catatan = hasil[kunci]
+        jadwal = []
+        for kode, kelompok, nama, _, _ in JADWAL:
+            if kelompok != kunci:
+                continue
+            cfg, g = konfigurasi.get(kode), log.get(kode)
+            jadwal.append({
+                'nama': nama, 'terakhir': cfg and cfg.last_successful_fetch, 'berikutnya': cfg and jatuh_tempo(cfg),
+                'gagal': (g.error_message[:300] or 'gagal') if g and g.result == 'FAILED' else '',
+            })
+        baris.append({'kode': kunci, 'label': label, 'sumber': sumber, 'data': data, 'status': status,
+                      'catatan': catatan, 'jadwal': jadwal})
+    return baris

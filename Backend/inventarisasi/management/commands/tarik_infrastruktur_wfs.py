@@ -4,7 +4,7 @@ import time
 
 import httpx
 from django.contrib.gis.geos import GEOSGeometry
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from inti.models import Provinsi
@@ -77,11 +77,9 @@ class Command(BaseCommand):
         parser.add_argument('--layer', action='append', help='Tarik hanya lapisan ini.')
 
     def handle(self, *args, **options):
-        terhapus = InfrastrukturPendukung.objects.filter(sumber_data=TANDA).delete()[0]
-        if terhapus:
-            self.stdout.write('Data tarikan sebelumnya dihapus: %d baris.' % terhapus)
         if options['hapus']:
-            self.stdout.write(self.style.SUCCESS('Selesai — data tarikan dibuang.'))
+            terhapus = InfrastrukturPendukung.objects.filter(sumber_data=TANDA).delete()[0]
+            self.stdout.write(self.style.SUCCESS(f'Selesai — {terhapus} objek hasil tarikan dibuang.'))
             return
 
         provinsi_list = list(Provinsi.objects.exclude(geometry=None))
@@ -109,6 +107,7 @@ class Command(BaseCommand):
         total = 0
         rekap = collections.Counter()
         gagal = []
+        kode_dipakai = set()
 
         for layer, kategori, status_tetap in daftar:
             fitur, galat = ambil_fitur(layer)
@@ -150,7 +149,14 @@ class Command(BaseCommand):
                 ))
                 rekap[geom.geom_type] += 1
 
+            kode = layer.split(':')[-1][:80]
+            kode_dipakai.add(kode)
+            if not antre:
+                gagal.append((layer, 'tidak ada fitur'))
+                self.stdout.write(self.style.WARNING(f'  ! {layer:<56} kosong'))
+                continue
             with transaction.atomic():
+                InfrastrukturPendukung.objects.filter(sumber_data=TANDA, kode_lapisan=kode).delete()
                 InfrastrukturPendukung.objects.bulk_create(antre, batch_size=200)
             total += len(antre)
             self.stdout.write('  %-56s %5d fitur%s' % (
@@ -163,3 +169,8 @@ class Command(BaseCommand):
         for layer, pesan in gagal:
             self.stdout.write(self.style.WARNING('Gagal: %s — %s' % (layer, pesan)))
         self.stdout.write('Sumber: Portal Satu Data KKP (WFS).')
+        if gagal:
+            raise CommandError(f'{len(gagal)} lapisan gagal ditarik, datanya yang lama dipertahankan: '
+                               f'{", ".join(layer for layer, _ in gagal)}')
+        if not options['layer']:
+            InfrastrukturPendukung.objects.filter(sumber_data=TANDA).exclude(kode_lapisan__in=kode_dipakai).delete()

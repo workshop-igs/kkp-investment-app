@@ -166,6 +166,7 @@ const LegendaGradasi = ({ kode, keterangan }) => {
       <p className="text-[11px] text-slate-500 leading-snug pt-2 border-t border-slate-100">
         {keterangan}
         {info.periode && ` Periode data: ${info.periode}.`}
+        {info.kedaluwarsa && <span className="text-amber-700"> Melewati masa berlaku {info.kedaluwarsa} tahun.</span>}
       </p>
     </div>
   );

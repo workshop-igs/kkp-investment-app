@@ -215,7 +215,7 @@ function susunLegenda(dek, lapisan, osea, x0, y0) {
     itemLegenda(def, osea, sektor).forEach((it) => {
       if (it.gradasi) {
         dek.gaya(5.8, C.abu);
-        const ket = d.splitTextToSize(bersih(`${it.label || ''} Periode data: ${it.gradasi.periode}.`), LEBAR_LEGENDA);
+        const ket = d.splitTextToSize(bersih(`${it.label || ''} Periode data: ${it.gradasi.periode}.${it.gradasi.kedaluwarsa ? ` Melewati masa berlaku ${it.gradasi.kedaluwarsa} tahun.` : ''}`), LEBAR_LEGENDA);
         ruang(9 + ket.length * 2.4);
         batangGradasi(dek, it.gradasi, x, y + 0.6, LEBAR_LEGENDA);
         y += 8;
