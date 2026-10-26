@@ -42,6 +42,7 @@ const AnalisisPage = () => {
 
   const handlePolygonCreated = (geoJsonGeometry) => {
     setGeometry(geoJsonGeometry);
+    setResult(null);
   };
 
   const pilihSektor = (sektor, sub = null) => {
