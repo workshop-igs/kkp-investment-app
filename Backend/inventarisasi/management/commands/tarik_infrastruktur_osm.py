@@ -39,6 +39,8 @@ class Command(BaseCommand):
         for kategori in opsi['kategori'] or [*TITIK, *GARIS]:
             mulai = time.time()
             objek = self._titik(kategori) if kategori in TITIK else self._garis(kategori)
+            if not objek:
+                raise CommandError(f'{kategori}: Overpass tidak mengembalikan objek; data lama dipertahankan.')
             with transaction.atomic():
                 InfrastrukturPendukung.objects.filter(kategori=kategori, sumber_data=SUMBER).delete()
                 InfrastrukturPendukung.objects.bulk_create(objek, batch_size=500)

@@ -633,7 +633,14 @@ const AsalData = ({ s }) => (
               <tr key={i} className="align-top">
                 <td className="px-3 py-1.5 font-medium text-slate-700">{d.data}</td>
                 <td className="px-3 py-1.5 text-slate-600">{d.sumber}</td>
-                <td className="px-3 py-1.5 text-slate-500">{d.keterangan || '-'}</td>
+                <td className="px-3 py-1.5 text-slate-500">
+                  {d.keterangan || '-'}
+                  {d.kedaluwarsa && (
+                    <span className="ml-1.5 inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-amber-800 ring-1 ring-amber-200">
+                      Melewati masa berlaku {d.kedaluwarsa} tahun
+                    </span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

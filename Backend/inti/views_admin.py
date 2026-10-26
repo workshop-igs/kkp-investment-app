@@ -25,6 +25,7 @@ from analitik.models import (
     StatusHitungUlang,
 )
 from analitik.services import konstanta, pengaturan
+from analitik.services.asal_data import ringkasan_sumber
 from analitik.services.kriteria import PARAMETER
 from analitik.services.parameter_tambahan import kunci_nama
 from analitik.tasks import jadwalkan_hitung_ulang
@@ -225,6 +226,7 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
             'templat_model_usaha': {s['kode']: konstanta.model_usaha_kosong(s['kode']) for s in sektor},
             'parameter_kriteria': {k: {'label': label, 'satuan': satuan} for k, (label, satuan, _) in PARAMETER.items()},
             'hitung_ulang': status_hitung_ulang(),
+            'sumber_data': ringkasan_sumber(),
         })
 
     def update(self, request, kunci=None):

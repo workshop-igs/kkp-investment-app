@@ -531,6 +531,10 @@ ASUMSI_MODEL_USAHA = {
     'umur_tahun': 10, 'diskonto_persen': 12.0, 'kenaikan_harga_persen': 0.0, 'kenaikan_biaya_persen': 0.0,
     'csr_persen': 2.5, 'batas_pbp_tahun': 10,
 }
+MASA_BERLAKU_DATA = {
+    'tata_ruang': 20, 'kkprl': 1, 'infrastruktur': 2, 'oseanografi': 3, 'kondisi_tetap': 0, 'ekosistem': 5,
+    'bencana': 5, 'adat': 5, 'bps_produksi': 3, 'bps_kerja': 3,
+}
 
 EKOSISTEM_TERLARANG_SEKTOR = {
     'PERIKANAN_BUDIDAYA': ['MANGROVE', 'LAMUN', 'TERUMBU_KARANG'],

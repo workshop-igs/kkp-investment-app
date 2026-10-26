@@ -1,6 +1,7 @@
+import json
 import time
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
 from inti.models import KabupatenKota, Provinsi
@@ -19,19 +20,13 @@ from penarikan_data.bps import (
     tahun_angka,
     tahun_tersedia,
 )
-from penarikan_data.models import (
-    KonfigurasiAPI,
-    LogPenarikan,
-    StatistikKetenagakerjaanBPS,
-)
+from penarikan_data.models import StatistikKetenagakerjaanBPS
 
 BATAS_KANDIDAT = 3
 
-SELANG_BAWAAN_JAM = 24 * 90
-
 
 class Command(BaseCommand):
-    help = 'Tarik statistik ketenagakerjaan BPS ke basis data (sekali jalan + periksa berkala).'
+    help = 'Tarik statistik ketenagakerjaan BPS ke basis data; dijadwalkan ulang oleh perbarui_sumber_data.'
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -39,41 +34,8 @@ class Command(BaseCommand):
             action='store_true',
             help='Tarik ulang datanya meskipun tahun BPS belum berubah.',
         )
-        parser.add_argument(
-            '--jika-jatuh-tempo',
-            action='store_true',
-            help='Berhenti tanpa melakukan apa pun bila selang periksa belum terlampaui.',
-        )
-
-    @staticmethod
-    def _konfigurasi() -> KonfigurasiAPI:
-        cfg, _ = KonfigurasiAPI.objects.get_or_create(
-            kode='BPS',
-            defaults={
-                'nama': 'Badan Pusat Statistik',
-                'base_url': 'https://webapi.bps.go.id/v1',
-                'api_key_env_var': 'BPS_API_KEY',
-                'status': 'ACTIVE',
-                'fetch_interval_hours': SELANG_BAWAAN_JAM,
-                'notes': 'TPT & jumlah penganggur per provinsi, TPT per kabupaten/kota, diperiksa tiap 3 bulan.',
-            },
-        )
-        return cfg
 
     def handle(self, *args, **opsi):
-        cfg = self._konfigurasi()
-
-        if opsi['jika_jatuh_tempo'] and cfg.last_successful_fetch:
-            selang = timezone.timedelta(hours=cfg.fetch_interval_hours or SELANG_BAWAAN_JAM)
-            jatuh_tempo = cfg.last_successful_fetch + selang
-            if timezone.now() < jatuh_tempo:
-                self.stdout.write(
-                    f'Belum jatuh tempo. Pemeriksaan berikutnya '
-                    f'{jatuh_tempo.date().isoformat()} '
-                    f'(selang {cfg.fetch_interval_hours} jam). Tidak ada yang dikerjakan.'
-                )
-                return
-
         mulai = time.time()
         rekap = {'baru': 0, 'diperbarui': 0, 'tetap': 0}
         galat = ''
@@ -92,36 +54,13 @@ class Command(BaseCommand):
                 galat = galat or f'{domain}: {e}'
                 self.stderr.write(f'  gagal: {str(e)[:140]}')
 
-        lewat = time.time() - mulai
-        if not galat:
-            self.stdout.write(self.style.SUCCESS(
-                f"Selesai dalam {lewat:.0f}s — {rekap['baru']} baris baru, "
-                f"{rekap['diperbarui']} diperbarui, {rekap['tetap']} tidak berubah."
-            ))
-
         if galat:
-            cfg.retry_count = (cfg.retry_count or 0) + 1
-            cfg.save(update_fields=['retry_count', 'updated_at'])
-            self.stderr.write(
-                'Waktu periksa TIDAK dicatat, supaya percobaan berikutnya tidak '
-                'tertunda tiga bulan.'
-            )
-        else:
-            cfg.last_successful_fetch = timezone.now()
-            cfg.retry_count = 0
-            cfg.save(update_fields=['last_successful_fetch', 'retry_count', 'updated_at'])
-
-        LogPenarikan.objects.create(
-            api_config=cfg,
-            endpoint='webapi.bps.go.id — statistik ketenagakerjaan',
-            completed_at=timezone.now(),
-            result='FAILED' if galat else 'SUCCESS',
-            records_count=rekap['baru'] + rekap['diperbarui'],
-            response_time_ms=int(lewat * 1000),
-            error_message=galat[:2000],
-            request_params={'paksa': opsi['paksa']},
-            response_summary=rekap,
-        )
+            raise CommandError(f'Sebagian statistik BPS belum tertarik ({galat[:300]}); data lama dipertahankan.')
+        self.stdout.write(self.style.SUCCESS(
+            f"Selesai dalam {time.time() - mulai:.0f}s — {rekap['baru']} baris baru, "
+            f"{rekap['diperbarui']} diperbarui, {rekap['tetap']} tidak berubah."
+        ))
+        return json.dumps(rekap)
 
     def _tarik(self, domain, paksa: bool, provinsi=None):
         variabel = {'tpt': VARIABEL_NASIONAL['tpt']} if provinsi else VARIABEL_NASIONAL

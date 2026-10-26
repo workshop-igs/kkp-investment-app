@@ -462,6 +462,61 @@ const ModelUsahaEditor = ({ nilai, onUbah, data }) => {
   );
 };
 
+const STATUS_SUMBER = {
+  BERLAKU: ['Berlaku', 'bg-emerald-50 text-emerald-700'],
+  SEBAGIAN: ['Sebagian lewat', 'bg-amber-50 text-amber-700'],
+  LEWAT: ['Lewat masa berlaku', 'bg-rose-50 text-rose-700'],
+  TANPA_BATAS: ['Tanpa batas', 'bg-slate-100 text-slate-500'],
+  TIDAK_DIKETAHUI: ['Tahun tidak diketahui', 'bg-slate-100 text-slate-500'],
+};
+
+const tanggal = (iso) => new Date(iso).toLocaleDateString('id-ID', { dateStyle: 'medium' });
+
+const MasaBerlakuEditor = ({ nilai, onUbah, data }) => (
+  <div className="overflow-x-auto rounded-lg border border-slate-200">
+    <table className="w-full text-left text-xs">
+      <thead className="bg-slate-50 text-slate-500">
+        <tr>
+          <th className="px-3 py-2 font-semibold">Data</th>
+          <th className="px-3 py-2 font-semibold">Isi saat ini</th>
+          <th className="px-3 py-2 font-semibold">Pembaruan otomatis</th>
+          <th className="px-3 py-2 font-semibold w-28">Masa berlaku (tahun)</th>
+        </tr>
+      </thead>
+      <tbody className="divide-y divide-slate-100">
+        {data.sumber_data.map((s) => {
+          const [teks, kelas] = STATUS_SUMBER[s.status];
+          return (
+            <tr key={s.kode} className="align-top">
+              <td className="px-3 py-2">
+                <div className="font-medium text-slate-700">{s.label}</div>
+                <div className="text-slate-500">{s.sumber}</div>
+              </td>
+              <td className="px-3 py-2 text-slate-600">
+                {s.data}
+                <span className={`ml-1.5 inline-block rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${kelas}`}>{teks}</span>
+                {s.catatan && <div className="mt-0.5 text-amber-700">{s.catatan}</div>}
+              </td>
+              <td className="px-3 py-2 text-slate-600">
+                {s.jadwal.length ? s.jadwal.map((j) => (
+                  <div key={j.nama}>
+                    {j.nama}: {j.terakhir ? `terakhir ${tanggal(j.terakhir)}` : 'belum pernah'}
+                    {j.berikutnya && `, berikutnya setelah ${tanggal(j.berikutnya)}`}
+                    {j.gagal && <div className="text-rose-600">Gagal: {j.gagal}</div>}
+                  </div>
+                )) : <span className="text-slate-400">Manual</span>}
+              </td>
+              <td className="px-3 py-2">
+                <Angka nilai={nilai[s.kode]} onUbah={(x) => onUbah({ ...nilai, [s.kode]: x })} />
+              </td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+);
+
 const KartuPengaturan = ({ item, data, onTersimpan }) => {
   const [nilai, setNilai] = useState(item.nilai);
   const [galat, setGalat] = useState('');
@@ -482,7 +537,9 @@ const KartuPengaturan = ({ item, data, onTersimpan }) => {
     }
   };
 
-  const EditorKhusus = { KRITERIA_JENIS: KriteriaEditor, MODEL_USAHA: ModelUsahaEditor }[item.kunci];
+  const EditorKhusus = {
+    KRITERIA_JENIS: KriteriaEditor, MODEL_USAHA: ModelUsahaEditor, MASA_BERLAKU_DATA: MasaBerlakuEditor,
+  }[item.kunci];
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
       <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
@@ -536,6 +593,9 @@ const AdminPengaturanAnalisisPage = () => {
   const tersimpan = ({ hitung_ulang: hu, ...item }) => {
     setData({ ...data, daftar: data.daftar.map((d) => (d.kunci === item.kunci ? item : d)) });
     setStatus(hu);
+    if (item.kunci === 'MASA_BERLAKU_DATA') {
+      api.get(URL).then(({ data: d }) => setData((lama) => ({ ...lama, sumber_data: d.sumber_data })));
+    }
   };
 
   return (

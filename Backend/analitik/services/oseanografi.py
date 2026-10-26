@@ -9,6 +9,7 @@ from django.db import connection
 from django.db.models import Max
 
 from analitik.models import RasterOseanografi
+from analitik.services.asal_data import kelompok_raster, lewat_masa, tahun_teks
 
 BATAS = (94.0, -11.0, 142.0, 7.0)
 LEBAR_MAKS_PNG = 1200
@@ -136,8 +137,9 @@ def keterangan_peta():
     for kode, label in RasterOseanografi.PARAMETER_CHOICES:
         r = RasterOseanografi.objects.filter(parameter=kode).values('satuan', 'periode', 'sumber').first()
         if r:
+            tahun = tahun_teks(r['periode']) or tahun_teks(r['sumber'])
             parameter[kode] = {'label': label, **r, 'skala': [[nilai, warna] for nilai, warna in PALET[kode]],
-                               'log': kode in SKALA_LOG}
+                               'log': kode in SKALA_LOG, 'kedaluwarsa': lewat_masa(kelompok_raster(kode), tahun=tahun)}
     return {'batas': BATAS, 'parameter': parameter}
 
 
