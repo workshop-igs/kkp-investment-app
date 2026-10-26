@@ -515,8 +515,8 @@ SATUAN_PRODUK_SEKTOR = {
 KOMPONEN_INVESTASI = ['Peralatan', 'Sarana dan prasarana', 'Lahan dan bangunan', 'Perizinan KKPRL', 'Perizinan lain']
 KOMPONEN_OPERASIONAL = ['Benih, bibit, atau bahan baku', 'Pakan, BBM, atau energi', 'Operasional alat', 'Tenaga kerja',
                         'Lain-lain']
-MODEL_USAHA = {
-    sub: {
+def model_usaha_kosong(jenis, sub=None):
+    return {
         'satuan_usaha': '1 unit usaha',
         'satuan_produk': 'ton CO2e' if sub == 'KONSERVASI_MANGROVE' else SATUAN_PRODUK_SEKTOR.get(jenis, 'kg'),
         'harga_per_satuan': None,
@@ -524,8 +524,9 @@ MODEL_USAHA = {
         'investasi': dict.fromkeys(KOMPONEN_INVESTASI),
         'operasional_per_tahun': dict.fromkeys(KOMPONEN_OPERASIONAL),
     }
-    for jenis, per_sub in KRITERIA_JENIS.items() for sub in per_sub
-}
+
+
+MODEL_USAHA = {sub: model_usaha_kosong(jenis, sub) for jenis, per_sub in KRITERIA_JENIS.items() for sub in per_sub}
 ASUMSI_MODEL_USAHA = {
     'umur_tahun': 10, 'diskonto_persen': 12.0, 'kenaikan_harga_persen': 0.0, 'kenaikan_biaya_persen': 0.0,
     'csr_persen': 2.5, 'batas_pbp_tahun': 10,

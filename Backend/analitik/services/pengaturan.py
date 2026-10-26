@@ -1,5 +1,6 @@
 import json
 import math
+import re
 import time
 
 from django.db import DatabaseError
@@ -272,6 +273,8 @@ def _kriteria(nilai, sektor):
             raise NilaiTidakSah(f'{kode}: sedikitnya satu sub-sektor.')
         for sub, isi in per_sub.items():
             jalur = f'{kode} > {sub}'
+            if not re.fullmatch(r'[A-Z0-9_]{2,40}', sub):
+                raise NilaiTidakSah(f'{jalur}: kode sub-sektor hanya huruf kapital, angka, dan garis bawah, paling panjang 40.')
             if not isinstance(isi, dict) or not {'nama', 'ranah', 'kriteria'} <= set(isi) <= {'nama', 'ranah', 'kriteria', 'unggulan'}:
                 raise NilaiTidakSah(f'{jalur}: isian harus nama, ranah, kriteria, dan (bila ada) unggulan.')
             if not isinstance(isi['nama'], str) or not isi['nama'].strip():
@@ -293,13 +296,14 @@ def _kriteria(nilai, sektor):
 
 
 def _model_usaha(nilai):
-    bawaan = BAWAAN['MODEL_USAHA']
-    nama = {sub: isi['nama'] for per_sub in konstanta.KRITERIA_JENIS.values() for sub, isi in per_sub.items()}
+    dikenal = {sub: (jenis, isi['nama']) for sumber in (konstanta.KRITERIA_JENIS, atur('KRITERIA_JENIS'))
+               for jenis, per_sub in sumber.items() for sub, isi in per_sub.items()}
     meta = {'batas': [0, None], 'bulat': False}
-    if not isinstance(nilai, dict) or set(nilai) != set(bawaan):
-        raise NilaiTidakSah('Model usaha: daftar sub-jenis tidak sesuai.')
+    if not isinstance(nilai, dict) or not set(nilai) <= set(dikenal):
+        raise NilaiTidakSah('Model usaha: ada sub-jenis yang tidak dikenal.')
     for sub, isi in nilai.items():
-        contoh, jalur = bawaan[sub], nama.get(sub, sub)
+        jenis, jalur = dikenal[sub]
+        contoh = konstanta.model_usaha_kosong(jenis, sub)
         if not isinstance(isi, dict) or set(isi) != set(contoh):
             raise NilaiTidakSah(f'{jalur}: susunan isian tidak sesuai.')
         for k in ('satuan_usaha', 'satuan_produk'):
