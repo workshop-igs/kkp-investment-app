@@ -6,7 +6,7 @@ from functools import partial
 from itertools import zip_longest
 
 import numpy as np
-from django.contrib.gis.geos import GEOSGeometry
+from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.db.models import Q
@@ -616,9 +616,11 @@ class Command(BaseCommand):
                      for jenis, label in BENCANA if jenis in bencana]
         zona_utama = Counter(z for i in sel for z in d['zona'][i]).most_common(1)[0][0]
         bersyarat = any(status[(z, sektor.kode)] == 'BERSYARAT' for i in sel for z in d['zona'][i])
+        inti = GEOSGeometry(memoryview(ewkb))
+        wilayah = GEOSGeometry(memoryview(ewkb_wilayah)).union(inti)
         return LokasiPotensial(
-            sektor=sektor, provinsi=prov, geometry=GEOSGeometry(memoryview(ewkb)),
-            wilayah=GEOSGeometry(memoryview(ewkb_wilayah)), luas_ha=luas,
+            sektor=sektor, provinsi=prov, geometry=inti,
+            wilayah=wilayah if wilayah.geom_type == 'MultiPolygon' else MultiPolygon(wilayah, srid=inti.srid), luas_ha=luas,
             persen_sesuai=sum(lolos[i][0] for i in sel) / len(sel), jenis=[sektor.kode],
             rincian={
                 'nama': zona[zona_utama][4],
