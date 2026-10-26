@@ -247,13 +247,17 @@ export const LAYER_LOKAL = {
     ikon: (p) => IKON_JENIS_INVESTASI[p.sektor_kode] || 'bintang',
     warnaIkon: (p) => warnaJenisInvestasi(p.sektor_kode),
     warnaTitik: (p) => (p.jenis?.length ? p.jenis : [p.sektor_kode]).map(warnaJenisInvestasi),
+    gaya: (f) => {
+      const warna = warnaJenisInvestasi(f.properties?.sektor_kode);
+      return { color: warna, weight: 2, opacity: 0.9, dashArray: '6 4', fillColor: warna, fillOpacity: 0.25 };
+    },
     tooltip: (p) => `Lokasi potensial:
 ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     zoomPin: 8,
     keteranganLegenda:
       'Lokasi yang diizinkan matriks Perda dan memenuhi kriteria unggulan jenis investasinya dengan skor mutu tinggi. '
-      + 'Warna titik menunjukkan jenis investasi. Klik titik lalu Analisis lokasi ini untuk penilaian lengkap. '
-      + 'Bukan pengganti Persetujuan KKPRL.',
+      + 'Saat peta diperbesar, lokasi tampil sebagai area indikatif, bukan batas tapak. Warna menunjukkan jenis '
+      + 'investasi. Klik lokasi lalu Analisis lokasi ini untuk penilaian lengkap. Bukan pengganti Persetujuan KKPRL.',
     popup: (p) => {
       const jenis = p.jenis?.length ? p.jenis : [p.sektor_kode];
       const nama = p.jenis_nama?.length ? p.jenis_nama : [p.sub_sektor || p.sektor || ''];
@@ -290,7 +294,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         <div class="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
           <p class="flex items-baseline justify-between gap-2 text-[11px] font-semibold" style="color:${warna}"><span>Skor mutu lokasi</span><span class="text-[15px] tabular-nums">${Math.round(Number(p.persen_sesuai || 0))}<span class="text-[10px] font-medium text-slate-400">/100</span></span></p>
           <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Semua batas unggulan terpenuhi${p.total ? ` (${p.terukur} dari ${p.total} kriteria terukur)` : ''}</p>
-          <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Inti lokasi &plusmn;${aman(luas)} ha${p.luas_wilayah_ha > p.luas_ha ? ` dari wilayah sesuai &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha` : ''}</p>
+          <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">${p.luas_wilayah_ha > p.luas_ha ? `Area indikatif &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha; Analisis lokasi ini menilai inti terbaik &plusmn;${aman(luas)} ha di dalamnya` : `Area indikatif &plusmn;${aman(luas)} ha`}</p>
         </div>
         ${gerbang.length
           ? `<div class="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5">

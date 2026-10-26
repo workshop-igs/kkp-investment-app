@@ -378,8 +378,7 @@ class PetaRisikoViewSet(viewsets.ReadOnlyModelViewSet):
 class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     BATAS_FITUR = 5000
     BATAS_JAUH = 0
-
-    HANYA_TITIK = True
+    LEBAR_AREA_DERAJAT = 1.5
     permission_classes = [AllowAny]
 
     SKALA = []
@@ -394,6 +393,12 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
 
     def peta_urutan(self, qs, request, batas):
         return qs.order_by('-persen_sesuai', '-luas_ha', 'id')
+
+    def hanya_titik(self, lebar):
+        return lebar >= self.LEBAR_AREA_DERAJAT
+
+    def kolom_geometri(self, request, lebar):
+        return 'geometry' if self.hanya_titik(lebar) else 'wilayah'
 
     def peta_queryset_tambahan(self, qs, request):
         kode = (request.query_params.get('sektor') or 'SEMUA').strip().upper()
