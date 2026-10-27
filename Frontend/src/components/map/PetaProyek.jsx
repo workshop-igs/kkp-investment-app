@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import KontrolPeta from './KontrolPeta';
 import LapisanVektorBBox from './LapisanVektorBBox';
 import LegendaPeta from './LegendaPeta';
-import { BATAS_OSEANOGRAFI, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
+import { BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
 
 const PenyesuaiUkuran = () => {
   const map = useMap();
@@ -107,6 +107,7 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
           <ImageOverlay
             key={`citra-${id}`}
             url={urlCitraOseanografi(LAYER_LOKAL[id].citra)}
+            errorOverlayUrl={CITRA_KOSONG}
             bounds={BATAS_OSEANOGRAFI}
             pane="tilePane"
             zIndex={2}

@@ -34,6 +34,8 @@ export const BATAS_OSEANOGRAFI = [[-11, 94], [7, 142]];
 
 export const urlCitraOseanografi = (kode) => `${API_V1_URL}/analitik/oseanografi/${kode}.png`;
 
+export const CITRA_KOSONG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+
 const OSEANOGRAFI = [
   ['osea_suhu', 'SUHU', 'Suhu Permukaan Laut', 'Rata-rata suhu permukaan laut 12 bulan terakhir (NOAA Coral Reef Watch).'],
   ['osea_anomali', 'ANOMALI_SUHU', 'Anomali Suhu Permukaan Laut',
