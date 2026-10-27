@@ -734,12 +734,12 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         { tebal: true, warna: h.cocok ? HIJAU_TEKS : MERAH_TEKS, ukuran: 7 });
         k.tabel(
           ['Kriteria', 'Di lokasi', 'Syarat', 'Status', 'Unggulan'],
-          [...h.kriteria, ...khusus, ...h.umum].map((x) => {
+          [...h.kriteria, ...khusus, ...h.umum, ...(h.informasi || [])].map((x) => {
             const layak = !khusus.includes(x);
             const u = unggul[x.kunci];
             return [x.pelengkap ? `${x.label} (pelengkap)` : x.label,
               x.nilai_teks || (x.data_ada === false ? 'belum ada data' : 'tidak terukur'),
-              layak ? x.ambang_teks : '-', layak ? STATUS(x.lulus) : '-',
+              layak ? x.ambang_teks : '-', layak && !x.informasi ? STATUS(x.lulus) : '-',
               u ? `${u.ambang_teks} (${STATUS(u.lulus).toLowerCase()})` : ''];
           }),
           [(LEBAR - 8) * 0.3, (LEBAR - 8) * 0.16, (LEBAR - 8) * 0.16, (LEBAR - 8) * 0.14, (LEBAR - 8) * 0.24]

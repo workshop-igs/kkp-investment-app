@@ -15,8 +15,10 @@ from analitik.models import LokasiPotensial, NilaiWilayahParameter, ParameterTam
 from analitik.services import pengecualian
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
+    INFORMASI_JENIS,
     KM_PER_DERAJAT,
     KRITERIA_PELENGKAP,
+    KRITERIA_TANPA_SKOR,
     SEKTOR_TERSENDIRI_DI_PETA,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
@@ -28,10 +30,12 @@ from analitik.services.kriteria import (
     KARANG,
     PARAMETER,
     RASTER_DATA,
+    baris_informasi,
     cek,
     dari_raster,
     karang_dari_jarak,
     kedekatan,
+    kode_raster,
     sumber_tersedia,
     syarat_unggulan,
     teks_ambang,
@@ -246,10 +250,11 @@ class Command(BaseCommand):
 
         c.execute('SELECT id, ST_X(titik), ST_Y(titik) FROM sel WHERE id = ANY(%s)', [calon])
         titik = np.array(c.fetchall(), dtype=float).reshape(-1, 3)
-        for kunci, raster in RASTER_DATA.items():
-            if raster not in d['tersedia']:
+        for kunci in RASTER_DATA:
+            kode = kode_raster(kunci)
+            if not set(kode) <= d['tersedia']:
                 continue
-            for i, v in zip(titik[:, 0].astype(int), nilai_titik(raster, titik[:, 1], titik[:, 2])):
+            for i, v in zip(titik[:, 0].astype(int), sum(nilai_titik(r, titik[:, 1], titik[:, 2]) for r in kode)):
                 if not np.isnan(v):
                     d[kunci][i] = dari_raster(kunci, float(v))
 
@@ -478,7 +483,8 @@ class Command(BaseCommand):
                 if perlu and v is None:
                     return None
                 continue
-            mutu.append(kedekatan(k, v, ambang, batas))
+            if k not in KRITERIA_TANPA_SKOR:
+                mutu.append(kedekatan(k, v, ambang, batas))
         if len(mutu) < minimal or any(kelas == 'TINGGI' for _, kelas in bencana) or False in tambahan:
             return None
         return 100 * sum(mutu) / len(mutu) if mutu else 0.0
@@ -493,7 +499,7 @@ class Command(BaseCommand):
         kriteria = list(syarat_unggulan(sub).items())
         layak = tuple(sub['kriteria'].get(k) for k, _ in kriteria)
         harus = tuple(wajib(k, d['tersedia']) for k, _ in kriteria)
-        minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
+        minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * sum(k not in KRITERIA_TANPA_SKOR for k, _ in kriteria))
         bobot, skor_minimal = atur('BOBOT_RUANG_BERSYARAT'), atur('SKOR_MINIMAL_LOKASI_UNGGULAN')
         khusus = {r: any(status[(z, sektor.kode)] == 'DIIZINKAN' for z in zona if zona[z][3] == r) for r in sub['ranah']}
         tembolok, lolos = {}, {}
@@ -606,16 +612,21 @@ class Command(BaseCommand):
         return hasil
 
     def _satu(self, prov, sektor, sub_kode, sub, ewkb, ewkb_wilayah, luas, sel, sel_wilayah, lolos, zona, status, d):
+        def rata_sel(kunci):
+            nilai = [d[kunci][i] for i in sel if d[kunci][i] is not None]
+            return sum(nilai) / len(nilai) if nilai else None
+
         kriteria, syarat = [], syarat_unggulan(sub)
         for j, (kunci, ambang) in enumerate(syarat.items()):
             nilai = [lolos[i][1][j] for i in sel if lolos[i][1][j] is not None]
             rata = sum(nilai) / len(nilai) if nilai else None
-            mutu = kedekatan(kunci, rata, ambang, sub['kriteria'].get(kunci))
+            mutu = None if kunci in KRITERIA_TANPA_SKOR else kedekatan(kunci, rata, ambang, sub['kriteria'].get(kunci))
             kriteria.append({'label': PARAMETER[kunci][0], 'nilai_teks': teks_nilai(kunci, rata),
                              'ambang_teks': teks_ambang(kunci, ambang), 'lulus': cek(kunci, rata, ambang),
                              'mutu': None if mutu is None else round(100 * mutu),
                              'pelengkap': kunci in KRITERIA_PELENGKAP})
-        terukur = sum(k['lulus'] is True for k in kriteria)
+        dihitung = [k for kunci, k in zip(syarat, kriteria) if kunci not in KRITERIA_TANPA_SKOR]
+        terukur = sum(k['lulus'] is True for k in dihitung)
         bencana = {jenis for i in sel for jenis, _ in lolos[i][2]}
         kriteria += [{'label': label, 'nilai_teks': None, 'ambang_teks': 'rendah–sedang', 'lulus': True}
                      for jenis, label in BENCANA if jenis in bencana]
@@ -637,9 +648,9 @@ class Command(BaseCommand):
                 'luas_wilayah_ha': round(luas / len(sel) * sel_wilayah),
                 'status_tata_ruang': 'BERSYARAT' if bersyarat else 'DIIZINKAN',
                 'syarat_dasar': [LABEL_ADAT, *(pengecualian.label(p, sektor.kode) for p in pengecualian.berlaku(sektor.kode))],
-                'kriteria': kriteria,
+                'kriteria': kriteria + baris_informasi(sub, rata_sel, INFORMASI_JENIS.get(sektor.kode)),
                 'terukur': terukur,
-                'total': len(syarat),
+                'total': len(dihitung),
                 'perlu_dinilai': [k['label'] for k in kriteria if k['lulus'] is None],
                 'peringatan': [
                     'Dekat wilayah kelola masyarakat hukum adat: berisiko konflik tenurial, libatkan masyarakat adat '
