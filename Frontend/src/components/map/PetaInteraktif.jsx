@@ -12,7 +12,10 @@ import PanelDetailProvinsi from './PanelDetailProvinsi';
 import LegendaPeta from './LegendaPeta';
 import LapisanVektorBBox from './LapisanVektorBBox';
 import TurPeta from './TurPeta';
-import { BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
+import {
+  BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, lapisanParameter, urlCitraOseanografi,
+} from './katalogLapisan';
+import { useAuth } from '../../context/KonteksAuth';
 
 import { api } from '../../api/klien';
 
@@ -164,9 +167,23 @@ const PetaInteraktif = ({
   const [error, setError] = useState(null);
   const [peringatanUnggah, setPeringatanUnggah] = useState([]);
   const [layerVisibility, setLayerVisibility] = useState({});
-  
+
+  const { isAuthenticated } = useAuth();
+  const [parameterArea, setParameterArea] = useState([]);
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setParameterArea([]);
+      return;
+    }
+    api.get('/analitik/parameter-tambahan/').then(({ data }) => setParameterArea(data)).catch(() => setParameterArea([]));
+  }, [isAuthenticated]);
+  const katalog = useMemo(
+    () => ({ ...LAYER_LOKAL, ...Object.fromEntries(parameterArea.map(lapisanParameter)) }),
+    [parameterArea]
+  );
+
   const [cari] = useSearchParams();
-  const lapisanAwal = (cari.get('lapisan') || '').split(',').filter((id) => LAYER_LOKAL[id]);
+  const lapisanAwal = (cari.get('lapisan') || '').split(',').filter((id) => katalog[id]);
   const [activeDataLayers, setActiveDataLayers] = useState(() => (lapisanAwal.length ? lapisanAwal : ['potensi']));
   const [petaSiap, setPetaSiap] = useState(false);
   const [wilayahLapisan, setWilayahLapisan] = useState({});
@@ -391,11 +408,11 @@ const PetaInteraktif = ({
           <KunciLapisanSaatMenggambar menggambar={isDrawing || modeUbah} />
 
           {activeDataLayers
-            .filter((id) => LAYER_LOKAL[id]?.citra)
+            .filter((id) => katalog[id]?.citra)
             .map((id) => (
               <ImageOverlay
                 key={`citra-${id}`}
-                url={urlCitraOseanografi(LAYER_LOKAL[id].citra)}
+                url={urlCitraOseanografi(katalog[id].citra)}
                 errorOverlayUrl={CITRA_KOSONG}
                 bounds={BATAS_OSEANOGRAFI}
                 pane="tilePane"
@@ -405,31 +422,31 @@ const PetaInteraktif = ({
             ))}
 
           {activeDataLayers
-            .filter((id) => LAYER_LOKAL[id]?.url)
+            .filter((id) => katalog[id]?.url)
             .map((id) => (
               <LapisanVektorBBox
                 key={`lokal-${id}`}
-                url={LAYER_LOKAL[id].url}
+                url={katalog[id].url}
                 params={{
-                  ...(LAYER_LOKAL[id].params || {}),
-                  ...(sektorLapisan[id] ? { [LAYER_LOKAL[id].pilihan?.param || 'sektor']: sektorLapisan[id] } : {}),
+                  ...(katalog[id].params || {}),
+                  ...(sektorLapisan[id] ? { [katalog[id].pilihan?.param || 'sektor']: sektorLapisan[id] } : {}),
                   ...(wilayahLapisan[id] ? { provinsi: wilayahLapisan[id] } : {}),
                 }}
-                style={LAYER_LOKAL[id].gaya}
-                gayaTitik={LAYER_LOKAL[id].titik}
-                ikon={LAYER_LOKAL[id].ikon}
-                warnaIkon={LAYER_LOKAL[id].warnaIkon}
-                warnaTitik={LAYER_LOKAL[id].warnaTitik}
-                zoomPin={LAYER_LOKAL[id].zoomPin}
+                style={katalog[id].gaya}
+                gayaTitik={katalog[id].titik}
+                ikon={katalog[id].ikon}
+                warnaIkon={katalog[id].warnaIkon}
+                warnaTitik={katalog[id].warnaTitik}
+                zoomPin={katalog[id].zoomPin}
                 onStatus={(st) => catatStatus(id, st)}
                 onEachFeature={(feature, layer) => {
                   const p = feature?.properties || {};
-                  layer.bindPopup(() => LAYER_LOKAL[id].popup(p), {
+                  layer.bindPopup(() => katalog[id].popup(p), {
                     maxHeight: Math.max(220, window.innerHeight - JARAK_POPUP.atas - JARAK_POPUP.bawah - 40),
                     autoPanPaddingTopLeft: [16, JARAK_POPUP.atas],
                     autoPanPaddingBottomRight: [JARAK_POPUP.kanan, JARAK_POPUP.bawah],
                   });
-                  const judul = LAYER_LOKAL[id].tooltip?.(p) || p.nama || p.pemohon;
+                  const judul = katalog[id].tooltip?.(p) || p.nama || p.pemohon;
                   if (judul) layer.bindTooltip(judul, { sticky: true, className: 'map-tooltip' });
                   layer.on('popupopen', (e) => {
                     e.popup
@@ -442,7 +459,7 @@ const PetaInteraktif = ({
                         let sub = p.sub_sektor_kode || null;
                         if (feature.id !== undefined && feature.id !== null) {
                           try {
-                            const { data } = await api.get(LAYER_LOKAL[id].url.replace(/peta\/$/, `${feature.id}/`));
+                            const { data } = await api.get(katalog[id].url.replace(/peta\/$/, `${feature.id}/`));
                             geometri = data?.geometry || geometri;
                             sektor = data?.sektor_kode || sektor;
                             sub = data?.sub_sektor_kode || sub;
@@ -501,7 +518,7 @@ const PetaInteraktif = ({
             setBasemap={setBasemap}
             activeLayers={activeDataLayers}
             toggleLayer={toggleDataLayer}
-            daftarLapisan={LAYER_LOKAL}
+            daftarLapisan={katalog}
             wilayahLapisan={wilayahLapisan}
             sektorLapisan={sektorLapisan}
             setSektorLapisan={pilihSektorLapisan}
@@ -533,7 +550,7 @@ const PetaInteraktif = ({
         <LegendaPeta
           wmsUrl={WMS_KKP}
           daftarLayer={LAYER_WMS}
-          daftarLokal={LAYER_LOKAL}
+          daftarLokal={katalog}
           layerAktif={activeDataLayers}
           sektorLapisan={sektorLapisan}
           setSektorLapisan={pilihSektorLapisan}
