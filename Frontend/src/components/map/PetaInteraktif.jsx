@@ -12,7 +12,7 @@ import PanelDetailProvinsi from './PanelDetailProvinsi';
 import LegendaPeta from './LegendaPeta';
 import LapisanVektorBBox from './LapisanVektorBBox';
 import TurPeta from './TurPeta';
-import { BATAS_OSEANOGRAFI, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
+import { BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
 
 import { api } from '../../api/klien';
 
@@ -396,6 +396,7 @@ const PetaInteraktif = ({
               <ImageOverlay
                 key={`citra-${id}`}
                 url={urlCitraOseanografi(LAYER_LOKAL[id].citra)}
+                errorOverlayUrl={CITRA_KOSONG}
                 bounds={BATAS_OSEANOGRAFI}
                 pane="tilePane"
                 zIndex={2}
