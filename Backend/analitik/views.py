@@ -2,13 +2,15 @@ import hashlib
 import json
 import logging
 
+from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import GEOSGeometry
 from django.core.cache import cache
-from django.db import transaction
+from django.db import connection, transaction
 from django.http import Http404, HttpResponse, JsonResponse
 from rest_framework import serializers, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import ParseError
+from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.throttling import ScopedRateThrottle
@@ -21,6 +23,7 @@ from inti.peta_bbox import PetaBBoxMixin
 from .models import (
     AnalisisKelayakan,
     LokasiPotensial,
+    ParameterTambahan,
     PetaRisiko,
     ZonaRisikoBencana,
 )
@@ -29,6 +32,7 @@ from .services.finansial import jalankan_analisis_finansial
 from .services.kriteria import uraian
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
+from .services.parameter_tambahan import geojson_area
 from .services.screening_ruang import screening_ruang
 from .services.skor_spasial import ambil_skor_spasial
 
@@ -373,6 +377,36 @@ class PetaRisikoViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = PetaRisiko.objects.select_related('provinsi').all()
     filterset_fields = ['provinsi', 'kelas_risiko']
     serializer_class = PetaRisikoSerializer
+
+
+class ParameterTambahanPetaViewSet(viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+    queryset = ParameterTambahan.objects.filter(tipe='AREA', area__isnull=False).distinct()
+
+    def list(self, request):
+        return Response([
+            {'id': p.id, 'nama': p.nama, 'peran': p.peran, 'peran_label': p.get_peran_display(), 'kondisi': p.kondisi,
+             'aktif': p.aktif, 'sumber': p.sumber, 'sektor': [s.nama for s in p.sektor.all()]}
+            for p in self.get_queryset().prefetch_related('sektor').order_by('nama')
+        ])
+
+    def _parameter(self, request):
+        return get_object_or_404(self.get_queryset(), pk=request.query_params.get('parameter'))
+
+    @action(detail=False, url_path='peta')
+    def peta(self, request):
+        p = self._parameter(request)
+        try:
+            bbox = [float(v) for v in request.query_params['bbox'].split(',')]
+        except (KeyError, ValueError):
+            bbox = None
+        with connection.cursor() as c:
+            return Response(geojson_area(c, p.id, bbox if bbox and len(bbox) == 4 else None))
+
+    @action(detail=False, url_path='cakupan')
+    def cakupan(self, request):
+        kotak = self._parameter(request).area.aggregate(batas=Extent('geometry'))['batas']
+        return Response({'cakupan': list(kotak) if kotak else None})
 
 
 class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):

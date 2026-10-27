@@ -27,7 +27,7 @@ from analitik.models import (
 from analitik.services import konstanta, pengaturan
 from analitik.services.asal_data import ringkasan_sumber
 from analitik.services.kriteria import PARAMETER
-from analitik.services.parameter_tambahan import kunci_nama
+from analitik.services.parameter_tambahan import geojson_area, kunci_nama
 from analitik.tasks import jadwalkan_hitung_ulang
 from inti.models import (
     KabupatenKota,
@@ -345,14 +345,7 @@ class AdminParameterTambahanViewSet(viewsets.ModelViewSet):
                     ).values('provinsi_id')))
             _picu_parameter(lama, p, cakupan_lama, _cakupan(p))
         with connection.cursor() as c:
-            c.execute(
-                "SELECT json_build_object('type', 'FeatureCollection', 'features', COALESCE(json_agg(json_build_object("
-                "'type', 'Feature', 'properties', json_build_object('nama', nama), 'geometry', "
-                "ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, 0.0005), 5)::json)), '[]'::json)) "
-                'FROM analitik_area_parameter WHERE parameter_id = %s',
-                [p.id],
-            )
-            geojson = c.fetchone()[0]
+            geojson = geojson_area(c, p.id)
         return Response({'jumlah': p.area.count(), 'provinsi': sorted(_cakupan(p) or []), 'geojson': geojson})
 
     @action(detail=True, methods=['get', 'post'], parser_classes=[MultiPartParser, FormParser])
