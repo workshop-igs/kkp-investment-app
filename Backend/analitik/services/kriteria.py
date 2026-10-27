@@ -3,7 +3,7 @@ import math
 from django.core.cache import cache
 from django.db import connection
 
-from analitik.services.konstanta import KM_PER_DERAJAT, KRITERIA_PELENGKAP
+from analitik.services.konstanta import INFORMASI_JENIS, KM_PER_DERAJAT, KRITERIA_PELENGKAP, KRITERIA_TANPA_SKOR
 from analitik.services.oseanografi import raster_tersedia
 from analitik.services.pengaturan import atur
 
@@ -53,6 +53,7 @@ PARAMETER = {
     'intertidal': ('Berada di zona intertidal (MSL–MHW)', 'ada/tidak', 'INTERTIDAL'),
     'luas_hamparan_ha': ('Luas hamparan lahan kontigu', 'ha', 'LUAS_EKS_MANGROVE'),
     'laju_abrasi': ('Laju abrasi garis pantai', 'm/tahun', 'ABRASI_PANTAI'),
+    'aktivitas_tangkap': ('Aktivitas penangkapan kapal berpelacak', 'jam/tahun', 'TANGKAP_SIANG'),
 }
 BINER = {'karang', 'eks_mangrove_mudflat', 'intertidal'}
 RASTER_DATA = {
@@ -63,7 +64,7 @@ RASTER_DATA = {
     'gelombang_ekstrem': 'GELOMBANG_EKSTREM', 'angin_100m': 'ANGIN_100M', 'ghi': 'GHI',
     'beda_suhu_1000m': 'BEDA_SUHU_1000M', 'tanah_liat': 'TANAH_LIAT', 'shannon': 'SHANNON',
     'laju_abrasi': 'ABRASI_PANTAI', 'eks_mangrove_mudflat': 'EKS_MANGROVE', 'luas_hamparan_ha': 'LUAS_EKS_MANGROVE',
-    'produksi_ikan_kabupaten_ton': 'PRODUKSI_KABUPATEN',
+    'produksi_ikan_kabupaten_ton': 'PRODUKSI_KABUPATEN', 'aktivitas_tangkap': ('TANGKAP_SIANG', 'TANGKAP_MALAM'),
 }
 RASTER_DARAT = {'curah_hujan', 'bulan_kering_berturut', 'kemiringan_lahan', 'tanah_liat', 'produksi_ikan_kabupaten_ton'}
 RASTER_DUA_RANAH = {'salinitas', 'pga', 'laju_abrasi', 'eks_mangrove_mudflat', 'luas_hamparan_ha', 'ghi'}
@@ -86,6 +87,11 @@ UBAH = {'kedalaman': lambda v: max(0.0, -v), 'curah_hujan': lambda v: v * 12}
 
 def dari_raster(kunci, v):
     return None if v is None else UBAH.get(kunci, float)(v)
+
+
+def kode_raster(kunci):
+    kode = RASTER_DATA[kunci]
+    return kode if isinstance(kode, tuple) else (kode,)
 BENCANA = (
     ('TSUNAMI', 'Risiko tsunami'),
     ('ABRASI', 'Risiko gelombang ekstrem dan abrasi'),
@@ -248,7 +254,7 @@ def kedekatan(kunci, nilai, ambang, layak=None):
 
 def skor_mutu(sub, data, bersyarat=False):
     nilai = [kedekatan(k, data.get(k), a, sub['kriteria'].get(k)) for k, a in syarat_unggulan(sub).items()
-             if cek(k, data.get(k), a) is not None]
+             if k not in KRITERIA_TANPA_SKOR and cek(k, data.get(k), a) is not None]
     if not nilai:
         return None
     return 100 * sum(nilai) / len(nilai) * (atur('BOBOT_RUANG_BERSYARAT') if bersyarat else 1)
@@ -272,9 +278,16 @@ def _baris(kunci, ambang, data, tersedia):
     }
 
 
-def nilai_sub(sub, data, tersedia, bersyarat=False):
+def baris_informasi(sub, nilai, informasi):
+    return [{'kunci': k, 'label': PARAMETER[k][0], 'nilai_teks': teks_nilai(k, nilai(k)), 'ambang_teks': ket,
+             'lulus': None, 'informasi': True}
+            for k, ket in (informasi or {}).items() if k not in syarat_unggulan(sub) and nilai(k) is not None]
+
+
+def nilai_sub(sub, data, tersedia, bersyarat=False, informasi=None):
     kriteria = [_baris(k, a, data, tersedia) for k, a in sub['kriteria'].items()]
     unggulan = [_baris(k, a, data, tersedia) for k, a in syarat_unggulan(sub).items()]
+    dihitung = [k for k in kriteria if k['kunci'] not in KRITERIA_TANPA_SKOR]
     umum = []
     if kena_bencana(data):
         for jenis, label in BENCANA:
@@ -284,12 +297,13 @@ def nilai_sub(sub, data, tersedia, bersyarat=False):
     for nama, hasil in (data.get('tambahan') or {}).items():
         umum.append({'kunci': nama, 'label': nama, 'nilai_teks': None, 'ambang_teks': 'ditetapkan administrator',
                      'lulus': hasil})
-    terukur = sum(k['lulus'] is not None for k in kriteria)
+    terukur = sum(k['lulus'] is not None for k in dihitung)
     gagal = [k for k in kriteria + umum if k['lulus'] is False]
-    cukup = terukur >= math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(kriteria))
+    cukup = terukur >= math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(dihitung))
     skor = skor_mutu(sub, data, bersyarat)
     return {
-        'nama': sub['nama'], 'kriteria': kriteria, 'umum': umum, 'terukur': terukur, 'total': len(kriteria),
+        'nama': sub['nama'], 'kriteria': kriteria, 'umum': umum, 'terukur': terukur, 'total': len(dihitung),
+        'informasi': baris_informasi(sub, data.get, informasi),
         'gagal': [k['label'] for k in gagal], 'cukup_data': cukup, 'cocok': not gagal and cukup,
         'unggulan': {
             'kriteria': unggulan, 'skor': None if skor is None else round(skor),
@@ -305,7 +319,7 @@ def penilaian(sektor_kode, data, tersedia=None, bersyarat=False, sub_kode=None):
     hasil = []
     for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items():
         if (not sub_kode or kode == sub_kode) and data['ranah'] in sub['ranah']:
-            hasil.append({'kode': kode, **nilai_sub(sub, data, tersedia, bersyarat)})
+            hasil.append({'kode': kode, **nilai_sub(sub, data, tersedia, bersyarat, INFORMASI_JENIS.get(sektor_kode))})
     return sorted(hasil, key=lambda h: (not h['cocok'], len(h['gagal']), -h['terukur']))
 
 

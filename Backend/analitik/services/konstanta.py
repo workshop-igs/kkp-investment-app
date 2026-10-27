@@ -215,6 +215,8 @@ MAKS_LOKASI_PER_PROVINSI = 5
 RADIUS_KARANG_KM = 1.0
 KARANG_TERPETAKAN_KM = 50.0
 KRITERIA_PELENGKAP = ('jarak_listrik_km', 'jarak_jalan_nasional_km', 'tanah_liat', 'shannon')
+KRITERIA_TANPA_SKOR = ('aktivitas_tangkap',)
+INFORMASI_JENIS = {'PERIKANAN_TANGKAP': {'aktivitas_tangkap': 'informasi; perahu kecil tidak terlihat'}}
 SKOR_MINIMAL_LOKASI_UNGGULAN = 30
 BOBOT_RUANG_BERSYARAT = 0.75
 
@@ -227,16 +229,18 @@ KRITERIA_JENIS = {
         'TANGKAP_ARMADA_INDUSTRI': {
             'nama': 'Armada Kapal Tangkap Skala Industri', 'ranah': ['LAUT'],
             'kriteria': {'kedalaman': [30.0, None], 'klorofil': [0.15, None], 'gelombang': [None, 2.5],
-                         'jarak_pelabuhan_perikanan_besar_km': [None, 100.0]},
+                         'jarak_pelabuhan_perikanan_besar_km': [None, 100.0], 'aktivitas_tangkap': [None, 300.0]},
             'unggulan': {'kedalaman': [50.0, None], 'klorofil': [0.2, None], 'gelombang': [None, 2.0],
-                         'jarak_pelabuhan_perikanan_besar_km': [None, 50.0]},
+                         'jarak_pelabuhan_perikanan_besar_km': [None, 50.0], 'aktivitas_tangkap': [None, 100.0]},
         },
         'TANGKAP_PELAGIS': {
             'nama': 'Perikanan Pelagis Besar', 'ranah': ['LAUT'],
             'kriteria': {'kedalaman': [100.0, None], 'klorofil': [0.1, 1.0], 'suhu_rata': [27.0, 31.0],
-                         'gelombang': [None, 2.5], 'jarak_pelabuhan_perikanan_km': [None, 100.0]},
+                         'gelombang': [None, 2.5], 'jarak_pelabuhan_perikanan_km': [None, 100.0],
+                         'aktivitas_tangkap': [None, 300.0]},
             'unggulan': {'kedalaman': [200.0, None], 'klorofil': [0.15, 0.5], 'suhu_rata': [28.0, 30.0],
-                         'gelombang': [None, 2.0], 'jarak_pelabuhan_perikanan_km': [None, 60.0]},
+                         'gelombang': [None, 2.0], 'jarak_pelabuhan_perikanan_km': [None, 60.0],
+                         'aktivitas_tangkap': [None, 100.0]},
         },
         'TANGKAP_DEMERSAL': {
             'nama': 'Perikanan Demersal dan Karang', 'ranah': ['LAUT'],
