@@ -27,6 +27,7 @@ from analitik.services.kriteria import (
     dari_raster,
     jarak_area,
     karang_dari_jarak,
+    kode_raster,
     penilaian,
     raster_ranah,
     sub_jenis,
@@ -174,10 +175,11 @@ def karakter_area(c, geom):
     tersedia = sumber_tersedia()
     data = {'ranah': 'DARAT' if darat else 'LAUT', 'ekosistem': ekosistem_di(c, geom)}
     kunci = [k for k in RASTER_DATA if raster_ranah(k, darat)]
-    stat = statistik_oseanografi(geom, sorted({RASTER_DATA[k] for k in kunci}))
+    stat = statistik_oseanografi(geom, sorted({r for k in kunci for r in kode_raster(k)}))
     _catat_oseanografi(data, stat)
     for k in kunci:
-        data[k] = dari_raster(k, (stat.get(RASTER_DATA[k]) or {}).get('rata2'))
+        rata = [(stat.get(r) or {}).get('rata2') for r in kode_raster(k)]
+        data[k] = dari_raster(k, None if None in rata else sum(rata))
     if not darat:
         if 'TERUMBU_KARANG' in tersedia:
             c.execute(

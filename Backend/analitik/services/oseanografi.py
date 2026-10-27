@@ -52,7 +52,7 @@ PALET = {
 }
 SKALA_LOG = {'KLOROFIL', 'KD490', 'TANGKAP_SIANG', 'TANGKAP_MALAM'}
 DIBALIK = {'KEDALAMAN'}
-NOL_TRANSPARAN = {'EKS_MANGROVE', 'LUAS_EKS_MANGROVE'}
+NOL_TRANSPARAN = {'EKS_MANGROVE', 'LUAS_EKS_MANGROVE', 'TANGKAP_SIANG', 'TANGKAP_MALAM'}
 
 
 def raster_tersedia():
@@ -175,6 +175,7 @@ def _merc(lat):
 
 def _warnai(nilai, kode):
     stop = PALET[kode]
+    kosong = np.isnan(nilai) | ((nilai == 0) if kode in NOL_TRANSPARAN else False)
     if kode in DIBALIK:
         nilai = -nilai
     if kode in SKALA_LOG:
@@ -183,7 +184,6 @@ def _warnai(nilai, kode):
     else:
         posisi = [s for s, _ in stop]
     rgb = [[int(w[i:i + 2], 16) for i in (1, 3, 5)] for _, w in stop]
-    kosong = np.isnan(nilai) | ((nilai == 0) if kode in NOL_TRANSPARAN else False)
     nilai = np.where(kosong, posisi[0], nilai)
     rgba = np.zeros((*nilai.shape, 4), dtype='uint8')
     for k in range(3):

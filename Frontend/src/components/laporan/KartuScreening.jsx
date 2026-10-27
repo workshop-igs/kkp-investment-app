@@ -389,7 +389,7 @@ const KriteriaSubSektor = ({ s }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {[...h.kriteria, ...khusus, ...h.umum].map((k) => {
+                  {[...h.kriteria, ...khusus, ...h.umum, ...(h.informasi || [])].map((k) => {
                     const layak = !khusus.includes(k);
                     const u = unggul[k.kunci];
                     const [kd, tanda, ket] = TANDA_FISIK[k.lulus];
@@ -402,7 +402,7 @@ const KriteriaSubSektor = ({ s }) => {
                           {k.nilai_teks || (k.data_ada === false ? 'belum ada data' : 'tidak terukur')}
                         </td>
                         <td className="px-3 py-1.5 text-slate-500">{layak ? k.ambang_teks : '—'}</td>
-                        <td className="px-3 py-1.5">{layak && <Tanda kode={kd} tanda={tanda} title={ket} />}</td>
+                        <td className="px-3 py-1.5">{layak && !k.informasi && <Tanda kode={kd} tanda={tanda} title={ket} />}</td>
                         <td className="px-3 py-1.5 text-slate-500">{u?.ambang_teks}</td>
                         <td className="px-3 py-1.5">
                           {u && <Tanda kode={TANDA_FISIK[u.lulus][0]} tanda={TANDA_FISIK[u.lulus][1]} title={`Unggulan: ${TANDA_FISIK[u.lulus][2]}`} />}

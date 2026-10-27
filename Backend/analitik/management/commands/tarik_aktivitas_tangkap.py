@@ -87,7 +87,6 @@ def tarik(klien, hari_ini):
     if not grid.any():
         raise CommandError('GFW tidak mengembalikan jam penangkapan; raster lama dipertahankan.')
     grid = grid.repeat(2, axis=1).repeat(2, axis=2)[:, 1:-1, 1:-1]
-    grid[grid <= 0] = np.nan
     (a, _), (b, _) = bulan[0], bulan[-1]
     periode = f'{BULAN[a.month - 1]} {a.year} – {BULAN[b.month - 1]} {b.year} (12 bulan)'
     sumber = SUMBER.format(versi=versi)
