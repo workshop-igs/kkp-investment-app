@@ -68,6 +68,12 @@ const OSEANOGRAFI = [
     'Perkiraan produksi perikanan tangkap per kabupaten/kota, dibagi dari angka provinsi BPS.'],
   ['osea_shannon', 'SHANNON', 'Keanekaragaman Hayati Laut (Shannon)',
     'Indeks keanekaragaman spesies laut dari catatan OBIS; sel dengan catatan terlalu sedikit dikosongkan.'],
+  ['tangkap_siang', 'TANGKAP_SIANG', 'Aktivitas Penangkapan Ikan Siang',
+    'Jam penangkapan kapal berpelacak AIS pukul 06.00–18.00 selama 12 bulan terakhir; perahu tanpa AIS tidak terlihat. '
+    + 'Powered by Global Fishing Watch.', 'Global Fishing Watch'],
+  ['tangkap_malam', 'TANGKAP_MALAM', 'Aktivitas Penangkapan Ikan Malam',
+    'Jam penangkapan kapal berpelacak AIS pukul 18.00–06.00 selama 12 bulan terakhir; perahu tanpa AIS tidak terlihat. '
+    + 'Powered by Global Fishing Watch.', 'Global Fishing Watch'],
 ];
 
 export const LAYER_WMS = {};
@@ -185,7 +191,9 @@ const POLA_RUANG = {
 
 export const LAYER_LOKAL = {
   ...Object.fromEntries(
-    OSEANOGRAFI.map(([id, citra, label, keteranganLegenda]) => [id, { citra, label, legenda: 'gradasi', keteranganLegenda }])
+    OSEANOGRAFI.map(([id, citra, label, keteranganLegenda, sumberData = 'NOAA (lewat ERDDAP)']) => [
+      id, { citra, label, legenda: 'gradasi', keteranganLegenda, sumberData },
+    ])
   ),
   ...Object.fromEntries(
     [

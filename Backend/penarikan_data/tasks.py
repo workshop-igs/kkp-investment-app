@@ -17,6 +17,8 @@ JADWAL = [
     ('KKP-INFRA', 'infrastruktur', 'Infrastruktur, Portal Satu Data KKP', 'tarik_infrastruktur_wfs', True),
     ('OSM-INFRA', 'infrastruktur', 'Bandara, gardu induk, kampus, dan listrik 20 kV, OpenStreetMap', 'tarik_infrastruktur_osm', True),
     ('OSEANOGRAFI', 'oseanografi', 'Oseanografi 12 bulan terakhir, NOAA dan NASA', 'tarik_oseanografi', True),
+    ('GFW', 'aktivitas_tangkap', 'Aktivitas penangkapan ikan 12 bulan terakhir, Global Fishing Watch',
+     'tarik_aktivitas_tangkap', False),
     ('BPS-PRODUKSI', 'bps_produksi', 'Produksi dan nilai produksi perikanan, BPS', 'tarik_produksi_perikanan', False),
     ('BPS', 'bps_kerja', 'Ketenagakerjaan, BPS', 'tarik_statistik_bps', False),
     ('KKP-RTRW', 'tata_ruang', 'RTRW Provinsi beserta matriks KKPRL, folder data KKP', 'perbarui_rtrw', True),

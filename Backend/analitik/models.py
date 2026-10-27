@@ -412,7 +412,8 @@ class RasterOseanografi(models.Model):
         ('EKS_MANGROVE', 'Eks-mangrove 1996-2020'),
         ('LUAS_EKS_MANGROVE', 'Luas hamparan eks-mangrove'),
         ('PRODUKSI_KABUPATEN', 'Perkiraan produksi ikan kabupaten/kota'),
-        ('PRODUKSI_KABUPATEN', 'Perkiraan produksi ikan kabupaten/kota'),
+        ('TANGKAP_SIANG', 'Aktivitas penangkapan ikan siang hari'),
+        ('TANGKAP_MALAM', 'Aktivitas penangkapan ikan malam hari'),
     ]
 
     parameter = models.CharField(max_length=20, choices=PARAMETER_CHOICES, db_index=True)
