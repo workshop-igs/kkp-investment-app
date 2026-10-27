@@ -276,7 +276,7 @@ export async function unduhPdfPeta(map, { lapisan, petaDasar }) {
   dek.doc.setLineWidth(0.3);
   dek.doc.rect(TEPI, atas, lebar, tinggi, 'S');
 
-  const sumberData = [...new Set(lapisan.map(({ def }) => (def.citra ? 'NOAA (lewat ERDDAP)' : 'Portal Satu Data KKP')))];
+  const sumberData = [...new Set(lapisan.map(({ def }) => def.sumberData || 'Portal Satu Data KKP'))];
   dek.sumber(`Sumber: ${sumberData.length ? `${sumberData.join(' dan ')}; ` : ''}peta dasar ${petaDasar.sumber}. Isi peta sama dengan tampilan layar saat diunduh.`);
 
   susunLegenda(dek, lapisan, osea, TEPI + lebar + JARAK_KOLOM, atas);

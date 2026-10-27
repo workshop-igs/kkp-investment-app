@@ -96,6 +96,7 @@ DATABASES = {
 }
 
 BPS_API_KEY = os.getenv('BPS_API_KEY', '')
+GFW_TOKEN = os.getenv('GFW_TOKEN', '')
 
 CACHE_URL = os.getenv('CACHE_URL', '')
 if CACHE_URL:

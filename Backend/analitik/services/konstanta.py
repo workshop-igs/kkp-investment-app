@@ -532,8 +532,8 @@ ASUMSI_MODEL_USAHA = {
     'csr_persen': 2.5, 'batas_pbp_tahun': 10,
 }
 MASA_BERLAKU_DATA = {
-    'tata_ruang': 20, 'kkprl': 1, 'infrastruktur': 2, 'oseanografi': 3, 'kondisi_tetap': 0, 'ekosistem': 5,
-    'bencana': 5, 'adat': 5, 'bps_produksi': 3, 'bps_kerja': 3,
+    'tata_ruang': 20, 'kkprl': 1, 'infrastruktur': 2, 'oseanografi': 3, 'aktivitas_tangkap': 1, 'kondisi_tetap': 0,
+    'ekosistem': 5, 'bencana': 5, 'adat': 5, 'bps_produksi': 3, 'bps_kerja': 3,
 }
 
 EKOSISTEM_TERLARANG_SEKTOR = {

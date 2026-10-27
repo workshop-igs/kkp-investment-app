@@ -38,17 +38,21 @@ LABEL_OSEANOGRAFI = {
     'EKS_MANGROVE': 'Eks-mangrove 1996-2020',
     'LUAS_EKS_MANGROVE': 'Luas hamparan eks-mangrove',
     'PRODUKSI_KABUPATEN': 'Perkiraan produksi ikan kabupaten/kota',
+    'TANGKAP_SIANG': 'Aktivitas penangkapan ikan siang hari',
+    'TANGKAP_MALAM': 'Aktivitas penangkapan ikan malam hari',
 }
 
 OSEANOGRAFI_DINAMIS = {
     'SUHU', 'ANOMALI_SUHU', 'KLOROFIL', 'GELOMBANG', 'PERIODE_GLB', 'KD490', 'ARUS', 'ARUS_DASAR', 'SALINITAS', 'TSS',
 }
+AKTIVITAS_TANGKAP = {'TANGKAP_SIANG', 'TANGKAP_MALAM'}
 
 KELOMPOK_DATA = {
     'tata_ruang': ('Tata ruang (RTRW Provinsi, PKKPRL, RZWP-3-K)', 'Portal Satu Data KKP dan folder data KKP'),
     'kkprl': ('Izin KKPRL terbit', 'Portal Satu Data KKP'),
     'infrastruktur': ('Infrastruktur pendukung', 'Portal Satu Data KKP dan OpenStreetMap'),
     'oseanografi': ('Oseanografi (suhu, klorofil, gelombang, arus, salinitas)', 'NOAA, NASA, HYCOM'),
+    'aktivitas_tangkap': ('Aktivitas penangkapan ikan kapal berpelacak AIS', 'Global Fishing Watch'),
     'kondisi_tetap': ('Kondisi fisik dan iklim jangka panjang', 'SRTM15+, EOT20, CHIRPS, GEM, Global Wind Atlas, dan lainnya'),
     'ekosistem': ('Ekosistem pesisir', 'Sidako KKP dan Global Mangrove Watch'),
     'bencana': ('Risiko bencana', 'BNPB InaRISK'),
@@ -75,6 +79,8 @@ def tahun_teks(teks):
 
 
 def kelompok_raster(kode):
+    if kode in AKTIVITAS_TANGKAP:
+        return 'aktivitas_tangkap'
     return 'oseanografi' if kode in OSEANOGRAFI_DINAMIS else 'kondisi_tetap'
 
 
@@ -244,7 +250,7 @@ def ringkasan_sumber():
         t = tahun_teks(r['periode']) or tahun_teks(r['sumber'])
         if t:
             raster[r['parameter']] = max(raster.get(r['parameter'], t), t)
-    for kunci in ('oseanografi', 'kondisi_tetap'):
+    for kunci in ('oseanografi', 'aktivitas_tangkap', 'kondisi_tetap'):
         tahun = {k: t for k, t in raster.items() if kelompok_raster(k) == kunci}
         lewat = [LABEL_OSEANOGRAFI.get(k, k) for k, t in tahun.items() if lewat_masa(kunci, tahun=t)]
         hasil[kunci] = (f'tahun data {_rentang(min(tahun.values()), max(tahun.values()))}' if tahun else 'tahun tidak tercantum',

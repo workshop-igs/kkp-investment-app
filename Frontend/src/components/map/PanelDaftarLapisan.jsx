@@ -108,6 +108,14 @@ const KATEGORI = [
     ],
   },
   {
+    judul: 'Aktivitas Perikanan Tangkap',
+    ikon: Fish,
+    layer: [
+      { id: 'tangkap_siang', nama: 'Aktivitas Penangkapan Ikan Siang', warna: '#ec7014', ikon: Sun },
+      { id: 'tangkap_malam', nama: 'Aktivitas Penangkapan Ikan Malam', warna: '#6a51a3', ikon: Moon },
+    ],
+  },
+  {
     judul: 'Analisis Investasi',
     ikon: Target,
     layer: [

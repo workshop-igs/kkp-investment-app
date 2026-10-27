@@ -506,11 +506,8 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
             {aktifLokal.length > 0 && aktif.length > 0
               ? 'Simbol lapisan lokal disusun sendiri; sisanya dari GeoServer Portal Satu Data KKP.'
               : aktifLokal.length > 0
-                ? `Data ${
-                  aktifLokal.every((id) => daftarLokal[id].citra)
-                    ? 'NOAA (lewat ERDDAP)'
-                    : aktifLokal.some((id) => daftarLokal[id].citra) ? 'Portal Satu Data KKP dan NOAA' : 'Portal Satu Data KKP'
-                }, disimpan dan disimbolkan di server sendiri.`
+                ? `Data ${[...new Set(aktifLokal.map((id) => daftarLokal[id].sumberData || 'Portal Satu Data KKP'))]
+                  .join(' dan ')}, disimpan dan disimbolkan di server sendiri.`
                 : 'Simbol bersumber dari GeoServer Portal Satu Data KKP.'}
           </p>
         </div>
