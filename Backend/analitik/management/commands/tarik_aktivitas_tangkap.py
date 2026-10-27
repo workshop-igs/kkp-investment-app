@@ -1,6 +1,5 @@
 import csv
 import io
-import re
 import time
 import zipfile
 from datetime import date
@@ -19,7 +18,6 @@ DATASET = 'public-global-fishing-effort:latest'
 RESOLUSI = 0.1
 TUNGGU_DETIK = 30
 TUNGGU_MAKS = 40
-JAM = re.compile(r'[T ](\d{1,2})')
 WILAYAH = {'type': 'FeatureCollection', 'features': [{'type': 'Feature', 'properties': {}, 'geometry': {
     'type': 'Polygon', 'coordinates': [[[BATAS[0], BATAS[1]], [BATAS[2], BATAS[1]], [BATAS[2], BATAS[3]],
                                         [BATAS[0], BATAS[3]], [BATAS[0], BATAS[1]]]]}}]}
@@ -44,7 +42,7 @@ def _berjalan(r):
 
 def _laporan(klien, awal, akhir):
     params = {'datasets[0]': DATASET, 'format': 'CSV', 'spatial-resolution': 'LOW',
-              'temporal-resolution': 'HOURLY', 'date-range': f'{awal},{akhir}'}
+              'temporal-resolution': 'HOURLY', 'group-by': 'FLAG', 'date-range': f'{awal},{akhir}'}
     for _ in range(TUNGGU_MAKS):
         r = klien.post(f'{API}/report', params=params, json={'geojson': WILAYAH})
         if r.status_code != 429:
@@ -70,17 +68,17 @@ def _baris(isi):
 def tambah_jam(grid, baris):
     _, tinggi, lebar = grid.shape
     for b in baris:
-        lat, lon, jam = float(b['lat']), float(b['lon']), float(b['hours'])
-        r = round((BATAS[3] - lat) / RESOLUSI) - 1
+        lat, lon, jam = float(b['Lat']), float(b['Lon']), float(b['Apparent Fishing Hours'])
+        r = round((BATAS[3] - lat) / RESOLUSI)
         k = round((lon - BATAS[0]) / RESOLUSI)
         if 0 <= r < tinggi and 0 <= k < lebar:
-            lokal = (int(JAM.search(b['date']).group(1)) + 0.5 + (lon + RESOLUSI / 2) / 15) % 24
+            lokal = (int(b['Time Range'][11:13]) + 0.5 + lon / 15) % 24
             grid[0 if 6 <= lokal < 18 else 1, r, k] += jam
 
 
 def tarik(klien, hari_ini):
     bulan = bulan_terakhir(hari_ini)
-    grid = np.zeros((2, round((BATAS[3] - BATAS[1]) / RESOLUSI), round((BATAS[2] - BATAS[0]) / RESOLUSI)))
+    grid = np.zeros((2, round((BATAS[3] - BATAS[1]) / RESOLUSI) + 1, round((BATAS[2] - BATAS[0]) / RESOLUSI) + 1))
     versi = DATASET
     for awal, akhir in bulan:
         r = _laporan(klien, awal, akhir)
@@ -88,12 +86,13 @@ def tarik(klien, hari_ini):
         tambah_jam(grid, _baris(r.content))
     if not grid.any():
         raise CommandError('GFW tidak mengembalikan jam penangkapan; raster lama dipertahankan.')
+    grid = grid.repeat(2, axis=1).repeat(2, axis=2)[:, 1:-1, 1:-1]
     grid[grid <= 0] = np.nan
     (a, _), (b, _) = bulan[0], bulan[-1]
     periode = f'{BULAN[a.month - 1]} {a.year} – {BULAN[b.month - 1]} {b.year} (12 bulan)'
     sumber = SUMBER.format(versi=versi)
     with transaction.atomic():
-        return {kode: simpan_grid(kode, data, RESOLUSI, 'jam/tahun', sumber, periode)
+        return {kode: simpan_grid(kode, data, RESOLUSI / 2, 'jam/tahun', sumber, periode)
                 for kode, data in (('TANGKAP_SIANG', grid[0]), ('TANGKAP_MALAM', grid[1]))}
 
 
