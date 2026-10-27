@@ -47,8 +47,8 @@ PALET = {
     'LUAS_EKS_MANGROVE': [(0, '#fef3c7'), (30, '#fbbf24'), (100, '#d97706'), (500, '#92400e'), (2000, '#451a03')],
     'PRODUKSI_KABUPATEN': [(0, '#f7fbff'), (5000, '#c6dbef'), (20000, '#6baed6'), (60000, '#2171b5'),
                            (200000, '#08306b')],
-    'TANGKAP_SIANG': [(0.1, '#fff7bc'), (1, '#fee391'), (10, '#fec44f'), (100, '#ec7014'), (1000, '#8c2d04')],
-    'TANGKAP_MALAM': [(0.1, '#efedf5'), (1, '#bcbddc'), (10, '#9e9ac8'), (100, '#6a51a3'), (1000, '#3f007d')],
+    'TANGKAP_SIANG': [(1, '#fff7bc'), (10, '#fee391'), (50, '#fec44f'), (200, '#ec7014'), (1000, '#8c2d04')],
+    'TANGKAP_MALAM': [(1, '#efedf5'), (10, '#bcbddc'), (50, '#9e9ac8'), (200, '#6a51a3'), (1000, '#3f007d')],
 }
 SKALA_LOG = {'KLOROFIL', 'KD490', 'TANGKAP_SIANG', 'TANGKAP_MALAM'}
 DIBALIK = {'KEDALAMAN'}
