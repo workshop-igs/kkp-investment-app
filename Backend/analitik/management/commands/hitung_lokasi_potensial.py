@@ -82,8 +82,13 @@ FROM (
 
 WILAYAH_GABUNGAN = """
 SELECT ST_AsEWKB(q.g), ST_Area(q.g::geography) / 10000
-FROM (SELECT ST_Multi(ST_Union(wilayah, 1e-9)) AS g FROM analitik_lokasi_potensial WHERE id = ANY(%s)) q
+FROM (SELECT ST_Multi(ST_CollectionExtract(ST_Union(wilayah, 1e-9), 3)) AS g
+      FROM analitik_lokasi_potensial WHERE id = ANY(%s)) q
 """
+
+
+def multipoligon(g):
+    return MultiPolygon([g] if g.geom_type == 'Polygon' else [p for p in g if p.geom_type == 'Polygon'], srid=g.srid)
 
 GABUNGAN = """
 WITH a AS MATERIALIZED (SELECT id, geometry AS g FROM analitik_lokasi_potensial WHERE id = ANY(%s)),
@@ -617,10 +622,9 @@ class Command(BaseCommand):
         zona_utama = Counter(z for i in sel for z in d['zona'][i]).most_common(1)[0][0]
         bersyarat = any(status[(z, sektor.kode)] == 'BERSYARAT' for i in sel for z in d['zona'][i])
         inti = GEOSGeometry(memoryview(ewkb))
-        wilayah = GEOSGeometry(memoryview(ewkb_wilayah)).union(inti)
         return LokasiPotensial(
             sektor=sektor, provinsi=prov, geometry=inti,
-            wilayah=wilayah if wilayah.geom_type == 'MultiPolygon' else MultiPolygon(wilayah, srid=inti.srid), luas_ha=luas,
+            wilayah=multipoligon(GEOSGeometry(memoryview(ewkb_wilayah)).union(inti)), luas_ha=luas,
             persen_sesuai=sum(lolos[i][0] for i in sel) / len(sel), jenis=[sektor.kode],
             rincian={
                 'nama': zona[zona_utama][4],
