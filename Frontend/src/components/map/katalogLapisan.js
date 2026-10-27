@@ -461,3 +461,31 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       'Rencana zonasi perairan lintas provinsi (Perpres 83/2020: Kaltim, Kalsel, Sulbar, Sulsel, dan Sulteng).',
   },
 };
+
+const WARNA_PARAMETER = ['#db2777', '#7c3aed', '#0891b2', '#ea580c', '#16a34a', '#ca8a04'];
+
+export const lapisanParameter = (p, i) => {
+  const warna = WARNA_PARAMETER[i % WARNA_PARAMETER.length];
+  const aturan = p.peran === 'INFORMASI'
+    ? 'Informasi saja, tidak memengaruhi penilaian.'
+    : `${p.peran_label}: lokasi sesuai bila ${p.kondisi === 'DI_DALAM' ? 'di dalam' : 'di luar'} area${
+      p.sektor.length ? ` untuk ${p.sektor.join(', ')}` : ''}.`;
+  const keterangan = `${aturan}${p.aktif ? '' : ' Sedang nonaktif.'}`;
+  return [`parameter_${p.id}`, {
+    url: '/analitik/parameter-tambahan/peta/',
+    params: { parameter: p.id },
+    label: p.nama,
+    tambahan: true,
+    legenda: 'tunggal',
+    warnaContoh: warna,
+    keteranganLegenda: keterangan,
+    sumberData: p.sumber || 'Administrator aplikasi',
+    gaya: { color: warna, weight: 2, opacity: 0.9, fillColor: warna, fillOpacity: 0.2 },
+    popup: (f) =>
+      `<div class="font-sans">
+        <h3 class="font-bold mb-1" style="color:${warna}">${aman(f.nama || p.nama)}</h3>
+        <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.nama)}</p>
+        <p class="text-xs text-slate-500">${aman(keterangan)}</p>
+      </div>`,
+  }];
+};

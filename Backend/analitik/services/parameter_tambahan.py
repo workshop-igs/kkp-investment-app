@@ -34,6 +34,18 @@ def sesuai_ambang(p, nilai):
     return (p.nilai_min is None or nilai >= p.nilai_min) and (p.nilai_maks is None or nilai <= p.nilai_maks)
 
 
+def geojson_area(c, parameter_id, bbox=None):
+    saring = ' AND geometry && ST_MakeEnvelope(%s, %s, %s, %s, 4326)' if bbox else ''
+    c.execute(
+        "SELECT json_build_object('type', 'FeatureCollection', 'features', COALESCE(json_agg(json_build_object("
+        "'type', 'Feature', 'id', id, 'properties', json_build_object('nama', nama), 'geometry', "
+        "ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, 0.0005), 5)::json)), '[]'::json)) "
+        f'FROM analitik_area_parameter WHERE parameter_id = %s{saring}',
+        [parameter_id, *(bbox or [])],
+    )
+    return c.fetchone()[0]
+
+
 def _area(c, p, geom):
     c.execute(
         'SELECT COALESCE(SUM(ST_Area(ST_Intersection(a.geometry, g.g)::geography)), 0), ST_Area(g.g::geography) '

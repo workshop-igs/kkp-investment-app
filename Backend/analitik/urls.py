@@ -6,6 +6,7 @@ from .views import (
     BahayaBencanaView,
     LaporanSpasialView,
     LokasiPotensialViewSet,
+    ParameterTambahanPetaViewSet,
     PetaRisikoViewSet,
     RunAnalysisView,
     ScreeningRuangView,
@@ -20,6 +21,7 @@ router.register(r'kelayakan', AnalisisKelayakanViewSet)
 router.register(r'peta-risiko', PetaRisikoViewSet)
 router.register(r'zona-risiko', ZonaRisikoBencanaViewSet)
 router.register(r'lokasi-potensial', LokasiPotensialViewSet, basename='lokasi-potensial')
+router.register(r'parameter-tambahan', ParameterTambahanPetaViewSet, basename='parameter-tambahan')
 
 urlpatterns = [
     path('screening/', ScreeningRuangView.as_view(), name='screening-ruang'),

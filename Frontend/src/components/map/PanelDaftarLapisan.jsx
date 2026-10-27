@@ -203,13 +203,20 @@ const PanelDaftarLapisan = ({
 
   const kataKunci = cari.trim().toLowerCase();
 
+  const kategoriSemua = useMemo(() => {
+    const tambahan = Object.entries(daftarLapisan)
+      .filter(([, d]) => d.tambahan)
+      .map(([id, d]) => ({ id, nama: d.label, warna: d.warnaContoh, ikon: LandPlot }));
+    return tambahan.length ? [...KATEGORI, { judul: 'Parameter Tambahan', ikon: Layers3, layer: tambahan }] : KATEGORI;
+  }, [daftarLapisan]);
+
   const kategoriTampil = useMemo(
     () =>
-      KATEGORI.map((k) => ({
+      kategoriSemua.map((k) => ({
         ...k,
         layer: kataKunci ? k.layer.filter((l) => l.nama.toLowerCase().includes(kataKunci)) : k.layer,
       })).filter((k) => k.layer.length > 0),
-    [kataKunci]
+    [kataKunci, kategoriSemua]
   );
 
   const zoomKeLapisan = async (idLapisan) => {
@@ -241,7 +248,7 @@ const PanelDaftarLapisan = ({
     }
   };
 
-  const idSemua = KATEGORI.flatMap((k) => k.layer.map((l) => l.id));
+  const idSemua = kategoriSemua.flatMap((k) => k.layer.map((l) => l.id));
   const jumlahAktif = idSemua.filter((id) => activeLayers.includes(id)).length;
 
   return (

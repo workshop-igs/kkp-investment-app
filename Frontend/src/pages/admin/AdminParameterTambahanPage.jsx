@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Edit2, FilePlus2, Layers, Plus, Trash2, Upload, X } from 'lucide-react';
+import L from 'leaflet';
+import { GeoJSON, MapContainer, TileLayer } from 'react-leaflet';
+import { Edit2, FilePlus2, Layers, Map as IkonPeta, Plus, Trash2, Upload, X } from 'lucide-react';
 import { api, ambilDaftar } from '../../api/klien';
+import { URL_PETA_DASAR } from '../../components/map/PetaInteraktif';
 import { bacaGeospasial } from '../../components/map/UnggahGeospasial';
 import { StatusHitungUlang, useStatusHitungUlang } from './AdminPengaturanAnalisisPage';
 
@@ -36,11 +39,39 @@ const Pilihan = ({ daftar, terpilih, onUbah, kunci, label }) => (
   </div>
 );
 
+const PratinjauArea = ({ geojson }) => {
+  const batas = L.geoJSON(geojson).getBounds();
+  if (!batas.isValid()) return null;
+  return (
+    <MapContainer bounds={batas} boundsOptions={{ padding: [16, 16] }} scrollWheelZoom={false}
+      className="h-72 w-full rounded-lg border border-slate-200">
+      <TileLayer url={URL_PETA_DASAR.satellite} attribution="&copy; KKP RI - Sistem Informasi Spasial" />
+      <GeoJSON data={geojson} style={{ color: '#f59e0b', weight: 2, fillOpacity: 0.25 }}
+        onEachFeature={(f, lapis) => f.properties?.nama && lapis.bindTooltip(f.properties.nama, { sticky: true })} />
+    </MapContainer>
+  );
+};
+
 const UnggahData = ({ parameter, onSelesai }) => {
   const [proses, setProses] = useState(false);
   const [hasil, setHasil] = useState(null);
   const [galat, setGalat] = useState('');
+  const [peta, setPeta] = useState(null);
   const area = parameter.tipe === 'AREA';
+
+  const lihat = async () => {
+    if (peta) {
+      setPeta(null);
+      return;
+    }
+    setGalat('');
+    try {
+      const { data } = await api.get(`${URL}${parameter.id}/area/`);
+      setPeta(data.geojson);
+    } catch (err) {
+      setGalat(pesanGalat(err));
+    }
+  };
 
   const pilih = async (e) => {
     const berkas = e.target.files?.[0];
@@ -49,11 +80,13 @@ const UnggahData = ({ parameter, onSelesai }) => {
     setProses(true);
     setGalat('');
     setHasil(null);
+    setPeta(null);
     try {
       if (area) {
         const { diabaikan, ...area_ } = await bacaGeospasial(berkas);
         const { data } = await api.post(`${URL}${parameter.id}/area/`, area_);
         setHasil(`${data.jumlah} poligon area tersimpan; berlaku di provinsi ${data.provinsi.join(', ') || '-'}.`);
+        setPeta(data.geojson);
       } else {
         const form = new FormData();
         form.append('berkas', berkas);
@@ -74,13 +107,22 @@ const UnggahData = ({ parameter, onSelesai }) => {
         {area ? 'Unggah area: Shapefile (.zip), KML, atau GeoJSON dalam derajat WGS84'
           : 'Unggah tabel: CSV atau Excel dengan kolom kode BPS atau nama wilayah, dan kolom nilai'}
       </div>
-      <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold text-slate-700 ${proses ? 'opacity-50' : 'cursor-pointer hover:bg-slate-100'}`}>
-        <Upload className="w-3.5 h-3.5" /> {proses ? 'Memproses...' : 'Pilih berkas'}
-        <input type="file" className="hidden" disabled={proses} onChange={pilih}
-          accept={area ? '.zip,.kml,.geojson,.json' : '.csv,.xlsx,.xls'} />
-      </label>
+      <div className="flex flex-wrap gap-2">
+        <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold text-slate-700 ${proses ? 'opacity-50' : 'cursor-pointer hover:bg-slate-100'}`}>
+          <Upload className="w-3.5 h-3.5" /> {proses ? 'Memproses...' : 'Pilih berkas'}
+          <input type="file" className="hidden" disabled={proses} onChange={pilih}
+            accept={area ? '.zip,.kml,.geojson,.json' : '.csv,.xlsx,.xls'} />
+        </label>
+        {area && parameter.jumlah_area > 0 && (
+          <button type="button" onClick={lihat}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 font-semibold text-slate-700 hover:bg-slate-100">
+            <IkonPeta className="w-3.5 h-3.5" /> {peta ? 'Tutup peta' : 'Lihat peta'}
+          </button>
+        )}
+      </div>
       {hasil && <p className="text-emerald-700">{hasil}</p>}
       {galat && <p className="text-rose-600">{galat}</p>}
+      {peta && <PratinjauArea geojson={peta} />}
     </div>
   );
 };
