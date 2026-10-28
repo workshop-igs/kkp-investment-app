@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { List, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
 import {
   IKON_JENIS_INVESTASI,
@@ -263,15 +263,7 @@ const angkaBulat = (v) => Number(v).toLocaleString('id-ID');
 
 const W = WARNA_JENIS_INVESTASI;
 
-const LegendaDisarankan = ({ sektor, onPilih }) => {
-  const [ringkas, setRingkas] = useState(null);
-  useEffect(() => {
-    let batal = false;
-    api.get('/inti/ringkasan-publik/')
-      .then(({ data }) => { if (!batal) setRingkas(data); })
-      .catch(() => { if (!batal) setRingkas({}); });
-    return () => { batal = true; };
-  }, []);
+const LegendaDisarankan = ({ ringkas, sektor, onPilih }) => {
   const jumlah = Object.fromEntries((ringkas?.peluang_per_jenis || []).map((j) => [j.kode, j.lokasi]));
   const terpilih = sektor && sektor !== 'SEMUA' ? sektor : null;
 
@@ -377,6 +369,67 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
   const aktif = layerAktif.filter((id) => daftarLayer[id]);
   const aktifLokal = layerAktif.filter((id) => daftarLokal[id]);
   const namaSektor = (kode) => (kode === 'SEMUA' ? 'Semua jenis investasi' : SECTORS.find((s) => s.id === kode)?.label || kode);
+  const sebaran = (id) => daftarLokal[id]?.legenda === 'disarankan';
+
+  const urutan = layerAktif.filter((id) => daftarLokal[id] || daftarLayer[id]).reverse();
+  const [dipilih, setDipilih] = useState(null);
+  const sebelumnya = useRef(urutan);
+  useEffect(() => {
+    const baru = urutan.find((id) => !sebelumnya.current.includes(id));
+    if (baru) setDipilih(baru);
+    sebelumnya.current = urutan;
+  }, [urutan.join('|')]); // eslint-disable-line react-hooks/exhaustive-deps
+  const buka = urutan.includes(dipilih) ? dipilih : urutan[0];
+
+  const adaSebaran = aktifLokal.some(sebaran);
+  const [ringkas, setRingkas] = useState(null);
+  useEffect(() => {
+    if (!terbuka || !adaSebaran || ringkas) return undefined;
+    let batal = false;
+    api.get('/inti/ringkasan-publik/')
+      .then(({ data }) => { if (!batal) setRingkas(data); })
+      .catch(() => { if (!batal) setRingkas({}); });
+    return () => { batal = true; };
+  }, [terbuka, adaSebaran]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const ringkasan = (id) => {
+    const d = daftarLokal[id];
+    if (sebaran(id)) {
+      const s = sektorLapisan[id];
+      return [
+        ringkas?.lokasi_potensial != null && `${angkaBulat(ringkas.lokasi_potensial)} lokasi`,
+        s && s !== 'SEMUA' && namaSektor(s),
+      ].filter(Boolean).join(' · ');
+    }
+    return d?.params && 'sektor' in d.params ? namaSektor(sektorLapisan[id] || d.params.sektor) : '';
+  };
+
+  const barisRingkas = (id) => (
+    <button
+      key={`ringkas-${id}`}
+      type="button"
+      onClick={() => setDipilih(id)}
+      aria-expanded={false}
+      className="w-full flex items-center gap-2.5 px-4 py-2.5 border-b border-slate-100 last:border-0 text-left
+                 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-kkp-100/60"
+    >
+      <span
+        className={`h-3.5 w-3.5 shrink-0 border border-black/10 ${sebaran(id) ? 'rounded-full' : 'rounded-[3px]'}`}
+        style={{
+          background: sebaran(id)
+            ? `conic-gradient(${W.PERIKANAN_TANGKAP} 0 33%, ${W.PARIWISATA_BAHARI} 0 66%, ${W.BIOTEKNOLOGI_KELAUTAN} 0)`
+            : daftarLokal[id]?.warnaContoh || '#94a3b8',
+        }}
+      />
+      <span className="flex-1 min-w-0">
+        <span className="block truncate text-[12.5px] font-semibold text-kkp-800">
+          {(daftarLokal[id] || daftarLayer[id]).label}
+        </span>
+        {ringkasan(id) && <span className="block truncate text-[11px] text-slate-500">{ringkasan(id)}</span>}
+      </span>
+      <ChevronDown className="h-4 w-4 shrink-0 -rotate-90 text-slate-400" />
+    </button>
+  );
 
   const urlLegenda = (id, format) => {
     const l = daftarLayer[id];
@@ -440,7 +493,7 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
           className="mt-2 bg-white border border-slate-200 rounded-xl shadow-xl overflow-y-auto custom-scrollbar
                      max-h-[calc(100vh-22rem)] min-h-[8rem]"
         >
-          {aktifLokal.map((id) => (
+          {urutan.map((id) => (id !== buka ? barisRingkas(id) : daftarLokal[id] ? (
             <div key={`lokal-${id}`} className="p-4 border-b border-slate-100 last:border-0">
               <h4 className="text-xs font-bold text-kkp-800 uppercase tracking-wider mb-2.5 leading-tight">
                 {daftarLokal[id].label}
@@ -452,7 +505,7 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
                 </p>
               )}
               {daftarLokal[id].legenda === 'disarankan' ? (
-                <LegendaDisarankan sektor={sektorLapisan[id]} onPilih={(kode) => setSektorLapisan?.(id, kode)} />
+                <LegendaDisarankan ringkas={ringkas} sektor={sektorLapisan[id]} onPilih={(kode) => setSektorLapisan?.(id, kode)} />
               ) : daftarLokal[id].legenda === 'jenis' ? (
                 <LegendaJenis keterangan={daftarLokal[id].keteranganLegenda} />
               ) : daftarLokal[id].legenda === 'zona' ? (
@@ -477,9 +530,7 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
                 </div>
               )}
             </div>
-          ))}
-
-          {aktif.map((id) => (
+          ) : (
             <div key={id} className="p-4 border-b border-slate-100 last:border-0">
               <h4 className="text-xs font-bold text-kkp-800 uppercase tracking-wider mb-2.5 leading-tight">
                 {daftarLayer[id].label}
@@ -503,7 +554,7 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
                 </div>
               )}
             </div>
-          ))}
+          )))}
           <p className="px-4 py-2.5 text-[10px] text-slate-400 bg-slate-50 sticky bottom-0">
             {aktifLokal.length > 0 && aktif.length > 0
               ? 'Simbol lapisan lokal disusun sendiri; sisanya dari GeoServer Portal Satu Data KKP.'
