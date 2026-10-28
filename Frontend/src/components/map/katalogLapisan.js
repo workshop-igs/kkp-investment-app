@@ -297,6 +297,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           <div class="min-w-0">
             <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Cocok untuk ${nama.length} sub-sektor investasi` : `Lokasi potensial ${aman(nama[0])}`}</h3>
             <p class="text-[11px] text-slate-500 leading-snug">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
+            ${p.alamat ? `<p class="text-[11px] text-slate-500 leading-snug">${aman(p.alamat)}</p>` : ''}
           </div>
         </div>
         ${nama.length > 1
@@ -376,6 +377,38 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         <b>Berlaku:</b> ${aman(p.berlaku || '-')}${p.berakhir ? ` s.d. ${aman(p.berakhir)}` : ''}<br/>
         <b>Luas:</b> ${aman(String(p.luas_ha ?? '-'))} ha<br/>
         <b>Wilayah:</b> ${aman([p.kabupaten, p.provinsi].filter(Boolean).join(', ') || '-')}</div>
+      </div>`,
+  },
+  batas_kecamatan: {
+    url: '/inti/kecamatan/peta/',
+    urlWilayah: '/inti/kecamatan/wilayah/',
+    label: 'Batas Kecamatan',
+    legenda: 'tunggal',
+    warnaContoh: '#f59e0b',
+    keteranganLegenda: 'Batas kecamatan. Klik sebuah kecamatan untuk melihat nama, kode Kemendagri, dan kabupatennya.',
+    sumberData: 'Portal Satu Data KKP',
+    gaya: { color: '#f59e0b', weight: 2.2, dashArray: '8 5', fillColor: '#f59e0b', fillOpacity: 0 },
+    popup: (p) =>
+      `<div class="font-sans">
+        <h3 class="font-bold text-slate-800 mb-1">Kecamatan ${aman(p.nama || '-')}</h3>
+        <div class="text-xs"><b>Kode Kemendagri:</b> ${aman(p.kode || '-')}<br/>
+        <b>Wilayah:</b> ${aman([p.kabupaten, p.provinsi].filter(Boolean).join(', ') || '-')}</div>
+      </div>`,
+  },
+  batas_desa: {
+    url: '/inti/desa-kelurahan/peta/',
+    urlWilayah: '/inti/desa-kelurahan/wilayah/',
+    label: 'Batas Desa/Kelurahan',
+    legenda: 'tunggal',
+    warnaContoh: '#fcd34d',
+    keteranganLegenda: 'Batas desa dan kelurahan skala 1:10.000. Perbesar peta atau pilih provinsi untuk melihat semua desa.',
+    sumberData: 'Badan Informasi Geospasial',
+    gaya: { color: '#fcd34d', weight: 1.3, dashArray: '2 4', fillColor: '#fcd34d', fillOpacity: 0 },
+    popup: (p) =>
+      `<div class="font-sans">
+        <h3 class="font-bold text-slate-800 mb-1">${aman(p.jenis || 'Desa')} ${aman(p.nama || '-')}</h3>
+        <div class="text-xs"><b>Kode Kemendagri:</b> ${aman(p.kode || '-')}<br/>
+        <b>Wilayah:</b> ${aman([p.kecamatan && `Kec. ${p.kecamatan}`, p.kabupaten, p.provinsi].filter(Boolean).join(', ') || '-')}</div>
       </div>`,
   },
   ...Object.fromEntries(

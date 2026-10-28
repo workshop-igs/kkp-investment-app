@@ -4,7 +4,9 @@ from rest_framework.routers import DefaultRouter
 from .asisten import daftar_alat, obrolan, pakai_alat
 from .pencarian import cari_lokasi
 from .views import (
+    DesaKelurahanViewSet,
     KabupatenKotaViewSet,
+    KecamatanViewSet,
     ProvinsiViewSet,
     SektorInvestasiViewSet,
     SumberDataViewSet,
@@ -32,6 +34,8 @@ from .views_admin import (
 router = DefaultRouter()
 router.register(r'provinsi', ProvinsiViewSet)
 router.register(r'kabupaten-kota', KabupatenKotaViewSet)
+router.register(r'kecamatan', KecamatanViewSet)
+router.register(r'desa-kelurahan', DesaKelurahanViewSet)
 router.register(r'sektor', SektorInvestasiViewSet)
 router.register(r'data-sources', SumberDataViewSet)
 
