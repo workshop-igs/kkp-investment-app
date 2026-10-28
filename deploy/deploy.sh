@@ -1,7 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 cd /home/deploy/kkp
-git pull --ff-only
+for coba in 1 2 3 4 5; do
+  GIT_SSH_COMMAND='ssh -o ConnectTimeout=15' git pull --ff-only && break
+  [ "$coba" -lt 5 ] || exit 1
+  echo "git pull gagal (percobaan $coba), diulang dalam 10 detik"
+  sleep 10
+done
 cd Backend
 source venv_django/bin/activate
 pip install -q -r requirements.lock.txt
