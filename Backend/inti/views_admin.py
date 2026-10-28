@@ -219,7 +219,7 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
         simpanan = self._simpanan()
         sektor = list(SektorInvestasi.objects.order_by('urutan', 'nama').values('kode', 'nama'))
         return Response({
-            'kelompok': [{'kode': k, 'label': label} for k, label in pengaturan.KELOMPOK],
+            'kelompok': [{'kode': k, 'label': label, 'keterangan': ket} for k, label, ket in pengaturan.KELOMPOK],
             'daftar': [self._baris(m, simpanan) for m in pengaturan.DAFTAR],
             'label_bagian': pengaturan.LABEL_BAGIAN,
             'sektor': sektor,
