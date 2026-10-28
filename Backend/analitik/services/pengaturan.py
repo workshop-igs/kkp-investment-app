@@ -147,8 +147,8 @@ DAFTAR = [
        'Seberapa besar keuangan, risiko, lokasi, dan prediksi laba menentukan skor rekomendasi. Jumlahnya harus '
        '100%.', istilah='Recommendation weights', **BOBOT),
     _d('DECISION_THRESHOLDS', 'rumus', 'Syarat keputusan layak dan bersyarat',
-       'Skor minimal untuk keputusan Layak dan Bersyarat. Layak juga mensyaratkan sesuai tata ruang dan NPV positif; '
-       'Bersyarat cukup salah satunya.', istilah='Decision thresholds', **PERSEN),
+       'Skor minimal dan syarat tambahan untuk keputusan Layak dan Bersyarat. Bawaannya, Layak wajib sesuai tata ruang '
+       'dan NPV positif, sedangkan Bersyarat cukup salah satunya; hapus centang untuk melonggarkan syarat itu.', istilah='Decision thresholds', **PERSEN),
     _d('PRIORITY_THRESHOLDS', 'rumus', 'Skor untuk tingkat prioritas',
        'Proyek layak dengan skor setinggi batas "tinggi" mendapat prioritas tinggi; proyek bersyarat dengan skor '
        'setinggi batas "sedang (bersyarat)" mendapat prioritas sedang.', istilah='Priority thresholds', **PERSEN),
