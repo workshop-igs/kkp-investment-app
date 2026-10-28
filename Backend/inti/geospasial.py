@@ -215,3 +215,39 @@ def teks_alamat(teks):
     if km == 0:
         return alamat
     return f"Perairan ±{f'{km:.1f}'.replace('.', ',') if km < 10 else f'{km:.0f}'} km dari {alamat}"
+
+
+KUNCI_CACHE_WPP = 'wpp:peta'
+
+
+def _wpp_di(acuan):
+    from inti.models import WilayahPengelolaanPerikanan
+
+    return WilayahPengelolaanPerikanan.objects.filter(geometry__intersects=acuan).order_by('kode')
+
+
+def nama_wpp(kode, zona_pit=''):
+    teks = f'WPP-RI {kode}'
+    return f"{teks} · {zona_pit.replace('Zona ', 'Zona PIT ')}" if zona_pit else teks
+
+
+def anotasi_wpp(qs, bidang='geometry'):
+    from django.contrib.gis.db.models import GeometryField
+    from django.db.models import CharField, ExpressionWrapper, OuterRef, Subquery, Value
+    from django.db.models.functions import Concat
+
+    acuan = ExpressionWrapper(OuterRef(bidang), output_field=GeometryField(srid=4326))
+    teks = Concat('kode', Value('|'), 'zona_pit', output_field=CharField())
+    return qs.annotate(wpp=Subquery(_wpp_di(acuan).annotate(teks_wpp=teks).values('teks_wpp')[:1]))
+
+
+def teks_wpp(teks):
+    return nama_wpp(*teks.split('|')) if teks else ''
+
+
+def wpp_geometri(geom):
+    w = _wpp_di(geom.point_on_surface).values('kode', 'perairan', 'zona_pit').first()
+    if not w:
+        return ''
+    teks = f"WPP-RI {w['kode']} ({w['perairan']})"
+    return f"{teks}, {w['zona_pit'].replace('Zona ', 'Zona PIT ')}" if w['zona_pit'] else teks
