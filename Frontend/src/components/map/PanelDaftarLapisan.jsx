@@ -15,37 +15,54 @@ import PemilihWilayah from './PemilihWilayah';
 
 const KATEGORI = [
   {
-    judul: 'Rencana Tata Ruang & Zonasi',
+    judul: 'Hasil Analisis',
+    kata: 'analisis investasi',
+    ikon: Target,
+    layer: [
+      { id: 'potensi', nama: 'Peta Sebaran Wilayah Potensial Investasi', warna: '#15803d', ikon: MapPinned, utama: true,
+        kata: 'potensi lokasi rekomendasi unggulan' },
+    ],
+  },
+  {
+    judul: 'Aturan Tata Ruang',
+    kata: 'rencana tata ruang zonasi',
     ikon: IkonPeta,
     layer: [
-      { id: 'polaruang', nama: 'RTRW Provinsi (Perda RTRW, PKKPRL & RZWP-3-K)', warna: '#0056A5', ikon: LandPlot },
-      { id: 'polaruang_darat', nama: 'Pola Ruang Darat Pesisir (RTRW Provinsi)', warna: '#65a30d', ikon: Trees },
-      { id: 'polaruang_kaw', nama: 'Rencana Zonasi Kawasan Antarwilayah (KAW)', warna: '#7c3aed', ikon: Waypoints },
-      { id: 'rtrl', nama: 'Rencana Tata Ruang Laut', warna: '#1d4ed8', ikon: Compass },
-      { id: 'wilayah_adat', nama: 'Wilayah Kelola Masyarakat Hukum Adat', warna: '#b45309', ikon: Users },
+      { id: 'polaruang', nama: 'Zonasi Laut Provinsi', warna: '#0056A5', ikon: LandPlot, utama: true,
+        kata: 'rtrw provinsi perda rtrw pkkprl rzwp-3-k zona' },
+      { id: 'polaruang_darat', nama: 'Tata Ruang Darat Pesisir', warna: '#65a30d', ikon: Trees, utama: true,
+        kata: 'pola ruang darat pesisir rtrw provinsi' },
+      { id: 'polaruang_kaw', nama: 'Zonasi Laut Lintas Provinsi', warna: '#7c3aed', ikon: Waypoints,
+        kata: 'rencana zonasi kawasan antarwilayah kaw' },
+      { id: 'rtrl', nama: 'Rencana Tata Ruang Laut', warna: '#1d4ed8', ikon: Compass, kata: 'rtrl alur pelayaran kabel pipa' },
+      { id: 'wilayah_adat', nama: 'Wilayah Kelola Masyarakat Hukum Adat', warna: '#b45309', ikon: Users, kata: 'mha' },
     ],
   },
   {
-    judul: 'Perizinan Pemanfaatan Ruang Laut',
+    judul: 'Izin yang Sudah Ada',
+    kata: 'perizinan pemanfaatan ruang laut',
     ikon: FileCheck,
     layer: [
-      { id: 'kkprl', nama: 'KKPRL Nasional', warna: '#10b981', ikon: ScrollText },
-      { id: 'iup_esdm', nama: 'IUP Minerba ESDM', warna: '#92400e', ikon: Pickaxe },
+      { id: 'kkprl', nama: 'Izin Ruang Laut (KKPRL)', warna: '#10b981', ikon: ScrollText, utama: true,
+        kata: 'kkprl nasional persetujuan konfirmasi' },
+      { id: 'iup_esdm', nama: 'Izin Tambang (IUP)', warna: '#92400e', ikon: Pickaxe, utama: true,
+        kata: 'iup iupk minerba esdm pertambangan' },
     ],
   },
   {
-    judul: 'Sebaran Transportasi & Infrastruktur',
+    judul: 'Pelabuhan, Jalan & Listrik',
+    kata: 'sebaran transportasi infrastruktur',
     ikon: Building2,
     layer: [
-      { id: 'infra_pelabuhan_perikanan', nama: 'Pelabuhan Perikanan', warna: '#0e7490', ikon: Fish },
-      { id: 'infra_pelabuhan_umum', nama: 'Pelabuhan Umum', warna: '#1e40af', ikon: Anchor },
+      { id: 'infra_pelabuhan_perikanan', nama: 'Pelabuhan Perikanan', warna: '#0e7490', ikon: Fish, utama: true, kata: 'pps ppn tpi' },
+      { id: 'infra_pelabuhan_umum', nama: 'Pelabuhan Umum', warna: '#1e40af', ikon: Anchor, utama: true },
+      { id: 'infra_jalan_nasional', nama: 'Jalan Nasional', warna: '#78350f', ikon: Route, utama: true },
       { id: 'infra_pelabuhan_penyeberangan', nama: 'Pelabuhan Penyeberangan', warna: '#7e22ce', ikon: Ship },
       { id: 'infra_terminal_khusus', nama: 'Terminal Khusus', warna: '#c2410c', ikon: Container },
-      { id: 'infra_jalan_nasional', nama: 'Jalan Nasional', warna: '#78350f', ikon: Route },
       { id: 'infra_jaringan_listrik', nama: 'Jaringan Listrik', warna: '#a16207', ikon: Zap },
       { id: 'infra_pembangkit_listrik', nama: 'Pembangkit Listrik', warna: '#b91c1c', ikon: PlugZap },
       { id: 'infra_kawasan_industri', nama: 'Kawasan Industri', warna: '#44403c', ikon: Factory },
-      { id: 'infra_kpbpb', nama: 'Kawasan Perdagangan Bebas', warna: '#15803d', ikon: BadgeDollarSign },
+      { id: 'infra_kpbpb', nama: 'Kawasan Perdagangan Bebas', warna: '#15803d', ikon: BadgeDollarSign, kata: 'kpbpb' },
       { id: 'infra_bandara', nama: 'Bandar Udara', warna: '#0f766e', ikon: Plane },
       { id: 'infra_gardu_induk', nama: 'Gardu Induk', warna: '#9a3412', ikon: Plug },
       { id: 'infra_listrik_tm', nama: 'Jaringan Listrik 20 kV', warna: '#ca8a04', ikon: UtilityPole },
@@ -54,62 +71,46 @@ const KATEGORI = [
     ],
   },
   {
-    judul: 'Risiko Bencana',
+    judul: 'Lingkungan & Risiko Bencana',
+    kata: 'ekosistem pesisir',
     ikon: ShieldAlert,
     layer: [
-      { id: 'risiko_tsunami', nama: 'Risiko Tsunami', warna: '#dc2626', ikon: Waves },
+      { id: 'eko_karang', nama: 'Terumbu Karang', warna: '#f43f5e', ikon: Flower2, utama: true },
+      { id: 'eko_lamun', nama: 'Padang Lamun', warna: '#16a34a', ikon: Sprout, utama: true },
+      { id: 'eko_mangrove', nama: 'Mangrove', warna: '#065f46', ikon: TreePalm, utama: true },
+      { id: 'risiko_tsunami', nama: 'Risiko Tsunami', warna: '#dc2626', ikon: Waves, utama: true },
       { id: 'risiko_abrasi', nama: 'Risiko Gelombang Ekstrem & Abrasi', warna: '#ea580c', ikon: TrendingDown },
       { id: 'risiko_banjir', nama: 'Risiko Banjir', warna: '#2563eb', ikon: Droplets },
-      { id: 'risiko_pga', nama: 'Percepatan Tanah Gempa (PGA)', warna: '#f03b20', ikon: Activity },
+      { id: 'risiko_pga', nama: 'Kekuatan Guncangan Gempa', warna: '#f03b20', ikon: Activity, kata: 'pga percepatan tanah' },
       { id: 'risiko_laju_abrasi', nama: 'Laju Abrasi Garis Pantai', warna: '#e31a1c', ikon: Shrink },
     ],
   },
   {
-    judul: 'Ekosistem Pesisir',
-    ikon: Flower2,
-    layer: [
-      { id: 'eko_karang', nama: 'Terumbu Karang', warna: '#f43f5e', ikon: Flower2 },
-      { id: 'eko_lamun', nama: 'Padang Lamun', warna: '#16a34a', ikon: Sprout },
-      { id: 'eko_mangrove', nama: 'Mangrove', warna: '#065f46', ikon: TreePalm },
-    ],
-  },
-  {
-    judul: 'Oseanografi',
+    judul: 'Kondisi Laut',
+    kata: 'oseanografi',
     ikon: Waves,
     layer: [
-      { id: 'osea_suhu', nama: 'Suhu Permukaan Laut', warna: '#f46d43', ikon: Thermometer },
+      { id: 'osea_kedalaman', nama: 'Kedalaman Laut', warna: '#0369a1', ikon: ArrowDownToLine, utama: true, kata: 'batimetri' },
+      { id: 'osea_gelombang', nama: 'Tinggi Gelombang Signifikan', warna: '#4575b4', ikon: Waves, utama: true },
+      { id: 'osea_suhu', nama: 'Suhu Permukaan Laut', warna: '#f46d43', ikon: Thermometer, kata: 'sst' },
       { id: 'osea_anomali', nama: 'Anomali Suhu Permukaan Laut', warna: '#b2182b', ikon: ThermometerSun },
-      { id: 'osea_klorofil', nama: 'Klorofil-a', warna: '#21918c', ikon: Leaf },
-      { id: 'osea_gelombang', nama: 'Tinggi Gelombang Signifikan', warna: '#4575b4', ikon: Waves },
-      { id: 'osea_kedalaman', nama: 'Kedalaman Laut', warna: '#0369a1', ikon: ArrowDownToLine },
-      { id: 'osea_kd490', nama: 'Kecerahan Perairan (Kd490)', warna: '#2171b5', ikon: Eye },
+      { id: 'osea_klorofil', nama: 'Kesuburan Laut (Klorofil)', warna: '#21918c', ikon: Leaf, kata: 'klorofil-a' },
+      { id: 'osea_kd490', nama: 'Kejernihan Air Laut', warna: '#2171b5', ikon: Eye, kata: 'kd490 kecerahan perairan' },
       { id: 'osea_periode', nama: 'Periode Gelombang', warna: '#4575b4', ikon: Timer },
       { id: 'osea_kemiringan_dasar', nama: 'Kemiringan Dasar Laut', warna: '#fc8d59', ikon: MoveDownRight },
       { id: 'osea_arus', nama: 'Kecepatan Arus Permukaan', warna: '#2171b5', ikon: Navigation2 },
-      { id: 'osea_salinitas', nama: 'Salinitas Permukaan Laut', warna: '#41ab5d', ikon: FlaskConical },
+      { id: 'osea_salinitas', nama: 'Salinitas Permukaan Laut', warna: '#41ab5d', ikon: FlaskConical, kata: 'kadar garam' },
       { id: 'osea_arus_dasar', nama: 'Kecepatan Arus Dasar', warna: '#2171b5', ikon: Navigation },
       { id: 'osea_gelombang_ekstrem', nama: 'Gelombang Ekstrem 50 Tahunan', warna: '#d73027', ikon: AlertTriangle },
-      { id: 'osea_pasut', nama: 'Tunggang Pasang Surut', warna: '#2c7fb8', ikon: Moon },
-      { id: 'osea_beda_suhu', nama: 'Beda Suhu Permukaan dan 1.000 m', warna: '#f46d43', ikon: ThermometerSnowflake },
-      { id: 'osea_shannon', nama: 'Keanekaragaman Hayati Laut (Shannon)', warna: '#238b45', ikon: Shell },
+      { id: 'osea_pasut', nama: 'Tunggang Pasang Surut', warna: '#2c7fb8', ikon: Moon, kata: 'pasut' },
+      { id: 'osea_beda_suhu', nama: 'Potensi Energi Panas Laut', warna: '#f46d43', ikon: ThermometerSnowflake,
+        kata: 'beda suhu permukaan 1.000 m otec' },
+      { id: 'osea_shannon', nama: 'Keanekaragaman Hayati Laut', warna: '#238b45', ikon: Shell, kata: 'shannon biodiversitas' },
     ],
   },
   {
-    judul: 'Iklim & Lahan Pesisir',
-    ikon: CloudSun,
-    layer: [
-      { id: 'iklim_hujan', nama: 'Curah Hujan Bulanan', warna: '#238443', ikon: CloudRain },
-      { id: 'iklim_kering', nama: 'Bulan Kering Berturut-turut', warna: '#ec7014', ikon: Sun },
-      { id: 'iklim_kemiringan', nama: 'Kemiringan Lahan', warna: '#fc8d59', ikon: Mountain },
-      { id: 'iklim_liat', nama: 'Kandungan Tanah Liat', warna: '#d95f0e', ikon: Layers3 },
-      { id: 'iklim_angin', nama: 'Kecepatan Angin 100 m', warna: '#238b45', ikon: Wind },
-      { id: 'iklim_ghi', nama: 'Iradiasi Surya (GHI)', warna: '#fd8d3c', ikon: SunMedium },
-      { id: 'pesisir_eks_mangrove', nama: 'Eks-Mangrove 1996-2020', warna: '#b45309', ikon: Sprout },
-      { id: 'pesisir_produksi_kab', nama: 'Perkiraan Produksi Ikan Kabupaten', warna: '#2171b5', ikon: BarChart3 },
-    ],
-  },
-  {
-    judul: 'Aktivitas Perikanan Tangkap',
+    judul: 'Aktivitas Kapal Ikan',
+    kata: 'aktivitas perikanan tangkap global fishing watch gfw',
     ikon: Fish,
     layer: [
       { id: 'tangkap_siang', nama: 'Aktivitas Penangkapan Ikan Siang', warna: '#ec7014', ikon: Sun },
@@ -117,10 +118,18 @@ const KATEGORI = [
     ],
   },
   {
-    judul: 'Analisis Investasi',
-    ikon: Target,
+    judul: 'Kondisi Iklim & Lahan',
+    kata: 'iklim lahan pesisir',
+    ikon: CloudSun,
     layer: [
-      { id: 'potensi', nama: 'Peta Sebaran Wilayah Potensial Investasi', warna: '#15803d', ikon: MapPinned },
+      { id: 'iklim_hujan', nama: 'Curah Hujan Bulanan', warna: '#238443', ikon: CloudRain },
+      { id: 'iklim_kering', nama: 'Bulan Kering Berturut-turut', warna: '#ec7014', ikon: Sun },
+      { id: 'iklim_kemiringan', nama: 'Kemiringan Lahan', warna: '#fc8d59', ikon: Mountain },
+      { id: 'iklim_liat', nama: 'Kandungan Tanah Liat', warna: '#d95f0e', ikon: Layers3 },
+      { id: 'iklim_angin', nama: 'Potensi Tenaga Angin', warna: '#238b45', ikon: Wind, kata: 'kecepatan angin 100 m' },
+      { id: 'iklim_ghi', nama: 'Potensi Tenaga Surya', warna: '#fd8d3c', ikon: SunMedium, kata: 'iradiasi surya ghi matahari' },
+      { id: 'pesisir_eks_mangrove', nama: 'Bekas Hutan Mangrove', warna: '#b45309', ikon: Sprout, kata: 'eks-mangrove 1996-2020' },
+      { id: 'pesisir_produksi_kab', nama: 'Perkiraan Produksi Ikan Kabupaten', warna: '#2171b5', ikon: BarChart3 },
     ],
   },
 ];
@@ -196,6 +205,7 @@ const PanelDaftarLapisan = ({
 }) => {
   const map = useMap();
   const [cari, setCari] = useState('');
+  const [lengkap, setLengkap] = useState(false);
   const [dibuka, setDibuka] = useState(() =>
     Object.fromEntries(KATEGORI.filter((k) => k.layer.some((l) => lapisanAwal.includes(l.id))).map((k) => [k.judul, true]))
   );
@@ -207,7 +217,7 @@ const PanelDaftarLapisan = ({
   const kategoriSemua = useMemo(() => {
     const tambahan = Object.entries(daftarLapisan)
       .filter(([, d]) => d.tambahan)
-      .map(([id, d]) => ({ id, nama: d.label, warna: d.warnaContoh, ikon: LandPlot }));
+      .map(([id, d]) => ({ id, nama: d.label, warna: d.warnaContoh, ikon: LandPlot, utama: true }));
     return tambahan.length ? [...KATEGORI, { judul: 'Parameter Tambahan', ikon: Layers3, layer: tambahan }] : KATEGORI;
   }, [daftarLapisan]);
 
@@ -215,10 +225,13 @@ const PanelDaftarLapisan = ({
     () =>
       kategoriSemua.map((k) => ({
         ...k,
-        layer: kataKunci ? k.layer.filter((l) => l.nama.toLowerCase().includes(kataKunci)) : k.layer,
+        layer: k.layer.filter((l) => (kataKunci
+          ? `${k.judul} ${k.kata || ''} ${l.nama} ${l.kata || ''}`.toLowerCase().includes(kataKunci)
+          : lengkap || l.utama || activeLayers.includes(l.id))),
       })).filter((k) => k.layer.length > 0),
-    [kataKunci, kategoriSemua]
+    [kataKunci, kategoriSemua, lengkap, activeLayers]
   );
+  const jumlahLanjutan = kategoriSemua.reduce((n, k) => n + k.layer.filter((l) => !l.utama).length, 0);
 
   const zoomKeLapisan = async (idLapisan) => {
     const def = daftarLapisan[idLapisan];
@@ -462,6 +475,20 @@ const PanelDaftarLapisan = ({
           </section>
         );
       })}
+
+      {!kataKunci && jumlahLanjutan > 0 && (
+        <button
+          type="button"
+          onClick={() => setLengkap((v) => !v)}
+          aria-expanded={lengkap}
+          className="w-full flex items-center justify-center gap-1.5 px-3.5 py-2.5 border-t border-slate-100
+                     text-[12.5px] font-semibold text-kkp-800 transition-colors hover:bg-slate-50
+                     focus-visible:outline-none focus-visible:bg-kkp-100/60"
+        >
+          {lengkap ? 'Sembunyikan data lanjutan' : `Tampilkan data lanjutan (${jumlahLanjutan})`}
+          <ChevronDown className={`h-4 w-4 transition-transform ${lengkap ? 'rotate-180' : ''}`} />
+        </button>
+      )}
     </PanelAlat>
   );
 };
