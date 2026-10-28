@@ -204,6 +204,8 @@ const StatusLapisan = ({ status }) => {
   );
 };
 
+export const LAYER_PANEL = Object.fromEntries(KATEGORI.flatMap((k) => k.layer.map((l) => [l.id, l])));
+
 const PanelDaftarLapisan = ({
   activeLayers,
   toggleLayer,
