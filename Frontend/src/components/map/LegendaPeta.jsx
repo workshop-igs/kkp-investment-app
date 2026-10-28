@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { List, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { List, ChevronDown, ChevronUp, LandPlot, Loader2 } from 'lucide-react';
 import {
   IKON_JENIS_INVESTASI,
   KATEGORI_ZONA,
@@ -11,6 +11,7 @@ import {
 import { GARIS_KAWASAN, KATEGORI_RTRL, WARNA_JENIS_INVESTASI } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { lambangSvg } from './ikonPeta';
+import { LAYER_PANEL } from './PanelDaftarLapisan';
 import { api } from '../../api/klien';
 
 const ISTILAH = {
@@ -404,32 +405,30 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
     return d?.params && 'sektor' in d.params ? namaSektor(sektorLapisan[id] || d.params.sektor) : '';
   };
 
-  const barisRingkas = (id) => (
-    <button
-      key={`ringkas-${id}`}
-      type="button"
-      onClick={() => setDipilih(id)}
-      aria-expanded={false}
-      className="w-full flex items-center gap-2.5 px-4 py-2.5 border-b border-slate-100 last:border-0 text-left
-                 transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-kkp-100/60"
-    >
-      <span
-        className={`h-3.5 w-3.5 shrink-0 border border-black/10 ${sebaran(id) ? 'rounded-full' : 'rounded-[3px]'}`}
-        style={{
-          background: sebaran(id)
-            ? `conic-gradient(${W.PERIKANAN_TANGKAP} 0 33%, ${W.PARIWISATA_BAHARI} 0 66%, ${W.BIOTEKNOLOGI_KELAUTAN} 0)`
-            : daftarLokal[id]?.warnaContoh || '#94a3b8',
-        }}
-      />
-      <span className="flex-1 min-w-0">
-        <span className="block truncate text-[12.5px] font-semibold text-kkp-800">
-          {(daftarLokal[id] || daftarLayer[id]).label}
+  const barisRingkas = (id) => {
+    const { ikon: Ikon, warna } = LAYER_PANEL[id] || { ikon: LandPlot, warna: daftarLokal[id]?.warnaContoh || '#94a3b8' };
+    return (
+      <button
+        key={`ringkas-${id}`}
+        type="button"
+        onClick={() => setDipilih(id)}
+        aria-expanded={false}
+        className="w-full flex items-center gap-2.5 px-4 py-2 border-b border-slate-100 last:border-0 text-left
+                   transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-kkp-100/60"
+      >
+        <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg text-white" style={{ backgroundColor: warna }}>
+          <Ikon className="h-4 w-4" />
         </span>
-        {ringkasan(id) && <span className="block truncate text-[11px] text-slate-500">{ringkasan(id)}</span>}
-      </span>
-      <ChevronDown className="h-4 w-4 shrink-0 -rotate-90 text-slate-400" />
-    </button>
-  );
+        <span className="flex-1 min-w-0">
+          <span className="block truncate text-[12.5px] font-semibold text-kkp-800">
+            {(daftarLokal[id] || daftarLayer[id]).label}
+          </span>
+          {ringkasan(id) && <span className="block truncate text-[11px] text-slate-500">{ringkasan(id)}</span>}
+        </span>
+        <ChevronDown className="h-4 w-4 shrink-0 -rotate-90 text-slate-400" />
+      </button>
+    );
+  };
 
   const urlLegenda = (id, format) => {
     const l = daftarLayer[id];
