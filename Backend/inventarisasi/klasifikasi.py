@@ -1,5 +1,7 @@
 import re
 
+from django.db.models import Q
+
 PETA_KAWASAN = [
     ('strategis nasional tertentu', 'KST'),
     ('ksnt', 'KST'),
@@ -237,3 +239,13 @@ def jenis_unsur(*teks):
         if kata in gabungan:
             return kode
     return 'LAINNYA'
+
+
+def q_jenis_unsur(kode):
+    hasil, sebelum = Q(pk=None), Q(pk=None)
+    for kata, k in PETA_UNSUR_RTRL:
+        cocok = Q(nama__icontains=kata) | Q(jenis__icontains=kata)
+        if k in kode:
+            hasil |= cocok & ~sebelum
+        sebelum |= cocok
+    return hasil

@@ -169,8 +169,13 @@ class UnsurRuangLautViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
     search_fields = ['nama', 'jenis']
 
     def peta_queryset_tambahan(self, qs, request):
+        from inventarisasi.klasifikasi import q_jenis_unsur
+
         kelompok = request.query_params.get('kelompok')
-        return qs.filter(kelompok=kelompok) if kelompok else qs
+        jenis = request.query_params.get('jenis_unsur')
+        if kelompok:
+            qs = qs.filter(kelompok=kelompok)
+        return qs.filter(q_jenis_unsur(jenis.split(','))) if jenis else qs
 
     def sertakan_titik(self, request):
         return request.query_params.get('kelompok') == 'MHA'

@@ -1,4 +1,4 @@
-import { gayaUnsurRtrl } from '../../utils/simbologiPeta';
+import { KATEGORI_RTRL, gayaUnsurRtrl } from '../../utils/simbologiPeta';
 import { warnaKelasRisiko } from '../../utils/simbologiPeta';
 import {
   IKON_JENIS_INVESTASI,
@@ -378,23 +378,39 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         <b>Wilayah:</b> ${aman([p.kabupaten, p.provinsi].filter(Boolean).join(', ') || '-')}</div>
       </div>`,
   },
-  rtrl: {
-    url: '/inventarisasi/unsur-ruang/peta/',
-    params: { kelompok: 'RTRL' },
-    label: 'Rencana Tata Ruang Laut',
-    legenda: 'rtrl',
-    warnaContoh: '#0056A5',
-    gaya: gayaUnsurRtrl,
-    ikon: 'bintang',
-    warnaIkon: '#dc2626',
-    popup: (p) =>
-      `<div class="font-sans">
-        <h3 class="font-bold text-kkp-800 mb-1">${aman(p.nama || 'Unsur ruang laut')}</h3>
-        <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.jenis || '-')}</p>
-        <div class="text-xs"><b>Keterangan:</b> ${aman(p.keterangan || '-')}<br/>
-        <b>Lapisan:</b> ${aman(p.lapisan || '-')}</div>
-      </div>`,
-  },
+  ...Object.fromEntries(
+    [
+      ['rtrl', 'Kabel & Pipa Bawah Laut', ['KABEL', 'PIPA'],
+        'Kabel dan pipa di dasar laut menurut RTRL Nasional; sekitarnya tidak boleh untuk jangkar, keramba, atau pengerukan.'],
+      ['rtrl_alur', 'Alur Pelayaran Kapal', ['ALUR_PELAYARAN'],
+        'Alur pelayaran dan ALKI menurut RTRL Nasional; badan alur harus bebas dari bangunan dan budidaya.'],
+      ['rtrl_migrasi', 'Jalur Migrasi Satwa Laut', ['MIGRASI_BIOTA'],
+        'Jalur migrasi penyu, paus, dan lumba-lumba menurut RTRL Nasional; kegiatan di sekitarnya perlu menjaga jalur ini.'],
+      ['rtrl_ksnt', 'Kawasan Strategis Nasional (KSNT)', ['KSNT'],
+        'Kawasan Strategis Nasional Tertentu menurut RTRL Nasional, seperti situs warisan dunia dan cadangan karbon biru.'],
+    ].map(([id, label, jenisRtrl, keteranganLegenda]) => [
+      id,
+      {
+        url: '/inventarisasi/unsur-ruang/peta/',
+        params: { kelompok: 'RTRL', jenis_unsur: jenisRtrl.join(',') },
+        label,
+        legenda: 'rtrl',
+        jenisRtrl,
+        keteranganLegenda,
+        warnaContoh: KATEGORI_RTRL[jenisRtrl[0]].warna,
+        gaya: gayaUnsurRtrl,
+        ikon: 'bintang',
+        warnaIkon: '#dc2626',
+        popup: (p) =>
+          `<div class="font-sans">
+            <h3 class="font-bold text-kkp-800 mb-1">${aman(p.nama || 'Unsur ruang laut')}</h3>
+            <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman(p.jenis || '-')}</p>
+            <div class="text-xs"><b>Keterangan:</b> ${aman(p.keterangan || '-')}<br/>
+            <b>Lapisan:</b> ${aman(p.lapisan || '-')}</div>
+          </div>`,
+      },
+    ])
+  ),
 
   ...Object.fromEntries(
     [
