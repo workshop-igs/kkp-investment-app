@@ -20,6 +20,7 @@ from .views import (
     me_api,
     register_api,
     ringkasan_publik,
+    wpp_peta,
 )
 from .views_admin import (
     AdminLogAktivitasViewSet,
@@ -49,6 +50,7 @@ admin_router.register(r'parameter-tambahan', AdminParameterTambahanViewSet, base
 
 urlpatterns = [
     path('cari/', cari_lokasi, name='cari-lokasi'),
+    path('wpp/', wpp_peta, name='wpp-peta'),
     path('asisten/alat/', daftar_alat, name='asisten-alat'),
     path('asisten/alat/<str:nama>/', pakai_alat, name='asisten-pakai-alat'),
     path('asisten/obrolan/', obrolan, name='asisten-obrolan'),

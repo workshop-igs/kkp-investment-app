@@ -29,6 +29,7 @@ const PROFIL_BATAS = {
     isi: '#0056A5',
     isiAktif: 0.3,
     isiDiam: 0.06,
+    wpp: '#0e7490',
   },
   gelap: {
     halo: '#0f172a',
@@ -38,6 +39,7 @@ const PROFIL_BATAS = {
     isi: '#7dd3fc',
     isiAktif: 0.28,
     isiDiam: 0.05,
+    wpp: '#67e8f9',
   },
 };
 
@@ -56,6 +58,10 @@ const PROFIL_PETA_DASAR = { topo: 'terang', street: 'terang', satellite: 'gelap'
 const PANE_HALO = 'batas-halo';
 
 const PANE_PROVINSI = 'batas-provinsi';
+
+const PANE_WPP = 'batas-wpp';
+
+const PANE_LABEL_WPP = 'label-wpp';
 
 const ZOOM_BATAS_DETAIL = 9;
 
@@ -112,9 +118,16 @@ const PaneBatas = ({ onSiap }) => {
     if (!map.getPane(PANE_PROVINSI)) {
       map.createPane(PANE_PROVINSI).style.zIndex = 360;
     }
+    [[PANE_WPP, 340], [PANE_LABEL_WPP, 380]].forEach(([nama, z]) => {
+      if (map.getPane(nama)) return;
+      const pane = map.createPane(nama);
+      pane.style.zIndex = z;
+      pane.style.pointerEvents = 'none';
+    });
     onSiap({
       halo: L.canvas({ pane: PANE_HALO, padding: 0.5 }),
       batas: L.canvas({ pane: PANE_PROVINSI, padding: 0.5 }),
+      wpp: L.canvas({ pane: PANE_WPP, padding: 0.5 }),
     });
   }, [map, onSiap]);
   return null;
@@ -161,6 +174,7 @@ const PetaInteraktif = ({
 
   const [provinsiRingkas, setProvinsiRingkas] = useState(null);
   const [provinsiDetail, setProvinsiDetail] = useState(null);
+  const [wppGeo, setWppGeo] = useState(null);
   const [zoomDekat, setZoomDekat] = useState(false);
   const provinsiGeo = zoomDekat && provinsiDetail ? provinsiDetail : provinsiRingkas;
   const [provinsiTerpilih, setProvinsiTerpilih] = useState(null);
@@ -293,6 +307,14 @@ const PetaInteraktif = ({
     api.get('/inti/provinsi/peta/', { params: { ringkas: 1 } })
       .then(({ data }) => { if (!batal) setProvinsiRingkas(data); })
       .catch(err => console.error('Gagal memuat batas provinsi', err));
+    return () => { batal = true; };
+  }, []);
+
+  useEffect(() => {
+    let batal = false;
+    api.get('/inti/wpp/')
+      .then(({ data }) => { if (!batal) setWppGeo(data); })
+      .catch(err => console.error('Gagal memuat batas WPP', err));
     return () => { batal = true; };
   }, []);
 
@@ -476,6 +498,33 @@ const PetaInteraktif = ({
             ))}
 
           <PemantauZoom ambang={ZOOM_BATAS_DETAIL} onUbah={setZoomDekat} />
+
+          {wppGeo && kanvasBatas && (
+            <GeoJSON
+              key={`wpp-garis-${basemap}`}
+              data={wppGeo}
+              pane={PANE_WPP}
+              renderer={kanvasBatas.wpp}
+              interactive={false}
+              filter={(f) => f.geometry.type !== 'Point'}
+              style={(f) => ({
+                color: profil.wpp, weight: 1.5, opacity: 0.9, dashArray: f.properties.jenis === 'ANTAR' ? '8 5' : '2 5',
+              })}
+            />
+          )}
+          {wppGeo && kanvasBatas && (
+            <GeoJSON
+              key="wpp-label"
+              data={wppGeo}
+              filter={(f) => f.geometry.type === 'Point'}
+              pointToLayer={(f, latlng) => L.marker(latlng, {
+                pane: PANE_LABEL_WPP,
+                interactive: false,
+                keyboard: false,
+                icon: L.divIcon({ className: 'label-wpp', html: `<span>WPP ${f.properties.kode}</span>`, iconSize: null }),
+              })}
+            />
+          )}
 
           {haloGeo && kanvasBatas && (
             <GeoJSON

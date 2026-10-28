@@ -17,7 +17,7 @@ from inventarisasi.models import (
 )
 
 from .geospasial import nama_kabupaten
-from .models import DesaKelurahan, KabupatenKota, Kecamatan, Provinsi
+from .models import DesaKelurahan, KabupatenKota, Kecamatan, Provinsi, WilayahPengelolaanPerikanan
 
 MIN_KATA_KUNCI = 2
 
@@ -77,6 +77,33 @@ def _cari_wilayah(model, kata, sumber, kolom, jenis, keterangan):
             }
         )
     return hasil
+
+
+def _cari_wpp(kata):
+    angka = ''.join(h for h in kata if h.isdigit())
+    saring = Q(kode__startswith=angka) if angka else Q(perairan__icontains=kata)
+    if not angka and 'wpp' in kata.lower():
+        saring = Q()
+    qs = (
+        WilayahPengelolaanPerikanan.objects.filter(saring)
+        .annotate(kotak=Envelope('geometry'))
+        .order_by('kode')
+        .values('kode', 'perairan', 'zona_pit', 'kotak')[:BATAS_PER_SUMBER * 2]
+    )
+    return [
+        {
+            'kelompok': 'Wilayah Administratif',
+            'sumber': 'wpp',
+            'kode': r['kode'],
+            'jenis': 'Wilayah Pengelolaan Perikanan',
+            'nama': f"WPP-RI {r['kode']}",
+            'keterangan': _gabung(r['perairan'], r['zona_pit'].replace('Zona ', 'Zona PIT ')),
+            'bbox': [round(v, 6) for v in r['kotak'].extent],
+            'titik': None,
+            'peringkat': 0 if angka else 1,
+        }
+        for r in qs
+    ]
 
 
 def _gabung(*bagian):
@@ -164,6 +191,7 @@ def cari_lokasi(request):
         return Response(tersimpan)
 
     hasil = []
+    hasil += _cari_wpp(kata)
     hasil += _cari_wilayah(Provinsi, kata, 'provinsi', ('kode_bps',), lambda r: 'Provinsi',
                            lambda r: f"Kode BPS {r['kode_bps']}")
     hasil += _cari_wilayah(KabupatenKota, kata, 'kabupaten', ('kode_bps', 'jenis', 'provinsi__nama'),
