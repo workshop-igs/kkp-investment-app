@@ -11,7 +11,6 @@ import {
   URUTAN_KATEGORI,
   URUTAN_KATEGORI_DARAT,
   URUTAN_KELAS_RISIKO,
-  URUTAN_RTRL,
   WARNA_JENIS_INVESTASI,
 } from './simbologiPeta';
 
@@ -133,7 +132,7 @@ function itemLegenda(def, osea, sektor) {
     case 'risiko':
       return kotak(URUTAN_KELAS_RISIKO, KELAS_RISIKO);
     case 'rtrl':
-      return URUTAN_RTRL.map((k) => {
+      return def.jenisRtrl.map((k) => {
         const r = KATEGORI_RTRL[k];
         return { label: r.label, warna: r.warna, garis: { tebal: r.tebal, putus: r.garis?.split(',').map((v) => v * 0.25) } };
       });

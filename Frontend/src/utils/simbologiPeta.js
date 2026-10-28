@@ -111,21 +111,21 @@ export const KATEGORI_RTRL = {
     warna: '#7c3aed',
     garis: '7,5',
     tebal: 2,
-    catatan: 'Penghalang berjangkar dan pengerukan; perlu zona aman',
+    catatan: 'Sekitarnya tidak boleh untuk jangkar, keramba, atau pengerukan',
   },
   PIPA: {
     label: 'Pipa Bawah Laut',
     warna: '#b45309',
     garis: '11,4,2,4',
     tebal: 2.2,
-    catatan: 'Penghalang berjangkar dan pengerukan; perlu zona aman',
+    catatan: 'Sekitarnya tidak boleh untuk jangkar, keramba, atau pengerukan',
   },
   MIGRASI_BIOTA: {
-    label: 'Koridor Migrasi Biota',
+    label: 'Jalur Migrasi Satwa Laut',
     warna: '#16a34a',
     garis: '2,6',
     tebal: 2.4,
-    catatan: 'Jalur migrasi penyu dan cetacea — pembatas lingkungan',
+    catatan: 'Jalur migrasi penyu, paus, dan lumba-lumba',
   },
   KSNT: {
     label: 'Kawasan Strategis Nasional Tertentu',
@@ -142,8 +142,6 @@ export const KATEGORI_RTRL = {
     catatan: 'Unsur RTRL yang belum terklasifikasi',
   },
 };
-
-export const URUTAN_RTRL = ['ALUR_PELAYARAN', 'KABEL', 'PIPA', 'MIGRASI_BIOTA', 'KSNT'];
 
 export const gayaUnsurRtrl = (fitur) => {
   const k = KATEGORI_RTRL[fitur?.properties?.jenis_kode] || KATEGORI_RTRL.LAINNYA;

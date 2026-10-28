@@ -8,7 +8,7 @@ import {
   URUTAN_KATEGORI_DARAT,
   URUTAN_KELAS_RISIKO,
 } from '../../utils/simbologiPeta';
-import { GARIS_KAWASAN, KATEGORI_RTRL, URUTAN_RTRL, WARNA_JENIS_INVESTASI } from '../../utils/simbologiPeta';
+import { GARIS_KAWASAN, KATEGORI_RTRL, WARNA_JENIS_INVESTASI } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { lambangSvg } from './ikonPeta';
 import { api } from '../../api/klien';
@@ -223,13 +223,15 @@ const LegendaLokal = ({ urutan = URUTAN_KATEGORI, garis = true }) => (
   </div>
 );
 
-const LegendaUnsurRtrl = () => (
+const LegendaUnsurRtrl = ({ urutan }) => (
   <div>
-    <p className="text-[11px] font-semibold text-slate-500 mb-2">
-      Warna &amp; pola garis = jenis unsur
-    </p>
+    {urutan.length > 1 && (
+      <p className="text-[11px] font-semibold text-slate-500 mb-2">
+        Warna &amp; pola garis = jenis unsur
+      </p>
+    )}
     <ul className="space-y-2">
-      {URUTAN_RTRL.map((kode) => {
+      {urutan.map((kode) => {
         const k = KATEGORI_RTRL[kode];
         return (
           <li key={kode} className="flex items-start gap-2">
@@ -460,7 +462,7 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
               ) : daftarLokal[id].legenda === 'risiko' ? (
                 <LegendaRisiko />
               ) : daftarLokal[id].legenda === 'rtrl' ? (
-                <LegendaUnsurRtrl />
+                <LegendaUnsurRtrl urutan={daftarLokal[id].jenisRtrl} />
               ) : daftarLokal[id].legenda === 'gradasi' ? (
                 <LegendaGradasi kode={daftarLokal[id].citra} keterangan={daftarLokal[id].keteranganLegenda} />
               ) : (
