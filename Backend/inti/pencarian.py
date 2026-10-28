@@ -16,7 +16,8 @@ from inventarisasi.models import (
     ZonasiRuangLaut,
 )
 
-from .models import Provinsi
+from .geospasial import nama_kabupaten
+from .models import DesaKelurahan, KabupatenKota, Kecamatan, Provinsi
 
 MIN_KATA_KUNCI = 2
 
@@ -51,31 +52,35 @@ def _peringkat(bidang, kata):
     )
 
 
-def _cari_provinsi(kata):
+def _cari_wilayah(model, kata, sumber, kolom, jenis, keterangan):
     qs = (
-        Provinsi.objects.filter(nama__icontains=kata)
+        model.objects.filter(nama__icontains=kata)
         .exclude(geometry=None)
         .annotate(peringkat=_peringkat('nama', kata), kotak=Envelope('geometry'))
-        .defer('geometry')
-        .order_by('peringkat', 'nama')[:BATAS_PER_SUMBER]
+        .order_by('peringkat', 'nama')
+        .values('nama', 'peringkat', 'kotak', *kolom)[:BATAS_PER_SUMBER]
     )
     hasil = []
-    for p in qs:
-        cakupan = list(p.kotak.extent) if p.kotak else None
+    for r in qs:
+        cakupan = list(r['kotak'].extent) if r['kotak'] else None
         hasil.append(
             {
                 'kelompok': 'Wilayah Administratif',
-                'sumber': 'provinsi',
-                'kode': p.kode_bps,
-                'jenis': 'Provinsi',
-                'nama': p.nama,
-                'keterangan': f'Kode BPS {p.kode_bps}',
+                'sumber': sumber,
+                'kode': r[kolom[0]],
+                'jenis': jenis(r),
+                'nama': r['nama'],
+                'keterangan': keterangan(r),
                 'bbox': [round(v, 6) for v in cakupan] if cakupan else None,
                 'titik': None,
-                'peringkat': p.peringkat,
+                'peringkat': r['peringkat'],
             }
         )
     return hasil
+
+
+def _gabung(*bagian):
+    return ', '.join(b for b in bagian if b)
 
 
 def _cari_sederhana(model, kata, kelompok, label_jenis, sumber, kode=None, bidang_keterangan=None, bidang_nama='nama',
@@ -159,7 +164,21 @@ def cari_lokasi(request):
         return Response(tersimpan)
 
     hasil = []
-    hasil += _cari_provinsi(kata)
+    hasil += _cari_wilayah(Provinsi, kata, 'provinsi', ('kode_bps',), lambda r: 'Provinsi',
+                           lambda r: f"Kode BPS {r['kode_bps']}")
+    hasil += _cari_wilayah(KabupatenKota, kata, 'kabupaten', ('kode_bps', 'jenis', 'provinsi__nama'),
+                           lambda r: 'Kota' if r['jenis'] == 'KOTA' else 'Kabupaten', lambda r: r['provinsi__nama'])
+    hasil += _cari_wilayah(Kecamatan, kata, 'kecamatan', ('kode', 'kabupaten__nama', 'kabupaten__jenis', 'provinsi__nama'),
+                           lambda r: 'Kecamatan',
+                           lambda r: _gabung(nama_kabupaten(r['kabupaten__nama'], r['kabupaten__jenis']), r['provinsi__nama']))
+    hasil += _cari_wilayah(
+        DesaKelurahan, kata, 'desa',
+        ('kode', 'jenis', 'kecamatan__nama', 'kecamatan__kabupaten__nama', 'kecamatan__kabupaten__jenis', 'provinsi__nama'),
+        lambda r: r['jenis'],
+        lambda r: _gabung(r['kecamatan__nama'] and f"Kec. {r['kecamatan__nama']}",
+                          nama_kabupaten(r['kecamatan__kabupaten__nama'], r['kecamatan__kabupaten__jenis']),
+                          r['provinsi__nama']),
+    )
     hasil += _cari_sederhana(
         InfrastrukturPendukung, kata, 'Infrastruktur & Transportasi',
         lambda o: o.get_kategori_display(), 'infrastruktur', kode=lambda o: o.kategori, bidang_keterangan='kelas',

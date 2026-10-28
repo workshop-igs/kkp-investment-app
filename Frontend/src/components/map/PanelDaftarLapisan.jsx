@@ -1,11 +1,12 @@
 import { useMemo, useState } from 'react';
 import {
-  Activity, AlertTriangle, Anchor, ArrowDownToLine, BadgeDollarSign, BarChart3, Building2, Cable, ChevronDown, CloudRain,
-  CloudSun, Compass, Container, Droplets, Eye, Factory, FileCheck, Fish, Flower2, FlaskConical, GitFork, GraduationCap, Info,
-  Landmark, LandPlot, Layers, Layers3, Leaf, Loader2, Map as IkonPeta, MapPinned, Moon, Mountain, MoveDownRight, Navigation,
-  Navigation2, Pickaxe, Plane, Plug, PlugZap, Route, Sailboat, ScrollText, Search, Shell, ShieldAlert, Ship, Shrink, Sprout, Sun,
-  SunMedium, Target, Thermometer, ThermometerSnowflake, ThermometerSun, Timer, Trees, TrendingDown, Turtle, Users,
-  TreePalm, UtilityPole, Waves, Waypoints, Wind, X, Zap, ZoomIn,
+  Activity, AlertTriangle, Anchor, ArrowDownToLine, BadgeDollarSign, BarChart3, Building, Building2, Cable,
+  ChevronDown, CloudRain, CloudSun, Compass, Container, Droplets, Eye, Factory, FileCheck, Fish, FlaskConical,
+  Flower2, Frame, GitFork, GraduationCap, Home, Info, Landmark, LandPlot, Layers, Layers3, Leaf, Loader2,
+  Map as IkonPeta, MapPinned, Moon, Mountain, MoveDownRight, Navigation, Navigation2, Pickaxe, Plane, Plug, PlugZap,
+  Route, Sailboat, ScrollText, Search, Shell, ShieldAlert, Ship, Shrink, Sprout, Sun, SunMedium, Target, Thermometer,
+  ThermometerSnowflake, ThermometerSun, Timer, TreePalm, Trees, TrendingDown, Turtle, Users, UtilityPole, Waves,
+  Waypoints, Wind, X, Zap, ZoomIn,
 } from 'lucide-react';
 import { useMap } from 'react-leaflet';
 import { api } from '../../api/klien';
@@ -142,6 +143,16 @@ const KATEGORI = [
       { id: 'iklim_ghi', nama: 'Potensi Tenaga Surya', warna: '#fd8d3c', ikon: SunMedium, kata: 'iradiasi surya ghi matahari' },
       { id: 'pesisir_eks_mangrove', nama: 'Bekas Hutan Mangrove', warna: '#b45309', ikon: Sprout, kata: 'eks-mangrove 1996-2020' },
       { id: 'pesisir_produksi_kab', nama: 'Perkiraan Produksi Ikan Kabupaten', warna: '#2171b5', ikon: BarChart3 },
+    ],
+  },
+  {
+    judul: 'Batas Wilayah',
+    kata: 'administrasi wilayah administratif',
+    ikon: Frame,
+    layer: [
+      { id: 'batas_kecamatan', nama: 'Batas Kecamatan', warna: '#d97706', ikon: Building, kata: 'camat distrik' },
+      { id: 'batas_desa', nama: 'Batas Desa/Kelurahan', warna: '#ca8a04', ikon: Home,
+        kata: 'desa kelurahan kampung nagari gampong' },
     ],
   },
 ];

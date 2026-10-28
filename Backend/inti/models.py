@@ -64,6 +64,48 @@ class KabupatenKota(models.Model):
         return f'{self.nama}, {self.provinsi.nama}'
 
 
+class Kecamatan(models.Model):
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE, related_name='kecamatan')
+    kabupaten = models.ForeignKey(
+        KabupatenKota, on_delete=models.SET_NULL, null=True, blank=True, related_name='kecamatan'
+    )
+    kode = models.CharField(max_length=20, blank=True, db_index=True, help_text='Kode Kemendagri, mis. 52.08.01')
+    nama = models.CharField(max_length=100)
+    geometry = models.MultiPolygonField(srid=4326)
+    luas_ha = models.FloatField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'inti_kecamatan'
+        verbose_name_plural = 'Kecamatan'
+
+    def __str__(self):
+        return self.nama
+
+
+class DesaKelurahan(models.Model):
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE, related_name='desa_kelurahan')
+    kecamatan = models.ForeignKey(
+        Kecamatan, on_delete=models.SET_NULL, null=True, blank=True, related_name='desa_kelurahan'
+    )
+    kode = models.CharField(
+        max_length=32, blank=True, db_index=True,
+        help_text='Kode Kemendagri, mis. 52.08.01.2001; wilayah bersama ditulis A/B',
+    )
+    nama = models.CharField(max_length=100)
+    jenis = models.CharField(max_length=10, default='Desa')
+    geometry = models.MultiPolygonField(srid=4326)
+    luas_ha = models.FloatField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'inti_desa_kelurahan'
+        verbose_name_plural = 'Desa/Kelurahan'
+
+    def __str__(self):
+        return f'{self.jenis} {self.nama}'
+
+
 class SektorInvestasi(models.Model):
     kode = models.CharField(max_length=50, unique=True, help_text='e.g., PERIKANAN_TANGKAP')
     nama = models.CharField(max_length=100)

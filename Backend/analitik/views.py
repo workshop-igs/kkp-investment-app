@@ -17,7 +17,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
 
-from inti.geospasial import hitung_luas_geodesik_ha
+from inti.geospasial import anotasi_alamat, hitung_luas_geodesik_ha, teks_alamat
 from inti.peta_bbox import PetaBBoxMixin
 
 from .models import (
@@ -426,7 +426,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
                          'sub_sektor_kode': lok.rincian.get('sub_sektor_kode')})
 
     def peta_urutan(self, qs, request, batas):
-        return qs.order_by('-persen_sesuai', '-luas_ha', 'id')
+        return anotasi_alamat(qs.order_by('-persen_sesuai', '-luas_ha', 'id'))
 
     def hanya_titik(self, lebar):
         return lebar >= self.LEBAR_AREA_DERAJAT
@@ -438,12 +438,13 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
         kode = (request.query_params.get('sektor') or 'SEMUA').strip().upper()
         return qs.filter(sektor__isnull=True) if kode == 'SEMUA' else qs.filter(sektor__kode=kode)
 
-    PETA_KOLOM = ('provinsi__nama', 'persen_sesuai', 'jenis', 'rincian', 'luas_ha')
+    PETA_KOLOM = ('provinsi__nama', 'persen_sesuai', 'jenis', 'rincian', 'luas_ha', 'alamat')
 
     def properti_peta(self, r):
         return {
             **r['rincian'],
             'provinsi': r['provinsi__nama'],
+            'alamat': teks_alamat(r['alamat']),
             'sektor_kode': r['jenis'][0],
             'jenis': r['jenis'],
             'kelas': 'TINGGI',

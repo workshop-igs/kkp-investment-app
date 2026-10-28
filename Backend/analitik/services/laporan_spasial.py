@@ -19,6 +19,7 @@ from analitik.services.konstanta import (
     SUMBER_MANGROVE_GMW,
 )
 from analitik.services.oseanografi import statistik as statistik_oseanografi
+from inti.geospasial import alamat_geometri
 from inti.models import KabupatenKota, Provinsi
 from inventarisasi.klasifikasi import jenis_unsur
 from inventarisasi.models import (
@@ -316,6 +317,10 @@ def _bagian_wilayah(geom, luas_aoi_m2) -> Dict[str, Any]:
                 f'Pemerintah Pusat, bukan pemerintah provinsi — perizinannya menempuh '
                 f'jalur yang berbeda.'
             )
+
+    alamat = alamat_geometri(geom) if ringkas else ''
+    if alamat:
+        ringkas += f' Letak administratif: {alamat}.'
 
     return {**_bagian(
         kunci='wilayah',
