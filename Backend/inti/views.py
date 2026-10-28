@@ -11,8 +11,17 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from penarikan_data.bps import kode_bps
 
-from .geospasial import nama_kabupaten
-from .models import DesaKelurahan, KabupatenKota, Kecamatan, Provinsi, SektorInvestasi, SumberData
+from .geospasial import KUNCI_CACHE_WPP, nama_kabupaten
+from .models import (
+    DesaKelurahan,
+    GarisWPP,
+    KabupatenKota,
+    Kecamatan,
+    Provinsi,
+    SektorInvestasi,
+    SumberData,
+    WilayahPengelolaanPerikanan,
+)
 from .peta_bbox import PetaBBoxMixin, Simplify, jawaban_peta
 from .serializers import (
     KabupatenKotaSerializer,
@@ -519,6 +528,27 @@ def dashboard_stats(request):
 
 
 CACHE_RINGKASAN_PUBLIK_DETIK = 3600
+
+
+@api_view(['GET'])
+@permission_classes([permissions.AllowAny])
+def wpp_peta(request):
+    import json
+
+    from django.core.cache import cache
+
+    data = cache.get(KUNCI_CACHE_WPP)
+    if data is None:
+        garis = GarisWPP.objects.annotate(gj=AsGeoJSON('geometry', precision=4)).values('jenis', 'gj')
+        data = {'type': 'FeatureCollection', 'features': [
+            *({'type': 'Feature', 'geometry': json.loads(g['gj']), 'properties': {'jenis': g['jenis']}} for g in garis),
+            *({'type': 'Feature',
+               'geometry': {'type': 'Point', 'coordinates': [round(w.titik_label.x, 4), round(w.titik_label.y, 4)]},
+               'properties': {'kode': w.kode, 'perairan': w.perairan, 'zona_pit': w.zona_pit}}
+              for w in WilayahPengelolaanPerikanan.objects.defer('geometry')),
+        ]}
+        cache.set(KUNCI_CACHE_WPP, data, 24 * 3600)
+    return Response(data)
 
 
 @api_view(['GET'])

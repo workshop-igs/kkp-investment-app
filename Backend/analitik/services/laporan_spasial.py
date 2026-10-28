@@ -19,7 +19,7 @@ from analitik.services.konstanta import (
     SUMBER_MANGROVE_GMW,
 )
 from analitik.services.oseanografi import statistik as statistik_oseanografi
-from inti.geospasial import alamat_geometri
+from inti.geospasial import alamat_geometri, wpp_geometri
 from inti.models import KabupatenKota, Provinsi
 from inventarisasi.klasifikasi import jenis_unsur
 from inventarisasi.models import (
@@ -321,6 +321,9 @@ def _bagian_wilayah(geom, luas_aoi_m2) -> Dict[str, Any]:
     alamat = alamat_geometri(geom) if ringkas else ''
     if alamat:
         ringkas += f' Letak administratif: {alamat}.'
+    wpp = wpp_geometri(geom) if ringkas else ''
+    if wpp:
+        ringkas += f' Wilayah pengelolaan perikanan: {wpp}.'
 
     return {**_bagian(
         kunci='wilayah',

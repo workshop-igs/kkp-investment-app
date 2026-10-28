@@ -106,6 +106,34 @@ class DesaKelurahan(models.Model):
         return f'{self.jenis} {self.nama}'
 
 
+class WilayahPengelolaanPerikanan(models.Model):
+    kode = models.CharField(max_length=3, unique=True, help_text='Nomor WPP-RI, mis. 713')
+    perairan = models.CharField(max_length=255)
+    zona_pit = models.CharField(max_length=20, blank=True, help_text='Zona Penangkapan Ikan Terukur')
+    peruntukan_zona = models.CharField(max_length=255, blank=True)
+    geometry = models.MultiPolygonField(srid=4326)
+    titik_label = models.PointField(srid=4326)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'inti_wpp'
+        ordering = ['kode']
+        verbose_name_plural = 'Wilayah Pengelolaan Perikanan'
+
+    def __str__(self):
+        return f'WPP-RI {self.kode}'
+
+
+class GarisWPP(models.Model):
+    JENIS_CHOICES = [('ANTAR', 'Batas antar-WPP'), ('LUAR', 'Batas terluar WPP')]
+
+    jenis = models.CharField(max_length=5, choices=JENIS_CHOICES, unique=True)
+    geometry = models.MultiLineStringField(srid=4326)
+
+    class Meta:
+        db_table = 'inti_wpp_garis'
+
+
 class SektorInvestasi(models.Model):
     kode = models.CharField(max_length=50, unique=True, help_text='e.g., PERIKANAN_TANGKAP')
     nama = models.CharField(max_length=100)

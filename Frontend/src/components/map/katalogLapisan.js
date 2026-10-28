@@ -298,6 +298,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
             <h3 class="text-[14px] font-bold leading-tight text-slate-900">${nama.length > 1 ? `Cocok untuk ${nama.length} sub-sektor investasi` : `Lokasi potensial ${aman(nama[0])}`}</h3>
             <p class="text-[11px] text-slate-500 leading-snug">${aman(p.nama || '-')} &middot; ${aman(p.provinsi || '-')}</p>
             ${p.alamat ? `<p class="text-[11px] text-slate-500 leading-snug">${aman(p.alamat)}</p>` : ''}
+            ${p.wpp ? `<p class="text-[11px] text-slate-500 leading-snug">${aman(p.wpp)}</p>` : ''}
           </div>
         </div>
         ${nama.length > 1
