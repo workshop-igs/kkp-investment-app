@@ -21,7 +21,7 @@ JENIS_DESA = {1: 'Desa', 2: 'Kelurahan'}
 def _json(metode, url, percobaan=4, **kw):
     for ke in range(percobaan):
         try:
-            r = httpx.request(metode, url, timeout=300.0, **kw)
+            r = httpx.request(metode, url, timeout=httpx.Timeout(60.0, connect=20.0), **kw)
             r.raise_for_status()
             data = r.json()
             if 'error' in data:
@@ -86,7 +86,7 @@ class Command(BaseCommand):
         if not baris:
             raise CommandError('Tidak ada kecamatan terbaca; data lama tidak diubah.')
         with transaction.atomic():
-            (Kecamatan.objects.filter(provinsi_id=self.provinsi[kode]) if kode else Kecamatan.objects.all()).delete()
+            (Kecamatan.objects.filter(kode__startswith=f'{kode}.') if kode else Kecamatan.objects.all()).delete()
             Kecamatan.objects.bulk_create(baris, batch_size=500)
         self.stdout.write(f'  {len(baris)} kecamatan tersimpan')
 
@@ -115,7 +115,7 @@ class Command(BaseCommand):
             berkas.seek(0)
             tersimpan = 0
             with transaction.atomic():
-                (DesaKelurahan.objects.filter(provinsi_id=self.provinsi[kode]) if kode
+                (DesaKelurahan.objects.filter(kode__startswith=f'{kode}.') if kode
                  else DesaKelurahan.objects.all()).delete()
                 kumpulan = []
                 for teks in berkas:
@@ -149,9 +149,12 @@ class Command(BaseCommand):
             c.execute("""
                 UPDATE inti_kecamatan k SET kabupaten_id = (
                     SELECT kb.id FROM inti_kabupaten_kota kb
-                    WHERE kb.provinsi_id = k.provinsi_id AND ST_Intersects(kb.geometry, ST_PointOnSurface(k.geometry))
-                    LIMIT 1)
+                    ORDER BY kb.geometry <-> ST_PointOnSurface(k.geometry) LIMIT 1)
                 WHERE k.kabupaten_id IS NULL
+            """)
+            c.execute("""
+                UPDATE inti_kecamatan k SET provinsi_id = kb.provinsi_id FROM inti_kabupaten_kota kb
+                WHERE k.kabupaten_id = kb.id AND k.provinsi_id <> kb.provinsi_id
             """)
             c.execute("""
                 UPDATE inti_desa_kelurahan d SET kecamatan_id = k.id FROM inti_kecamatan k
@@ -160,9 +163,12 @@ class Command(BaseCommand):
             c.execute("""
                 UPDATE inti_desa_kelurahan d SET kecamatan_id = (
                     SELECT k.id FROM inti_kecamatan k
-                    WHERE k.provinsi_id = d.provinsi_id AND ST_Intersects(k.geometry, ST_PointOnSurface(d.geometry))
-                    LIMIT 1)
+                    ORDER BY k.geometry <-> ST_PointOnSurface(d.geometry) LIMIT 1)
                 WHERE d.kecamatan_id IS NULL
+            """)
+            c.execute("""
+                UPDATE inti_desa_kelurahan d SET provinsi_id = k.provinsi_id FROM inti_kecamatan k
+                WHERE d.kecamatan_id = k.id AND d.provinsi_id <> k.provinsi_id
             """)
         self.stdout.write(
             f'  tanpa kabupaten: {Kecamatan.objects.filter(kabupaten__isnull=True).count()} kecamatan; '
