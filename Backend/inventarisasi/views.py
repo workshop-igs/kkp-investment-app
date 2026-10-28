@@ -7,6 +7,7 @@ from inti.peta_bbox import PetaBBoxMixin
 from .models import (
     KKPRL,
     InfrastrukturPendukung,
+    IzinTambang,
     PotensiInvestasi,
     ProgramKKP,
     SumberDayaAlam,
@@ -236,6 +237,30 @@ class InfrastrukturPendukungViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet
             'keterangan': r['keterangan'],
             'provinsi': r['provinsi__nama'],
             'sumber': r['sumber_data'],
+        }
+
+
+class IzinTambangViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
+    SERTAKAN_TITIK = True
+    queryset = IzinTambang.objects.all()
+
+    PETA_KOLOM = (
+        'nama_usaha', 'badan_usaha', 'jenis_izin', 'kegiatan', 'komoditas', 'sk_iup',
+        'tanggal_berlaku', 'tanggal_akhir', 'luas_ha', 'kabupaten', 'provinsi__nama',
+    )
+
+    def properti_peta(self, r):
+        return {
+            'nama': ' '.join(filter(None, [r['badan_usaha'], r['nama_usaha']])),
+            'jenis_izin': r['jenis_izin'],
+            'kegiatan': r['kegiatan'],
+            'komoditas': r['komoditas'],
+            'sk': r['sk_iup'],
+            'berlaku': r['tanggal_berlaku'].isoformat(),
+            'berakhir': r['tanggal_akhir'].isoformat() if r['tanggal_akhir'] else None,
+            'luas_ha': round(r['luas_ha'], 1),
+            'kabupaten': r['kabupaten'],
+            'provinsi': r['provinsi__nama'],
         }
 
 

@@ -408,3 +408,27 @@ class SumberDayaAlam(models.Model):
 
     def __str__(self):
         return f'{self.get_jenis_display()} - {self.nama}'
+
+
+class IzinTambang(models.Model):
+    kode_wiup = models.CharField(max_length=40)
+    nama_usaha = models.CharField(max_length=255)
+    badan_usaha = models.CharField(max_length=40, blank=True)
+    jenis_izin = models.CharField(max_length=10)
+    kegiatan = models.CharField(max_length=40, blank=True)
+    komoditas = models.CharField(max_length=100, blank=True)
+    sk_iup = models.CharField(max_length=100, blank=True)
+    tanggal_berlaku = models.DateField()
+    tanggal_akhir = models.DateField(null=True, blank=True)
+    luas_ha = models.FloatField(default=0)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.SET_NULL, null=True, blank=True, related_name='izin_tambang')
+    kabupaten = models.CharField(max_length=100, blank=True)
+    geometry = models.MultiPolygonField(srid=4326)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'inventarisasi_izin_tambang'
+        verbose_name_plural = 'Izin Tambang'
+
+    def __str__(self):
+        return f'{self.jenis_izin} {self.nama_usaha}'

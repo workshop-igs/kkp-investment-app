@@ -7,7 +7,14 @@ from django.utils import timezone
 from analitik.models import RasterOseanografi, ZonaRisikoBencana
 from analitik.services.konstanta import BULAN, LABEL_SUMBER_ZONASI
 from analitik.services.pengaturan import atur
-from inventarisasi.models import KKPRL, InfrastrukturPendukung, SumberDayaAlam, UnsurRuangLaut, ZonasiRuangLaut
+from inventarisasi.models import (
+    KKPRL,
+    InfrastrukturPendukung,
+    IzinTambang,
+    SumberDayaAlam,
+    UnsurRuangLaut,
+    ZonasiRuangLaut,
+)
 from penarikan_data.models import ProduksiPerikananBPS, StatistikKetenagakerjaanBPS
 
 LABEL_OSEANOGRAFI = {
@@ -50,6 +57,7 @@ AKTIVITAS_TANGKAP = {'TANGKAP_SIANG', 'TANGKAP_MALAM'}
 KELOMPOK_DATA = {
     'tata_ruang': ('Tata ruang (RTRW Provinsi, PKKPRL, RZWP-3-K)', 'Portal Satu Data KKP dan folder data KKP'),
     'kkprl': ('Izin KKPRL terbit', 'Portal Satu Data KKP'),
+    'izin_tambang': ('Izin usaha pertambangan (IUP/IUPK) 5 tahun terakhir', 'Geoportal ESDM (Ditjen Minerba)'),
     'infrastruktur': ('Infrastruktur pendukung', 'Portal Satu Data KKP dan OpenStreetMap'),
     'oseanografi': ('Oseanografi (suhu, klorofil, gelombang, arus, salinitas)', 'NOAA, NASA, HYCOM'),
     'aktivitas_tangkap': ('Aktivitas penangkapan ikan kapal berpelacak AIS', 'Global Fishing Watch'),
@@ -110,6 +118,7 @@ def _terbaru():
         return hasil
     hasil = {
         'kkprl': KKPRL.objects.aggregate(t=Max('updated_at'))['t'],
+        'izin_tambang': IzinTambang.objects.aggregate(t=Max('updated_at'))['t'],
         'ekosistem': SumberDayaAlam.objects.aggregate(t=Max('updated_at'))['t'],
         'bencana': ZonaRisikoBencana.objects.aggregate(t=Max('dibuat_pada'))['t'],
         'infrastruktur': InfrastrukturPendukung.objects.aggregate(t=Max('updated_at'))['t'],
@@ -240,7 +249,7 @@ def ringkasan_sumber():
                            _status(masa.get('tata_ruang'), len(lewat), len(zona)),
                            f'{len(lewat)} dari {len(zona)} provinsi melewati masa berlaku' if lewat else '')
 
-    for kunci in ('kkprl', 'infrastruktur', 'ekosistem', 'bencana', 'adat'):
+    for kunci in ('kkprl', 'izin_tambang', 'infrastruktur', 'ekosistem', 'bencana', 'adat'):
         t = terbaru[kunci]
         hasil[kunci] = (f'data per {_tanggal(t)}' if t else 'belum tersedia',
                         _status(masa.get(kunci), int(bool(lewat_masa(kunci, waktu=t))), int(bool(t))), '')
