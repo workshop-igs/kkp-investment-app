@@ -165,3 +165,53 @@ def hitung_luas_geodesik_ha(geometry):
     except Exception as e:
         logger.error(f'Gagal menghitung luas geodesic: {e}', exc_info=True)
         raise ValueError(f'Gagal menghitung luas area dari geometry: {e}')
+
+
+def nama_kabupaten(nama, jenis):
+    return f'Kab. {nama}' if nama and jenis == 'KAB' else nama or ''
+
+
+def _desa_terdekat(acuan):
+    from django.contrib.gis.db.models.functions import GeometryDistance
+    from django.db.models import CharField, Value
+    from django.db.models.functions import Cast, Coalesce, Concat
+
+    from inti.models import DesaKelurahan
+
+    return (
+        DesaKelurahan.objects.annotate(jarak=GeometryDistance('geometry', acuan))
+        .order_by('jarak')
+        .annotate(teks_alamat=Concat(
+            Cast('jarak', CharField()), Value('|'), 'jenis', Value('|'), 'nama', Value('|'),
+            Coalesce('kecamatan__nama', Value('')), Value('|'),
+            Coalesce('kecamatan__kabupaten__nama', Value('')), Value('|'),
+            Coalesce('kecamatan__kabupaten__jenis', Value('')),
+            output_field=CharField(),
+        ))
+        .values('teks_alamat')
+    )
+
+
+def anotasi_alamat(qs, bidang='geometry'):
+    from django.contrib.gis.db.models import GeometryField
+    from django.db.models import ExpressionWrapper, OuterRef, Subquery
+
+    acuan = ExpressionWrapper(OuterRef(bidang), output_field=GeometryField(srid=4326))
+    return qs.annotate(alamat=Subquery(_desa_terdekat(acuan)[:1]))
+
+
+def alamat_geometri(geom):
+    return teks_alamat(_desa_terdekat(geom.point_on_surface).values_list('teks_alamat', flat=True).first())
+
+
+def teks_alamat(teks):
+    if not teks:
+        return ''
+    jarak, jenis, desa, kecamatan, kabupaten, jenis_kab = teks.split('|')
+    alamat = ', '.join(filter(None, [
+        f'{jenis} {desa}', kecamatan and f'Kec. {kecamatan}', nama_kabupaten(kabupaten, jenis_kab),
+    ]))
+    km = float(jarak) * 111.32
+    if km == 0:
+        return alamat
+    return f"Perairan ±{f'{km:.1f}'.replace('.', ',') if km < 10 else f'{km:.0f}'} km dari {alamat}"

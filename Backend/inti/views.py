@@ -11,8 +11,9 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from penarikan_data.bps import kode_bps
 
-from .models import KabupatenKota, Provinsi, SektorInvestasi, SumberData
-from .peta_bbox import Simplify, jawaban_peta
+from .geospasial import nama_kabupaten
+from .models import DesaKelurahan, KabupatenKota, Kecamatan, Provinsi, SektorInvestasi, SumberData
+from .peta_bbox import PetaBBoxMixin, Simplify, jawaban_peta
 from .serializers import (
     KabupatenKotaSerializer,
     ProvinsiListSerializer,
@@ -249,6 +250,37 @@ class KabupatenKotaViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = KabupatenKotaSerializer
     filterset_fields = ['provinsi', 'jenis', 'pesisir']
     search_fields = ['nama']
+
+
+class KecamatanViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
+    queryset = Kecamatan.objects.all()
+    PETA_KOLOM = ('nama', 'kode', 'kabupaten__nama', 'kabupaten__jenis', 'provinsi__nama')
+
+    def properti_peta(self, r):
+        return {
+            'nama': r['nama'],
+            'kode': r['kode'],
+            'kabupaten': nama_kabupaten(r['kabupaten__nama'], r['kabupaten__jenis']),
+            'provinsi': r['provinsi__nama'],
+        }
+
+
+class DesaKelurahanViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
+    queryset = DesaKelurahan.objects.all()
+    PETA_KOLOM = (
+        'nama', 'jenis', 'kode', 'kecamatan__nama', 'kecamatan__kabupaten__nama', 'kecamatan__kabupaten__jenis',
+        'provinsi__nama',
+    )
+
+    def properti_peta(self, r):
+        return {
+            'nama': r['nama'],
+            'jenis': r['jenis'],
+            'kode': r['kode'],
+            'kecamatan': r['kecamatan__nama'],
+            'kabupaten': nama_kabupaten(r['kecamatan__kabupaten__nama'], r['kecamatan__kabupaten__jenis']),
+            'provinsi': r['provinsi__nama'],
+        }
 
 
 class SektorInvestasiViewSet(viewsets.ReadOnlyModelViewSet):

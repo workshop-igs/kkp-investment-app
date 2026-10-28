@@ -136,7 +136,7 @@ const PanelPencarian = ({ onTuju }) => {
       )}
       kaki={(
         <p className="px-4 py-2 text-[10.5px] text-slate-400 bg-slate-50 border-t border-slate-100 shrink-0 leading-snug">
-          Wilayah administratif baru sampai tingkat provinsi; kabupaten, kecamatan, dan kelurahan belum tersedia.
+          Wilayah administratif dapat dicari sampai desa/kelurahan.
         </p>
       )}
     >
