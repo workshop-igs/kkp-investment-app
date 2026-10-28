@@ -3,7 +3,7 @@ import {
   Activity, AlertTriangle, Anchor, ArrowDownToLine, BadgeDollarSign, BarChart3, Building2, ChevronDown, CloudRain,
   CloudSun, Compass, Container, Droplets, Eye, Factory, FileCheck, Fish, Flower2, FlaskConical, GitFork, GraduationCap, Info,
   LandPlot, Layers, Layers3, Leaf, Loader2, Map as IkonPeta, MapPinned, Moon, Mountain, MoveDownRight, Navigation,
-  Navigation2, Plane, Plug, PlugZap, Route, ScrollText, Search, Shell, ShieldAlert, Ship, Shrink, Sprout, Sun,
+  Navigation2, Pickaxe, Plane, Plug, PlugZap, Route, ScrollText, Search, Shell, ShieldAlert, Ship, Shrink, Sprout, Sun,
   SunMedium, Target, Thermometer, ThermometerSnowflake, ThermometerSun, Timer, Trees, TrendingDown, Users,
   TreePalm, UtilityPole, Waves, Waypoints, Wind, X, Zap, ZoomIn,
 } from 'lucide-react';
@@ -30,6 +30,7 @@ const KATEGORI = [
     ikon: FileCheck,
     layer: [
       { id: 'kkprl', nama: 'KKPRL Nasional', warna: '#10b981', ikon: ScrollText },
+      { id: 'iup_esdm', nama: 'IUP Minerba ESDM', warna: '#92400e', ikon: Pickaxe },
     ],
   },
   {

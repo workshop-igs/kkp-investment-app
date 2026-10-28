@@ -14,6 +14,7 @@ SELANG_JAM = 24 * 90
 
 JADWAL = [
     ('KKP-KKPRL', 'kkprl', 'Izin KKPRL, Portal Satu Data KKP', 'tarik_kkprl_wfs', True),
+    ('ESDM-IUP', 'izin_tambang', 'Izin usaha pertambangan 5 tahun terakhir, Geoportal ESDM', 'tarik_iup_esdm', False),
     ('KKP-INFRA', 'infrastruktur', 'Infrastruktur, Portal Satu Data KKP', 'tarik_infrastruktur_wfs', True),
     ('OSM-INFRA', 'infrastruktur', 'Bandara, gardu induk, kampus, dan listrik 20 kV, OpenStreetMap', 'tarik_infrastruktur_osm', True),
     ('OSEANOGRAFI', 'oseanografi', 'Oseanografi 12 bulan terakhir, NOAA dan NASA', 'tarik_oseanografi', True),

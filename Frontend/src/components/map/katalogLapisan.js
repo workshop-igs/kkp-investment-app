@@ -355,6 +355,28 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         <b>Provinsi:</b> ${aman(p.provinsi || '-')}</div>
       </div>`,
   },
+  iup_esdm: {
+    url: '/inventarisasi/izin-tambang/peta/',
+    urlWilayah: '/inventarisasi/izin-tambang/wilayah/',
+    label: 'IUP Minerba ESDM',
+    legenda: 'tunggal',
+    warnaContoh: '#92400e',
+    keteranganLegenda: 'Wilayah IUP dan IUPK yang mulai berlaku dalam 5 tahun terakhir.',
+    sumberData: 'Geoportal ESDM (Ditjen Minerba)',
+    zoomPin: 8,
+    gaya: { color: '#92400e', weight: 1.5, fillColor: '#b45309', fillOpacity: 0.3 },
+    ikon: 'kristal',
+    warnaIkon: '#92400e',
+    popup: (p) =>
+      `<div class="font-sans">
+        <h3 class="font-bold mb-1" style="color:#92400e">${aman(p.nama || 'Pemegang izin')}</h3>
+        <p class="text-xs text-slate-600 border-b pb-1 mb-1">${aman([p.jenis_izin, p.kegiatan, p.komoditas].filter(Boolean).join(' · '))}</p>
+        <div class="text-xs"><b>No. SK:</b> ${aman(p.sk || '-')}<br/>
+        <b>Berlaku:</b> ${aman(p.berlaku || '-')}${p.berakhir ? ` s.d. ${aman(p.berakhir)}` : ''}<br/>
+        <b>Luas:</b> ${aman(String(p.luas_ha ?? '-'))} ha<br/>
+        <b>Wilayah:</b> ${aman([p.kabupaten, p.provinsi].filter(Boolean).join(', ') || '-')}</div>
+      </div>`,
+  },
   rtrl: {
     url: '/inventarisasi/unsur-ruang/peta/',
     params: { kelompok: 'RTRL' },
