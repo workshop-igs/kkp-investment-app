@@ -205,14 +205,22 @@ def skor_prediksi(prediksi_keuntungan: float, investasi_miliar: float) -> Tuple[
     }
 
 
-def _determine_decision(total_score: float, kesesuaian_tr: bool, npv: float) -> Tuple[str, str]:
-    layak_threshold = atur('DECISION_THRESHOLDS')['layak']['min_score']
-    bersyarat_threshold = atur('DECISION_THRESHOLDS')['bersyarat']['min_score']
+def _syarat_terpenuhi(syarat: Dict, kesesuaian_tr: bool, npv: float) -> bool:
+    if syarat.get('require_tata_ruang') and not kesesuaian_tr:
+        return False
+    if syarat.get('require_npv_positive') and not npv > 0:
+        return False
+    return not syarat.get('require_tata_ruang_or_npv') or kesesuaian_tr or npv > 0
 
-    if total_score >= layak_threshold and kesesuaian_tr and npv > 0:
+
+def _determine_decision(total_score: float, kesesuaian_tr: bool, npv: float) -> Tuple[str, str]:
+    layak = atur('DECISION_THRESHOLDS')['layak']
+    bersyarat = atur('DECISION_THRESHOLDS')['bersyarat']
+
+    if total_score >= layak['min_score'] and _syarat_terpenuhi(layak, kesesuaian_tr, npv):
         keputusan = 'LAYAK'
         prioritas = 'TINGGI' if total_score >= atur('PRIORITY_THRESHOLDS')['tinggi'] else 'SEDANG'
-    elif total_score >= bersyarat_threshold and (kesesuaian_tr or npv > 0):
+    elif total_score >= bersyarat['min_score'] and _syarat_terpenuhi(bersyarat, kesesuaian_tr, npv):
         keputusan = 'BERSYARAT'
         prioritas = 'SEDANG' if total_score >= atur('PRIORITY_THRESHOLDS')['sedang_bersyarat'] else 'RENDAH'
     else:
@@ -250,23 +258,31 @@ def _rupiah(nilai: float) -> str:
 
 
 def _temuan_keputusan(keputusan: str, skor: float, kesesuaian_tr: bool, npv: float) -> str:
-    batas_layak = atur('DECISION_THRESHOLDS')['layak']['min_score']
-    batas_bersyarat = atur('DECISION_THRESHOLDS')['bersyarat']['min_score']
+    layak = atur('DECISION_THRESHOLDS')['layak']
+    bersyarat = atur('DECISION_THRESHOLDS')['bersyarat']
+    batas_layak = layak['min_score']
+    batas_bersyarat = bersyarat['min_score']
     skor_teks = _angka_id(skor, 2)
 
     if keputusan == 'LAYAK':
-        return (
-            f'Keputusan LAYAK pada skor gabungan {skor_teks}: melewati ambang '
-            f'{_angka_id(batas_layak, 2)}, lokasi sesuai rencana tata ruang, dan NPV positif.'
-        )
+        syarat = [f'melewati ambang {_angka_id(batas_layak, 2)}']
+        if layak.get('require_tata_ruang'):
+            syarat.append('lokasi sesuai rencana tata ruang')
+        if layak.get('require_npv_positive'):
+            syarat.append('NPV positif')
+        if len(syarat) > 1:
+            syarat[-1] = ('dan ' if len(syarat) > 2 else '') + syarat[-1]
+        pemisah = ', ' if len(syarat) > 2 else ' dan '
+        return f'Keputusan LAYAK pada skor gabungan {skor_teks}: {pemisah.join(syarat)}.'
 
     ambang = batas_layak if keputusan == 'BERSYARAT' else batas_bersyarat
     sebab = []
     if skor < ambang:
         sebab.append(f'skor gabungan {skor_teks} di bawah ambang {_angka_id(ambang, 2)}')
-    if not kesesuaian_tr:
+    atau = bersyarat.get('require_tata_ruang_or_npv')
+    if not kesesuaian_tr and (layak.get('require_tata_ruang') or atau):
         sebab.append('lokasi belum sesuai rencana tata ruang laut')
-    if npv is not None and npv <= 0:
+    if npv is not None and npv <= 0 and (layak.get('require_npv_positive') or atau):
         sebab.append('NPV tidak positif')
 
     label = 'TIDAK LAYAK' if keputusan == 'TIDAK_LAYAK' else 'BERSYARAT'
