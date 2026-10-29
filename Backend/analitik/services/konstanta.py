@@ -464,13 +464,6 @@ KRITERIA_JENIS = {
             'unggulan': {'kd490': [None, 0.1], 'jarak_zona_budidaya_km': [None, 10.0], 'jarak_muara_pelabuhan_km': [10.0, None],
                          'jarak_bandara_lab_km': [None, 100.0], 'shannon': [3.0, None]},
         },
-        'BIOTEK_FARMASI': {
-            'nama': 'Farmasi & Nutrasetikal', 'ranah': ['LAUT'],
-            'kriteria': {'karang': [1, None], 'shannon': [2.0, None], 'jarak_muara_pelabuhan_km': [5.0, None],
-                         'jarak_bandara_lab_km': [None, 150.0]},
-            'unggulan': {'karang': [1, None], 'shannon': [3.0, None], 'jarak_muara_pelabuhan_km': [10.0, None],
-                         'jarak_bandara_lab_km': [None, 100.0]},
-        },
         'BIOTEK_BIOPLASTIK': {
             'nama': 'Bioplastik Ramah Lingkungan', 'ranah': ['DARAT'],
             'kriteria': {'jarak_zona_budidaya_km': [None, 30.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
