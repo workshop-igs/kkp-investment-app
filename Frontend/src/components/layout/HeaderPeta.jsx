@@ -13,7 +13,7 @@ const PROFIL = { label: 'Profil Investasi', link: '/profil-investasi', ikon: Fil
 
 const MENU_TAMU = [BERANDA, PETA, PROFIL];
 
-const MENU_PENGGUNA = [
+const MENU_PORTOFOLIO = [
   BERANDA,
   { label: 'Dashboard Nasional', link: '/dashboard', ikon: LayoutDashboard },
   { label: 'Proyek Investasi', link: '/pipeline', ikon: BriefcaseBusiness },
@@ -46,7 +46,7 @@ const kelasMenu = (aktif) => `flex h-10 items-center gap-2 whitespace-nowrap rou
 const HeaderPeta = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, bolehPortofolio, logout } = useAuth();
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
@@ -55,8 +55,9 @@ const HeaderPeta = () => {
   const bolehAdmin = Boolean(user?.is_staff);
   const menuItems = useMemo(() => {
     if (!isAuthenticated) return MENU_TAMU;
-    return bolehAdmin ? [...MENU_PENGGUNA, ADMIN_MENU] : MENU_PENGGUNA;
-  }, [bolehAdmin, isAuthenticated]);
+    const menu = bolehPortofolio ? MENU_PORTOFOLIO : MENU_TAMU;
+    return bolehAdmin ? [...menu, ADMIN_MENU] : menu;
+  }, [bolehAdmin, bolehPortofolio, isAuthenticated]);
   const userMenuRef = useRef(null);
   const diPeta = location.pathname === '/peta';
   const aktif = (item) => (item.submenus ? location.pathname.startsWith('/admin') : location.pathname === item.link);

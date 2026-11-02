@@ -44,6 +44,7 @@ from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
 from pipeline.models import ProyekInvestasi
 
 from .audit import catat, potret, selisih, simpan_berjejak
+from .izin import LEVEL, level
 from .kbli import ringkas
 from .kesehatan import periksa_semua
 from .serializers import SektorInvestasiSerializer
@@ -55,7 +56,7 @@ from .serializers_admin import (
     KetentuanSektorSerializer,
     KompetensiSektorSerializer,
     ParameterTambahanSerializer,
-    TambahAdminSerializer,
+    TambahAkunSerializer,
 )
 
 
@@ -69,10 +70,12 @@ class AdminUserViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminUser]
 
     def create(self, request, *args, **kwargs):
-        serializer = TambahAdminSerializer(data=request.data)
+        serializer = TambahAkunSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if serializer.validated_data['level'] == 'ADMIN' and not request.user.is_superuser:
+            raise PermissionDenied('Hanya Super Admin yang dapat membuat akun Administrator.')
         user = serializer.save()
-        catat(request, f"Menambahkan akun administrator '{_nama_akun(user)}'", f'Akun @{user.username}')
+        catat(request, f"Menambahkan akun '{_nama_akun(user)}' dengan level {LEVEL[level(user)]}", f'Akun @{user.username}')
         return Response(AdminUserSerializer(user).data, status=status.HTTP_201_CREATED)
 
     def perform_update(self, serializer):
@@ -85,23 +88,28 @@ class AdminUserViewSet(viewsets.ModelViewSet):
                            lambda k: str(ProfilPengguna._meta.get_field(k).verbose_name).capitalize())
         catat(self.request, f"Mengubah akun '{_nama_akun(user)}'", f'Akun @{user.username}', rincian)
 
-    @action(detail=True, methods=['post'], url_path='akses-admin')
-    def akses_admin(self, request, pk=None):
-        if not request.user.is_superuser:
-            raise PermissionDenied('Hanya Super Admin yang dapat mengubah akses administrator.')
+    @action(detail=True, methods=['post'], url_path='level')
+    def ubah_level(self, request, pk=None):
         sasaran = self.get_object()
+        baru = request.data.get('level')
+        if baru not in LEVEL:
+            raise ValidationError({'detail': 'Level akses tidak dikenal.'})
         if sasaran.pk == request.user.pk:
-            raise ValidationError({'detail': 'Anda tidak dapat mengubah akses administrator akun Anda sendiri.'})
+            raise ValidationError({'detail': 'Anda tidak dapat mengubah level akses akun Anda sendiri.'})
         if sasaran.is_superuser:
-            raise ValidationError({'detail': 'Akses Super Admin tidak dapat dicabut.'})
-        jadi = bool(request.data.get('admin'))
-        if sasaran.is_staff != jadi:
-            sasaran.is_staff = jadi
+            raise ValidationError({'detail': 'Level akses Super Admin tidak dapat diubah.'})
+        lama = level(sasaran)
+        if 'ADMIN' in (lama, baru) and lama != baru and not request.user.is_superuser:
+            raise PermissionDenied('Hanya Super Admin yang dapat memberi atau mencabut level Administrator.')
+        with transaction.atomic():
+            sasaran.is_staff = baru == 'ADMIN'
             sasaran.save(update_fields=['is_staff'])
-        kalimat = (f"Menjadikan akun '{_nama_akun(sasaran)}' sebagai administrator" if jadi
-                   else f"Mencabut akses administrator dari akun '{_nama_akun(sasaran)}'")
-        catat(request, kalimat, f'Akun @{sasaran.username}', [f"Administrator: {'Tidak → Ya' if jadi else 'Ya → Tidak'}"])
-        return Response(AdminUserSerializer(sasaran).data)
+            profil, _ = ProfilPengguna.objects.get_or_create(user=sasaran)
+            profil.akses_portofolio = baru == 'PENUH'
+            profil.save(update_fields=['akses_portofolio'])
+        catat(request, f"Mengubah level akses akun '{_nama_akun(sasaran)}'", f'Akun @{sasaran.username}',
+              [f'Level: {LEVEL[lama]} → {LEVEL[baru]}'])
+        return Response(AdminUserSerializer(User.objects.select_related('profil').get(pk=sasaran.pk)).data)
 
     def destroy(self, request, *args, **kwargs):
         sasaran = self.get_object()

@@ -360,7 +360,9 @@ export class Kanvas {
   tabel(kolom, baris, lebarKolom) {
     if (!baris?.length) return;
     const d = this.doc;
-    const lk = lebarKolom || kolom.map((_, i) => (i === 0 ? (LEBAR - 8) * 0.5 : (LEBAR - 8) * 0.5 / (kolom.length - 1)));
+    const minta = lebarKolom || kolom.map((_, i) => (i === 0 ? (LEBAR - 8) * 0.5 : (LEBAR - 8) * 0.5 / (kolom.length - 1)));
+    const skala = Math.min(1, (LEBAR - 8) / minta.reduce((a, b) => a + b, 0));
+    const lk = minta.map((l) => l * skala);
 
     const kepala = () => {
       this.ruang(13);
@@ -371,9 +373,10 @@ export class Kanvas {
       d.setFontSize(5.9);
       let x = TEPI + 4;
       kolom.forEach((k, i) => {
+        const judul = bersih(k).toUpperCase();
         d.text(
-          bersih(k).toUpperCase(),
-          i === 0 ? x : x + lk[i],
+          judul,
+          i === 0 ? x : x + lk[i] - 0.12 * judul.length,
           this.y,
           { align: i === 0 ? 'left' : 'right', charSpace: 0.12 }
         );
@@ -388,21 +391,23 @@ export class Kanvas {
 
     kepala();
     baris.forEach((r, idx) => {
+      d.setFont(FONT, 'normal');
+      d.setFontSize(T.tabel);
+      const sel = r.map((isi, i) => d.splitTextToSize(bersih(isi ?? '-'), lk[i] - 3));
+      const tambahan = (Math.max(...sel.map((b) => b.length)) - 1) * ((T.tabel * 1.15 * 25.4) / 72);
       const sebelum = this.halaman;
-      this.ruang(6.4);
+      this.ruang(6.4 + tambahan);
       if (this.halaman !== sebelum) kepala();
 
       d.setFont(FONT, 'normal');
       d.setFontSize(T.tabel);
       let x = TEPI + 4;
-      r.forEach((sel, i) => {
+      sel.forEach((b, i) => {
         d.setTextColor(...(i === 0 ? GELAP : ABU));
-        const teks = bersih(sel ?? '-');
-        const potong = i === 0 ? d.splitTextToSize(teks, lk[0] - 2)[0] : teks;
-        d.text(potong, i === 0 ? x : x + lk[i], this.y, { align: i === 0 ? 'left' : 'right' });
+        d.text(b, i === 0 ? x : x + lk[i], this.y, { align: i === 0 ? 'left' : 'right' });
         x += lk[i];
       });
-      this.y += 2;
+      this.y += 2 + tambahan;
 
       if (idx < baris.length - 1) {
         d.setDrawColor(...GARIS);

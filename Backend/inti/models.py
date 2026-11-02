@@ -163,6 +163,9 @@ class ProfilPengguna(models.Model):
         Provinsi, on_delete=models.SET_NULL, null=True, blank=True, help_text='Provinsi wilayah kerja'
     )
     telepon = models.CharField(max_length=20, blank=True)
+    akses_portofolio = models.BooleanField(
+        default=False, help_text='Boleh membuka Dashboard Nasional dan Proyek Investasi'
+    )
     terakhir_aktif = models.DateTimeField(
         null=True, blank=True, db_index=True, help_text='Permintaan terakhir dari akun ini (diperbarui paling sering per menit)'
     )

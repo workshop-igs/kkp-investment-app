@@ -15,7 +15,7 @@ JALUR_KHUSUS = (
     ('/analitik/analisis/', 'ANALISIS', 'Menjalankan analisis kelayakan'),
     ('/auth/ganti-sandi/', 'UBAH', 'Mengganti kata sandi'),
     ('/auth/me/', 'UBAH', 'Memperbarui data diri'),
-    ('/admin/users/', 'BUAT', 'Menambahkan akun administrator'),
+    ('/admin/users/', 'BUAT', 'Menambahkan akun'),
     ('/analitik/laporan-spasial/', 'ANALISIS', 'Menyusun laporan analisis area'),
     ('/analitik/screening/', 'ANALISIS', 'Menyaring lokasi potensial'),
     ('/analitik/sebaran-tenaga-kerja/', 'ANALISIS', 'Menghitung sebaran tenaga kerja'),

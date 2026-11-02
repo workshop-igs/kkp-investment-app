@@ -15,6 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { api } from '../api/klien';
+import { useAuth } from '../context/KonteksAuth';
 import PetaProyek from '../components/map/PetaProyek';
 import KartuLaporan, {
   AngkaBesar,
@@ -113,6 +114,7 @@ const WARNA_KELAS_RISIKO = {
 const LaporanAnalisisPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { bolehPortofolio } = useAuth();
   const { result, geometry, namaProyek, investor, lokasiDetail } =
     location.state || {};
   const subJenis = result?.screening?.sub_jenis;
@@ -521,7 +523,7 @@ const LaporanAnalisisPage = () => {
             >
               <Printer className="w-4 h-4" />
             </button>
-            <button
+            {bolehPortofolio && <button
               onClick={simpanKePipeline}
               disabled={menyimpan}
               title="Simpan proyek ini ke daftar Proyek Investasi"
@@ -537,7 +539,7 @@ const LaporanAnalisisPage = () => {
               <span className="hidden sm:inline">
                 {menyimpan ? 'Menyimpan…' : 'Simpan ke Proyek Investasi'}
               </span>
-            </button>
+            </button>}
           </div>
         </div>
 

@@ -318,15 +318,6 @@ KRITERIA_JENIS = {
             'unggulan': {'jarak_zona_budidaya_km': [None, 10.0], 'jarak_listrik_km': [None, 1.0],
                          'jarak_jalan_nasional_km': [None, 1.0], 'jarak_pelabuhan_ekspor_km': [None, 50.0]},
         },
-        'OLAH_SIAP_SAJI': {
-            'nama': 'Produk Siap Masak/Makan (Value-Added Products)', 'kbli': '10218', 'ranah': ['DARAT'],
-            'kriteria': {'jarak_pelabuhan_ekspor_km': [None, 60.0], 'jarak_pelabuhan_perikanan_km': [None, 60.0],
-                         'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0],
-                         'produksi_ikan_kabupaten_ton': [5000.0, None]},
-            'unggulan': {'jarak_pelabuhan_ekspor_km': [None, 25.0], 'jarak_pelabuhan_perikanan_km': [None, 30.0],
-                         'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0],
-                         'produksi_ikan_kabupaten_ton': [20000.0, None]},
-        },
     },
     'PARIWISATA_BAHARI': {
         'WISATA_RESOR': {
@@ -379,13 +370,6 @@ KRITERIA_JENIS = {
                          'tunggang_pasut': [None, 3.5], 'jarak_alur_km': [None, 100.0], 'jarak_muara_km': [5.0, None]},
             'unggulan': {'kedalaman': [10.0, None], 'jarak_pantai_km': [None, 0.5], 'gelombang': [None, 1.0],
                          'tunggang_pasut': [None, 3.0], 'jarak_alur_km': [None, 50.0], 'jarak_muara_km': [10.0, None]},
-        },
-        'JASA_SALVAGE': {
-            'nama': 'Penyelamatan Laut & Pekerjaan Bawah Air (Salvage & Underwater Work)', 'kbli': '52226', 'ranah': ['LAUT'],
-            'kriteria': {'jarak_alur_km': [None, 50.0], 'jarak_pelabuhan_ekspor_km': [None, 60.0],
-                         'jarak_pantai_km': [None, 2.0], 'gelombang': [None, 2.0]},
-            'unggulan': {'jarak_alur_km': [None, 20.0], 'jarak_pelabuhan_ekspor_km': [None, 30.0],
-                         'jarak_pantai_km': [None, 1.0], 'gelombang': [None, 1.5]},
         },
     },
     'INFRASTRUKTUR_LAUT': {

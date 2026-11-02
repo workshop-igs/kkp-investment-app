@@ -111,15 +111,10 @@ const Pilihan = ({ nilai, onUbah, kosong, opsi, label }) => (
   </select>
 );
 
-const Kpi = ({ label, nilai, sub, sorot, persen }) => (
+const Kpi = ({ label, nilai, sub, sorot }) => (
   <div className="min-w-0 rounded-xl bg-white/[0.06] px-4 py-3 ring-1 ring-inset ring-white/10">
     <p className="truncate text-xs text-white/60">{label}</p>
     <p className={`mt-1 truncate text-[1.75rem] font-bold leading-tight tracking-tight tabular-nums ${sorot ? 'text-[#BFE9F4]' : 'text-white'}`}>{nilai}</p>
-    {persen !== undefined && (
-      <span className="mt-1.5 block h-1 overflow-hidden rounded-full bg-white/15">
-        <span className="block h-full rounded-full bg-kkp-hijau" style={{ width: `${Math.min(100, persen)}%` }} />
-      </span>
-    )}
     <p className="mt-1 truncate text-xs text-white/50">{sub}</p>
   </div>
 );
@@ -288,8 +283,6 @@ const DashboardPage = () => {
   const namaProvinsi = daftarProvinsi.find(([id]) => id === provinsi)?.[1];
 
   const rencana = jumlah(proyek, 'nilai_investasi_miliar');
-  const realisasi = jumlah(proyek, 'nilai_realisasi_miliar');
-  const persenRealisasi = rencana > 0 ? (realisasi / rencana) * 100 : 0;
   const berskor = proyek.filter((p) => p.skor_kelayakan !== null && p.skor_kelayakan !== undefined);
   const rataSkor = berskor.length ? (jumlah(berskor, 'skor_kelayakan') / berskor.length) * 100 : null;
 
@@ -412,10 +405,9 @@ const DashboardPage = () => {
               <Kpi label="Provinsi" nilai={angka(provinsiLokasi)} sub={provinsi ? namaProvinsi : `dari ${angka(data?.summary?.total_provinsi)}`} />
               <Kpi label="Luas lokasi" nilai={angka(jumlah(potensi, 'luas_ha'))} sub="hektare" />
             </Grup>
-            <Grup judul="Portofolio proyek" kolom="sm:grid-cols-4">
+            <Grup judul="Portofolio proyek" kolom="sm:grid-cols-3">
               <Kpi label="Proyek" nilai={angka(proyek.length)} sub={rataSkor === null ? 'skor —' : `skor rata-rata ${angka(rataSkor)}%`} />
               <Kpi label="Nilai rencana" nilai={rupiah(rencana)} sub={`${angka(jumlah(proyek, 'luas_ha'))} ha area`} />
-              <Kpi label="Realisasi" nilai={`${angka(persenRealisasi, 1)}%`} sub={rupiah(realisasi)} persen={persenRealisasi} />
               <Kpi label="Tenaga kerja" nilai={angka(jumlah(proyek, 'proyeksi_tenaga_kerja'))} sub="orang" />
             </Grup>
           </div>

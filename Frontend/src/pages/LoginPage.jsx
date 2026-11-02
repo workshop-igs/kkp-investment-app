@@ -31,7 +31,7 @@ const LoginPage = () => {
   const [error, setError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
 
-  const from = location.state?.from?.pathname || '/dashboard';
+  const tujuan = (u) => location.state?.from?.pathname || (u.level === 'DASAR' ? '/peta' : '/dashboard');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,9 +45,9 @@ const LoginPage = () => {
 
     try {
       const res = await login(username, password);
-      setSuccessMsg(`Selamat datang, ${res.user.full_name}! Mengalihkan ke dashboard...`);
+      setSuccessMsg(`Selamat datang, ${res.user.full_name}! Mengalihkan...`);
       setTimeout(() => {
-        navigate(from, { replace: true });
+        navigate(tujuan(res.user), { replace: true });
       }, 700);
     } catch (err) {
       setError(err.message || 'Gagal masuk. Periksa kembali username dan kata sandi Anda.');
@@ -64,7 +64,7 @@ const LoginPage = () => {
       const res = await demoLogin(demoUsername);
       setSuccessMsg(`Login berhasil sebagai ${res.user.full_name}! Mengalihkan...`);
       setTimeout(() => {
-        navigate(from, { replace: true });
+        navigate(tujuan(res.user), { replace: true });
       }, 700);
     } catch (err) {
       setError(err.message || 'Demo login gagal.');
