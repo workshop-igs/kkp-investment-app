@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, Edit2, Loader2, Map as IkonPeta, MapPin, Search, Trash2, X } from 'lucide-react';
 import { api, ambilDaftar } from '../../api/klien';
-import { rupiahMiliar } from '../../utils/pemformat';
+import { labelKbli, rupiahMiliar } from '../../utils/pemformat';
 import { LABEL_TAHAPAN, TAHAPAN_PROYEK } from '../../utils/konstanta';
 
 const KELAS_ISIAN = 'w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-kkp-700/20 focus:border-kkp-700';
@@ -104,7 +104,7 @@ const UbahProyek = ({ proyek, sektor, provinsi, onTutup, onSelesai }) => {
   );
 
   return (
-    <Dialog judul={`Ubah Proyek ${proyek.kode_proyek}`} onTutup={() => !menyimpan && onTutup()} lebar="max-w-3xl">
+    <Dialog judul={`Ubah Proyek ${proyek.nama}`} onTutup={() => !menyimpan && onTutup()} lebar="max-w-3xl">
       <form onSubmit={simpan} className="p-6 space-y-5">
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="sm:col-span-2">{medan('Nama proyek', 'nama', { required: true, maxLength: 255 })}</div>
@@ -178,7 +178,7 @@ const HapusProyek = ({ proyek, onTutup, onSelesai }) => {
         <div className="flex items-start gap-3">
           <div className="p-2 rounded-lg bg-rose-100 text-rose-600 shrink-0"><AlertTriangle className="w-5 h-5" /></div>
           <div className="text-sm text-slate-700 space-y-2">
-            <p>Hapus proyek <b>{proyek.nama}</b> ({proyek.kode_proyek})?</p>
+            <p>Hapus proyek <b>{proyek.nama}</b> ({labelKbli(proyek.sub_sektor_kbli)})?</p>
             <p className="text-xs text-slate-500">
               Proyek beserta riwayat tahapnya terhapus permanen dan hilang dari daftar Proyek Investasi, dashboard, dan peta.
             </p>
@@ -237,7 +237,7 @@ const AdminPipelinePage = () => {
   const tersaring = useMemo(() => {
     const kata = saring.cari.trim().toLowerCase();
     return projects.filter((p) =>
-      (!kata || [p.nama, p.kode_proyek, p.investor, p.investor_nama].some((t) => t?.toLowerCase().includes(kata)))
+      (!kata || [p.nama, p.sub_sektor_kbli?.kode, p.investor, p.investor_nama].some((t) => t?.toLowerCase().includes(kata)))
       && (!saring.status || p.status === saring.status)
       && (!saring.sektor || String(p.sektor) === saring.sektor)
       && (!saring.provinsi || String(p.provinsi) === saring.provinsi));
@@ -282,7 +282,7 @@ const AdminPipelinePage = () => {
             type="text"
             value={saring.cari}
             onChange={aturSaring('cari')}
-            placeholder="Cari nama proyek, kode, atau investor…"
+            placeholder="Cari nama proyek, kode KBLI, atau investor…"
             className="w-full bg-white border border-slate-300 rounded-lg text-sm pl-9 pr-3 py-2 focus:outline-none focus:border-sky-500 text-slate-800"
           />
         </div>
@@ -318,7 +318,7 @@ const AdminPipelinePage = () => {
                 <tr key={p.id} className="hover:bg-slate-50/50">
                   <td className="px-6 py-4">
                     <div className="font-bold text-slate-900">{p.nama}</div>
-                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">{p.kode_proyek} • {p.sektor_nama || 'Tanpa jenis'}</div>
+                    <div className="text-[11px] text-slate-500 font-mono mt-0.5">{labelKbli(p.sub_sektor_kbli)} • {p.sektor_nama || 'Tanpa jenis'}</div>
                   </td>
                   <td className="px-6 py-4">
                     <div className="font-medium text-slate-700">{p.investor || p.investor_nama || '-'}</div>
