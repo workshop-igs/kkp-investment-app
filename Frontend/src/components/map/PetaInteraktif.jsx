@@ -12,8 +12,9 @@ import PanelDetailProvinsi from './PanelDetailProvinsi';
 import LegendaPeta from './LegendaPeta';
 import LapisanVektorBBox from './LapisanVektorBBox';
 import TurPeta from './TurPeta';
+import { PitaStatusLapisan } from './PanelDaftarLapisan';
 import {
-  BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, lapisanParameter, urlCitraOseanografi,
+  BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, lapisanParameter, penanganCitra, urlCitraOseanografi,
 } from './katalogLapisan';
 import { useAuth } from '../../context/KonteksAuth';
 
@@ -211,6 +212,7 @@ const PetaInteraktif = ({
     setSektorLapisan((sebelum) => ({ ...sebelum, [idLapisan]: kodeSektor }));
 
   const [statusLapisan, setStatusLapisan] = useState({});
+  const [cobaLagi, setCobaLagi] = useState({});
   const catatStatus = useCallback((idLapisan, status) => {
     setStatusLapisan((sebelum) => {
       if (status === null) {
@@ -433,8 +435,9 @@ const PetaInteraktif = ({
             .filter((id) => katalog[id]?.citra)
             .map((id) => (
               <ImageOverlay
-                key={`citra-${id}`}
+                key={`citra-${id}-${cobaLagi[id] || 0}`}
                 url={urlCitraOseanografi(katalog[id].citra)}
+                eventHandlers={penanganCitra((st) => catatStatus(id, st))}
                 errorOverlayUrl={CITRA_KOSONG}
                 bounds={BATAS_OSEANOGRAFI}
                 pane="tilePane"
@@ -447,7 +450,7 @@ const PetaInteraktif = ({
             .filter((id) => katalog[id]?.url)
             .map((id) => (
               <LapisanVektorBBox
-                key={`lokal-${id}`}
+                key={`lokal-${id}-${cobaLagi[id] || 0}`}
                 url={katalog[id].url}
                 params={{
                   ...(katalog[id].params || {}),
@@ -603,6 +606,11 @@ const PetaInteraktif = ({
           layerAktif={activeDataLayers}
           sektorLapisan={sektorLapisan}
           setSektorLapisan={pilihSektorLapisan}
+        />
+
+        <PitaStatusLapisan
+          statusLapisan={statusLapisan}
+          onCobaLagi={(id) => setCobaLagi((c) => ({ ...c, [id]: (c[id] || 0) + 1 }))}
         />
 
         <PanelDetailProvinsi fitur={provinsiTerpilih} onTutup={() => setProvinsiTerpilih(null)} />

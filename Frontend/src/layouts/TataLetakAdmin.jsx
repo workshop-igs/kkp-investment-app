@@ -32,7 +32,7 @@ const TataLetakAdmin = () => {
       judul: 'Data & Master',
       items: [
         { name: 'Proyek Investasi', path: '/admin/pipeline', icon: Briefcase },
-        { name: 'Sektor Investasi', path: '/admin/sectors', icon: Map },
+        { name: 'Jenis Investasi', path: '/admin/sectors', icon: Map },
       ],
     },
     {

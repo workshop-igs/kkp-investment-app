@@ -5,7 +5,8 @@ import 'leaflet/dist/leaflet.css';
 import KontrolPeta from './KontrolPeta';
 import LapisanVektorBBox from './LapisanVektorBBox';
 import LegendaPeta from './LegendaPeta';
-import { BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, urlCitraOseanografi } from './katalogLapisan';
+import { BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, penanganCitra, urlCitraOseanografi } from './katalogLapisan';
+import { PitaStatusLapisan } from './PanelDaftarLapisan';
 
 const PenyesuaiUkuran = () => {
   const map = useMap();
@@ -42,6 +43,7 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
   const [lapisanAktif, setLapisanAktif] = useState([]);
   const [wilayahLapisan, setWilayahLapisan] = useState({});
   const [statusLapisan, setStatusLapisan] = useState({});
+  const [cobaLagi, setCobaLagi] = useState({});
   const [modeUkur, setModeUkur] = useState(false);
 
   const basemapUrl = {
@@ -105,8 +107,9 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
         .filter((id) => LAYER_LOKAL[id]?.citra)
         .map((id) => (
           <ImageOverlay
-            key={`citra-${id}`}
+            key={`citra-${id}-${cobaLagi[id] || 0}`}
             url={urlCitraOseanografi(LAYER_LOKAL[id].citra)}
+            eventHandlers={penanganCitra((st) => catatStatus(id, st))}
             errorOverlayUrl={CITRA_KOSONG}
             bounds={BATAS_OSEANOGRAFI}
             pane="tilePane"
@@ -119,7 +122,7 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
         .filter((id) => LAYER_LOKAL[id]?.url)
         .map((id) => (
           <LapisanVektorBBox
-            key={`lokal-${id}`}
+            key={`lokal-${id}-${cobaLagi[id] || 0}`}
             url={LAYER_LOKAL[id].url}
             params={{
               ...(LAYER_LOKAL[id].params || {}),
@@ -170,6 +173,11 @@ const PetaProyek = ({ posisi, tampilkanPerkakas = false }) => {
       daftarLayer={LAYER_WMS}
       daftarLokal={LAYER_LOKAL}
       layerAktif={lapisanAktif}
+    />
+
+    <PitaStatusLapisan
+      statusLapisan={statusLapisan}
+      onCobaLagi={(id) => setCobaLagi((c) => ({ ...c, [id]: (c[id] || 0) + 1 }))}
     />
     </>
   );

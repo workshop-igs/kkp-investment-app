@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from inti.audit import catat, simpan_berjejak
 from inti.geospasial import kabupaten_dari_geometri, provinsi_dari_geometri
 
 from .models import ProyekInvestasi, RekapRealisasi
@@ -36,7 +37,8 @@ class ProyekInvestasiViewSet(viewsets.ModelViewSet):
         return qs
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user if self.request.user.is_authenticated else None)
+        p = serializer.save(created_by=self.request.user if self.request.user.is_authenticated else None)
+        catat(self.request, f"Menambahkan proyek '{p.nama}'", f'Proyek {p.kode_proyek}')
 
     def perform_update(self, serializer):
         instance = serializer.instance
@@ -45,7 +47,12 @@ class ProyekInvestasiViewSet(viewsets.ModelViewSet):
             instance._history_catatan = catatan_request
         if self.request.user and self.request.user.is_authenticated:
             instance._history_user = self.request.user
-        serializer.save()
+        p, rincian = simpan_berjejak(serializer)
+        catat(self.request, f"Mengubah proyek '{p.nama}'", f'Proyek {p.kode_proyek}', rincian)
+
+    def perform_destroy(self, instance):
+        catat(self.request, f"Menghapus proyek '{instance.nama}'", f'Proyek {instance.kode_proyek}')
+        instance.delete()
 
     def create(self, request, *args, **kwargs):
         data = request.data.copy() if hasattr(request.data, 'copy') else request.data

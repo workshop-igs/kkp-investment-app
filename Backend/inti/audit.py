@@ -1,3 +1,4 @@
+import json
 import logging
 from datetime import timedelta
 
@@ -15,6 +16,10 @@ JALUR_KHUSUS = (
     ('/auth/ganti-sandi/', 'UBAH', 'Mengganti kata sandi'),
     ('/auth/me/', 'UBAH', 'Memperbarui data diri'),
     ('/admin/users/', 'BUAT', 'Menambahkan akun administrator'),
+    ('/analitik/laporan-spasial/', 'ANALISIS', 'Menyusun laporan analisis area'),
+    ('/analitik/screening/', 'ANALISIS', 'Menyaring lokasi potensial'),
+    ('/analitik/sebaran-tenaga-kerja/', 'ANALISIS', 'Menghitung sebaran tenaga kerja'),
+    ('/pengaturan-analisis/hitung-ulang/', 'ANALISIS', 'Menjalankan hitung ulang analisis'),
 )
 
 AKSI_METODE = {'POST': 'BUAT', 'PUT': 'UBAH', 'PATCH': 'UBAH', 'DELETE': 'HAPUS'}
@@ -22,13 +27,74 @@ AKSI_METODE = {'POST': 'BUAT', 'PUT': 'UBAH', 'PATCH': 'UBAH', 'DELETE': 'HAPUS'
 NAMA_SASARAN = {
     'proyek': 'Proyek investasi',
     'users': 'Akun pengguna',
-    'sektor': 'Sektor investasi',
+    'sektor': 'Jenis investasi',
     'potensi': 'Lokasi potensi',
     'kkprl': 'Izin KKPRL',
     'zonasi': 'Zona ruang laut',
     'pengaturan-analisis': 'Pengaturan analisis',
     'parameter-tambahan': 'Parameter analisis tambahan',
 }
+
+
+LABEL_MEDAN = {
+    'is_active': 'Akun aktif', 'is_staff': 'Administrator', 'first_name': 'Nama depan',
+    'last_name': 'Nama belakang', 'email': 'Surel',
+}
+
+
+def catat(request, ringkasan, objek='', rincian=()):
+    asal = getattr(request, '_request', request)
+    asal.jejak_audit = (ringkasan, objek, '\n'.join(rincian))
+
+
+def _tampil(v):
+    if v is None or v == '' or v == []:
+        return '(kosong)'
+    if isinstance(v, bool):
+        return 'Ya' if v else 'Tidak'
+    teks = v if isinstance(v, str) else json.dumps(v, ensure_ascii=False, default=str)
+    return teks if len(teks) <= 240 else teks[:237] + '…'
+
+
+def selisih(lama, baru, label=str, awalan=''):
+    baris = []
+    for k in dict.fromkeys([*lama, *baru]):
+        a, b = lama.get(k), baru.get(k)
+        if a == b:
+            continue
+        nama = f'{awalan}{label(k)}'
+        if isinstance(a, dict) and isinstance(b, dict):
+            baris += selisih(a, b, label, f'{nama} › ')
+        else:
+            baris.append(f'{nama}: {_tampil(a)} → {_tampil(b)}')
+    return baris
+
+
+def potret(v):
+    if hasattr(v, 'geom_type'):
+        return f'{v.geom_type}, {v.num_points} titik'
+    if hasattr(v, 'all'):
+        return sorted(str(x) for x in v.all())
+    if hasattr(v, '_meta'):
+        return str(v)
+    return v if isinstance(v, (str, int, float, bool, list, dict, type(None))) else str(v)
+
+
+def _label_medan(model, k):
+    if k in LABEL_MEDAN:
+        return LABEL_MEDAN[k]
+    try:
+        return str(model._meta.get_field(k).verbose_name).capitalize()
+    except Exception:
+        return k
+
+
+def simpan_berjejak(serializer, **tambahan):
+    data = {k: v for k, v in serializer.validated_data.items() if not isinstance(v, dict)}
+    lama = {k: potret(getattr(serializer.instance, k, None)) for k in data}
+    obj = serializer.save(**tambahan)
+    baru = {k: potret(getattr(obj, k, None)) for k in data}
+    return obj, selisih(lama, baru, lambda k: _label_medan(type(obj), k))
 
 
 def _alamat_ip(request):
@@ -121,9 +187,20 @@ class JejakAktivitasMiddleware:
             aksi = AKSI_METODE.get(metode, 'DITOLAK')
             ringkasan = ''
 
+        jejak = getattr(request, 'jejak_audit', None)
+        objek = _sasaran(jalur)
+        rincian = ''
+        if jejak and not ditolak:
+            ringkasan, objek, rincian = jejak[0], jejak[1] or objek, jejak[2]
+        elif kode and kode >= 400 and not ditolak:
+            ringkasan = f'Gagal: {ringkasan or "permintaan tidak dapat diproses"} (kode {kode})'
+
         if ditolak:
             aksi = 'DITOLAK'
-            ringkasan = ringkasan or f'Upaya tanpa hak akses ({metode})'
+            ringkasan = ringkasan or (
+                'Sesi login sudah berakhir atau belum masuk' if kode == 401
+                else 'Ditolak karena tidak punya hak akses'
+            )
 
         pengguna = getattr(request, 'user', None)
         masuk = bool(pengguna and pengguna.is_authenticated)
@@ -134,8 +211,9 @@ class JejakAktivitasMiddleware:
             aksi=aksi,
             metode=metode,
             jalur=jalur[:255],
-            objek=_sasaran(jalur)[:120],
+            objek=objek[:120],
             ringkasan=ringkasan[:255],
+            rincian=rincian,
             kode_status=kode,
             alamat_ip=_alamat_ip(request),
             agen=request.META.get('HTTP_USER_AGENT', '')[:200],

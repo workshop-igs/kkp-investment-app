@@ -52,8 +52,8 @@ class AdminUserSerializer(serializers.ModelSerializer):
         diminta = sorted({'is_staff', 'is_superuser'} & set(self.initial_data))
         if diminta:
             raise PermissionDenied(
-                'Akses administrator hanya diberikan dengan menambahkan akun '
-                'administrator baru, tidak dengan mengubah akun yang sudah ada.'
+                'Akses administrator diubah oleh Super Admin lewat tombol '
+                'Jadikan administrator atau Cabut administrator.'
             )
         request = self.context.get('request')
         if (self.instance is not None and request is not None
@@ -139,7 +139,7 @@ class AdminLogAktivitasSerializer(serializers.ModelSerializer):
         model = LogAktivitas
         fields = [
             'id', 'waktu', 'nama_pengguna', 'aksi', 'aksi_label', 'metode',
-            'jalur', 'objek', 'ringkasan', 'kode_status', 'alamat_ip', 'agen',
+            'jalur', 'objek', 'ringkasan', 'rincian', 'kode_status', 'alamat_ip', 'agen',
         ]
         read_only_fields = fields
 

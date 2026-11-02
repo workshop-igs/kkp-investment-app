@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { api, ambilDaftar } from '../../api/klien';
-import { Edit2, Check, X, Plus, ListChecks, Trash2 } from 'lucide-react';
+import { AlertTriangle, Edit2, Check, X, Plus, ListChecks, Loader2, Trash2 } from 'lucide-react';
 
 const KELAS = 'w-full px-2.5 py-1.5 border border-slate-300 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-kkp-700/20 focus:border-kkp-700';
 
@@ -209,6 +210,93 @@ const PengaturanSektor = ({ sektor, onTutup }) => {
 };
 
 
+const HapusJenis = ({ sektor, onTutup, onSelesai }) => {
+  const [dampak, setDampak] = useState(null);
+  const [ketik, setKetik] = useState('');
+  const [menghapus, setMenghapus] = useState(false);
+  const [galat, setGalat] = useState(null);
+
+  useEffect(() => {
+    api.get(`/inti/admin/sektor/${sektor.id}/dampak/`)
+      .then(({ data }) => setDampak(data))
+      .catch((err) => setGalat(pesanGalat(err)));
+  }, [sektor.id]);
+
+  const hapus = async () => {
+    setMenghapus(true);
+    setGalat(null);
+    try {
+      await api.delete(`/inti/admin/sektor/${sektor.id}/`);
+      onSelesai();
+    } catch (err) {
+      setGalat(`Gagal menghapus: ${pesanGalat(err)}`);
+      setMenghapus(false);
+    }
+  };
+
+  const cocok = ketik.trim().toLowerCase() === sektor.nama.trim().toLowerCase();
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Hapus jenis investasi">
+      <div className="absolute inset-0 bg-slate-900/50" onClick={() => !menghapus && onTutup()} />
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-rose-100 text-rose-600 shrink-0"><AlertTriangle className="w-5 h-5" /></div>
+          <div className="text-sm text-slate-700 space-y-2">
+            <p className="font-bold text-slate-900">Hapus jenis investasi {sektor.nama}?</p>
+            <p className="text-xs text-slate-500">Penghapusan permanen dan tidak dapat dibatalkan. Data berikut ikut terhapus:</p>
+          </div>
+        </div>
+        {!dampak && !galat && (
+          <p className="text-xs text-slate-500 flex items-center gap-2"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Menghitung data yang terdampak…</p>
+        )}
+        {dampak && (
+          <ul className="text-sm rounded-lg border border-slate-200 divide-y divide-slate-100">
+            {dampak.terhapus.map((d) => (
+              <li key={d.nama} className="flex justify-between gap-3 px-3 py-2">
+                <span className="text-slate-600">{d.nama}</span>
+                <span className="font-semibold tabular-nums text-rose-700">{d.jumlah.toLocaleString('id-ID')}</span>
+              </li>
+            ))}
+            {dampak.terhapus.length === 0 && <li className="px-3 py-2 text-slate-500">Tidak ada data lain yang terhubung.</li>}
+            {dampak.proyek > 0 && (
+              <li className="px-3 py-2 text-xs text-amber-700 bg-amber-50">
+                {dampak.proyek.toLocaleString('id-ID')} proyek investasi tidak ikut terhapus, tetapi menjadi tanpa jenis investasi.
+              </li>
+            )}
+          </ul>
+        )}
+        <label className="block">
+          <span className="block text-xs font-semibold text-slate-700 mb-1.5">Ketik <b>{sektor.nama}</b> untuk mengonfirmasi</span>
+          <input
+            type="text"
+            value={ketik}
+            onChange={(e) => setKetik(e.target.value)}
+            disabled={menghapus}
+            className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-rose-500"
+          />
+        </label>
+        {galat && <div role="alert" className="p-3 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 text-xs">{galat}</div>}
+        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onClick={onTutup} disabled={menghapus} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">
+            Batal
+          </button>
+          <button
+            type="button"
+            onClick={hapus}
+            disabled={!cocok || !dampak || menghapus}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-lg disabled:opacity-40"
+          >
+            {menghapus && <Loader2 className="w-4 h-4 animate-spin" />}
+            {menghapus ? 'Menghapus…' : 'Hapus permanen'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+};
+
+
 const AdminSectorsPage = () => {
   const [sectors, setSectors] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -216,6 +304,7 @@ const AdminSectorsPage = () => {
   const [editForm, setEditForm] = useState({});
   const [baru, setBaru] = useState(null);
   const [pengaturan, setPengaturan] = useState(null);
+  const [dihapus, setDihapus] = useState(null);
 
   const simpanBaru = async () => {
     try {
@@ -263,13 +352,13 @@ const AdminSectorsPage = () => {
     }
   };
 
-  if (loading && sectors.length === 0) return <div className="p-8 text-slate-500">Memuat sektor...</div>;
+  if (loading && sectors.length === 0) return <div className="p-8 text-slate-500">Memuat jenis investasi...</div>;
 
   return (
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] min-[1920px]:max-w-[1800px] mx-auto space-y-6">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Sektor Investasi</h1>
+          <h1 className="text-2xl font-bold text-slate-900">Jenis Investasi</h1>
           <p className="text-slate-500 text-sm mt-1">Jenis investasi yang bisa dipilih saat menganalisis lokasi.</p>
         </div>
         {!baru && (
@@ -288,7 +377,7 @@ const AdminSectorsPage = () => {
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
               <tr>
-                <th className="px-6 py-4">Nama Sektor</th>
+                <th className="px-6 py-4">Nama Jenis</th>
                 <th className="px-6 py-4">Warna UI</th>
                 <th className="px-6 py-4">Rasio Naker / Miliar</th>
                 <th className="px-6 py-4 text-center">Status</th>
@@ -418,8 +507,11 @@ const AdminSectorsPage = () => {
                         <button onClick={() => setPengaturan(s)} title="Ketentuan sub-zona & kompetensi tenaga kerja" className="p-1.5 text-kkp-700 bg-kkp-100 rounded hover:bg-kkp-200">
                           <ListChecks className="w-4 h-4" />
                         </button>
-                        <button onClick={() => handleEditClick(s)} className="p-1.5 text-sky-600 bg-sky-50 rounded hover:bg-sky-100">
+                        <button onClick={() => handleEditClick(s)} title="Ubah" className="p-1.5 text-sky-600 bg-sky-50 rounded hover:bg-sky-100">
                           <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => setDihapus(s)} title="Hapus jenis investasi" className="p-1.5 text-rose-600 bg-rose-50 rounded hover:bg-rose-100">
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     )}
@@ -432,6 +524,14 @@ const AdminSectorsPage = () => {
       </div>
 
       {pengaturan && <PengaturanSektor key={pengaturan.id} sektor={pengaturan} onTutup={() => setPengaturan(null)} />}
+      {dihapus && (
+        <HapusJenis
+          key={dihapus.id}
+          sektor={dihapus}
+          onTutup={() => setDihapus(null)}
+          onSelesai={() => { setDihapus(null); fetchSectors(); }}
+        />
+      )}
     </div>
   );
 };

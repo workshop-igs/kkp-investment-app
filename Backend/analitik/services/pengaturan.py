@@ -369,7 +369,7 @@ def _kriteria(nilai, sektor):
     from analitik.services.kriteria import PARAMETER
 
     meta = {'batas': [None, None], 'bulat': False}
-    if not isinstance(nilai, dict) or not set(nilai) <= sektor:
+    if not isinstance(nilai, dict) or not set(nilai) <= sektor | set(konstanta.KRITERIA_JENIS):
         raise NilaiTidakSah('Kriteria: kunci harus kode jenis investasi yang terdaftar.')
     for kode, per_sub in nilai.items():
         if not isinstance(per_sub, dict) or not per_sub:

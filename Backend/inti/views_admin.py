@@ -1,6 +1,7 @@
 import io
 import json
 import re
+from collections import Counter
 from datetime import timedelta
 
 import pandas as pd
@@ -8,10 +9,11 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.cache import cache
 from django.db import connection, transaction
+from django.db.models.deletion import Collector
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
-from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.exceptions import NotFound, PermissionDenied, ValidationError
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
@@ -32,6 +34,7 @@ from analitik.tasks import jadwalkan_hitung_ulang
 from inti.models import (
     KabupatenKota,
     LogAktivitas,
+    ProfilPengguna,
     Provinsi,
     SektorInvestasi,
 )
@@ -40,6 +43,7 @@ from ketenagakerjaan.models import KalibrasiPelatihanSektor, MatriksKeahlianSekt
 from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
 from pipeline.models import ProyekInvestasi
 
+from .audit import catat, potret, selisih, simpan_berjejak
 from .kesehatan import periksa_semua
 from .serializers import SektorInvestasiSerializer
 from .serializers_admin import (
@@ -54,6 +58,10 @@ from .serializers_admin import (
 )
 
 
+def _nama_akun(u):
+    return u.get_full_name() or u.username
+
+
 class AdminUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.select_related('profil').all().order_by('-date_joined')
     serializer_class = AdminUserSerializer
@@ -63,7 +71,36 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         serializer = TambahAdminSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
+        catat(request, f"Menambahkan akun administrator '{_nama_akun(user)}'", f'Akun @{user.username}')
         return Response(AdminUserSerializer(user).data, status=status.HTTP_201_CREATED)
+
+    def perform_update(self, serializer):
+        data_profil = serializer.validated_data.get('profil') or {}
+        profil = ProfilPengguna.objects.filter(user=serializer.instance).first()
+        lama = {k: potret(getattr(profil, k, None)) for k in data_profil}
+        user, rincian = simpan_berjejak(serializer)
+        profil = ProfilPengguna.objects.filter(user=user).first()
+        rincian += selisih(lama, {k: potret(getattr(profil, k, None)) for k in data_profil},
+                           lambda k: str(ProfilPengguna._meta.get_field(k).verbose_name).capitalize())
+        catat(self.request, f"Mengubah akun '{_nama_akun(user)}'", f'Akun @{user.username}', rincian)
+
+    @action(detail=True, methods=['post'], url_path='akses-admin')
+    def akses_admin(self, request, pk=None):
+        if not request.user.is_superuser:
+            raise PermissionDenied('Hanya Super Admin yang dapat mengubah akses administrator.')
+        sasaran = self.get_object()
+        if sasaran.pk == request.user.pk:
+            raise ValidationError({'detail': 'Anda tidak dapat mengubah akses administrator akun Anda sendiri.'})
+        if sasaran.is_superuser:
+            raise ValidationError({'detail': 'Akses Super Admin tidak dapat dicabut.'})
+        jadi = bool(request.data.get('admin'))
+        if sasaran.is_staff != jadi:
+            sasaran.is_staff = jadi
+            sasaran.save(update_fields=['is_staff'])
+        kalimat = (f"Menjadikan akun '{_nama_akun(sasaran)}' sebagai administrator" if jadi
+                   else f"Mencabut akses administrator dari akun '{_nama_akun(sasaran)}'")
+        catat(request, kalimat, f'Akun @{sasaran.username}', [f"Administrator: {'Tidak → Ya' if jadi else 'Ya → Tidak'}"])
+        return Response(AdminUserSerializer(sasaran).data)
 
     def destroy(self, request, *args, **kwargs):
         sasaran = self.get_object()
@@ -71,6 +108,7 @@ class AdminUserViewSet(viewsets.ModelViewSet):
             raise ValidationError({'detail': 'Anda tidak dapat menghapus akun Anda sendiri.'})
         if sasaran.is_superuser and not request.user.is_superuser:
             raise ValidationError({'detail': 'Akun superadmin hanya dapat dihapus oleh superadmin.'})
+        catat(request, f"Menghapus akun '{_nama_akun(sasaran)}'", f'Akun @{sasaran.username}')
         sasaran.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -109,12 +147,83 @@ class AdminProyekViewSet(viewsets.ModelViewSet):
     queryset = ProyekInvestasi.objects.select_related('sektor', 'provinsi', 'created_by').all().order_by('-created_at')
     serializer_class = AdminProyekSerializer
     permission_classes = [IsAdminUser]
+    pagination_class = None
+
+    def perform_update(self, serializer):
+        serializer.instance._history_user = self.request.user
+        p, rincian = simpan_berjejak(serializer)
+        catat(self.request, f"Mengubah proyek '{p.nama}'", f'Proyek {p.kode_proyek}', rincian)
+
+    def perform_destroy(self, instance):
+        catat(self.request, f"Menghapus proyek '{instance.nama}'", f'Proyek {instance.kode_proyek}')
+        instance.delete()
+
+
+LABEL_DAMPAK = {
+    'analitik.LokasiPotensial': 'Lokasi potensial di Peta Sebaran',
+    'analitik.SkorKelayakanZona': 'Skor kelayakan zona',
+    'analitik.KetentuanRuang': 'Ketentuan zona (boleh, bersyarat, dilarang)',
+    'analitik.AnalisisKelayakan': 'Hasil analisis kelayakan tersimpan',
+    'analitik.ParameterAHP': 'Bobot penilaian (AHP)',
+    'ketenagakerjaan.KalibrasiPelatihanSektor': 'Kalibrasi pelatihan tenaga kerja',
+    'ketenagakerjaan.MatriksKeahlianSektor': 'Kebutuhan kompetensi tenaga kerja',
+    'pipeline.RekapRealisasi': 'Rekap realisasi investasi',
+}
+
+
+def _bersihkan_pengaturan(sektor):
+    sub = set(konstanta.KRITERIA_JENIS.get(sektor.kode, {})) | set(pengaturan.atur('KRITERIA_JENIS').get(sektor.kode, {}))
+    for p in PengaturanAnalisis.objects.all():
+        if not isinstance(p.nilai, dict):
+            continue
+        bawaan = pengaturan.BAWAAN.get(p.kunci)
+        buang = (({sektor.kode} | sub) & set(p.nilai)) - set(bawaan if isinstance(bawaan, dict) else ())
+        if buang:
+            p.nilai = {k: v for k, v in p.nilai.items() if k not in buang}
+            p.save(update_fields=['nilai'])
+    pengaturan.segarkan()
 
 
 class AdminSektorViewSet(viewsets.ModelViewSet):
     queryset = SektorInvestasi.objects.all().order_by('urutan', 'nama')
     serializer_class = SektorInvestasiSerializer
     permission_classes = [IsAdminUser]
+
+    def perform_create(self, serializer):
+        s = serializer.save()
+        catat(self.request, f"Menambahkan jenis investasi '{s.nama}'", f'Jenis {s.kode}')
+
+    def perform_update(self, serializer):
+        s, rincian = simpan_berjejak(serializer)
+        catat(self.request, f"Mengubah jenis investasi '{s.nama}'", f'Jenis {s.kode}', rincian)
+
+    @action(detail=True, methods=['get'])
+    def dampak(self, request, pk=None):
+        sektor = self.get_object()
+        pengumpul = Collector(using='default')
+        pengumpul.collect([sektor])
+        jumlah = Counter()
+        for model, isi in pengumpul.data.items():
+            jumlah[model._meta.label] += len(isi)
+        for qs in pengumpul.fast_deletes:
+            jumlah[qs.model._meta.label] += qs.count()
+        return Response({
+            'terhapus': [
+                {'nama': LABEL_DAMPAK.get(label, label.split('.')[-1]), 'jumlah': n}
+                for label, n in jumlah.most_common()
+                if n and label != SektorInvestasi._meta.label and '_' not in label.split('.')[-1]
+            ],
+            'proyek': sektor.proyek.count(),
+        })
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            proyek = ProyekInvestasi.objects.filter(sektor=instance).update(sub_sektor='')
+            _bersihkan_pengaturan(instance)
+            instance.delete()
+        cache.clear()
+        catat(self.request, f"Menghapus jenis investasi '{instance.nama}' beserta datanya", f'Jenis {instance.kode}',
+              [f'{proyek} proyek kini tanpa jenis investasi'] if proyek else ())
 
     @action(detail=True, methods=['get', 'put'])
     def ketentuan(self, request, pk=None):
@@ -136,7 +245,11 @@ class AdminSektorViewSet(viewsets.ModelViewSet):
                         sektor=sektor, sub_zona=d['sub_zona'], provinsi=None,
                         defaults={'status': d['status'], 'syarat': d['syarat'], 'sumber': 'Ditetapkan administrator'},
                     )
+            lama = {kode: ada[kode].status for kode in ada}
             ada = {k.sub_zona: k for k in KetentuanRuang.objects.filter(sektor=sektor, provinsi=None)}
+            label = dict(SUB_ZONA_BERKETENTUAN)
+            catat(request, f"Mengubah ketentuan zona jenis investasi '{sektor.nama}'", f'Jenis {sektor.kode}',
+                  selisih(lama, {kode: ada[kode].status for kode in ada}, lambda k: label.get(k, k)))
             cache.clear()
             jadwalkan_hitung_ulang(lokasi=[], skor=True)
         return Response([
@@ -153,6 +266,8 @@ class AdminSektorViewSet(viewsets.ModelViewSet):
             ser.is_valid(raise_exception=True)
             if sum(d['pct_demand'] for d in ser.validated_data) > 1.0001:
                 raise ValidationError({'detail': 'Jumlah porsi seluruh kompetensi tidak boleh melebihi 100%.'})
+            catat(request, f"Mengubah kebutuhan kompetensi jenis investasi '{sektor.nama}'", f'Jenis {sektor.kode}',
+                  [f"{d['nama_posisi']}: {round(d['pct_demand'] * 100, 1)}%" for d in ser.validated_data])
             with transaction.atomic():
                 kalibrasi, _ = KalibrasiPelatihanSektor.objects.get_or_create(sektor=sektor)
                 kalibrasi.skill_matrix.all().delete()
@@ -175,7 +290,7 @@ class AdminLogAktivitasViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AdminLogAktivitasSerializer
     permission_classes = [IsAdminUser]
     filterset_fields = ['aksi', 'nama_pengguna', 'kode_status', 'metode']
-    search_fields = ['nama_pengguna', 'jalur', 'objek', 'ringkasan', 'alamat_ip']
+    search_fields = ['nama_pengguna', 'jalur', 'objek', 'ringkasan', 'rincian', 'alamat_ip']
     ordering_fields = ['waktu', 'aksi', 'nama_pengguna']
 
     @action(detail=False, methods=['get'], url_path='pilihan-aksi')
@@ -238,14 +353,28 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
             pengaturan.periksa(kunci, nilai)
         except pengaturan.NilaiTidakSah as e:
             raise ValidationError({'detail': str(e)}) from e
+        meta = pengaturan.TERDAFTAR[kunci]
+        lama = pengaturan.atur(kunci)
         PengaturanAnalisis.objects.update_or_create(kunci=kunci, defaults={'nilai': nilai, 'diubah_oleh': request.user})
+        catat(request, f"Mengubah pengaturan '{meta['label']}'", 'Pengaturan', self._selisih(meta, lama, nilai))
         return self._setelah(kunci)
 
     def destroy(self, request, kunci=None):
         if kunci not in pengaturan.TERDAFTAR:
             raise NotFound('Pengaturan tidak dikenal.')
+        meta = pengaturan.TERDAFTAR[kunci]
+        lama = pengaturan.atur(kunci)
         PengaturanAnalisis.objects.filter(kunci=kunci).delete()
+        catat(request, f"Mengembalikan pengaturan '{meta['label']}' ke nilai bawaan", 'Pengaturan',
+              self._selisih(meta, lama, pengaturan.BAWAAN[kunci]))
         return self._setelah(kunci)
+
+    @staticmethod
+    def _selisih(meta, lama, baru):
+        if not (isinstance(lama, dict) and isinstance(baru, dict)):
+            lama, baru = {meta['label']: lama}, {meta['label']: baru}
+        nama = {**pengaturan.LABEL_BAGIAN, **dict(SektorInvestasi.objects.values_list('kode', 'nama'))}
+        return selisih(lama, baru, lambda k: nama.get(k, k))
 
     def _setelah(self, kunci):
         pengaturan.segarkan()
@@ -295,16 +424,19 @@ class AdminParameterTambahanViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         p = serializer.save(dibuat_oleh=self.request.user)
+        catat(self.request, f"Menambahkan parameter tambahan '{p.nama}'", 'Parameter tambahan')
         _picu_parameter(None, p, 'tidak ada', _cakupan(p))
 
     def perform_update(self, serializer):
         lama = ParameterTambahan.objects.get(pk=serializer.instance.pk)
         cakupan_lama = _cakupan(lama)
-        p = serializer.save()
+        p, rincian = simpan_berjejak(serializer)
+        catat(self.request, f"Mengubah parameter tambahan '{p.nama}'", 'Parameter tambahan', rincian)
         _picu_parameter(lama, p, cakupan_lama, _cakupan(p))
 
     def perform_destroy(self, instance):
         cakupan = _cakupan(instance)
+        catat(self.request, f"Menghapus parameter tambahan '{instance.nama}'", 'Parameter tambahan')
         instance.delete()
         _picu_parameter(instance, None, cakupan, 'tidak ada')
 
@@ -345,6 +477,8 @@ class AdminParameterTambahanViewSet(viewsets.ModelViewSet):
                             [poli for b in bentuk for poli in b.geometry], srid=4326).unary_union,
                     ).values('provinsi_id')))
             _picu_parameter(lama, p, cakupan_lama, _cakupan(p))
+            catat(request, f"Mengunggah area parameter tambahan '{p.nama}'", 'Parameter tambahan',
+                  [f'{len(bentuk)} poligon area'])
         with connection.cursor() as c:
             geojson = geojson_area(c, p.id)
         return Response({'jumlah': p.area.count(), 'provinsi': sorted(_cakupan(p) or []), 'geojson': geojson})
@@ -373,6 +507,8 @@ class AdminParameterTambahanViewSet(viewsets.ModelViewSet):
                 raise ValidationError({'detail': f'Berkas tidak dapat dibaca: {e}'}) from e
             hasil = _simpan_tabel(p, df)
             _picu_parameter(p, p, _cakupan(p), _cakupan(p))
+            catat(request, f"Mengunggah tabel nilai parameter tambahan '{p.nama}'", 'Parameter tambahan',
+                  [f'Berkas {berkas.name}'])
         baris = p.nilai_wilayah.select_related('provinsi', 'kabupaten').order_by('kabupaten__kode_bps', 'provinsi__kode_bps')
         return Response({**hasil, 'baris': [
             {'kode': (b.kabupaten or b.provinsi).kode_bps, 'wilayah': (b.kabupaten or b.provinsi).nama, 'nilai': b.nilai}

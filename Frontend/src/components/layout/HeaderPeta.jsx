@@ -29,7 +29,7 @@ const ADMIN_MENU = {
     { label: 'Dashboard Admin', link: '/admin' },
     { label: 'Pengguna & Peran', link: '/admin/users' },
     { label: 'Proyek Investasi', link: '/admin/pipeline' },
-    { label: 'Sektor Investasi', link: '/admin/sectors' },
+    { label: 'Jenis Investasi', link: '/admin/sectors' },
     { label: 'Pengaturan Analisis', link: '/admin/pengaturan-analisis' },
     { label: 'Parameter Tambahan', link: '/admin/parameter-tambahan' },
     { label: 'Pengaturan Profil Investasi', link: '/admin/pengaturan-profil' },

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { api, ambilDaftar } from '../../api/klien';
 import { useAuth } from '../../context/KonteksAuth';
 import {
-  UserCheck, UserX, Pencil, Trash2, X, UserPlus, ShieldCheck, Loader2, CheckCircle2, AlertTriangle,
+  UserCheck, UserX, Pencil, Trash2, X, UserPlus, ShieldCheck, ShieldOff, Loader2, CheckCircle2, AlertTriangle,
 } from 'lucide-react';
 
 const ADMIN_KOSONG = {
@@ -65,6 +65,9 @@ const Dialog = ({ judul, onTutup, children }) => createPortal(
 
 const AdminUsersPage = () => {
   const { user: saya } = useAuth();
+  const [aksesDiubah, setAksesDiubah] = useState(null);
+  const [mengubahAkses, setMengubahAkses] = useState(false);
+  const [galatAkses, setGalatAkses] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [provinsi, setProvinsi] = useState([]);
@@ -141,6 +144,24 @@ const AdminUsersPage = () => {
       setGalatHapus(pesanGalat(err, 'Akun gagal dihapus. Periksa koneksi lalu coba lagi.'));
     } finally {
       setMenghapus(false);
+    }
+  };
+
+  const ubahAkses = async () => {
+    setMengubahAkses(true);
+    setGalatAkses(null);
+    const jadi = !aksesDiubah.is_staff;
+    try {
+      await api.post(`/inti/admin/users/${aksesDiubah.id}/akses-admin/`, { admin: jadi });
+      setBerhasil(jadi
+        ? `${namaTampil(aksesDiubah)} kini administrator.`
+        : `Akses administrator ${namaTampil(aksesDiubah)} telah dicabut.`);
+      setAksesDiubah(null);
+      fetchUsers();
+    } catch (err) {
+      setGalatAkses(pesanGalat(err, 'Akses gagal diubah. Periksa koneksi lalu coba lagi.'));
+    } finally {
+      setMengubahAkses(false);
     }
   };
 
@@ -355,6 +376,17 @@ const AdminUsersPage = () => {
                       >
                         <Pencil className="w-3.5 h-3.5" /> Edit Profil
                       </button>
+                      {saya?.is_superuser && !u.is_superuser && u.id !== saya.id && (
+                        <button
+                          onClick={() => { setAksesDiubah(u); setGalatAkses(null); setBerhasil(null); }}
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap rounded-lg transition-colors ${
+                            u.is_staff ? 'text-slate-700 bg-slate-100 hover:bg-slate-200' : 'text-amber-800 bg-amber-50 hover:bg-amber-100'
+                          }`}
+                        >
+                          {u.is_staff ? <ShieldOff className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
+                          {u.is_staff ? 'Cabut admin' : 'Jadikan admin'}
+                        </button>
+                      )}
                       <button
                         onClick={() => { setDihapus(u); setGalatHapus(null); setBerhasil(null); }}
                         disabled={u.id === saya?.id}
@@ -446,6 +478,56 @@ const AdminUsersPage = () => {
               </button>
             </div>
           </form>
+        </Dialog>
+      )}
+
+      {aksesDiubah && (
+        <Dialog
+          judul={aksesDiubah.is_staff ? 'Cabut Akses Administrator' : 'Jadikan Administrator'}
+          onTutup={() => !mengubahAkses && setAksesDiubah(null)}
+        >
+          <div className="p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className={`p-2 rounded-lg shrink-0 ${aksesDiubah.is_staff ? 'bg-slate-100 text-slate-600' : 'bg-amber-100 text-amber-700'}`}>
+                {aksesDiubah.is_staff ? <ShieldOff className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
+              </div>
+              <div className="text-sm text-slate-700 space-y-2">
+                <p>
+                  {aksesDiubah.is_staff ? 'Cabut akses administrator dari' : 'Jadikan'} <b>{namaTampil(aksesDiubah)}</b> (@{aksesDiubah.username})
+                  {aksesDiubah.is_staff ? '?' : ' sebagai administrator?'}
+                </p>
+                <p className="text-xs text-slate-500">
+                  {aksesDiubah.is_staff
+                    ? 'Akun tetap aktif sebagai pengguna KKP biasa, tetapi tidak bisa lagi membuka halaman administrator. Berlaku seketika.'
+                    : 'Administrator dapat mengubah pengaturan analisis, mengelola jenis investasi, proyek, dan akun pengguna lain. Berlaku seketika.'}
+                </p>
+              </div>
+            </div>
+            {galatAkses && (
+              <div role="alert" className="p-3 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 text-xs">
+                {galatAkses}
+              </div>
+            )}
+            <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setAksesDiubah(null)}
+                disabled={mengubahAkses}
+                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                Batal
+              </button>
+              <button
+                type="button"
+                onClick={ubahAkses}
+                disabled={mengubahAkses}
+                className="inline-flex items-center gap-2 px-4 py-2 bg-kkp-700 hover:bg-kkp-800 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
+              >
+                {mengubahAkses && <Loader2 className="w-4 h-4 animate-spin" />}
+                {aksesDiubah.is_staff ? 'Ya, Cabut Akses' : 'Ya, Jadikan Administrator'}
+              </button>
+            </div>
+          </div>
         </Dialog>
       )}
 

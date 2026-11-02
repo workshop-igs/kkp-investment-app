@@ -277,6 +277,7 @@ class LogAktivitas(models.Model):
         max_length=120, blank=True, help_text='Sasaran perbuatan, mis. "Proyek #12"'
     )
     ringkasan = models.CharField(max_length=255, blank=True)
+    rincian = models.TextField(blank=True)
     kode_status = models.IntegerField(null=True, blank=True)
     alamat_ip = models.GenericIPAddressField(null=True, blank=True)
     agen = models.CharField(max_length=200, blank=True, help_text='User-Agent, dipangkas')

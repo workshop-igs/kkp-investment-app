@@ -19,7 +19,7 @@ const NAMA_HALAMAN = [
   ['/register', 'Pendaftaran'],
   ['/admin/users', 'Manajemen Pengguna'],
   ['/admin/pipeline', 'Proyek Investasi'],
-  ['/admin/sectors', 'Sektor Investasi'],
+  ['/admin/sectors', 'Jenis Investasi'],
   ['/admin/log-aktivitas', 'Log Aktivitas'],
   ['/admin', 'Dashboard Admin'],
 ];
