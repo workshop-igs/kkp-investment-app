@@ -2,11 +2,13 @@ import json
 from collections import Counter
 from datetime import date
 
+from django.core.cache import cache
 from django.db import connection
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Max, Q, Sum
 from django.utils import timezone
+from rest_framework.renderers import JSONRenderer
 
-from analitik.models import KetentuanRuang, LokasiPotensial, SkorKelayakanZona
+from analitik.models import KetentuanRuang, LokasiPotensial, PengaturanAnalisis, RasterOseanografi, SkorKelayakanZona
 from analitik.services.finansial import hitung_model_usaha
 from analitik.services.konstanta import (
     KETENTUAN_DARAT_BAWAAN,
@@ -518,3 +520,29 @@ def skor_sesuai(sektor=None, provinsi=None):
 
 def belum_dimanfaatkan(skor):
     return skor.filter(jumlah_kkprl=0, zona__persen_terbangun__lt=atur('AMBANG_TERBANGUN_PERSEN'))
+
+
+def versi_profil(segar=False):
+    versi = None if segar else cache.get('profil-provinsi:versi')
+    if versi is None:
+        versi = '-'.join(
+            str(int(t.timestamp())) if t else '0'
+            for t in (
+                ProduksiPerikananBPS.objects.aggregate(t=Max('diperbarui_pada'))['t'],
+                RegulasiTataRuang.objects.aggregate(t=Max('ditarik_pada'))['t'],
+                RasterOseanografi.objects.aggregate(t=Max('ditarik_pada'))['t'],
+                LokasiPotensial.objects.aggregate(t=Max('dihitung_pada'))['t'],
+                PengaturanAnalisis.objects.aggregate(t=Max('updated_at'))['t'],
+            )
+        )
+        cache.set('profil-provinsi:versi', versi, 60)
+    return versi
+
+
+def profil_siap_kirim(provinsi, sektor=None, versi=None):
+    kunci = f'profil-provinsi:v6:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    isi = cache.get(kunci)
+    if isi is None:
+        isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))
+        cache.set(kunci, isi, 24 * 3600)
+    return isi

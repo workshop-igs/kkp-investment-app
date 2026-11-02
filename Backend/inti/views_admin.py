@@ -32,7 +32,7 @@ from analitik.services import konstanta, pengaturan
 from analitik.services.asal_data import ringkasan_sumber
 from analitik.services.kriteria import PARAMETER
 from analitik.services.parameter_tambahan import geojson_area, kunci_nama
-from analitik.tasks import jadwalkan_hitung_ulang, jadwalkan_seleksi_nasional
+from analitik.tasks import jadwalkan_hitung_ulang, jadwalkan_isi_cache_profil, jadwalkan_seleksi_nasional
 from inti.models import (
     KabupatenKota,
     LogAktivitas,
@@ -393,6 +393,7 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
     def _setelah(self, kunci):
         pengaturan.segarkan()
         cache.clear()
+        jadwalkan_isi_cache_profil()
         dampak = pengaturan.TERDAFTAR[kunci]['dampak']
         if dampak:
             jadwalkan_hitung_ulang(lokasi=[] if pengaturan.PETA in dampak else None, skor=pengaturan.SKOR in dampak)
