@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import {
   AlertTriangle,
@@ -100,6 +100,8 @@ const DetailProyekPage = () => {
   const [proyek, setProyek] = useState(null);
   const [muat, setMuat] = useState({ memuat: true, galat: null });
   const [tema, setTema] = useState('umum');
+  const isiTema = useRef(null);
+  useEffect(() => { isiTema.current?.scrollTo(0, 0); }, [tema]);
 
   const [spasial, setSpasial] = useState({ memuat: false, data: null, galat: null });
   const [bps, setBps] = useState({ memuat: false, data: null, galat: null });
@@ -580,7 +582,7 @@ const DetailProyekPage = () => {
           </div>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-4 py-4 print:overflow-visible">
+        <div ref={isiTema} className="flex-1 min-h-0 overflow-y-auto custom-scrollbar px-4 py-4 print:overflow-visible">
           <p className="text-[13px] text-slate-500 leading-relaxed mb-4">{PENGANTAR[tema]}</p>
           {(analisis.kelayakan?.skor != null || screening) && (
             <div className="mb-4">

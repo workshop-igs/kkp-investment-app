@@ -64,9 +64,9 @@ const AppLayout = () => {
           <Route path="/" element={<LandingPage />} />
           <Route path="/peta" element={<AnalisisPage />} />
           <Route path="/profil-investasi" element={<ProfilInvestasiPage />} />
-          <Route path="/dashboard" element={<RuteTerlindung><DashboardPage /></RuteTerlindung>} />
-          <Route path="/pipeline" element={<RuteTerlindung><PipelinePage /></RuteTerlindung>} />
-          <Route path="/pipeline/:id" element={<RuteTerlindung><DetailProyekPage /></RuteTerlindung>} />
+          <Route path="/dashboard" element={<RuteTerlindung portofolio><DashboardPage /></RuteTerlindung>} />
+          <Route path="/pipeline" element={<RuteTerlindung portofolio><PipelinePage /></RuteTerlindung>} />
+          <Route path="/pipeline/:id" element={<RuteTerlindung portofolio><DetailProyekPage /></RuteTerlindung>} />
           <Route path="/analysis-report" element={<RuteTerlindung><LaporanAnalisisPage /></RuteTerlindung>} />
           <Route path="/profil" element={<RuteTerlindung><ProfilPage /></RuteTerlindung>} />
           <Route path="/login" element={<LoginPage />} />

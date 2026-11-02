@@ -318,7 +318,12 @@ export class Dek {
   teks(x, y, lebar, isi, { ukuran = 8, warna = C.teks, tebal = false, jarak = 1.4, maks } = {}) {
     this.gaya(ukuran, warna, tebal);
     let baris = this.doc.splitTextToSize(bersih(isi), lebar);
-    if (maks) baris = baris.slice(0, maks);
+    if (maks && baris.length > maks) {
+      baris = baris.slice(0, maks);
+      let akhir = `${baris[maks - 1]}…`;
+      while (akhir.length > 1 && this.doc.getTextWidth(akhir) > lebar) akhir = `${akhir.slice(0, -2).trimEnd()}…`;
+      baris[maks - 1] = akhir;
+    }
     this.doc.text(baris, x, y, { lineHeightFactor: jarak });
     return y + baris.length * ukuran * MM_PER_PT * jarak;
   }
@@ -806,9 +811,10 @@ class DekProfil extends Dek {
     d.circle(cx, cy, 9, 'F');
     this.lencana(cx, cy, 6, ikon, aksen);
     this.gaya(11, C.navy, true);
-    d.text(bersih(judul), cx, cy + 17, { align: 'center' });
+    const baris = d.splitTextToSize(bersih(judul), Math.min(w - 30, 230));
+    d.text(baris, cx, cy + 17, { align: 'center', lineHeightFactor: 1.2 });
     this.gaya(7.4, C.abu);
-    d.text(d.splitTextToSize(bersih(isi), Math.min(w - 30, 190)), cx, cy + 23, { align: 'center', lineHeightFactor: 1.45 });
+    d.text(d.splitTextToSize(bersih(isi), Math.min(w - 30, 190)), cx, cy + 23 + (baris.length - 1) * 4.7, { align: 'center', lineHeightFactor: 1.45 });
   }
 
   pilKelas(x, y, kode, kanan = true) {
@@ -938,6 +944,7 @@ function ringkasan(dek, o, rencana) {
   const lebarKolom = (kiri - 10 - (kolom - 1) * 5) / kolom;
   const perKolom = Math.ceil(o.bab.length / kolom);
   const yAwal = yy;
+  const barisIsi = Math.max(1, Math.min(2, Math.floor(((BAWAH - 3 - yAwal) / perKolom - 5) / (6.1 * MM_PER_PT * 1.4))));
   o.bab.forEach((b, n) => {
     if (n % perKolom === 0) yy = yAwal;
     const xk = TEPI + 5 + Math.floor(n / perKolom) * (lebarKolom + 5);
@@ -954,7 +961,7 @@ function ringkasan(dek, o, rencana) {
     dek.doc.roundedRect(xk, yy - 2.8, 1.3, 6.4, 0.65, 0.65, 'F');
     dek.gaya(7, C.navy, true);
     dek.doc.text(bersih(namaRapi(b.nama, 44)), xk + 3.6, yy);
-    yy = dek.teks(xk + 3.6, yy + 3.4, lebarKolom - 4, isi, { ukuran: 6.1, warna: C.abu, maks: 2 }) + 1.6;
+    yy = dek.teks(xk + 3.6, yy + 3.4, lebarKolom - 4, isi, { ukuran: 6.1, warna: C.abu, maks: barisIsi }) + 1.6;
   });
 
   const x = TEPI + kiri + 5;
@@ -1393,11 +1400,9 @@ function lokasiSesuai(dek, o, b, i, citra) {
     d.circle(x + 7, yy - 0.2, 2.6, 'F');
     dek.gaya(6.8, C.putih, true);
     d.text(String(n + 1), x + 7, yy + 0.8, { align: 'center' });
-    dek.gaya(7.2, C.navy, true);
-    d.text(bersih(namaRapi(l.nama, 36)), x + 11.6, yy);
+    dek.teks(x + 11.6, yy, lebar - 26, namaRapi(l.nama, 36), { ukuran: 7.2, warna: C.navy, tebal: true, maks: 1 });
     dek.pilKelas(x + lebar - 5, yy, kelas);
-    dek.gaya(6.2, C.abu);
-    d.text(bersih(`${l.kabupaten || '-'}  |  LP ${angka(l.luas_ha, 1)} ha${l.luas_wilayah_ha ? ` dari area potensial ${angka(l.luas_wilayah_ha)} ha` : ''}${b.sub_jenis.length > 1 && l.sub_sektor ? `  |  ${namaRapi(l.sub_sektor, 28)}` : ''}`), x + 11.6, yy + 3.4);
+    dek.teks(x + 11.6, yy + 3.4, lebar - 16.6, `${l.kabupaten || '-'}  |  LP ${angka(l.luas_ha, 1)} ha${l.luas_wilayah_ha ? ` dari area potensial ${angka(l.luas_wilayah_ha)} ha` : ''}${b.sub_jenis.length > 1 && l.sub_sektor ? `  |  ${namaRapi(l.sub_sektor, 28)}` : ''}`, { ukuran: 6.2, warna: C.abu, maks: 1 });
     let yb = yy + 3.4;
     const laut = l.oseanografi || {};
     const teksLaut = [

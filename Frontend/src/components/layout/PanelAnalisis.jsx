@@ -60,7 +60,7 @@ const LANGKAH = ['Identitas Proyek', 'Analisis Ruang', 'Analisis Finansial'];
 
 const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sektorAwal, subAwal, onLihatLokasi }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, bolehPortofolio } = useAuth();
   
   const [projectName, setProjectName] = useState("");
   const [investor, setInvestor] = useState("");
@@ -701,6 +701,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                 Lihat Laporan Lengkap (PDF)
               </button>
               
+              {bolehPortofolio && (
               <button 
                 onClick={handleSaveToPipeline}
                 disabled={saving}
@@ -708,6 +709,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
               >
                 {saving ? "Menyimpan..." : "Simpan ke Proyek Investasi"}
               </button>
+              )}
             </div>
           </div>
         )}

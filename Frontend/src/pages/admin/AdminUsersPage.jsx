@@ -3,12 +3,39 @@ import { createPortal } from 'react-dom';
 import { api, ambilDaftar } from '../../api/klien';
 import { useAuth } from '../../context/KonteksAuth';
 import {
-  UserCheck, UserX, Pencil, Trash2, X, UserPlus, ShieldCheck, ShieldOff, Loader2, CheckCircle2, AlertTriangle,
+  UserCheck, UserX, Pencil, Trash2, X, UserPlus, ShieldCheck, Loader2, CheckCircle2, AlertTriangle,
 } from 'lucide-react';
 
 const ADMIN_KOSONG = {
-  first_name: '', last_name: '', username: '', email: '', instansi: '', password: '', password_ulang: '',
+  first_name: '', last_name: '', username: '', email: '', instansi: '', password: '', password_ulang: '', level: 'DASAR',
 };
+
+const LEVEL_AKSES = [
+  ['DASAR', 'Pengguna Dasar', 'Beranda, Peta Spasial, dan Profil Investasi.'],
+  ['PENUH', 'Pengguna Penuh', 'Ditambah Dashboard Nasional dan Proyek Investasi.'],
+  ['ADMIN', 'Administrator', 'Semua halaman, termasuk halaman administrator.'],
+];
+
+const GAYA_LEVEL = {
+  ADMIN: 'bg-amber-50 text-amber-800 border border-amber-200',
+  PENUH: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  DASAR: 'bg-sky-100 text-sky-700',
+};
+
+const PilihLevel = ({ nilai, onUbah, bolehAdmin }) => (
+  <fieldset className="space-y-2">
+    <legend className="block text-xs font-semibold text-slate-700 mb-1.5">Level akses</legend>
+    {LEVEL_AKSES.filter(([kode]) => bolehAdmin || kode !== 'ADMIN').map(([kode, label, ket]) => (
+      <label key={kode} className={`flex items-start gap-2.5 rounded-lg border px-3 py-2 cursor-pointer ${nilai === kode ? 'border-kkp-700 bg-kkp-100/40' : 'border-slate-200'}`}>
+        <input type="radio" name="level" value={kode} checked={nilai === kode} onChange={() => onUbah(kode)} className="mt-0.5" />
+        <span className="text-sm">
+          <span className="font-semibold text-slate-800">{label}</span>
+          <span className="block text-xs text-slate-500">{ket}</span>
+        </span>
+      </label>
+    ))}
+  </fieldset>
+);
 
 const pesanGalat = (err, cadangan) => {
   const data = err.response?.data;
@@ -68,6 +95,7 @@ const AdminUsersPage = () => {
   const [aksesDiubah, setAksesDiubah] = useState(null);
   const [mengubahAkses, setMengubahAkses] = useState(false);
   const [galatAkses, setGalatAkses] = useState(null);
+  const [levelBaru, setLevelBaru] = useState('DASAR');
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [provinsi, setProvinsi] = useState([]);
@@ -150,12 +178,9 @@ const AdminUsersPage = () => {
   const ubahAkses = async () => {
     setMengubahAkses(true);
     setGalatAkses(null);
-    const jadi = !aksesDiubah.is_staff;
     try {
-      await api.post(`/inti/admin/users/${aksesDiubah.id}/akses-admin/`, { admin: jadi });
-      setBerhasil(jadi
-        ? `${namaTampil(aksesDiubah)} kini administrator.`
-        : `Akses administrator ${namaTampil(aksesDiubah)} telah dicabut.`);
+      const { data } = await api.post(`/inti/admin/users/${aksesDiubah.id}/level/`, { level: levelBaru });
+      setBerhasil(`Level akses ${namaTampil(aksesDiubah)} kini ${data.role_display}.`);
       setAksesDiubah(null);
       fetchUsers();
     } catch (err) {
@@ -188,7 +213,7 @@ const AdminUsersPage = () => {
     setBerhasil(null);
     try {
       const { data } = await api.post('/inti/admin/users/', isianAdmin);
-      setBerhasil(`Akun administrator ${data.username} berhasil ditambahkan.`);
+      setBerhasil(`Akun ${data.username} (${data.role_display}) berhasil ditambahkan.`);
       setIsianAdmin(ADMIN_KOSONG);
       setFormAdmin(false);
       fetchUsers();
@@ -231,7 +256,7 @@ const AdminUsersPage = () => {
             className="inline-flex items-center gap-2 px-4 py-2 bg-kkp-700 hover:bg-kkp-800 text-white text-sm font-semibold rounded-lg transition-colors shrink-0"
           >
             <UserPlus className="w-4 h-4" />
-            Tambah Administrator
+            Tambah Akun
           </button>
         )}
       </div>
@@ -250,10 +275,10 @@ const AdminUsersPage = () => {
               <ShieldCheck className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-slate-900">Tambah Akun Administrator</h2>
+              <h2 className="text-sm font-bold text-slate-900">Tambah Akun</h2>
               <p className="text-xs text-slate-500 mt-0.5">
-                Akses administrator hanya diberikan lewat akun baru yang ditambahkan di sini. Akun yang mendaftar
-                sendiri tidak dapat dinaikkan menjadi administrator.
+                Buat akun untuk pegawai KKP dan tentukan halaman yang boleh dibukanya. Level dapat diubah kemudian
+                lewat tombol Ubah akses.
               </p>
             </div>
           </div>
@@ -268,6 +293,13 @@ const AdminUsersPage = () => {
               </div>
               {medanAdmin('Kata sandi awal *', 'password', { required: true, type: 'password', autoComplete: 'new-password' })}
               {medanAdmin('Ulangi kata sandi awal *', 'password_ulang', { required: true, type: 'password', autoComplete: 'new-password' })}
+              <div className="sm:col-span-2">
+                <PilihLevel
+                  nilai={isianAdmin.level}
+                  onUbah={(level) => setIsianAdmin((s) => ({ ...s, level }))}
+                  bolehAdmin={Boolean(saya?.is_superuser)}
+                />
+              </div>
             </div>
             <p className="text-[11px] text-slate-500">
               Serahkan kata sandi awal langsung kepada pemilik akun dan minta ia menggantinya di halaman Profil Saya
@@ -292,7 +324,7 @@ const AdminUsersPage = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-kkp-700 hover:bg-kkp-800 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
               >
                 {menyimpanAdmin && <Loader2 className="w-4 h-4 animate-spin" />}
-                Tambahkan Administrator
+                Tambahkan Akun
               </button>
             </div>
           </div>
@@ -329,11 +361,9 @@ const AdminUsersPage = () => {
                   <td className="px-4 py-4 text-slate-600">{u.email}</td>
                   
                   <td className="px-4 py-4">
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold ${
-                      u.is_staff ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-sky-100 text-sky-700'
-                    }`}>
+                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${GAYA_LEVEL[u.level] || GAYA_LEVEL.DASAR}`}>
                       {u.is_staff && <ShieldCheck className="w-3 h-3" />}
-                      {u.role_display}
+                      {u.is_superuser ? 'Super Admin' : u.role_display}
                     </span>
                   </td>
                   
@@ -372,25 +402,25 @@ const AdminUsersPage = () => {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => bukaEdit(u)}
-                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-sky-700 bg-sky-50 rounded-lg hover:bg-sky-100 transition-colors"
+                        disabled={u.is_superuser && !saya?.is_superuser}
+                        title={u.is_superuser && !saya?.is_superuser ? 'Akun Super Admin hanya dapat diubah oleh Super Admin' : 'Edit profil'}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-sky-700 bg-sky-50 rounded-lg hover:bg-sky-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <Pencil className="w-3.5 h-3.5" /> Edit Profil
                       </button>
-                      {saya?.is_superuser && !u.is_superuser && u.id !== saya.id && (
+                      {u.id !== saya?.id && !u.is_superuser && (saya?.is_superuser || !u.is_staff) && (
                         <button
-                          onClick={() => { setAksesDiubah(u); setGalatAkses(null); setBerhasil(null); }}
-                          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap rounded-lg transition-colors ${
-                            u.is_staff ? 'text-slate-700 bg-slate-100 hover:bg-slate-200' : 'text-amber-800 bg-amber-50 hover:bg-amber-100'
-                          }`}
+                          onClick={() => { setAksesDiubah(u); setLevelBaru(u.level); setGalatAkses(null); setBerhasil(null); }}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap rounded-lg transition-colors text-amber-800 bg-amber-50 hover:bg-amber-100"
                         >
-                          {u.is_staff ? <ShieldOff className="w-3.5 h-3.5" /> : <ShieldCheck className="w-3.5 h-3.5" />}
-                          {u.is_staff ? 'Cabut admin' : 'Jadikan admin'}
+                          <ShieldCheck className="w-3.5 h-3.5" /> Ubah akses
                         </button>
                       )}
                       <button
                         onClick={() => { setDihapus(u); setGalatHapus(null); setBerhasil(null); }}
-                        disabled={u.id === saya?.id}
-                        title={u.id === saya?.id ? 'Anda tidak dapat menghapus akun Anda sendiri' : 'Hapus pengguna'}
+                        disabled={u.id === saya?.id || (u.is_superuser && !saya?.is_superuser)}
+                        title={u.id === saya?.id ? 'Anda tidak dapat menghapus akun Anda sendiri'
+                          : u.is_superuser && !saya?.is_superuser ? 'Akun Super Admin hanya dapat dihapus oleh Super Admin' : 'Hapus pengguna'}
                         className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap text-rose-700 bg-rose-50 rounded-lg hover:bg-rose-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                       >
                         <Trash2 className="w-3.5 h-3.5" /> Hapus
@@ -482,27 +512,13 @@ const AdminUsersPage = () => {
       )}
 
       {aksesDiubah && (
-        <Dialog
-          judul={aksesDiubah.is_staff ? 'Cabut Akses Administrator' : 'Jadikan Administrator'}
-          onTutup={() => !mengubahAkses && setAksesDiubah(null)}
-        >
+        <Dialog judul="Ubah Level Akses" onTutup={() => !mengubahAkses && setAksesDiubah(null)}>
           <div className="p-6 space-y-4">
-            <div className="flex items-start gap-3">
-              <div className={`p-2 rounded-lg shrink-0 ${aksesDiubah.is_staff ? 'bg-slate-100 text-slate-600' : 'bg-amber-100 text-amber-700'}`}>
-                {aksesDiubah.is_staff ? <ShieldOff className="w-5 h-5" /> : <ShieldCheck className="w-5 h-5" />}
-              </div>
-              <div className="text-sm text-slate-700 space-y-2">
-                <p>
-                  {aksesDiubah.is_staff ? 'Cabut akses administrator dari' : 'Jadikan'} <b>{namaTampil(aksesDiubah)}</b> (@{aksesDiubah.username})
-                  {aksesDiubah.is_staff ? '?' : ' sebagai administrator?'}
-                </p>
-                <p className="text-xs text-slate-500">
-                  {aksesDiubah.is_staff
-                    ? 'Akun tetap aktif sebagai pengguna KKP biasa, tetapi tidak bisa lagi membuka halaman administrator. Berlaku seketika.'
-                    : 'Administrator dapat mengubah pengaturan analisis, mengelola jenis investasi, proyek, dan akun pengguna lain. Berlaku seketika.'}
-                </p>
-              </div>
-            </div>
+            <p className="text-sm text-slate-700">
+              Akun <b>{namaTampil(aksesDiubah)}</b> (@{aksesDiubah.username}) saat ini <b>{aksesDiubah.role_display}</b>.
+              Perubahan berlaku seketika.
+            </p>
+            <PilihLevel nilai={levelBaru} onUbah={setLevelBaru} bolehAdmin={Boolean(saya?.is_superuser)} />
             {galatAkses && (
               <div role="alert" className="p-3 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 text-xs">
                 {galatAkses}
@@ -520,11 +536,11 @@ const AdminUsersPage = () => {
               <button
                 type="button"
                 onClick={ubahAkses}
-                disabled={mengubahAkses}
+                disabled={mengubahAkses || levelBaru === aksesDiubah.level}
                 className="inline-flex items-center gap-2 px-4 py-2 bg-kkp-700 hover:bg-kkp-800 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
               >
                 {mengubahAkses && <Loader2 className="w-4 h-4 animate-spin" />}
-                {aksesDiubah.is_staff ? 'Ya, Cabut Akses' : 'Ya, Jadikan Administrator'}
+                Simpan Level Akses
               </button>
             </div>
           </div>

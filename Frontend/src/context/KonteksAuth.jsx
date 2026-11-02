@@ -108,6 +108,7 @@ export const PenyediaAuth = ({ children }) => {
       user,
       token,
       isAuthenticated: !!user,
+      bolehPortofolio: Boolean(user && user.level !== 'DASAR'),
       loading,
       login,
       register,
