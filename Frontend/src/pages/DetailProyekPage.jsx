@@ -41,7 +41,7 @@ import {
   warnaStatus,
 } from '../utils/normalisasiAnalisis';
 import { keLatLng } from '../utils/koordinat';
-import { angkaRingkas as nf, rupiahRingkas } from '../utils/pemformat';
+import { angkaRingkas as nf, labelKbli, rupiahRingkas } from '../utils/pemformat';
 import { unduhPdfLaporan } from '../utils/pdfLaporan';
 import { mulaiMemuat } from '../components/OverlayMemuat';
 import BannerIndikatif from '../components/laporan/BannerIndikatif';
@@ -280,7 +280,7 @@ const DetailProyekPage = () => {
       await unduhPdfLaporan({
         bencana: bencana.data,
         namaProyek: proyek.nama,
-        subjudul: [proyek.kode_proyek, proyek.sektor_nama, proyek.provinsi_nama]
+        subjudul: [labelKbli(proyek.sub_sektor_kbli), proyek.sektor_nama, proyek.provinsi_nama]
           .filter(Boolean)
           .join(' · '),
         jenisInvestasi: [proyek.sektor_nama, proyek.sub_sektor_nama, proyek.sub_sektor_kbli && `KBLI ${proyek.sub_sektor_kbli.kode}`].filter(Boolean).join(' — '),
@@ -551,7 +551,7 @@ const DetailProyekPage = () => {
               {proyek.nama}
             </h1>
             <p className="text-[11.5px] text-slate-400 truncate">
-              {[proyek.kode_proyek, proyek.sektor_nama, proyek.provinsi_nama].filter(Boolean).join(' · ')}
+              {[labelKbli(proyek.sub_sektor_kbli), proyek.sektor_nama, proyek.provinsi_nama].filter(Boolean).join(' · ')}
             </p>
           </div>
           <div className="flex gap-1 shrink-0 print:hidden">
@@ -611,7 +611,7 @@ const DetailProyekPage = () => {
                   <TabelRingkas
                     kolom={['Keterangan', 'Isi']}
                     baris={[
-                      ['Kode proyek', proyek.kode_proyek || '—'],
+                      ['KBLI', proyek.sub_sektor_kbli ? `${proyek.sub_sektor_kbli.kode} · ${proyek.sub_sektor_kbli.judul}` : 'Belum ditentukan'],
                       ['Investor', proyek.investor || '—'],
                       ['Provinsi', proyek.provinsi_nama || '—'],
                       ['Lokasi', proyek.lokasi_detail || '—'],

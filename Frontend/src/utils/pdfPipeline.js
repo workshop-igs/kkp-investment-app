@@ -124,7 +124,7 @@ export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, pr
     k.tabel(
       ['Nama Proyek', 'Jenis Investasi', 'Provinsi', 'Tahap', 'Nilai'],
       proyek.map((p) => [
-        `${p.kode_proyek ? `${p.kode_proyek} · ` : ''}${p.nama || '—'}`,
+        `${p.sub_sektor_kbli ? `KBLI ${p.sub_sektor_kbli.kode} · ` : ''}${p.nama || '—'}`,
         p.sektor_nama || '—',
         p.provinsi_nama || '—',
         LABEL_TAHAPAN[p.status] || p.status || '—',

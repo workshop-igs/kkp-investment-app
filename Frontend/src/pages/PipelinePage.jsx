@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Plus, Search, BarChart3, TrendingUp, Users, Trash2, Eye, AlertTriangle, X, CheckCircle2, Loader2, FileText } from 'lucide-react';
-import { formatRupiah, formatNumber, rupiahMiliar } from '../utils/pemformat';
+import { formatRupiah, formatNumber, labelKbli, rupiahMiliar } from '../utils/pemformat';
 import { LABEL_TAHAPAN, SECTORS, TAHAPAN_PROYEK } from '../utils/konstanta';
 import { unduhPdfPipeline } from '../utils/pdfPipeline';
 import { api } from '../api/klien';
@@ -146,7 +146,7 @@ const PipelinePage = () => {
 
       setNotification({
         type: 'success',
-        message: `Proyek "${projectToDelete.nama}" (${projectToDelete.kode_proyek || `PRJ-${projectToDelete.id.toString().padStart(4, '0')}`}) berhasil dihapus.`
+        message: `Proyek "${projectToDelete.nama}" berhasil dihapus.`
       });
 
       setProjectToDelete(null);
@@ -311,7 +311,7 @@ const PipelinePage = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs uppercase tracking-wider">
-                  <th className="py-3.5 px-6 font-semibold">Kode</th>
+                  <th className="py-3.5 px-6 font-semibold">KBLI</th>
                   <th className="py-3.5 px-6 font-semibold">Nama Proyek</th>
                   <th className="py-3.5 px-6 font-semibold">Lokasi</th>
                   <th className="py-3.5 px-6 font-semibold">Jenis Investasi</th>
@@ -325,7 +325,7 @@ const PipelinePage = () => {
                   const badge = { label: LABEL_TAHAPAN[p.status] || p.status, style: GAYA_TAHAP[p.status] || 'bg-slate-100 text-slate-600 border border-slate-200' };
                   return (
                     <tr key={p.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-4 px-6 font-mono text-xs text-teal-600 font-semibold whitespace-nowrap">{p.kode_proyek || `PRJ-${p.id.toString().padStart(4, '0')}`}</td>
+                      <td className="py-4 px-6 font-mono text-xs text-teal-600 font-semibold whitespace-nowrap">{labelKbli(p.sub_sektor_kbli)}</td>
                       <td className="py-4 px-6 font-semibold text-slate-800">{p.nama}</td>
                       <td className="py-4 px-6 text-slate-500 text-xs">{p.provinsi_nama || p.lokasi_detail || '-'}</td>
                       <td className="py-4 px-6 text-slate-500 text-sm">{p.sektor_nama}</td>
@@ -380,7 +380,7 @@ const PipelinePage = () => {
 
             <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 mb-5 space-y-1.5">
               <div className="text-xs font-mono text-teal-700 font-bold">
-                {projectToDelete.kode_proyek || `PRJ-${projectToDelete.id.toString().padStart(4, '0')}`}
+                {labelKbli(projectToDelete.sub_sektor_kbli)}
               </div>
               <div className="text-sm font-semibold text-slate-800">
                 {projectToDelete.nama}
