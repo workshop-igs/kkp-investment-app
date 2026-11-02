@@ -283,7 +283,7 @@ const DetailProyekPage = () => {
         subjudul: [proyek.kode_proyek, proyek.sektor_nama, proyek.provinsi_nama]
           .filter(Boolean)
           .join(' · '),
-        jenisInvestasi: [proyek.sektor_nama, proyek.sub_sektor_nama].filter(Boolean).join(' — '),
+        jenisInvestasi: [proyek.sektor_nama, proyek.sub_sektor_nama, proyek.sub_sektor_kbli && `KBLI ${proyek.sub_sektor_kbli.kode}`].filter(Boolean).join(' — '),
         analisis: { ...analisis, screening: screening || analisis.screening },
         spasial: spasial.data,
         bps: dataBps,
@@ -592,7 +592,7 @@ const DetailProyekPage = () => {
             <>
               {proyek.sektor_nama && (
                 <KartuLaporan judul="Jenis Investasi">
-                  <AngkaBesar item={[{ nilai: [proyek.sektor_nama, proyek.sub_sektor_nama].filter(Boolean).join(' — '), satuan: 'Sektor investasi' }]} />
+                  <AngkaBesar item={[{ nilai: [proyek.sektor_nama, proyek.sub_sektor_nama].filter(Boolean).join(' — '), satuan: proyek.sub_sektor_kbli ? `KBLI ${proyek.sub_sektor_kbli.kode} · ${proyek.sub_sektor_kbli.judul}` : 'Jenis investasi' }]} />
                 </KartuLaporan>
               )}
               <KartuLaporan

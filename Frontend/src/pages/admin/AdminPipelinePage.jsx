@@ -120,7 +120,7 @@ const UbahProyek = ({ proyek, sektor, provinsi, onTutup, onSelesai }) => {
           ], { onChange: (e) => setIsian((s) => ({ ...s, sektor: e.target.value, sub_sektor: '' })) })}
           {pilihan('Sub-jenis', 'sub_sektor', [
             <option key="" value="">Tanpa sub-jenis</option>,
-            ...subJenis.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>),
+            ...subJenis.map((s) => <option key={s.kode} value={s.kode}>{s.nama}{s.kbli ? ` (KBLI ${s.kbli.kode})` : ''}</option>),
           ], { disabled: !subJenis.length })}
           {pilihan('Provinsi', 'provinsi', [
             <option key="" value="">Belum ditentukan</option>,

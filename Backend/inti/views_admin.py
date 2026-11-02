@@ -44,6 +44,7 @@ from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
 from pipeline.models import ProyekInvestasi
 
 from .audit import catat, potret, selisih, simpan_berjejak
+from .kbli import ringkas
 from .kesehatan import periksa_semua
 from .serializers import SektorInvestasiSerializer
 from .serializers_admin import (
@@ -341,6 +342,9 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
             'sektor': sektor,
             'templat_model_usaha': {s['kode']: konstanta.model_usaha_kosong(s['kode']) for s in sektor},
             'parameter_kriteria': {k: {'label': label, 'satuan': satuan} for k, (label, satuan, _) in PARAMETER.items()},
+            'kbli': {isi['kbli']: ringkas(isi['kbli'])['judul']
+                     for sumber in (konstanta.KRITERIA_JENIS, pengaturan.atur('KRITERIA_JENIS'))
+                     for per_sub in sumber.values() for isi in per_sub.values() if ringkas(isi.get('kbli'))},
             'hitung_ulang': status_hitung_ulang(),
             'sumber_data': ringkasan_sumber(),
         })

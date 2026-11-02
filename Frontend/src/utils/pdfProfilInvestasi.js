@@ -1179,9 +1179,9 @@ function komoditasUnggulan(dek, o) {
     sub.forEach((s) => {
       const n = unik(o.bab.flatMap((b) => b.lokasi)).filter((l) => l.sub_sektor_kode === s.kode).length;
       dek.gaya(6.9, C.navy, true);
-      dek.doc.text(bersih(namaRapi(s.nama, 40)), x + 5, yy);
+      dek.doc.text(bersih(namaRapi(s.nama, 32)), x + 5, yy);
       dek.gaya(6.2, C.abu);
-      dek.doc.text(`${n} lokasi`, x + lebar - 5, yy, { align: 'right' });
+      dek.doc.text(`${s.kbli ? `KBLI ${s.kbli.kode} · ` : ''}${n} lokasi`, x + lebar - 5, yy, { align: 'right' });
       yy += 6;
     });
   } else {
@@ -1272,8 +1272,8 @@ function kajian(dek, o, b, i) {
   const y = dek.slide({
     alis: alisBab(i, b, 1, k ? 'Kajian produksi dan pasar' : 'Kajian ruang'),
     judul: k ? `Kajian produksi dan pasar ${b.nama.toLowerCase()}` : `Kajian ruang ${b.nama.toLowerCase()}`,
-    sub: k ? `${k.ranah_label} di Provinsi ${o.wilayah.nama}; sub-jenis ${b.sub_jenis.map((s) => s.nama.toLowerCase()).join(', ')}.`
-      : `Sub-jenis: ${b.sub_jenis.map((s) => s.nama).join(', ')}.`,
+    sub: k ? `${k.ranah_label} di Provinsi ${o.wilayah.nama}; sub-jenis ${b.sub_jenis.map((s) => namaKbli(s, true)).join(', ')}.`
+      : `Sub-jenis: ${b.sub_jenis.map((s) => namaKbli(s)).join(', ')}.`,
     aksen,
     bab: true,
   });
@@ -1758,7 +1758,7 @@ function barisPestel(o, b) {
       kurang.length ? `Fasilitas belum tercatat (${kurang.slice(0, 3).join(', ')}) menjadi peluang investasi pendukung.` : 'Fasilitas pendukung utama sudah tercatat di provinsi.'],
     ['Lingkungan', `${angka(j.tinggi_ha)} ha zona S1 dan ${angka(j.sedang_ha)} ha zona S2; ${b.lokasi.length ? `${s1} dari ${b.lokasi.length} lokasi prioritas berkelas S1` : 'belum ada lokasi prioritas pada Peta Sebaran'}.`,
       'Lokasi S2 memiliki faktor pembatas alami; tidak boleh menutup ekosistem sensitif (mangrove, lamun, terumbu karang).'],
-    ['Legal', 'NIB dan perizinan berusaha sesuai KBLI, PKKPRL atau PKKPR, dokumen lingkungan (SPPL, UKL-UPL, atau AMDAL), dan sertifikasi mutu.',
+    ['Legal', `NIB dan perizinan berusaha sesuai ${izinKbli(b)}, PKKPRL atau PKKPR, dokumen lingkungan (SPPL, UKL-UPL, atau AMDAL), dan sertifikasi mutu.`,
       'Proses perizinan melalui OSS; persetujuan kawasan konservasi diperlukan bila berada di dalamnya.'],
   ];
 }
@@ -1813,6 +1813,10 @@ function csr(dek, o) {
   dek.sumber('Sumber: model usaha Pengaturan Profil Investasi aplikasi; asumsi CSR mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026).');
 }
 
+const kodeKbli = (b) => [...new Set(b.sub_jenis.map((x) => x.kbli?.kode).filter(Boolean))];
+const izinKbli = (b) => (kodeKbli(b).length ? `KBLI ${kodeKbli(b).join(', ')}` : 'KBLI');
+const namaKbli = (s, kecil = false) => `${kecil ? s.nama.toLowerCase() : s.nama}${s.kbli ? ` (KBLI ${s.kbli.kode})` : ''}`;
+
 function izinUntuk(b) {
   const s = b.sektor;
   const subs = b.sub_jenis.map((x) => x.kode);
@@ -1820,12 +1824,12 @@ function izinUntuk(b) {
   const darat = ['PENGOLAHAN_HASIL_LAUT', 'GARAM'].includes(s) || subs.some((x) => ['BUDIDAYA_PEMBENIHAN', 'WISATA_RESOR', 'BIOTEK_BIOPLASTIK', 'BIOTEK_PAKAN_ALAMI'].includes(x));
   const ekspor = (s === 'PERIKANAN_TANGKAP' || tambak || s === 'PENGOLAHAN_HASIL_LAUT');
   if (s === 'PERIKANAN_TANGKAP') {
-    return ['Pas Kecil, NIB, e-BKP (mikro); Pas Besar, NIB, Perizinan Berusaha Subsektor Penangkapan Ikan', '-', '-',
+    return [`Pas Kecil, NIB, e-BKP (mikro); Pas Besar, NIB, Perizinan Berusaha Subsektor Penangkapan Ikan (${izinKbli(b)})`, '-', '-',
       'Hanya kapal di bawah 10 GT*', 'PBG gudang atau cold storage, SLF*', 'Cara Penanganan Ikan yang Baik; HACCP', '-',
       'Dokumen karantina ikan; Sertifikat mutu dan keamanan hasil perikanan (ekspor)', 'Administrasi OSS atau konsultan*'];
   }
   return [
-    s === 'PERIKANAN_BUDIDAYA' ? 'NIB, Perizinan Berusaha Subsektor Pembudidayaan Ikan' : 'NIB dan perizinan berusaha sesuai KBLI',
+    s === 'PERIKANAN_BUDIDAYA' ? `NIB, Perizinan Berusaha Subsektor Pembudidayaan Ikan (${izinKbli(b)})` : `NIB dan perizinan berusaha sesuai ${izinKbli(b)}`,
     tambak ? 'PKKPRL atau PKKPR' : darat ? 'PKKPR' : 'PKKPRL',
     'SPPL, UKL-UPL, atau AMDAL*',
     'Persetujuan pemanfaatan kawasan*',

@@ -17,6 +17,7 @@ from inventarisasi.models import (
 )
 
 from .geospasial import nama_kabupaten
+from .kbli import cari, ringkas
 from .models import DesaKelurahan, KabupatenKota, Kecamatan, Provinsi, WilayahPengelolaanPerikanan
 
 MIN_KATA_KUNCI = 2
@@ -177,6 +178,47 @@ def _cari_kkprl(kata):
     return [h for h in hasil if h['titik']]
 
 
+def _cari_kbli(kata):
+    from analitik.services.pengaturan import atur
+
+    from .models import SektorInvestasi
+
+    angka = kata.replace(' ', '')
+    kecil = kata.lower()
+    nama_sektor = dict(SektorInvestasi.objects.filter(aktif=True).values_list('kode', 'nama'))
+    hasil = []
+    for sektor, per_sub in atur('KRITERIA_JENIS').items():
+        for isi in per_sub.values():
+            kbli = ringkas(isi.get('kbli'))
+            if sektor not in nama_sektor or not kbli:
+                continue
+            if angka.isdigit():
+                cocok = kbli['kode'].startswith(angka)
+            else:
+                cocok = kecil in isi['nama'].lower() or kecil in kbli['judul'].lower()
+            if cocok:
+                hasil.append({
+                    'kelompok': 'Jenis Usaha (KBLI)',
+                    'sumber': 'kbli',
+                    'kode': kbli['kode'],
+                    'jenis': f"KBLI {kbli['kode']}",
+                    'nama': isi['nama'],
+                    'keterangan': _gabung(nama_sektor[sektor], kbli['judul']),
+                    'sektor': sektor,
+                    'bbox': None,
+                    'titik': None,
+                    'peringkat': 0 if angka.isdigit() else 2,
+                })
+    return hasil[:BATAS_PER_SUMBER * 2]
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+@throttle_classes([ThrottlePencarian])
+def cari_kbli(request):
+    return Response({'hasil': cari(request.query_params.get('q'))})
+
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 @throttle_classes([ThrottlePencarian])
@@ -191,6 +233,7 @@ def cari_lokasi(request):
         return Response(tersimpan)
 
     hasil = []
+    hasil += _cari_kbli(kata)
     hasil += _cari_wpp(kata)
     hasil += _cari_wilayah(Provinsi, kata, 'provinsi', ('kode_bps',), lambda r: 'Provinsi',
                            lambda r: f"Kode BPS {r['kode_bps']}")

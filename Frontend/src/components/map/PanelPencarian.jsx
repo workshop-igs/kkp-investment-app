@@ -74,7 +74,7 @@ export const usePencarian = (kata) => {
   return { hasil, status };
 };
 
-const PanelPencarian = ({ onTuju }) => {
+const PanelPencarian = ({ onTuju, onJenis }) => {
   const [kata, setKata] = useState('');
   const { hasil, status } = usePencarian(kata);
 
@@ -87,15 +87,14 @@ const PanelPencarian = ({ onTuju }) => {
     return [...peta.entries()];
   }, [hasil]);
 
-  const pilih = (h) =>
-    onTuju({
+  const pilih = (h) => (h.sumber === 'kbli' ? onJenis(h.sektor) : onTuju({
       lat: h.titik ? h.titik[1] : null,
       lng: h.titik ? h.titik[0] : null,
       bbox: h.bbox,
       label: h.nama,
       keterangan: [h.jenis, h.keterangan].filter(Boolean).join(' · '),
       zoom: 13,
-    });
+    }));
 
   const kirim = (e) => {
     e.preventDefault();
@@ -136,7 +135,7 @@ const PanelPencarian = ({ onTuju }) => {
       )}
       kaki={(
         <p className="px-4 py-2 text-[10.5px] text-slate-400 bg-slate-50 border-t border-slate-100 shrink-0 leading-snug">
-          Wilayah dapat dicari sampai desa/kelurahan, termasuk nomor WPP, misalnya 713.
+          Wilayah dapat dicari sampai desa/kelurahan, termasuk nomor WPP (misalnya 713) dan kode KBLI (misalnya 03110).
         </p>
       )}
     >

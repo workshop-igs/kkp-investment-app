@@ -372,18 +372,79 @@ const Editor = ({ nilai, bawaan, onUbah, meta, label }) => {
 
 const RANAH = [['LAUT', 'Perairan'], ['DARAT', 'Darat pesisir']];
 
+const PilihKbli = ({ onPilih, onBatal }) => {
+  const [kata, setKata] = useState('');
+  const [hasil, setHasil] = useState([]);
+  const [memuat, setMemuat] = useState(false);
+
+  useEffect(() => {
+    if (kata.trim().length < 2) { setHasil([]); return undefined; }
+    const kontrol = new AbortController();
+    const t = setTimeout(() => {
+      setMemuat(true);
+      api.get('/inti/kbli/', { params: { q: kata.trim() }, signal: kontrol.signal })
+        .then(({ data }) => setHasil(data.hasil || []))
+        .catch(() => {})
+        .finally(() => setMemuat(false));
+    }, 300);
+    return () => { clearTimeout(t); kontrol.abort(); };
+  }, [kata]);
+
+  return (
+    <div className="rounded-lg border border-sky-200 bg-sky-50/50 p-3 space-y-2">
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2 top-1/2 -translate-y-1/2" />
+          <input
+            autoFocus
+            value={kata}
+            onChange={(e) => setKata(e.target.value)}
+            placeholder="Cari KBLI 2025: kode (mis. 03213) atau kata (mis. rumput laut)"
+            className={`${kelasInput} pl-7`}
+          />
+        </div>
+        {memuat && <Loader2 className="w-4 h-4 animate-spin text-slate-400" />}
+        <button type="button" onClick={onBatal} className="text-xs font-semibold text-slate-500 hover:text-slate-700">Batal</button>
+      </div>
+      {hasil.length > 0 && (
+        <ul className="max-h-64 overflow-y-auto divide-y divide-slate-100 rounded-md border border-slate-200 bg-white">
+          {hasil.map((k) => (
+            <li key={k.kode}>
+              <button type="button" onClick={() => onPilih(k)} className="w-full text-left px-3 py-1.5 text-sm hover:bg-sky-50">
+                <span className="font-mono text-xs font-semibold text-kkp-700 mr-2">{k.kode}</span>{k.judul}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      {kata.trim().length >= 2 && !memuat && !hasil.length && (
+        <p className="text-xs text-slate-500">Tidak ada KBLI 2025 yang cocok.</p>
+      )}
+      <p className="text-[11px] text-slate-500">Sumber: KBLI 2025, Peraturan BPS Nomor 7 Tahun 2025.</p>
+    </div>
+  );
+};
+
 const KriteriaEditor = ({ nilai, onUbah, data }) => {
   const [kode, setKode] = useState(data.sektor[0]?.kode);
+  const [memilih, setMemilih] = useState(null);
+  const [judulKbli, setJudulKbli] = useState(data.kbli || {});
   const parameter = data.parameter_kriteria;
   const subs = nilai[kode] || {};
   const bawaan = data.daftar.find((d) => d.kunci === 'KRITERIA_JENIS')?.bawaan?.[kode] || {};
   const ubahSub = (sub, baru) => onUbah({ ...nilai, [kode]: { ...subs, [sub]: baru } });
-  const tambahSub = () => {
-    const terpakai = new Set(Object.values(nilai).flatMap((s) => Object.keys(s)));
-    const awalan = kode.toUpperCase().replace(/[^A-Z0-9_]/g, '_').slice(0, 30);
-    let n = 1;
-    while (terpakai.has(`${awalan}_BARU_${n}`)) n += 1;
-    ubahSub(`${awalan}_BARU_${n}`, { nama: 'Sub-jenis baru', ranah: ['LAUT'], kriteria: {} });
+  const pilihKbli = (k) => {
+    setJudulKbli((j) => ({ ...j, [k.kode]: k.judul }));
+    if (memilih === 'baru') {
+      const terpakai = new Set(Object.values(nilai).flatMap((s) => Object.keys(s)));
+      const awalan = `${kode.toUpperCase().replace(/[^A-Z0-9_]/g, '_').slice(0, 30)}_${k.kode}`;
+      let baru = awalan;
+      for (let n = 2; terpakai.has(baru); n += 1) baru = `${awalan}_${n}`;
+      ubahSub(baru, { nama: k.judul, kbli: k.kode, ranah: ['LAUT'], kriteria: {} });
+    } else {
+      ubahSub(memilih, { ...subs[memilih], kbli: k.kode });
+    }
+    setMemilih(null);
   };
   const hapusSub = (sub) => {
     const { [sub]: _, ...lain } = subs;
@@ -401,11 +462,12 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
         <select value={kode} onChange={(e) => setKode(e.target.value)} className={`${kelasInput} max-w-sm`}>
           {data.sektor.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
         </select>
-        <button type="button" onClick={tambahSub}
+        <button type="button" onClick={() => setMemilih('baru')}
           className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50">
-          <Plus className="w-3.5 h-3.5" /> Tambah sub-jenis
+          <Plus className="w-3.5 h-3.5" /> Tambah sub-jenis dari KBLI
         </button>
       </div>
+      {memilih === 'baru' && <PilihKbli onPilih={pilihKbli} onBatal={() => setMemilih(null)} />}
       {Object.entries(subs).map(([sub, isi]) => {
         const unggulan = isi.unggulan || {};
         const ubahKriteria = (k, ambang) => ubahSub(sub, { ...isi, kriteria: { ...isi.kriteria, [k]: ambang } });
@@ -427,6 +489,11 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
                   {n}
                 </label>
               ))}
+              <button type="button" onClick={() => setMemilih(sub)} title="Ganti KBLI"
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                  isi.kbli ? 'bg-sky-50 text-kkp-700 hover:bg-sky-100' : 'bg-amber-50 text-amber-800 hover:bg-amber-100'}`}>
+                {isi.kbli ? `KBLI ${isi.kbli}${judulKbli[isi.kbli] ? ` · ${judulKbli[isi.kbli]}` : ''}` : 'Pilih KBLI (wajib)'}
+              </button>
               {!bawaan[sub] && (
                 <button type="button" onClick={() => hapusSub(sub)}
                   className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50">
@@ -434,6 +501,7 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
                 </button>
               )}
             </div>
+            {memilih === sub && <PilihKbli onPilih={pilihKbli} onBatal={() => setMemilih(null)} />}
             {!kunci.length && <p className="text-xs text-amber-700">Tambahkan sedikitnya satu kriteria sebelum menyimpan.</p>}
             <div className={`overflow-x-auto ${kunci.length ? '' : 'hidden'}`}>
               <table className="text-sm">

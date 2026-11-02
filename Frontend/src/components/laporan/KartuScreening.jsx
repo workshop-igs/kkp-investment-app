@@ -369,7 +369,10 @@ const KriteriaSubSektor = ({ s }) => {
           return (
             <div key={h.kode} className="overflow-x-auto rounded-lg border border-slate-200 bg-white text-xs">
               <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2">
-                <span className="font-semibold text-slate-800">{h.nama}</span>
+                <span className="font-semibold text-slate-800">
+                  {h.nama}
+                  {h.kbli && <span className="ml-1.5 font-normal text-slate-500">KBLI {h.kbli.kode}</span>}
+                </span>
                 <span className="flex items-center gap-2 text-[10.5px] text-slate-500">
                   {h.terukur} dari {h.total} kriteria terukur
                   {h.unggulan?.skor != null && <span className="tabular-nums">· skor mutu {h.unggulan.skor}</span>}
