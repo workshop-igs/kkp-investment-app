@@ -115,9 +115,15 @@ class ProyekInvestasiListSerializer(serializers.ModelSerializer):
     provinsi_nama = serializers.SerializerMethodField()
     sektor_nama = serializers.CharField(source='sektor.nama', read_only=True, default=None)
     sektor_kode = serializers.CharField(source='sektor.kode', read_only=True, default=None)
+    sub_sektor_kbli = serializers.SerializerMethodField()
 
     def get_provinsi_nama(self, obj):
         return obj.provinsi.nama if obj.provinsi_id else LABEL_TANPA_PROVINSI
+
+    def get_sub_sektor_kbli(self, obj):
+        from analitik.services.kriteria import kbli_sub
+
+        return kbli_sub(obj.sektor.kode, obj.sub_sektor) if obj.sektor_id else None
 
     class Meta:
         model = ProyekInvestasi
@@ -129,6 +135,7 @@ class ProyekInvestasiListSerializer(serializers.ModelSerializer):
             'provinsi_nama',
             'sektor_nama',
             'sektor_kode',
+            'sub_sektor_kbli',
             'nilai_investasi_miliar',
             'status',
             'progress_pct',

@@ -148,6 +148,12 @@ class AdminProyekSerializer(serializers.ModelSerializer):
     sektor_nama = serializers.CharField(source='sektor.nama', read_only=True)
     provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
     investor_nama = serializers.CharField(source='created_by.first_name', read_only=True)
+    sub_sektor_kbli = serializers.SerializerMethodField()
+
+    def get_sub_sektor_kbli(self, obj):
+        from analitik.services.kriteria import kbli_sub
+
+        return kbli_sub(obj.sektor.kode, obj.sub_sektor) if obj.sektor_id else None
 
     class Meta:  # type: ignore
         model = ProyekInvestasi

@@ -70,3 +70,5 @@ export const waktuPanjang = (iso) => {
 
 export const inisialNama = (user) =>
   ((user?.first_name?.[0] || '') + (user?.last_name?.[0] || '') || user?.username?.[0] || '?').toUpperCase();
+
+export const labelKbli = (kbli) => (kbli ? `KBLI ${kbli.kode}` : 'KBLI belum ditentukan');

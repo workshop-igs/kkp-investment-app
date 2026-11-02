@@ -353,6 +353,7 @@ def dashboard_stats(request):
     from django.db.models import Avg, Count, Sum
 
     from analitik.models import LokasiPotensial
+    from analitik.services.kriteria import kbli_sub
     from inventarisasi.models import KKPRL, PotensiInvestasi, ZonasiRuangLaut
     from pipeline.models import ProyekInvestasi
 
@@ -460,6 +461,7 @@ def dashboard_stats(request):
         {
             'id': p.id,
             'kode_proyek': p.kode_proyek,
+            'sub_sektor_kbli': kbli_sub(p.sektor.kode, p.sub_sektor) if p.sektor_id else None,
             'nama': p.nama,
             'investor': p.investor,
             'sektor_kode': p.sektor.kode if p.sektor_id else '',

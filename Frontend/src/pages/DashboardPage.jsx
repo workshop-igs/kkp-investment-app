@@ -10,7 +10,7 @@ import { buatIkon, lambangSvg } from '../components/map/ikonPeta';
 import { BATAS_INDONESIA } from '../components/map/PetaInteraktif';
 import { IKON_JENIS_INVESTASI, WARNA_JENIS_INVESTASI, warnaJenisInvestasi } from '../utils/simbologiPeta';
 import { LABEL_TAHAPAN, SECTORS, TAHAPAN_PROYEK } from '../utils/konstanta';
-import { formatNumber, rupiahRingkas } from '../utils/pemformat';
+import { formatNumber, labelKbli, rupiahRingkas } from '../utils/pemformat';
 
 const POTENSI = LAYER_LOKAL.potensi;
 const NAVY = '#002242';
@@ -201,7 +201,7 @@ const PetaDashboard = ({ jenis, provinsi, proyek }) => {
         <Marker key={p.id} position={[p.lat, p.lng]} icon={ikonProyek} zIndexOffset={1000}>
           <Popup maxWidth={260}>
             <div className="font-sans">
-              <span className="font-mono text-[10px] font-semibold text-kkp-700">{p.kode_proyek}</span>
+              <span className="font-mono text-[10px] font-semibold text-kkp-700">{labelKbli(p.sub_sektor_kbli)}</span>
               <h4 className="mt-0.5 text-sm font-bold leading-tight text-kkp-900">{p.nama}</h4>
               <p className="mt-0.5 text-xs text-slate-500">{p.sektor_nama} · {p.provinsi_nama}</p>
               <p className="mt-2 text-xs text-slate-700">
@@ -349,10 +349,10 @@ const DashboardPage = () => {
       ? v.toLocaleString('id-ID', { useGrouping: false, maximumFractionDigits: 2 })
       : `"${String(v ?? '').replace(/"/g, '""')}"`);
     const baris = [
-      ['Kode Proyek', 'Nama Proyek', 'Investor', 'Jenis Investasi', 'Provinsi', 'Tahap', 'Nilai Investasi (Miliar Rp)',
+      ['KBLI', 'Nama Proyek', 'Investor', 'Jenis Investasi', 'Provinsi', 'Tahap', 'Nilai Investasi (Miliar Rp)',
         'Realisasi (Miliar Rp)', 'Luas (Ha)', 'Tenaga Kerja (Orang)', 'Skor Kelayakan (%)'],
       ...proyek.map((p) => [
-        p.kode_proyek, p.nama, p.investor, p.sektor_nama, p.provinsi_nama, LABEL_TAHAPAN[p.status] || p.status,
+        p.sub_sektor_kbli?.kode || '', p.nama, p.investor, p.sektor_nama, p.provinsi_nama, LABEL_TAHAPAN[p.status] || p.status,
         p.nilai_investasi_miliar || 0, p.nilai_realisasi_miliar || 0, p.luas_ha || 0, p.proyeksi_tenaga_kerja || 0,
         p.skor_kelayakan === null || p.skor_kelayakan === undefined ? '' : p.skor_kelayakan * 100,
       ]),
@@ -649,7 +649,7 @@ const DashboardPage = () => {
                     <tr key={p.id} className="hover:bg-slate-50">
                       <td className="max-w-[18rem] px-4 py-2.5">
                         <Link to={`/pipeline/${p.id}`} className={`block truncate font-semibold text-slate-900 hover:text-kkp-700 ${FOKUS}`}>{p.nama}</Link>
-                        <span className="font-mono text-[11px] text-slate-400">{p.kode_proyek}</span>
+                        <span className="font-mono text-[11px] text-slate-400">{labelKbli(p.sub_sektor_kbli)}</span>
                       </td>
                       <td className="px-3 py-2.5">
                         <span className="flex items-center gap-2 text-slate-700">
