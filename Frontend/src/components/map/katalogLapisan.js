@@ -36,6 +36,16 @@ export const urlCitraOseanografi = (kode) => `${API_V1_URL}/analitik/oseanografi
 
 export const CITRA_KOSONG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
+export const penanganCitra = (catat) => {
+  const gagal = { memuat: false, galat: 'Gambar layer tidak tersedia' };
+  return {
+    add: () => catat({ memuat: true }),
+    load: (e) => catat(e.target.getElement()?.src === CITRA_KOSONG ? gagal : { memuat: false }),
+    error: () => catat(gagal),
+    remove: () => catat(null),
+  };
+};
+
 const OSEANOGRAFI = [
   ['osea_suhu', 'SUHU', 'Suhu Permukaan Laut', 'Rata-rata suhu permukaan laut 12 bulan terakhir (NOAA Coral Reef Watch).'],
   ['osea_anomali', 'ANOMALI_SUHU', 'Anomali Suhu Permukaan Laut',

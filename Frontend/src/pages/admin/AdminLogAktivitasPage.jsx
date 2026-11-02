@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
-import { Loader2, RefreshCw, Search, ShieldAlert } from 'lucide-react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
+import { ChevronRight, Loader2, RefreshCw, Search, ShieldAlert } from 'lucide-react';
 import { api, ambilDaftar } from '../../api/klien';
 import { WARNA_AKSI } from '../../utils/konstanta';
 import { waktuPanjang } from '../../utils/pemformat';
@@ -11,6 +11,7 @@ const AdminLogAktivitasPage = () => {
   const [cari, setCari] = useState('');
   const [memuat, setMemuat] = useState(true);
   const [galat, setGalat] = useState(null);
+  const [terbuka, setTerbuka] = useState(null);
 
   useEffect(() => {
     api
@@ -62,7 +63,7 @@ const AdminLogAktivitasPage = () => {
             type="text"
             value={cari}
             onChange={(e) => setCari(e.target.value)}
-            placeholder="Cari pengguna, alamat IP, jalur, atau sasaran…"
+            placeholder="Cari pengguna, kegiatan, nama proyek atau pengaturan, alamat IP…"
             className="w-full bg-white border border-slate-300 rounded-lg text-sm pl-9 pr-3 py-2 focus:outline-none focus:border-sky-500 text-slate-800"
           />
         </div>
@@ -112,14 +113,19 @@ const AdminLogAktivitasPage = () => {
                 <th className="px-6 py-4">Pengguna</th>
                 <th className="px-6 py-4">Aksi</th>
                 <th className="px-6 py-4">Sasaran</th>
-                <th className="px-6 py-4">Keterangan</th>
-                <th className="px-6 py-4 text-center">Status</th>
+                <th className="px-6 py-4">Apa yang terjadi</th>
+                <th className="px-6 py-4 text-center">Hasil</th>
                 <th className="px-6 py-4">Alamat IP</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {baris.map((b) => (
-                <tr key={b.id} className="hover:bg-slate-50/50">
+                <Fragment key={b.id}>
+                <tr
+                  onClick={() => setTerbuka((t) => (t === b.id ? null : b.id))}
+                  className={`cursor-pointer hover:bg-slate-50/50 ${terbuka === b.id ? 'bg-slate-50' : ''}`}
+                  aria-expanded={terbuka === b.id}
+                >
                   <td className="px-6 py-3.5 text-slate-500 text-xs whitespace-nowrap tabular-nums">
                     {waktuPanjang(b.waktu)}
                   </td>
@@ -138,25 +144,52 @@ const AdminLogAktivitasPage = () => {
                     </span>
                   </td>
                   <td className="px-6 py-3.5 text-slate-700">{b.objek || '-'}</td>
-                  <td className="px-6 py-3.5 text-slate-500 text-xs max-w-[22rem]">
-                    <div className="truncate" title={b.ringkasan || b.jalur}>
-                      {b.ringkasan || '-'}
+                  <td className="px-6 py-3.5 text-slate-700 max-w-[28rem]">
+                    <div className="flex items-start gap-1.5">
+                      <ChevronRight className={`w-3.5 h-3.5 mt-0.5 shrink-0 text-slate-400 transition-transform ${terbuka === b.id ? 'rotate-90' : ''}`} />
+                      <span>{b.ringkasan || `${b.aksi_label || b.aksi}${b.objek ? `: ${b.objek}` : ''}`}</span>
                     </div>
-                    <div className="truncate font-mono text-[10px] text-slate-400" title={b.jalur}>
-                      {b.metode} {b.jalur}
-                    </div>
+                    {b.rincian && terbuka !== b.id && (
+                      <div className="pl-5 text-xs text-slate-400">{b.rincian.split('\n').length} rincian perubahan</div>
+                    )}
                   </td>
                   <td className="px-6 py-3.5 text-center">
                     <span
-                      className={`font-mono text-xs font-bold ${
+                      title={b.kode_status ? `Kode ${b.kode_status}` : undefined}
+                      className={`text-xs font-semibold ${
                         b.kode_status >= 400 ? 'text-rose-600' : 'text-emerald-600'
                       }`}
                     >
-                      {b.kode_status ?? '-'}
+                      {b.kode_status == null ? '-' : b.kode_status >= 400 ? 'Gagal' : 'Berhasil'}
                     </span>
                   </td>
                   <td className="px-6 py-3.5 font-mono text-xs text-slate-500">{b.alamat_ip || '-'}</td>
                 </tr>
+                {terbuka === b.id && (
+                  <tr className="bg-slate-50">
+                    <td colSpan={7} className="px-6 pb-4 pt-1">
+                      <div className="grid gap-3 md:grid-cols-[2fr_1fr] text-xs">
+                        <div>
+                          <p className="font-semibold text-slate-600 mb-1">Rincian</p>
+                          {b.rincian ? (
+                            <ul className="space-y-0.5 text-slate-700">
+                              {b.rincian.split('\n').map((r, i) => <li key={i} className="break-words">• {r}</li>)}
+                            </ul>
+                          ) : (
+                            <p className="text-slate-400">Tidak ada rincian tambahan untuk aktivitas ini.</p>
+                          )}
+                        </div>
+                        <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5 text-slate-500">
+                          <dt>Waktu</dt><dd className="text-slate-700">{waktuPanjang(b.waktu)}</dd>
+                          <dt>Hasil</dt><dd className="text-slate-700">{b.kode_status >= 400 ? 'Gagal' : 'Berhasil'} (kode {b.kode_status ?? '-'})</dd>
+                          <dt>Alamat</dt><dd className="font-mono break-all">{b.metode} {b.jalur}</dd>
+                          <dt>Perangkat</dt><dd className="break-words">{b.agen || '-'}</dd>
+                        </dl>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                </Fragment>
               ))}
 
               {!memuat && baris.length === 0 && !galat && (

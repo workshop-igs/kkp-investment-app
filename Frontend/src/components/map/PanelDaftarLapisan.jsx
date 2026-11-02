@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-  Activity, AlertTriangle, Anchor, ArrowDownToLine, BadgeDollarSign, BarChart3, Building, Building2, Cable,
+  Activity, AlertTriangle, Anchor, CheckCircle2, RotateCcw, ArrowDownToLine, BadgeDollarSign, BarChart3, Building, Building2, Cable,
   ChevronDown, CloudRain, CloudSun, Compass, Container, Droplets, Eye, Factory, FileCheck, Fish, FlaskConical,
   Flower2, Frame, GitFork, GraduationCap, Home, Info, Landmark, LandPlot, Layers, Layers3, Leaf, Loader2,
   Map as IkonPeta, MapPinned, Moon, Mountain, MoveDownRight, Navigation, Navigation2, Pickaxe, Plane, Plug, PlugZap,
@@ -183,7 +183,7 @@ const StatusLapisan = ({ status }) => {
           status.catatan ? 'text-amber-600' : 'text-emerald-700'
         }`}
       >
-        {status.catatan || 'Peta bahaya tergambar.'}
+        {status.catatan || 'Layer tergambar.'}
       </p>
     );
   }
@@ -216,6 +216,62 @@ const StatusLapisan = ({ status }) => {
 };
 
 export const LAYER_PANEL = Object.fromEntries(KATEGORI.flatMap((k) => k.layer.map((l) => [l.id, l])));
+
+export const PitaStatusLapisan = ({ statusLapisan, onCobaLagi }) => {
+  const [berhasil, setBerhasil] = useState([]);
+  const [ditutup, setDitutup] = useState({});
+  const pernah = useRef(new Set());
+
+  useEffect(() => {
+    pernah.current.forEach((id) => { if (!(id in statusLapisan)) pernah.current.delete(id); });
+    const baru = Object.entries(statusLapisan)
+      .filter(([id, s]) => !s.memuat && !s.galat && !pernah.current.has(id))
+      .map(([id]) => id);
+    if (!baru.length) return;
+    baru.forEach((id) => pernah.current.add(id));
+    setBerhasil((b) => [...b, ...baru]);
+    setTimeout(() => setBerhasil((b) => b.filter((id) => !baru.includes(id))), 3500);
+  }, [statusLapisan]);
+
+  const nama = (id) => LAYER_PANEL[id]?.nama || id;
+  const daftar = Object.entries(statusLapisan);
+  const memuat = daftar.filter(([, s]) => s.memuat).map(([id]) => nama(id));
+  const gagal = daftar.filter(([id, s]) => s.galat && ditutup[id] !== s.galat);
+  const tampil = berhasil.filter((id) => statusLapisan[id] && !statusLapisan[id].memuat && !statusLapisan[id].galat);
+  if (!memuat.length && !gagal.length && !tampil.length) return null;
+
+  const pita = 'flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-medium shadow-lg max-w-[min(90vw,34rem)]';
+  return (
+    <div className="absolute top-20 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center gap-1.5 pointer-events-none" role="status" aria-live="polite">
+      {memuat.length > 0 && (
+        <div className={`${pita} bg-white/95 text-slate-700 border border-slate-200`}>
+          <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0 text-kkp-700" />
+          <span className="truncate">Memuat {memuat.join(', ')}…</span>
+        </div>
+      )}
+      {tampil.map((id) => (
+        <div key={`ok-${id}`} className={`${pita} ${statusLapisan[id].jumlah === 0 ? 'bg-amber-50 text-amber-800 border border-amber-200' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'}`}>
+          <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate">
+            {nama(id)} {statusLapisan[id].jumlah === 0 ? 'aktif, tetapi tidak ada data di tampilan ini' : 'berhasil dimuat'}
+          </span>
+        </div>
+      ))}
+      {gagal.map(([id, s]) => (
+        <div key={`galat-${id}`} className={`${pita} bg-rose-50 text-rose-800 border border-rose-200 pointer-events-auto`} role="alert">
+          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+          <span className="min-w-0">Gagal memuat {nama(id)}: {s.galat}</span>
+          <button type="button" onClick={() => onCobaLagi(id)} className="shrink-0 inline-flex items-center gap-1 font-semibold underline-offset-2 hover:underline">
+            <RotateCcw className="w-3 h-3" /> Coba lagi
+          </button>
+          <button type="button" onClick={() => setDitutup((d) => ({ ...d, [id]: s.galat }))} aria-label="Tutup" className="shrink-0 p-0.5 rounded-full hover:bg-rose-100">
+            <X className="w-3 h-3" />
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+};
 
 const PanelDaftarLapisan = ({
   activeLayers,
