@@ -311,6 +311,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
             ${p.wpp ? `<p class="text-[11px] text-slate-500 leading-snug">${aman(p.wpp)}</p>` : ''}
           </div>
         </div>
+        ${nama.length === 1 && p.kbli ? `<p class="mt-1.5 text-[11px] text-slate-600 leading-snug"><b class="font-semibold">KBLI ${aman(p.kbli.kode)}</b> &middot; ${aman(p.kbli.judul)}</p>` : ''}
         ${nama.length > 1
           ? `<div class="mt-2 flex flex-wrap gap-1">${nama.map((n, i) => `<span class="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10.5px] font-medium text-slate-700"><span class="h-2 w-2 rounded-full" style="background:${warnaJenisInvestasi((p.jenis_sub || jenis)[i] || jenis[0])}"></span>${aman(n)}</span>`).join('')}</div>`
           : ''}

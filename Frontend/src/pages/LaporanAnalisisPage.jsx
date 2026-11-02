@@ -115,7 +115,9 @@ const LaporanAnalisisPage = () => {
   const navigate = useNavigate();
   const { result, geometry, namaProyek, investor, lokasiDetail } =
     location.state || {};
-  const jenisInvestasi = [SECTORS.find((s) => s.id === result?.sektor)?.label || result?.sektor, result?.screening?.sub_jenis?.nama]
+  const subJenis = result?.screening?.sub_jenis;
+  const jenisInvestasi = [SECTORS.find((s) => s.id === result?.sektor)?.label || result?.sektor,
+    subJenis && `${subJenis.nama}${subJenis.kbli ? ` (KBLI ${subJenis.kbli.kode})` : ''}`]
     .filter(Boolean).join(' — ');
   const skorTema = (t) => skorBagian(result?.kelayakan?.skor_per_aspek, result?.spasial?.sumber, t);
   const indikatif = statusIndikatif(result?.screening, {

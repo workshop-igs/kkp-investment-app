@@ -310,9 +310,13 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                         onChange={(e) => setSubSektor(e.target.value)}
                         className="w-full bg-white border border-slate-300 rounded-lg p-2.5 text-sm text-slate-800 focus:outline-none focus:border-kkp-700 focus:ring-1 focus:ring-kkp-700 appearance-none"
                       >
-                        {daftarSub.map((s) => <option key={s.kode} value={s.kode}>{s.nama}</option>)}
+                        {daftarSub.map((s) => <option key={s.kode} value={s.kode}>{s.nama}{s.kbli ? ` (KBLI ${s.kbli.kode})` : ''}</option>)}
                       </select>
                       <p className="text-xs text-slate-500 mt-1.5">
+                        {(() => {
+                          const kbli = daftarSub.find((s) => s.kode === subSektor)?.kbli;
+                          return kbli && <>KBLI {kbli.kode} · {kbli.judul}. </>;
+                        })()}
                         Kecocokan lokasi dinilai dengan kriteria sub-jenis ini.
                       </p>
                     </div>
@@ -399,7 +403,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
               <div className="bg-slate-50/50 border border-slate-200 rounded-xl p-6">
                 <h3 className="font-bold text-slate-800 mb-1 text-[15px]">Parameter Finansial</h3>
                 <p className="text-xs text-slate-500 mb-5">
-                  Lokasi dinyatakan {screening.status_label.toLowerCase()} secara ruang untuk {screening.sub_jenis?.nama || screening.sektor_nama}
+                  Lokasi dinyatakan {screening.status_label.toLowerCase()} secara ruang untuk {screening.sub_jenis?.nama || screening.sektor_nama}{screening.sub_jenis?.kbli ? ` (KBLI ${screening.sub_jenis.kbli.kode})` : ''}
                   {screening.status === 'BELUM_TERVERIFIKASI' && '; analisis dilanjutkan dengan label belum terverifikasi'}.
                 </p>
                 <div className="space-y-6">

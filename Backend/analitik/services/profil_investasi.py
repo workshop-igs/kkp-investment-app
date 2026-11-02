@@ -14,7 +14,7 @@ from analitik.services.konstanta import (
     PRIORITAS_SUMBER_ZONASI,
     SEKTOR_SUB_ZONA_COCOK,
 )
-from analitik.services.kriteria import uraian
+from analitik.services.kriteria import kbli_sub, uraian
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.pengaturan import BAWAAN, atur
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
@@ -272,6 +272,7 @@ def _lokasi(c, provinsi, sektor, subs):
             'persen_sesuai': lok.persen_sesuai,
             'sub_sektor': r.get('sub_sektor'),
             'sub_sektor_kode': r.get('sub_sektor_kode'),
+            'kbli': kbli_sub(sektor.kode, r.get('sub_sektor_kode')),
             'kelas': sesuai.filter(zona__geometry__intersects=titik).order_by('-skor_total')
             .values_list('kelas', flat=True).first(),
             'keunggulan': [f"{k['label']} {k['nilai_teks']}" if k['nilai_teks'] else k['label']
@@ -481,7 +482,7 @@ def profil_provinsi(provinsi, sektor=None):
         'jenis_lain': [{'kode': s.kode, 'nama': s.nama, **luas[s.kode]} for s in jenis_lain],
         'bab': [{
             'kode': b['kode'], 'nama': b['nama'], 'sektor': b['sektor'], 'komoditas': 'kelompok' in b,
-            'sub_jenis': [{'kode': s, 'nama': nama_sub.get(s, s)} for s in subs[b['kode']]],
+            'sub_jenis': [{'kode': s, 'nama': nama_sub.get(s, s), 'kbli': kbli_sub(b['sektor'], s)} for s in subs[b['kode']]],
             'lokasi': lokasi[b['kode']],
             'finansial': _finansial(subs[b['kode']], nama_sub, b.get('harga_rp_kg')),
         } for b in bab],
