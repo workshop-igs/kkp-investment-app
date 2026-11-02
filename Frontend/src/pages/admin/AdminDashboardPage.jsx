@@ -167,7 +167,7 @@ const WARNA_AKSI = {
 
 const MENU_ADMIN = [
   ['/admin/pipeline', Briefcase, 'Proyek Investasi', 'Perbarui realisasi dan tahap proyek.'],
-  ['/admin/sectors', IkonPeta, 'Sektor Investasi', 'Tambah jenis investasi dan atur ketentuan zonanya.'],
+  ['/admin/sectors', IkonPeta, 'Jenis Investasi', 'Tambah, ubah, atau hapus jenis investasi dan atur ketentuan zonanya.'],
   ['/admin/pengaturan-analisis', SlidersHorizontal, 'Pengaturan Analisis', 'Ubah ambang, bobot, dan skor yang dipakai analisis.'],
   ['/admin/parameter-tambahan', Layers, 'Parameter Tambahan', 'Tambah area atau nilai wilayah khusus untuk analisis.'],
   ['/admin/pengaturan-profil', FileText, 'Pengaturan Profil Investasi', 'Atur model usaha, susunan, dan isi teks PDF Profil Investasi.'],
