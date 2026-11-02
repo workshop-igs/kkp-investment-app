@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
-  AlertTriangle, Check, CheckCircle2, ChevronDown, Loader2, Plus, RefreshCw, RotateCcw, Save, Search,
+  AlertTriangle, Check, CheckCircle2, ChevronDown, FileText, Loader2, Plus, RefreshCw, RotateCcw, Save, Search,
   SlidersHorizontal, Trash2,
 } from 'lucide-react';
 import { api } from '../../api/klien';
@@ -227,8 +227,76 @@ const Bawaan = ({ nilai, persen }) => (typeof nilai === 'number'
   ? <span className="whitespace-nowrap text-[11px] text-slate-400">bawaan {angkaId(nilai, persen)}</span>
   : null);
 
+const kelasTeks = `${kelasInput} mt-1 resize-y font-normal`;
+
+const EditorTeks = ({ nilai, onUbah, meta, label }) => {
+  const [minimal, maksimal, panjang] = meta.teks;
+  const urutan = Object.keys(label);
+  if (Array.isArray(nilai)) {
+    const ubahSel = (i, j, x) => onUbah(nilai.map((b, a) => (a === i ? b.map((y, c) => (c === j ? x : y)) : b)));
+    return (
+      <div className="space-y-2">
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                {meta.kolom.map((k) => <th key={k} className="px-1 pb-1 text-left text-xs font-semibold text-slate-500">{k}</th>)}
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {nilai.map((b, i) => (
+                <tr key={i}>
+                  {b.map((v, j) => (
+                    <td key={j} className={`px-1 py-0.5 ${j === 0 ? 'w-56' : ''}`}>
+                      <input value={v} maxLength={panjang} onChange={(e) => ubahSel(i, j, e.target.value)}
+                        onBlur={(e) => ubahSel(i, j, e.target.value.trim())} className={kelasInput} />
+                    </td>
+                  ))}
+                  <td className="w-8">
+                    <button type="button" title="Hapus baris" disabled={nilai.length <= minimal}
+                      onClick={() => onUbah(nilai.filter((_, a) => a !== i))}
+                      className="p-1 text-rose-500 hover:bg-rose-50 rounded disabled:opacity-30">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {nilai.length < maksimal && (
+          <button type="button" onClick={() => onUbah([...nilai, meta.kolom.map(() => '')])}
+            className="inline-flex items-center gap-1 rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs font-semibold text-slate-600 hover:bg-slate-50">
+            <Plus className="w-3.5 h-3.5" /> Tambah baris
+          </button>
+        )}
+      </div>
+    );
+  }
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {Object.entries(nilai).sort(([a], [b]) => urutan.indexOf(a) - urutan.indexOf(b)).map(([k, v]) => (
+        <label key={k} className="block text-xs font-semibold text-slate-600">
+          {label[k] || k}
+          {Array.isArray(v) ? (
+            <textarea rows={Math.max(3, v.length)} value={v.join('\n')}
+              onChange={(e) => onUbah({ ...nilai, [k]: e.target.value.split('\n') })}
+              onBlur={(e) => onUbah({ ...nilai, [k]: e.target.value.split('\n').map((x) => x.trim()).filter(Boolean) })}
+              className={kelasTeks} />
+          ) : (
+            <textarea rows={2} value={v} maxLength={panjang} onChange={(e) => onUbah({ ...nilai, [k]: e.target.value })}
+              onBlur={(e) => onUbah({ ...nilai, [k]: e.target.value.trim() })} className={kelasTeks} />
+          )}
+        </label>
+      ))}
+    </div>
+  );
+};
+
 const Editor = ({ nilai, bawaan, onUbah, meta, label }) => {
   const sebut = (k) => label[k] || k.replace(/_/g, ' ');
+  if (meta.teks) return <EditorTeks nilai={nilai} onUbah={onUbah} meta={meta} label={label} />;
   if (typeof nilai === 'boolean') {
     return (
       <label className="inline-flex items-center gap-2 text-sm">
@@ -616,7 +684,7 @@ const KartuPengaturan = ({ item, data, tampil, onTersimpan }) => {
           {item.keterangan && <p className="mb-3 max-w-3xl text-sm text-slate-600">{item.keterangan}</p>}
           {EditorKhusus
             ? <EditorKhusus nilai={nilai} onUbah={setNilai} data={data} />
-            : <Editor nilai={nilai} bawaan={item.bawaan} onUbah={setNilai} meta={item} label={data.label_bagian} />}
+            : <Editor nilai={nilai} bawaan={item.bawaan} onUbah={setNilai} meta={item} label={data.label} />}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-slate-500">
               {item.diubah && `Diubah ${item.diubah_oleh || 'administrator'} pada ${waktu(item.diubah_pada)}. `}
@@ -644,16 +712,28 @@ const KartuPengaturan = ({ item, data, tampil, onTersimpan }) => {
   );
 };
 
-const AdminPengaturanAnalisisPage = () => {
+const HALAMAN = {
+  analisis: [SlidersHorizontal, 'Pengaturan Analisis',
+    'Angka yang dipakai analisis dan Peta Sebaran. Klik sebuah pengaturan untuk membaca penjelasan dan mengubahnya.',
+    'Cari pengaturan, misalnya kabel'],
+  profil: [FileText, 'Pengaturan Profil Investasi',
+    'Model usaha, susunan, dan isi teks PDF Profil Investasi. Perubahan berlaku pada PDF yang diunduh berikutnya.',
+    'Cari pengaturan, misalnya rantai'],
+};
+
+const AdminPengaturanAnalisisPage = ({ halaman = 'analisis' }) => {
   const [data, setData] = useState(null);
   const [cari, setCari] = useState('');
-  const [dibuka, setDibuka] = useState({ syarat_lokasi: true });
+  const [dibuka, setDibuka] = useState({});
   const [status, setStatus, mulai] = useStatusHitungUlang(data?.hitung_ulang);
+  const [Ikon, judul, pengantar, petunjukCari] = HALAMAN[halaman];
 
-  const muat = useCallback(() => api.get(URL).then(({ data: d }) => setData(d)), []);
+  const muat = useCallback(() => api.get(URL).then(({ data: d }) => setData({
+    ...d, label: { ...d.label_bagian, ...Object.fromEntries(d.sektor.map((x) => [x.kode, x.nama])) },
+  })), []);
   useEffect(() => { muat(); }, [muat]);
 
-  if (!data) return <div className="p-8 text-slate-500">Memuat pengaturan analisis...</div>;
+  if (!data) return <div className="p-8 text-slate-500">Memuat pengaturan...</div>;
 
   const tersimpan = ({ hitung_ulang: hu, ...item }) => {
     setData({ ...data, daftar: data.daftar.map((d) => (d.kunci === item.kunci ? item : d)) });
@@ -665,36 +745,35 @@ const AdminPengaturanAnalisisPage = () => {
 
   const kata = cari.trim().toLowerCase();
   const cocok = (d) => !kata || `${d.label} ${d.istilah} ${d.keterangan} ${d.kunci}`.toLowerCase().includes(kata);
-  const adaHasil = data.daftar.some(cocok);
+  const kelompok = data.kelompok.filter((k) => k.halaman === halaman);
+  const adaHasil = data.daftar.some((d) => kelompok.some((k) => k.kode === d.kelompok) && cocok(d));
 
   return (
     <div className="w-full max-w-7xl 2xl:max-w-[1600px] mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <div className="p-2 bg-kkp-100 rounded-xl text-kkp-800"><SlidersHorizontal className="w-5 h-5" /></div>
+        <div className="p-2 bg-kkp-100 rounded-xl text-kkp-800"><Ikon className="w-5 h-5" /></div>
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Pengaturan Analisis</h1>
-          <p className="text-slate-500 text-sm mt-1">
-            Angka yang dipakai analisis dan Peta Sebaran. Klik sebuah pengaturan untuk membaca penjelasan dan mengubahnya.
-          </p>
+          <h1 className="text-2xl font-bold text-slate-900">{judul}</h1>
+          <p className="text-slate-500 text-sm mt-1">{pengantar}</p>
         </div>
       </div>
-      <StatusHitungUlang status={status} onMulai={mulai} />
+      {halaman === 'analisis' && <StatusHitungUlang status={status} onMulai={mulai} />}
       <div className="relative max-w-md">
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
         <input
           type="search"
           value={cari}
           onChange={(e) => setCari(e.target.value)}
-          placeholder="Cari pengaturan, misalnya kabel"
+          placeholder={petunjukCari}
           aria-label="Cari pengaturan"
           className="w-full rounded-xl border border-slate-200 bg-white py-2 pl-9 pr-3 text-sm focus:border-kkp-700 focus:outline-none"
         />
       </div>
       <div className="space-y-3">
-        {data.kelompok.map((k) => {
+        {kelompok.map((k, i) => {
           const isi = data.daftar.filter((d) => d.kelompok === k.kode);
           const cocokDiSini = isi.filter(cocok);
-          const terbuka = kata ? true : Boolean(dibuka[k.kode]);
+          const terbuka = kata ? true : (dibuka[k.kode] ?? i === 0);
           const diubah = isi.filter((d) => d.diubah).length;
           return (
             <section key={k.kode} hidden={!cocokDiSini.length}
@@ -702,7 +781,7 @@ const AdminPengaturanAnalisisPage = () => {
               <button
                 type="button"
                 aria-expanded={terbuka}
-                onClick={() => setDibuka((s) => ({ ...s, [k.kode]: !s[k.kode] }))}
+                onClick={() => setDibuka((s) => ({ ...s, [k.kode]: !terbuka }))}
                 className="w-full flex items-center gap-3 px-5 py-4 text-left transition-colors hover:bg-slate-50
                            focus-visible:outline-none focus-visible:bg-kkp-100/50"
               >
