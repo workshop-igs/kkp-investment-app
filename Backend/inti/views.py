@@ -12,6 +12,7 @@ from rest_framework.throttling import ScopedRateThrottle
 from penarikan_data.bps import kode_bps
 
 from .geospasial import KUNCI_CACHE_WPP, nama_kabupaten
+from .izin import LEVEL, AksesPortofolio, level
 from .models import (
     DesaKelurahan,
     GarisWPP,
@@ -347,7 +348,7 @@ def _komoditas_dashboard():
 
 
 @api_view(['GET'])
-@permission_classes([permissions.IsAuthenticated])
+@permission_classes([AksesPortofolio])
 def dashboard_stats(request):
     from django.core.cache import cache
     from django.db.models import Avg, Count, Sum
@@ -602,7 +603,8 @@ def _serialize_user(user):
         'is_staff': user.is_staff,
         'is_superuser': user.is_superuser,
         'role': 'ADMIN' if user.is_staff else 'PENGGUNA',
-        'role_display': 'Administrator' if user.is_staff else 'Pengguna KKP',
+        'role_display': LEVEL[level(user)],
+        'level': level(user),
         'instansi': profil.instansi or INSTANSI_BAWAAN,
         'telepon': profil.telepon or '',
         'provinsi_id': profil.provinsi_id if profil.provinsi else None,
@@ -846,7 +848,7 @@ def me_api(request):
 
 MEDAN_PROFIL_BOLEH = frozenset({'first_name', 'last_name', 'telepon', 'instansi', 'provinsi_id'})
 MEDAN_PROFIL_TERLARANG = frozenset({
-    'role', 'is_staff', 'is_superuser', 'is_active', 'username', 'email',
+    'role', 'level', 'akses_portofolio', 'is_staff', 'is_superuser', 'is_active', 'username', 'email',
     'password', 'groups', 'user_permissions',
 })
 

@@ -7,6 +7,7 @@ from rest_framework.exceptions import PermissionDenied
 
 from analitik.models import KetentuanRuang, ParameterTambahan
 from analitik.services.konstanta import SUB_ZONA_TANPA_RINCIAN
+from inti.izin import LEVEL, level
 from inti.models import LogAktivitas, ProfilPengguna, Provinsi, SektorInvestasi
 from inventarisasi.models import ZonasiRuangLaut
 from ketenagakerjaan.models import MatriksKeahlianSektor
@@ -25,6 +26,7 @@ class AdminProfilPenggunaSerializer(serializers.ModelSerializer):
 class AdminUserSerializer(serializers.ModelSerializer):
     profil = AdminProfilPenggunaSerializer()
     role_display = serializers.SerializerMethodField()
+    level = serializers.SerializerMethodField()
     provinsi_nama = serializers.CharField(source='profil.provinsi.nama', read_only=True)
 
     class Meta:  # type: ignore
@@ -32,12 +34,15 @@ class AdminUserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'username', 'email', 'first_name', 'last_name',
             'is_active', 'is_staff', 'is_superuser', 'date_joined',
-            'profil', 'role_display', 'provinsi_nama'
+            'profil', 'role_display', 'level', 'provinsi_nama'
         ]
         read_only_fields = ['username', 'is_staff', 'is_superuser', 'date_joined']
 
     def get_role_display(self, obj):
-        return 'Administrator' if obj.is_staff else 'Pengguna KKP'
+        return LEVEL[level(obj)]
+
+    def get_level(self, obj):
+        return level(obj)
 
     def validate_email(self, nilai):
         nilai = nilai.strip().lower()
@@ -52,8 +57,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
         diminta = sorted({'is_staff', 'is_superuser'} & set(self.initial_data))
         if diminta:
             raise PermissionDenied(
-                'Akses administrator diubah oleh Super Admin lewat tombol '
-                'Jadikan administrator atau Cabut administrator.'
+                'Level akses diubah lewat tombol Ubah akses.'
             )
         request = self.context.get('request')
         if (self.instance is not None and request is not None
@@ -82,7 +86,7 @@ class AdminUserSerializer(serializers.ModelSerializer):
         return instance
 
 
-class TambahAdminSerializer(serializers.Serializer):
+class TambahAkunSerializer(serializers.Serializer):
     username = serializers.RegexField(
         r'^[\w.@+-]+$', min_length=3, max_length=150,
         error_messages={'invalid': 'Hanya huruf, angka, dan tanda . @ + - _ tanpa spasi.'},
@@ -92,6 +96,7 @@ class TambahAdminSerializer(serializers.Serializer):
     last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
     instansi = serializers.CharField(max_length=255, required=False, allow_blank=True)
     password = serializers.CharField(write_only=True, trim_whitespace=False)
+    level = serializers.ChoiceField(choices=list(LEVEL), default='DASAR')
     password_ulang = serializers.CharField(write_only=True, trim_whitespace=False)
 
     def validate_username(self, nilai):
@@ -124,9 +129,10 @@ class TambahAdminSerializer(serializers.Serializer):
                 password=validated_data['password'],
                 first_name=validated_data['first_name'].strip(),
                 last_name=validated_data.get('last_name', '').strip(),
-                is_staff=True,
+                is_staff=validated_data['level'] == 'ADMIN',
             )
             profil, _ = ProfilPengguna.objects.get_or_create(user=user)
+            profil.akses_portofolio = validated_data['level'] == 'PENUH'
             profil.instansi = (validated_data.get('instansi') or '').strip() or 'Kementerian Kelautan dan Perikanan'
             profil.save()
         return user

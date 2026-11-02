@@ -15,7 +15,7 @@ const TataLetakAdmin = () => {
     return <Navigate to="/login" replace />;
   }
   if (!user.is_staff) {
-    return <Navigate to="/dashboard" replace />;
+    return <Navigate to="/peta" replace />;
   }
 
   const handleLogout = () => {

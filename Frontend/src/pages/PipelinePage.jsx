@@ -191,15 +191,6 @@ const PipelinePage = () => {
         <div>
           <h1 className="text-3xl font-syne font-bold text-slate-800 mb-2">Proyek Investasi</h1>
           <p className="text-slate-500">Daftar proyek investasi ruang laut dan perkembangannya, dari perencanaan sampai beroperasi.</p>
-          <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
-            <span>Tahap proyek mengikuti tahapan Proyek Strategis Nasional (KPPIP):</span>
-            {TAHAPAN_PROYEK.map((t, i) => (
-              <span key={t.kode} className="inline-flex items-center gap-1.5">
-                {i > 0 && <span aria-hidden="true">→</span>}
-                <span title={t.desc} className={`cursor-help rounded border px-1.5 py-0.5 font-semibold ${GAYA_TAHAP[t.kode]}`}>{t.label}</span>
-              </span>
-            ))}
-          </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <button

@@ -307,8 +307,8 @@ const ENTRI_TETAP = [
     ['Peta Spasial', 'Peta interaktif seluruh layer data ruang laut', '/peta', 'peta spasial'],
     ['Analisis wilayah', 'Gambar atau unggah area untuk dianalisis', '/peta?mulai=gambar', 'analisis kelayakan gambar poligon unggah shp kml geojson'],
     ['Profil Investasi', 'Profil investasi per provinsi dalam PDF', '/profil-investasi', 'profil investasi pdf'],
-    ['Proyek investasi', 'Proyek dari perencanaan sampai beroperasi, perlu akun', '/pipeline', 'proyek investasi pipeline tahap perencanaan penyiapan transaksi konstruksi operasi loi'],
-    ['Dashboard', 'Ringkasan pemantauan, perlu akun', '/dashboard', 'dashboard pemantauan'],
+    ['Proyek investasi', 'Proyek dari perencanaan sampai beroperasi, perlu izin akses', '/pipeline', 'proyek investasi pipeline tahap perencanaan penyiapan transaksi konstruksi operasi loi'],
+    ['Dashboard', 'Ringkasan pemantauan, perlu izin akses', '/dashboard', 'dashboard pemantauan'],
   ].map(([nama, keterangan, ke, kunci]) => ({ kelompok: 'Halaman', nama, keterangan, ke, kunci })),
   ...Object.entries(LAYER_LOKAL).map(([id, d]) => ({
     kelompok: 'Layer Peta', nama: d.label, keterangan: d.keteranganLegenda || '', ke: `/peta?lapisan=${id}`,

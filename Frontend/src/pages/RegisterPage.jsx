@@ -81,7 +81,7 @@ const RegisterPage = () => {
 
       setSuccessMsg(`Pendaftaran berhasil! Selamat datang, ${res.user.full_name}. Mengalihkan...`);
       setTimeout(() => {
-        navigate('/dashboard', { replace: true });
+        navigate('/peta', { replace: true });
       }, 900);
     } catch (err) {
       const data = err.response?.data;

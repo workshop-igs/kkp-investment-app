@@ -1,11 +1,11 @@
 from django.db.models import Count, Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from inti.audit import catat, simpan_berjejak
 from inti.geospasial import kabupaten_dari_geometri, provinsi_dari_geometri
+from inti.izin import AksesPortofolio
 
 from .models import ProyekInvestasi, RekapRealisasi
 from .serializers import (
@@ -18,7 +18,7 @@ from .serializers import (
 class ProyekInvestasiViewSet(viewsets.ModelViewSet):
     queryset = ProyekInvestasi.objects.select_related('provinsi', 'sektor').all()
     serializer_class = ProyekInvestasiSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AksesPortofolio]
     filterset_fields = ['status', 'sektor', 'provinsi']
     search_fields = ['nama', 'investor', 'kode_proyek', 'lokasi_detail']
     ordering_fields = ['created_at', 'nilai_investasi_miliar', 'status']
@@ -254,4 +254,5 @@ class ProyekInvestasiViewSet(viewsets.ModelViewSet):
 class RekapRealisasiViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = RekapRealisasi.objects.select_related('provinsi', 'sektor').all()
     serializer_class = RekapRealisasiSerializer
+    permission_classes = [AksesPortofolio]
     filterset_fields = ['provinsi', 'sektor', 'tahun']
