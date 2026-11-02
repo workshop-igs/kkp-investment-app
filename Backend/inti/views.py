@@ -4,6 +4,7 @@ from datetime import datetime
 
 from django.contrib.gis.db.models.functions import AsGeoJSON, PointOnSurface
 from django.db.models.functions import Coalesce
+from django.http import HttpResponse
 from rest_framework import permissions, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
@@ -76,13 +77,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['get'], url_path='profil-investasi', permission_classes=[permissions.AllowAny])
     def profil_investasi(self, request, pk=None):
-        from django.core.cache import cache
-        from django.db.models import Max
-
-        from analitik.models import LokasiPotensial, PengaturanAnalisis, RasterOseanografi
-        from analitik.services.profil_investasi import profil_provinsi
-        from inventarisasi.models import RegulasiTataRuang
-        from penarikan_data.models import ProduksiPerikananBPS
+        from analitik.services.profil_investasi import profil_siap_kirim
 
         provinsi = self.get_object()
         sektor = None
@@ -90,22 +85,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
             sektor = SektorInvestasi.objects.filter(kode=request.query_params['jenis']).first()
             if sektor is None:
                 return Response({'detail': 'Jenis investasi tidak ditemukan.'}, status=status.HTTP_404_NOT_FOUND)
-        versi = '-'.join(
-            str(int(t.timestamp())) if t else '0'
-            for t in (
-                ProduksiPerikananBPS.objects.aggregate(t=Max('diperbarui_pada'))['t'],
-                RegulasiTataRuang.objects.aggregate(t=Max('ditarik_pada'))['t'],
-                RasterOseanografi.objects.aggregate(t=Max('ditarik_pada'))['t'],
-                LokasiPotensial.objects.aggregate(t=Max('dihitung_pada'))['t'],
-                PengaturanAnalisis.objects.aggregate(t=Max('updated_at'))['t'],
-            )
-        )
-        kunci = f'profil-provinsi:v5:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi}'
-        profil = cache.get(kunci)
-        if profil is None:
-            profil = profil_provinsi(provinsi, sektor)
-            cache.set(kunci, profil, 6 * 3600)
-        return Response(profil)
+        return HttpResponse(profil_siap_kirim(provinsi, sektor), content_type='application/json')
 
     def _bangun_peta(self, ringkas=False):
         import json as _json

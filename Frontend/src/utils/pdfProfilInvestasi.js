@@ -464,9 +464,21 @@ export class Dek {
     }
   }
 
-  legenda(x, y, lebar, item) {
+  legenda(x, y, lebar, item, { keAtas = false } = {}) {
     let cx = x;
     this.gaya(6.4, C.teks);
+    if (keAtas) {
+      let baris = 0;
+      item.reduce((posisi, { label }) => {
+        const w = this.doc.getTextWidth(bersih(label)) + 6.5;
+        if (posisi + w > x + lebar && posisi > x) {
+          baris += 1;
+          return x + w + 2.5;
+        }
+        return posisi + w + 2.5;
+      }, x);
+      y -= baris * 4.4;
+    }
     item.forEach(({ label, warna }) => {
       const t = bersih(label);
       const w = this.doc.getTextWidth(t) + 6.5;
@@ -482,8 +494,15 @@ export class Dek {
     return y + 4.5;
   }
 
-  batang(x, y, lebar, daftar, aksen) {
+  batang(x, y, lebar, daftar, aksen, batas = BAWAH - 3) {
     const d = this.doc;
+    const muat = Math.max(1, Math.floor((batas - 3.8 - y) / 6.2) + 1);
+    if (daftar.length > muat) {
+      const sorot = daftar.filter((b) => b.sorot).slice(0, muat);
+      daftar = daftar.filter((b) => !b.sorot).slice(0, muat - sorot.length).concat(sorot)
+        .sort((a1, a2) => daftar.indexOf(a1) - daftar.indexOf(a2));
+    }
+    const jarak = daftar.length > 1 ? Math.min(8.6, (batas - 3.8 - y) / (daftar.length - 1)) : 8.6;
     const maks = Math.max(1, ...daftar.map((b) => b.nilai));
     daftar.forEach((b) => {
       this.gaya(6.8, b.sorot ? gelap(rgb(aksen)) : C.teks, !!b.sorot);
@@ -494,7 +513,7 @@ export class Dek {
       d.roundedRect(x, y + 1.6, lebar, 2.2, 1.1, 1.1, 'F');
       d.setFillColor(...(b.sorot ? rgb(aksen) : campur(rgb(aksen), 0.45)));
       d.roundedRect(x, y + 1.6, Math.max(2.2, (lebar * b.nilai) / maks), 2.2, 1.1, 1.1, 'F');
-      y += 8.6;
+      y += jarak;
     });
     return y;
   }
@@ -1578,7 +1597,7 @@ function rantaiPasar(dek, o, b, i) {
   dek.legenda(TEPI + 4, BAWAH - 2, 200, [
     { label: 'Fasilitas tercatat di provinsi', warna: '#2563EB' },
     { label: 'Belum tercatat di basis data: peluang investasi pendukung', warna: '#EA580C' },
-  ]);
+  ], { keAtas: true });
   dek.sumber('Sumber: kerangka rantai nilai Hendratmo dkk. (2017) sebagaimana dipakai laporan profil investasi perikanan NTB; jumlah fasilitas dari Satu Data KKP dan OpenStreetMap pada basis data aplikasi.');
 }
 
@@ -1636,7 +1655,7 @@ function finansial(dek, o, b, i, perJenis) {
   const tinggiGrafik = tinggiAtas - 22;
   dek.gambar(garisKanvas(h.proyeksi.map((p) => p.tahun), seri, { tinggi: Math.round((1500 * tinggiGrafik) / (lebar - 8)), format: (v) => angka(v, bagi >= 1e9 ? 1 : 0) }),
     x + 4, yy - 3, lebar - 8, tinggiGrafik);
-  dek.legenda(x + 5, y + tinggiAtas - 3, lebar - 10, seri.map((s) => ({ label: s.label, warna: s.warna })));
+  dek.legenda(x + 5, y + tinggiAtas - 3, lebar - 10, seri.map((s) => ({ label: s.label, warna: s.warna })), { keAtas: true });
 
   const yt = y + tinggiAtas + 4;
   const lp = (kode) => [...new Set(b.lokasi.filter((l) => kelasS(l.kelas) === kode.toUpperCase())
@@ -1807,7 +1826,7 @@ function csr(dek, o) {
   const yy = dek.kartu(TEPI, y, kiri, BAWAH - y, { judul: `Potensi CSR per tahun (Rp ${satuan})`, ikon: 'csr' });
   dek.gambar(garisKanvas(finansialUtama(ada[0]).hasil.csr.map((c) => c.tahun), seri, { tinggi: 760, format: (v) => angka(v, 1) }),
     TEPI + 4, yy - 2, kiri - 8, (kiri - 8) * (760 / 1500));
-  dek.legenda(TEPI + 5, BAWAH - 4, kiri - 10, seri.map((s) => ({ label: s.label, warna: s.warna })));
+  dek.legenda(TEPI + 5, BAWAH - 4, kiri - 10, seri.map((s) => ({ label: s.label, warna: s.warna })), { keAtas: true });
   const x = TEPI + kiri + 5;
   dek.tabel(x, y, W - TEPI - x, ['Komoditas atau jenis', 'Satuan usaha', `Total ${o.asumsi_finansial.umur_tahun} tahun`],
     ada.map((b) => {
