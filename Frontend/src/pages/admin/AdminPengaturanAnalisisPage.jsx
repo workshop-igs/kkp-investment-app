@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   AlertTriangle, Check, CheckCircle2, ChevronDown, FileText, Loader2, Plus, RefreshCw, RotateCcw, Save, Search,
   SlidersHorizontal, Trash2,
@@ -425,13 +426,90 @@ const PilihKbli = ({ onPilih, onBatal }) => {
   );
 };
 
-const KriteriaEditor = ({ nilai, onUbah, data }) => {
+const HapusSubJenis = ({ sektor, sub, onTutup, onSelesai }) => {
+  const [dampak, setDampak] = useState(null);
+  const [ketik, setKetik] = useState('');
+  const [menghapus, setMenghapus] = useState(false);
+  const [galat, setGalat] = useState('');
+
+  useEffect(() => {
+    api.get(`${URL}hapus-sub-jenis/`, { params: { sektor, sub } })
+      .then(({ data }) => setDampak(data))
+      .catch((e) => setGalat(e.response?.data?.detail || 'Dampak penghapusan gagal dihitung.'));
+  }, [sektor, sub]);
+
+  const hapus = async () => {
+    setMenghapus(true);
+    setGalat('');
+    try {
+      await api.post(`${URL}hapus-sub-jenis/`, { sektor, sub });
+      onSelesai();
+    } catch (e) {
+      setGalat(e.response?.data?.detail || 'Sub-jenis gagal dihapus.');
+      setMenghapus(false);
+    }
+  };
+
+  const cocok = dampak && ketik.trim().toLowerCase() === dampak.nama.trim().toLowerCase();
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Hapus sub-jenis">
+      <div className="absolute inset-0 bg-slate-900/50" onClick={() => !menghapus && onTutup()} />
+      <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl p-6 space-y-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-lg bg-rose-100 text-rose-600 shrink-0"><AlertTriangle className="w-5 h-5" /></div>
+          <div className="text-sm text-slate-700 space-y-1">
+            <p className="font-bold text-slate-900">Hapus sub-jenis {dampak?.nama || sub}?</p>
+            <p className="text-xs text-slate-500">
+              Kriteria dan model usahanya dihapus, dan sub-jenis ini tidak lagi dapat dipilih saat analisis. Penghapusan permanen.
+            </p>
+          </div>
+        </div>
+        {!dampak && !galat && (
+          <p className="text-xs text-slate-500 flex items-center gap-2"><Loader2 className="w-3.5 h-3.5 animate-spin" /> Menghitung dampak…</p>
+        )}
+        {dampak && (
+          <ul className="text-sm rounded-lg border border-slate-200 divide-y divide-slate-100">
+            <li className="flex justify-between gap-3 px-3 py-2">
+              <span className="text-slate-600">Lokasi di Peta Sebaran yang ikut terhapus</span>
+              <span className="font-semibold tabular-nums text-rose-700">{dampak.lokasi.toLocaleString('id-ID')}</span>
+            </li>
+            <li className="flex justify-between gap-3 px-3 py-2">
+              <span className="text-slate-600">Proyek yang menjadi tanpa sub-jenis</span>
+              <span className="font-semibold tabular-nums text-amber-700">{dampak.proyek.toLocaleString('id-ID')}</span>
+            </li>
+            <li className="px-3 py-2 text-xs text-slate-500">Peta Sebaran disusun ulang otomatis sesudahnya; kuota jenis ini diisi sub-jenis lain.</li>
+          </ul>
+        )}
+        {dampak && (
+          <label className="block">
+            <span className="block text-xs font-semibold text-slate-700 mb-1.5">Ketik <b>{dampak.nama}</b> untuk mengonfirmasi</span>
+            <input value={ketik} onChange={(e) => setKetik(e.target.value)} disabled={menghapus} className={kelasInput} />
+          </label>
+        )}
+        {galat && <div role="alert" className="p-3 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 text-xs">{galat}</div>}
+        <div className="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onClick={onTutup} disabled={menghapus} className="px-4 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-lg">
+            Batal
+          </button>
+          <button type="button" onClick={hapus} disabled={!cocok || menghapus}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold rounded-lg disabled:opacity-40">
+            {menghapus && <Loader2 className="w-4 h-4 animate-spin" />}
+            {menghapus ? 'Menghapus…' : 'Hapus permanen'}
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+};
+
+const KriteriaEditor = ({ nilai, onUbah, data, onMuatUlang }) => {
+  const [dihapus, setDihapus] = useState(null);
   const [kode, setKode] = useState(data.sektor[0]?.kode);
   const [memilih, setMemilih] = useState(null);
   const [judulKbli, setJudulKbli] = useState(data.kbli || {});
   const parameter = data.parameter_kriteria;
   const subs = nilai[kode] || {};
-  const bawaan = data.daftar.find((d) => d.kunci === 'KRITERIA_JENIS')?.bawaan?.[kode] || {};
   const ubahSub = (sub, baru) => onUbah({ ...nilai, [kode]: { ...subs, [sub]: baru } });
   const pilihKbli = (k) => {
     setJudulKbli((j) => ({ ...j, [k.kode]: k.judul }));
@@ -446,7 +524,12 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
     }
     setMemilih(null);
   };
+  const tersimpan = data.daftar.find((d) => d.kunci === 'KRITERIA_JENIS')?.nilai?.[kode] || {};
   const hapusSub = (sub) => {
+    if (tersimpan[sub]) {
+      setDihapus(sub);
+      return;
+    }
     const { [sub]: _, ...lain } = subs;
     const { [kode]: __, ...jenisLain } = nilai;
     onUbah(Object.keys(lain).length ? { ...nilai, [kode]: lain } : jenisLain);
@@ -468,6 +551,10 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
         </button>
       </div>
       {memilih === 'baru' && <PilihKbli onPilih={pilihKbli} onBatal={() => setMemilih(null)} />}
+      {dihapus && (
+        <HapusSubJenis sektor={kode} sub={dihapus} onTutup={() => setDihapus(null)}
+          onSelesai={() => { setDihapus(null); onMuatUlang(); }} />
+      )}
       {Object.entries(subs).map(([sub, isi]) => {
         const unggulan = isi.unggulan || {};
         const ubahKriteria = (k, ambang) => ubahSub(sub, { ...isi, kriteria: { ...isi.kriteria, [k]: ambang } });
@@ -494,12 +581,11 @@ const KriteriaEditor = ({ nilai, onUbah, data }) => {
                   isi.kbli ? 'bg-sky-50 text-kkp-700 hover:bg-sky-100' : 'bg-amber-50 text-amber-800 hover:bg-amber-100'}`}>
                 {isi.kbli ? `KBLI ${isi.kbli}${judulKbli[isi.kbli] ? ` · ${judulKbli[isi.kbli]}` : ''}` : 'Pilih KBLI (wajib)'}
               </button>
-              {!bawaan[sub] && (
-                <button type="button" onClick={() => hapusSub(sub)}
-                  className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50">
-                  <Trash2 className="w-3.5 h-3.5" /> Hapus sub-jenis
-                </button>
-              )}
+              <button type="button" onClick={() => hapusSub(sub)} disabled={Object.keys(subs).length === 1}
+                title={Object.keys(subs).length === 1 ? 'Sub-jenis terakhir; hapus jenisnya di halaman Jenis Investasi' : 'Hapus sub-jenis'}
+                className="ml-auto inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-semibold text-rose-600 hover:bg-rose-50 disabled:opacity-40 disabled:cursor-not-allowed">
+                <Trash2 className="w-3.5 h-3.5" /> Hapus sub-jenis
+              </button>
             </div>
             {memilih === sub && <PilihKbli onPilih={pilihKbli} onBatal={() => setMemilih(null)} />}
             {!kunci.length && <p className="text-xs text-amber-700">Tambahkan sedikitnya satu kriteria sebelum menyimpan.</p>}
@@ -700,7 +786,7 @@ const ringkas = (item) => {
 
 const DAMPAK = { peta: 'Peta Sebaran', skor: 'skor kelayakan zona' };
 
-const KartuPengaturan = ({ item, data, tampil, onTersimpan }) => {
+const KartuPengaturan = ({ item, data, tampil, onTersimpan, onMuatUlang }) => {
   const [nilai, setNilai] = useState(item.nilai);
   const [galat, setGalat] = useState('');
   const [proses, setProses] = useState(false);
@@ -751,7 +837,7 @@ const KartuPengaturan = ({ item, data, tampil, onTersimpan }) => {
         <div hidden={!terbuka} className="px-5 pb-5 pt-1">
           {item.keterangan && <p className="mb-3 max-w-3xl text-sm text-slate-600">{item.keterangan}</p>}
           {EditorKhusus
-            ? <EditorKhusus nilai={nilai} onUbah={setNilai} data={data} />
+            ? <EditorKhusus nilai={nilai} onUbah={setNilai} data={data} onMuatUlang={onMuatUlang} />
             : <Editor nilai={nilai} bawaan={item.bawaan} onUbah={setNilai} meta={item} label={data.label} />}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-slate-500">
@@ -864,7 +950,7 @@ const AdminPengaturanAnalisisPage = ({ halaman = 'analisis' }) => {
               </button>
               <div hidden={!terbuka} className="border-t border-slate-100">
                 {isi.map((item) => (
-                  <KartuPengaturan key={item.kunci} item={item} data={data} tampil={cocok(item)} onTersimpan={tersimpan} />
+                  <KartuPengaturan key={item.kunci} item={item} data={data} tampil={cocok(item)} onTersimpan={tersimpan} onMuatUlang={muat} />
                 ))}
               </div>
             </section>
