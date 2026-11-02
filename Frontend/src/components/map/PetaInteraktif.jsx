@@ -66,7 +66,7 @@ const PANE_LABEL_WPP = 'label-wpp';
 
 const ZOOM_BATAS_DETAIL = 9;
 
-const JARAK_POPUP = { atas: 72 + 16, kanan: 72, bawah: 100 };
+const JARAK_POPUP = { atas: 72 + 16, kanan: 72, bawah: 150 };
 
 const LEBAR_HALO = 2;
 const TEBAL_BATAS = { diam: 1.8, aktif: 3.2 };
@@ -105,6 +105,66 @@ const KunciLapisanSaatMenggambar = ({ menggambar }) => {
     wadah.classList.toggle('mode-gambar', menggambar);
     return () => wadah.classList.remove('mode-gambar');
   }, [map, menggambar]);
+  return null;
+};
+
+const PasPopup = () => {
+  const map = useMap();
+  useEffect(() => {
+    let aktif = null;
+    let sampai = 0;
+    const ruang = () => {
+      const kotak = map.getContainer().getBoundingClientRect();
+      return {
+        atas: kotak.top + JARAK_POPUP.atas, bawah: kotak.bottom - JARAK_POPUP.bawah,
+        kiri: kotak.left + 16, kanan: kotak.right - JARAK_POPUP.kanan,
+      };
+    };
+    const unsur = () => {
+      const el = aktif?.isOpen() && aktif.getElement();
+      return [el, el?.querySelector('.leaflet-popup-content')];
+    };
+    const susut = () => {
+      const [el, isi] = unsur();
+      if (!isi || Date.now() > sampai) return;
+      const lebih = ruang().atas - el.getBoundingClientRect().top;
+      if (lebih > 0) {
+        isi.style.maxHeight = `${Math.max(140, isi.offsetHeight - lebih)}px`;
+        isi.style.overflowY = 'auto';
+      }
+    };
+    const pas = () => {
+      const [el, isi] = unsur();
+      if (!isi) return;
+      if (aktif.options.maxHeight) isi.style.maxHeight = `${aktif.options.maxHeight}px`;
+      const { atas, bawah, kiri, kanan } = ruang();
+      const r = el.getBoundingClientRect();
+      const turun = r.top < atas
+        ? Math.max(0, Math.min(atas - r.top, bawah - r.bottom))
+        : -Math.max(0, Math.min(r.bottom - bawah, r.top - atas));
+      const geser = r.left < kiri ? kiri - r.left : r.right > kanan ? Math.max(kanan - r.right, kiri - r.left) : 0;
+      sampai = Date.now() + 1000;
+      if (turun || geser) map.panBy([-geser, -turun], { animate: false });
+      susut();
+    };
+    const buka = (e) => {
+      aktif = e.popup;
+      requestAnimationFrame(pas);
+    };
+    const tutup = (e) => {
+      if (e.popup === aktif) aktif = null;
+    };
+    map.on('popupopen', buka);
+    map.on('popupclose', tutup);
+    map.on('zoomend', pas);
+    map.on('moveend', susut);
+    return () => {
+      map.off('popupopen', buka);
+      map.off('popupclose', tutup);
+      map.off('zoomend', pas);
+      map.off('moveend', susut);
+    };
+  }, [map]);
   return null;
 };
 
@@ -429,6 +489,7 @@ const PetaInteraktif = ({
           />
 
           <PaneBatas onSiap={setKanvasBatas} />
+          <PasPopup />
           <KunciLapisanSaatMenggambar menggambar={isDrawing || modeUbah} />
 
           {activeDataLayers
@@ -468,8 +529,7 @@ const PetaInteraktif = ({
                   const p = feature?.properties || {};
                   layer.bindPopup(() => katalog[id].popup(p), {
                     maxHeight: Math.max(220, window.innerHeight - JARAK_POPUP.atas - JARAK_POPUP.bawah - 40),
-                    autoPanPaddingTopLeft: [16, JARAK_POPUP.atas],
-                    autoPanPaddingBottomRight: [JARAK_POPUP.kanan, JARAK_POPUP.bawah],
+                    autoPan: false,
                   });
                   const judul = katalog[id].tooltip?.(p) || p.nama || p.pemohon;
                   if (judul) layer.bindTooltip(judul, { sticky: true, className: 'map-tooltip' });

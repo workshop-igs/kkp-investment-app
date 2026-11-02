@@ -87,8 +87,24 @@ const KontrolPeta = ({
     });
   }, []);
 
-  const handleZoomIn = () => map.setZoom(map.getZoom() + 1, { animate: false });
-  const handleZoomOut = () => map.setZoom(map.getZoom() - 1, { animate: false });
+  const popupTerbuka = useRef(null);
+  useEffect(() => {
+    const buka = (e) => { popupTerbuka.current = e.popup; };
+    const tutup = (e) => { if (popupTerbuka.current === e.popup) popupTerbuka.current = null; };
+    map.on('popupopen', buka);
+    map.on('popupclose', tutup);
+    return () => {
+      map.off('popupopen', buka);
+      map.off('popupclose', tutup);
+    };
+  }, [map]);
+  const ubahZoom = (d) => {
+    const p = popupTerbuka.current;
+    if (p?.isOpen()) map.setZoomAround(p.getLatLng(), map.getZoom() + d, { animate: false });
+    else map.setZoom(map.getZoom() + d, { animate: false });
+  };
+  const handleZoomIn = () => ubahZoom(1);
+  const handleZoomOut = () => ubahZoom(-1);
 
   const handlePan = (direction) => {
     const panAmount = 150;
