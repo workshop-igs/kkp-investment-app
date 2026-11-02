@@ -43,6 +43,7 @@ const AppLayout = () => {
           <Route path="log-aktivitas" element={<AdminLogAktivitasPage />} />
           <Route path="pengaturan-analisis" element={<AdminPengaturanAnalisisPage />} />
           <Route path="parameter-tambahan" element={<AdminParameterTambahanPage />} />
+          <Route path="pengaturan-profil" element={<AdminPengaturanAnalisisPage key="profil" halaman="profil" />} />
         </Route>
       </Routes>
       </BatasGalat>

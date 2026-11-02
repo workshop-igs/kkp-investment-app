@@ -528,6 +528,67 @@ ASUMSI_MODEL_USAHA = {
     'umur_tahun': 10, 'diskonto_persen': 12.0, 'kenaikan_harga_persen': 0.0, 'kenaikan_biaya_persen': 0.0,
     'csr_persen': 2.5, 'batas_pbp_tahun': 10,
 }
+JUMLAH_LOKASI_PRIORITAS = 6
+JUMLAH_UNGGULAN = 4
+JUMLAH_JENIS_UNGGULAN = 3
+JUMLAH_KEAHLIAN = 7
+RANTAI_PASOK = {
+    'PERIKANAN_TANGKAP': ['Penyedia BBM, es, dan umpan', 'Nelayan', 'TPI dan pengepul', 'Pengolah dan cold storage',
+                          'Pedagang besar dan eksportir', 'Pasar lokal dan ekspor'],
+    'PERIKANAN_BUDIDAYA': ['Penyedia benih dan pakan', 'Pembudidaya', 'Pengepul desa', 'Pengumpul besar dan pabrik',
+                           'Eksportir', 'Pasar lokal dan ekspor'],
+    'PENGOLAHAN_HASIL_LAUT': ['Nelayan dan pembudidaya', 'Pengepul bahan baku', 'Unit pengolahan', 'Distributor dan eksportir',
+                              'Ritel dan pasar ekspor'],
+    'GARAM': ['Petambak garam', 'Pengepul', 'Pabrik pemurnian', 'Industri dan distributor', 'Pasar konsumsi dan industri'],
+    'PARIWISATA_BAHARI': ['Operator dan pemandu lokal', 'Akomodasi dan kuliner', 'Agen perjalanan',
+                          'Wisatawan domestik dan mancanegara'],
+    'JASA_MARITIM': ['Pemilik dan operator kapal', 'Galangan, bunker, dan terminal', 'Jasa pelabuhan dan logistik',
+                     'Pengguna jasa pelayaran'],
+    'INFRASTRUKTUR_LAUT': ['Perencana dan kontraktor', 'Pemasok material', 'Operator infrastruktur',
+                           'Pengguna dan masyarakat pesisir'],
+    'ENERGI_KELAUTAN': ['Pengembang pembangkit', 'Pemasok teknologi', 'Transmisi dan gardu PLN', 'Pelanggan listrik'],
+    'BIOTEKNOLOGI_KELAUTAN': ['Penyedia bahan baku hayati', 'Riset dan pengembangan', 'Pabrik bioproduk', 'Distributor',
+                              'Pasar farmasi, kosmetik, dan pakan'],
+    'KONSERVASI_PESISIR': ['Kelompok pengelola masyarakat', 'Restorasi dan pemantauan', 'Verifikasi dan sertifikasi',
+                           'Pembeli kredit karbon dan wisatawan'],
+}
+LINGKUNGAN_BISNIS = {
+    'UMUM': ['PKKPRL atau PKKPR', 'SPPL, UKL-UPL, atau AMDAL', 'Perizinan berusaha OSS', 'Standar mutu produk',
+             'Kemitraan masyarakat'],
+    'PERIKANAN_TANGKAP': ['Perizinan kapal dan penangkapan', 'Cara Penanganan Ikan yang Baik', 'HACCP',
+                          'Karantina dan mutu ekspor', 'Kuota penangkapan'],
+    'PERIKANAN_BUDIDAYA': ['PKKPRL atau PKKPR', 'Cara Budi Daya Ikan yang Baik', 'SPPL, UKL-UPL, atau AMDAL',
+                           'Karantina dan mutu ekspor', 'Tata kelola lahan'],
+    'PENGOLAHAN_HASIL_LAUT': ['PKKPR', 'HACCP', 'Sertifikasi halal', 'SPPL, UKL-UPL, atau AMDAL', 'Mutu ekspor'],
+}
+KEBUTUHAN_TEKNOLOGI = {
+    'UMUM': 'teknologi produksi dan standar mutu',
+    'PERIKANAN_TANGKAP': 'rantai dingin di kapal dan pelabuhan, palka berpendingin, serta ketertelusuran hasil tangkapan',
+    'PERIKANAN_BUDIDAYA': 'benih unggul, biosekuriti, pemantauan kualitas air, dan penanganan pascapanen',
+    'PENGOLAHAN_HASIL_LAUT': 'pendinginan, mesin pengolahan berstandar mutu, dan pengemasan',
+    'GARAM': 'geomembran, pencucian dan pemurnian, serta fortifikasi yodium',
+    'PARIWISATA_BAHARI': 'fasilitas ramah lingkungan, pengelolaan sampah, dan pemantauan daya dukung kunjungan',
+    'JASA_MARITIM': 'peralatan galangan, sistem bunker aman, dan digitalisasi layanan pelabuhan',
+    'INFRASTRUKTUR_LAUT': 'rekayasa pantai, material tahan korosi, dan pemantauan struktur',
+    'ENERGI_KELAUTAN': 'turbin atau konverter energi laut dan sambungan ke jaringan PLN',
+    'BIOTEKNOLOGI_KELAUTAN': 'laboratorium ekstraksi, kultur mikroalga, dan standar produk',
+    'KONSERVASI_PESISIR': 'pemantauan karbon dan ekosistem, pembibitan, dan transplantasi',
+}
+REKOMENDASI_KESESUAIAN = {
+    'S1': 'Dapat direkomendasikan untuk dikembangkan dengan skala industri.',
+    'S2': 'Belum direkomendasikan untuk skala industri: ada faktor pembatas alami yang memerlukan biaya rekayasa '
+          'lingkungan tinggi.',
+}
+KEBIJAKAN_NASIONAL = [
+    ['Perpres No. 12 Tahun 2025', 'RPJMN 2025–2029', 'Ekonomi biru menjadi salah satu arah pembangunan nasional.'],
+    ['UU No. 6 Tahun 2023', 'Cipta Kerja', 'Dasar penyederhanaan perizinan berusaha.'],
+    ['PP No. 28 Tahun 2025', 'Perizinan Berusaha Berbasis Risiko', 'Perizinan melalui sistem OSS sesuai tingkat risiko usaha.'],
+    ['PP No. 21 Tahun 2021', 'Penyelenggaraan Penataan Ruang', 'Dasar Kesesuaian Kegiatan Pemanfaatan Ruang Laut (KKPRL).'],
+    ['Permen KP No. 28 Tahun 2021', 'Penyelenggaraan Penataan Ruang Laut', 'Tata cara persetujuan KKPRL dan rencana zonasi.'],
+    ['PP No. 85 Tahun 2021', 'Jenis dan Tarif PNBP KKP', 'Tarif penerimaan negara bukan pajak sektor kelautan dan perikanan.'],
+    ['Permen KP No. 10 Tahun 2021', 'Standar Kegiatan Usaha PBBR', 'Standar usaha dan produk sektor kelautan dan perikanan.'],
+    ['Permen KP No. 35 Tahun 2021', 'Tarif Nol Rupiah/Nol Persen PNBP KKP', 'Keringanan PNBP untuk kegiatan tertentu.'],
+]
 MASA_BERLAKU_DATA = {
     'tata_ruang': 20, 'kkprl': 1, 'izin_tambang': 1, 'infrastruktur': 2, 'oseanografi': 3, 'aktivitas_tangkap': 1, 'kondisi_tetap': 0,
     'ekosistem': 5, 'bencana': 5, 'adat': 5, 'bps_produksi': 3, 'bps_kerja': 3,

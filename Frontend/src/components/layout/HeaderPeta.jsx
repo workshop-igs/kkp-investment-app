@@ -32,6 +32,7 @@ const ADMIN_MENU = {
     { label: 'Sektor Investasi', link: '/admin/sectors' },
     { label: 'Pengaturan Analisis', link: '/admin/pengaturan-analisis' },
     { label: 'Parameter Tambahan', link: '/admin/parameter-tambahan' },
+    { label: 'Pengaturan Profil Investasi', link: '/admin/pengaturan-profil' },
   ],
 };
 

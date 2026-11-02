@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  Activity, AlertTriangle, ArrowUpRight, Briefcase, CheckCircle2, Layers, Map as IkonPeta, ScrollText,
+  Activity, AlertTriangle, ArrowUpRight, Briefcase, CheckCircle2, FileText, Layers, Map as IkonPeta, ScrollText,
   ShieldAlert, SlidersHorizontal, UserCheck, Users, XOctagon,
 } from 'lucide-react';
 import { api, ambilDaftar } from '../../api/klien';
@@ -170,6 +170,7 @@ const MENU_ADMIN = [
   ['/admin/sectors', IkonPeta, 'Sektor Investasi', 'Tambah jenis investasi dan atur ketentuan zonanya.'],
   ['/admin/pengaturan-analisis', SlidersHorizontal, 'Pengaturan Analisis', 'Ubah ambang, bobot, dan skor yang dipakai analisis.'],
   ['/admin/parameter-tambahan', Layers, 'Parameter Tambahan', 'Tambah area atau nilai wilayah khusus untuk analisis.'],
+  ['/admin/pengaturan-profil', FileText, 'Pengaturan Profil Investasi', 'Atur model usaha, susunan, dan isi teks PDF Profil Investasi.'],
   ['/admin/users', Users, 'Pengguna & Peran', 'Tambah admin, ubah profil, atau nonaktifkan akun.'],
   ['/admin/log-aktivitas', ScrollText, 'Log Aktivitas', 'Lihat siapa melakukan apa, termasuk akses yang ditolak.'],
 ];

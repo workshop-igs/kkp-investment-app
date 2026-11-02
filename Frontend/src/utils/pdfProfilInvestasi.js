@@ -573,10 +573,6 @@ const hargaTeks = (k) => {
 const kelasS = (kelas) => ({ TINGGI: 'S1', SEDANG: 'S2' }[kelas] || null);
 const WARNA_S = { S1: C.tinggi, S2: C.sedang };
 const LABEL_S = { S1: 'Sangat sesuai (S1)', S2: 'Sesuai (S2)' };
-const REKOMENDASI_S = {
-  S1: 'Dapat direkomendasikan untuk dikembangkan dengan skala industri.',
-  S2: 'Belum direkomendasikan untuk skala industri: ada faktor pembatas alami yang memerlukan biaya rekayasa lingkungan tinggi.',
-};
 const unik = (daftar) => [...new Map(daftar.map((x) => [x.id, x])).values()];
 const lokasiSemua = (o) => unik(o.bab.flatMap((b) => b.lokasi));
 const finansialUtama = (b) => b.finansial.find((f) => f.hasil) || null;
@@ -822,17 +818,6 @@ class DekProfil extends Dek {
     return this.pil(kanan ? x - lebar : x, y, kode, campur(WARNA_S[kode], 0.16), gelap(WARNA_S[kode], 0.78), 5.6);
   }
 }
-
-const KEBIJAKAN_NASIONAL = [
-  ['Perpres No. 12 Tahun 2025', 'RPJMN 2025–2029', 'Ekonomi biru menjadi salah satu arah pembangunan nasional.'],
-  ['UU No. 6 Tahun 2023', 'Cipta Kerja', 'Dasar penyederhanaan perizinan berusaha.'],
-  ['PP No. 28 Tahun 2025', 'Perizinan Berusaha Berbasis Risiko', 'Perizinan melalui sistem OSS sesuai tingkat risiko usaha.'],
-  ['PP No. 21 Tahun 2021', 'Penyelenggaraan Penataan Ruang', 'Dasar Kesesuaian Kegiatan Pemanfaatan Ruang Laut (KKPRL).'],
-  ['Permen KP No. 28 Tahun 2021', 'Penyelenggaraan Penataan Ruang Laut', 'Tata cara persetujuan KKPRL dan rencana zonasi.'],
-  ['PP No. 85 Tahun 2021', 'Jenis dan Tarif PNBP KKP', 'Tarif penerimaan negara bukan pajak sektor kelautan dan perikanan.'],
-  ['Permen KP No. 10 Tahun 2021', 'Standar Kegiatan Usaha PBBR', 'Standar usaha dan produk sektor kelautan dan perikanan.'],
-  ['Permen KP No. 35 Tahun 2021', 'Tarif Nol Rupiah/Nol Persen PNBP KKP', 'Keringanan PNBP untuk kegiatan tertentu.'],
-];
 
 function rencanaHalaman(o, perJenis) {
   const komoditas = komoditasDokumen(o);
@@ -1118,7 +1103,7 @@ function kebijakan(dek, o) {
     sub: 'Peraturan yang menjadi dasar perizinan, penataan ruang laut, dan penerimaan negara untuk investasi ruang laut.',
   });
   const daftar = [
-    ...KEBIJAKAN_NASIONAL.map(([nomor, judul, peran]) => ({ nomor, judul, peran, daerah: false })),
+    ...o.teks.kebijakan_nasional.map(([nomor, judul, peran]) => ({ nomor, judul, peran, daerah: false })),
     {
       nomor: perdaSingkat(o.zona) === '-' ? (o.zona.label_data || 'Perda RTRW Provinsi') : perdaSingkat(o.zona),
       judul: o.zona.regulasi ? o.zona.regulasi.tentang : `Rencana tata ruang wilayah Provinsi ${o.wilayah.nama}`,
@@ -1248,7 +1233,7 @@ function metode(dek, o) {
   yy += 17;
   dek.gaya(6.6, C.navy, true);
   dek.doc.text('Asumsi yang berlaku', TEPI + 5, yy);
-  dek.teks(TEPI + 5, yy + 3.8, kiri - 10, `Horizon proyeksi ${angka(a.umur_tahun)} tahun; tingkat diskonto ${angka(a.diskonto_persen, 1)}%; kenaikan harga ${angka(a.kenaikan_harga_persen, 1)}% dan biaya ${angka(a.kenaikan_biaya_persen, 1)}% per tahun; potensi CSR ${angka(a.csr_persen, 1)}% dari pendapatan bersih tahun sebelumnya. Model usaha per sub-jenis ditetapkan administrator di Pengaturan Analisis.`, { ukuran: 6.3, maks: 4 });
+  dek.teks(TEPI + 5, yy + 3.8, kiri - 10, `Horizon proyeksi ${angka(a.umur_tahun)} tahun; tingkat diskonto ${angka(a.diskonto_persen, 1)}%; kenaikan harga ${angka(a.kenaikan_harga_persen, 1)}% dan biaya ${angka(a.kenaikan_biaya_persen, 1)}% per tahun; potensi CSR ${angka(a.csr_persen, 1)}% dari pendapatan bersih tahun sebelumnya. Model usaha per sub-jenis ditetapkan administrator di Pengaturan Profil Investasi.`, { ukuran: 6.3, maks: 4 });
 
   const x = TEPI + kiri + 5;
   const lebar = W - TEPI - x;
@@ -1429,7 +1414,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
     if (kelas) {
       yb += 2.9;
       dek.gaya(5.9, gelap(WARNA_S[kelas], 0.75));
-      d.text(d.splitTextToSize(bersih(REKOMENDASI_S[kelas]), lebar - 18)[0], x + 11.6, yb);
+      d.text(d.splitTextToSize(bersih(o.teks.rekomendasi_kesesuaian[kelas]), lebar - 18)[0], x + 11.6, yb);
     }
     if (!rapat && (l.pembatas[0] || l.peringatan[0])) {
       yb += 2.9;
@@ -1489,23 +1474,11 @@ function lokasiDetail(dek, o, b, i, citraLokasi) {
       dek.gaya(5.9, C.teks);
       dek.doc.text(bersih(`Produktivitas ${kelas || 'S1'}: ${angka(vol.volume)} ${f.hasil.satuan_produk}/tahun per ${f.hasil.satuan_usaha}`), x + 4, yy);
     }
-    if (kelas) dek.teks(x + 4, yy + 2.8, lebar - 8, REKOMENDASI_S[kelas], { ukuran: 5.8, warna: gelap(WARNA_S[kelas], 0.75), maks: 2 });
+    if (kelas) dek.teks(x + 4, yy + 2.8, lebar - 8, o.teks.rekomendasi_kesesuaian[kelas], { ukuran: 5.8, warna: gelap(WARNA_S[kelas], 0.75), maks: 2 });
   });
   dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi; produktivitas dari model usaha administrator; ${ATRIBUSI_CITRA}.`);
 }
 
-const RANTAI_INTI = {
-  PERIKANAN_TANGKAP: ['Penyedia BBM, es, dan umpan', 'Nelayan', 'TPI dan pengepul', 'Pengolah dan cold storage', 'Pedagang besar dan eksportir', 'Pasar lokal dan ekspor'],
-  PERIKANAN_BUDIDAYA: ['Penyedia benih dan pakan', 'Pembudidaya', 'Pengepul desa', 'Pengumpul besar dan pabrik', 'Eksportir', 'Pasar lokal dan ekspor'],
-  PENGOLAHAN_HASIL_LAUT: ['Nelayan dan pembudidaya', 'Pengepul bahan baku', 'Unit pengolahan', 'Distributor dan eksportir', 'Ritel dan pasar ekspor'],
-  GARAM: ['Petambak garam', 'Pengepul', 'Pabrik pemurnian', 'Industri dan distributor', 'Pasar konsumsi dan industri'],
-  PARIWISATA_BAHARI: ['Operator dan pemandu lokal', 'Akomodasi dan kuliner', 'Agen perjalanan', 'Wisatawan domestik dan mancanegara'],
-  JASA_MARITIM: ['Pemilik dan operator kapal', 'Galangan, bunker, dan terminal', 'Jasa pelabuhan dan logistik', 'Pengguna jasa pelayaran'],
-  INFRASTRUKTUR_LAUT: ['Perencana dan kontraktor', 'Pemasok material', 'Operator infrastruktur', 'Pengguna dan masyarakat pesisir'],
-  ENERGI_KELAUTAN: ['Pengembang pembangkit', 'Pemasok teknologi', 'Transmisi dan gardu PLN', 'Pelanggan listrik'],
-  BIOTEKNOLOGI_KELAUTAN: ['Penyedia bahan baku hayati', 'Riset dan pengembangan', 'Pabrik bioproduk', 'Distributor', 'Pasar farmasi, kosmetik, dan pakan'],
-  KONSERVASI_PESISIR: ['Kelompok pengelola masyarakat', 'Restorasi dan pemantauan', 'Verifikasi dan sertifikasi', 'Pembeli kredit karbon dan wisatawan'],
-};
 const PENDUKUNG = [
   ['Pelabuhan perikanan', ['PELABUHAN_PERIKANAN']],
   ['Pelabuhan umum', ['PELABUHAN_UMUM']],
@@ -1517,12 +1490,6 @@ const PENDUKUNG = [
   ['Jalan nasional', ['JALAN_NASIONAL']],
   ['Kampus dan lembaga riset', ['KAMPUS_RISET']],
 ];
-const LINGKUNGAN_BISNIS = {
-  PERIKANAN_TANGKAP: ['Perizinan kapal dan penangkapan', 'Cara Penanganan Ikan yang Baik', 'HACCP', 'Karantina dan mutu ekspor', 'Kuota penangkapan'],
-  PERIKANAN_BUDIDAYA: ['PKKPRL atau PKKPR', 'Cara Budi Daya Ikan yang Baik', 'SPPL, UKL-UPL, atau AMDAL', 'Karantina dan mutu ekspor', 'Tata kelola lahan'],
-  PENGOLAHAN_HASIL_LAUT: ['PKKPR', 'HACCP', 'Sertifikasi halal', 'SPPL, UKL-UPL, atau AMDAL', 'Mutu ekspor'],
-};
-const LINGKUNGAN_UMUM = ['PKKPRL atau PKKPR', 'SPPL, UKL-UPL, atau AMDAL', 'Perizinan berusaha OSS', 'Standar mutu produk', 'Kemitraan masyarakat'];
 
 function rantaiPasar(dek, o, b, i) {
   const aksen = aksenBab(b);
@@ -1535,7 +1502,7 @@ function rantaiPasar(dek, o, b, i) {
   });
   const d = dek.doc;
   const inf = o.infrastruktur || {};
-  const inti = RANTAI_INTI[b.sektor] || RANTAI_INTI.PENGOLAHAN_HASIL_LAUT;
+  const inti = o.teks.rantai_pasok[b.sektor] || o.teks.rantai_pasok.PENGOLAHAN_HASIL_LAUT;
   const pendukung = PENDUKUNG.map(([label, kat]) => ({ label, n: kat.reduce((s, k) => s + (inf[k] || 0), 0) }));
   const BIRU = [37, 99, 235];
   const ORANYE = [234, 88, 12];
@@ -1592,7 +1559,7 @@ function rantaiPasar(dek, o, b, i) {
     d.setLineDashPattern([], 0);
   });
 
-  const regulasi = LINGKUNGAN_BISNIS[b.sektor] || LINGKUNGAN_UMUM;
+  const regulasi = o.teks.lingkungan_bisnis[b.sektor] || o.teks.lingkungan_bisnis.UMUM;
   const lebarReg = (lebarIsi - 8 - (regulasi.length - 1) * 4) / regulasi.length;
   regulasi.forEach((r, n) => {
     const x = TEPI + 4 + n * (lebarReg + 4);
@@ -1631,7 +1598,7 @@ function finansial(dek, o, b, i, perJenis) {
       ikon: 'finansial',
       aksen,
       judul: `Model usaha ${b.sub_jenis.map((s) => s.nama.toLowerCase()).join(', ')} belum ditetapkan`,
-      isi: `Analisis finansial (struktur investasi, proyeksi ${angka(o.asumsi_finansial.umur_tahun)} tahun, NPV, IRR, BCR, dan masa pengembalian) dihitung otomatis setelah administrator mengisi volume produksi, harga, investasi awal, dan biaya operasional di Pengaturan Analisis, kelompok Model usaha Profil Investasi.${k?.harga_rp_kg ? ` Harga produsen BPS di provinsi ini Rp ${angka(k.harga_rp_kg)}/kg akan dipakai bila harga tidak diisi.` : ''}`,
+      isi: `Analisis finansial (struktur investasi, proyeksi ${angka(o.asumsi_finansial.umur_tahun)} tahun, NPV, IRR, BCR, dan masa pengembalian) dihitung otomatis setelah administrator mengisi volume produksi, harga, investasi awal, dan biaya operasional di Pengaturan Profil Investasi, kelompok Model usaha & asumsi keuangan.${k?.harga_rp_kg ? ` Harga produsen BPS di provinsi ini Rp ${angka(k.harga_rp_kg)}/kg akan dipakai bila harga tidak diisi.` : ''}`,
     });
     return;
   }
@@ -1681,7 +1648,7 @@ function finansial(dek, o, b, i, perJenis) {
       { bagian: [0.3, 0.16, 0.12, 0.12, 0.14, 0.16], rataKanan: [1, 2, 3, 4], ukuran: 6.2, aksen });
   }
   const lain = b.finansial.filter((x2) => x2 !== f);
-  dek.sumber(`Baris disorot = layak (NPV > 0, IRR > ${angka(h.asumsi.diskonto_persen, 1)}%, BCR > 1, masa kembali paling lama ${angka(h.asumsi.batas_pbp_tahun)} tahun). Model usaha: Pengaturan Analisis aplikasi${lain.length ? `; sub-jenis lain ${lain.map((x2) => `${x2.nama.toLowerCase()} (${x2.hasil ? 'ada model' : 'belum ada model'})`).join(', ')}` : ''}.`);
+  dek.sumber(`Baris disorot = layak (NPV > 0, IRR > ${angka(h.asumsi.diskonto_persen, 1)}%, BCR > 1, masa kembali paling lama ${angka(h.asumsi.batas_pbp_tahun)} tahun). Model usaha: Pengaturan Profil Investasi aplikasi${lain.length ? `; sub-jenis lain ${lain.map((x2) => `${x2.nama.toLowerCase()} (${x2.hasil ? 'ada model' : 'belum ada model'})`).join(', ')}` : ''}.`);
 }
 
 function sosial(dek, o, b, i) {
@@ -1720,7 +1687,7 @@ function sosial(dek, o, b, i) {
   const lebar = W - TEPI - x;
   yy = dek.kartu(x, yk, lebar, BAWAH - yk, { judul: 'Keahlian yang dibutuhkan', ikon: 'keahlian', aksen });
   const d = dek.doc;
-  j.keahlian.slice(0, 7).forEach((kh) => {
+  j.keahlian.forEach((kh) => {
     if (yy > BAWAH - 6) return;
     dek.gaya(7.2, C.navy, true);
     d.text(d.splitTextToSize(bersih(kh.posisi), lebar - 30)[0], x + 5, yy);
@@ -1734,19 +1701,6 @@ function sosial(dek, o, b, i) {
   });
   dek.sumber('Sumber: BPS (ketenagakerjaan provinsi), data sosial kabupaten/kota (BPS dan KKP) pada basis data aplikasi, matriks keahlian per jenis investasi.');
 }
-
-const KEBUTUHAN_TEKNOLOGI = {
-  PERIKANAN_TANGKAP: 'rantai dingin di kapal dan pelabuhan, palka berpendingin, serta ketertelusuran hasil tangkapan',
-  PERIKANAN_BUDIDAYA: 'benih unggul, biosekuriti, pemantauan kualitas air, dan penanganan pascapanen',
-  PENGOLAHAN_HASIL_LAUT: 'pendinginan, mesin pengolahan berstandar mutu, dan pengemasan',
-  GARAM: 'geomembran, pencucian dan pemurnian, serta fortifikasi yodium',
-  PARIWISATA_BAHARI: 'fasilitas ramah lingkungan, pengelolaan sampah, dan pemantauan daya dukung kunjungan',
-  JASA_MARITIM: 'peralatan galangan, sistem bunker aman, dan digitalisasi layanan pelabuhan',
-  INFRASTRUKTUR_LAUT: 'rekayasa pantai, material tahan korosi, dan pemantauan struktur',
-  ENERGI_KELAUTAN: 'turbin atau konverter energi laut dan sambungan ke jaringan PLN',
-  BIOTEKNOLOGI_KELAUTAN: 'laboratorium ekstraksi, kultur mikroalga, dan standar produk',
-  KONSERVASI_PESISIR: 'pemantauan karbon dan ekosistem, pembibitan, dan transplantasi',
-};
 
 function nilaiRisiko(o, b) {
   const k = komoditasBab(o, b);
@@ -1797,10 +1751,10 @@ function barisPestel(o, b) {
     ['Politik', `${angka(j.sesuai_ha)} ha zona sesuai menurut ${perdaSingkat(o.zona)}${r ? `; matriks: penuh di ${angka(r.blok.DIIZINKAN || 0)} blok, bersyarat di ${angka(r.blok.BERSYARAT || 0)}` : ''}.`,
       'Utamakan lokasi di zona yang mengizinkan penuh; lokasi bersyarat memerlukan kajian tambahan.'],
     ['Ekonomi', [k && pertumbuhanTeks(k), k && hargaTeks(k), dasar && `NPV ${rp(dasar.npv)}, IRR ${angka(dasar.irr, 1)}%.`].filter(Boolean).join(' ') || 'Data pasar publik untuk jenis ini terbatas.',
-      dasar ? (dasar.layak ? 'Model usaha layak pada kondisi dasar.' : 'Model usaha belum layak pada kondisi dasar; perlu efisiensi biaya atau peningkatan produktivitas.') : 'Tetapkan model usaha di Pengaturan Analisis untuk menilai kelayakan finansial.'],
+      dasar ? (dasar.layak ? 'Model usaha layak pada kondisi dasar.' : 'Model usaha belum layak pada kondisi dasar; perlu efisiensi biaya atau peningkatan produktivitas.') : 'Tetapkan model usaha di Pengaturan Profil Investasi untuk menilai kelayakan finansial.'],
     ['Sosial', `${tpt?.nilai != null ? `Pengangguran terbuka ${angka(tpt.nilai, 2)}%; ` : ''}${angka(j.rasio_tk_per_miliar, 1)} tenaga kerja per Rp1 miliar investasi.`,
       b.lokasi.some((l) => l.peringatan.length) ? 'Ada lokasi dekat wilayah adat; libatkan masyarakat adat sejak awal.' : 'Prioritaskan tenaga kerja lokal dan pelatihan keahlian berprioritas tinggi.'],
-    ['Teknologi', `Kebutuhan utama: ${KEBUTUHAN_TEKNOLOGI[b.sektor] || 'teknologi produksi dan standar mutu'}.`,
+    ['Teknologi', `Kebutuhan utama: ${o.teks.kebutuhan_teknologi[b.sektor] || o.teks.kebutuhan_teknologi.UMUM}.`,
       kurang.length ? `Fasilitas belum tercatat (${kurang.slice(0, 3).join(', ')}) menjadi peluang investasi pendukung.` : 'Fasilitas pendukung utama sudah tercatat di provinsi.'],
     ['Lingkungan', `${angka(j.tinggi_ha)} ha zona S1 dan ${angka(j.sedang_ha)} ha zona S2; ${b.lokasi.length ? `${s1} dari ${b.lokasi.length} lokasi prioritas berkelas S1` : 'belum ada lokasi prioritas pada Peta Sebaran'}.`,
       'Lokasi S2 memiliki faktor pembatas alami; tidak boleh menutup ekosistem sensitif (mangrove, lamun, terumbu karang).'],
@@ -1829,7 +1783,7 @@ function pestel(dek, o, b, i) {
   dek.nomor(x + 5, yy, lebar - 10, [
     'Verifikasi lapangan lokasi prioritas; pastikan tidak tumpang tindih KKPRL terbit maupun bangunan yang sudah ada.',
     b.lokasi.some((l) => l.pembatas.length) && 'Nilai di lapangan parameter yang belum terukur sebelum penetapan lokasi.',
-    finansialUtama(b) ? 'Perbarui model usaha dengan data biaya terbaru sebelum promosi investasi.' : `Tetapkan model usaha ${b.nama.toLowerCase()} di Pengaturan Analisis.`,
+    finansialUtama(b) ? 'Perbarui model usaha dengan data biaya terbaru sebelum promosi investasi.' : `Tetapkan model usaha ${b.nama.toLowerCase()} di Pengaturan Profil Investasi.`,
     'Siapkan pelatihan untuk posisi berprioritas tinggi pada matriks keahlian.',
   ], { aksen, ukuran: 6.4 });
   dek.sumber('Disusun otomatis dari halaman kajian, lokasi, rantai pasar, finansial, dan sosial bab ini; peluang risiko dinilai dari kelas lokasi, variasi harga BPS, InaRISK, dan matriks Perda.');
@@ -1856,7 +1810,7 @@ function csr(dek, o) {
       return [b.nama, h.satuan_usaha, rp(h.csr.reduce((n, c) => n + c.nilai, 0))];
     }), { bagian: [0.4, 0.3, 0.3], rataKanan: [2], ukuran: 6.4 });
   dek.teks(x, y + 12 + ada.length * 6.4, W - TEPI - x, `Potensi CSR tahun ke-n = ${angka(o.asumsi_finansial.csr_persen, 1)}% x pendapatan bersih tahun ke-(n-1); tahun pertama belum ada karena belum ada pendapatan tahun sebelumnya. Nilai dihitung per satuan usaha model dan berlipat sesuai skala investasi.`, { ukuran: 6.4, warna: C.abu });
-  dek.sumber('Sumber: model usaha Pengaturan Analisis aplikasi; asumsi CSR mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026).');
+  dek.sumber('Sumber: model usaha Pengaturan Profil Investasi aplikasi; asumsi CSR mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026).');
 }
 
 function izinUntuk(b) {

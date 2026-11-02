@@ -10,22 +10,26 @@ from analitik.services import konstanta
 PETA, SKOR = 'peta', 'skor'
 
 KELOMPOK = [
-    ('syarat_lokasi', 'Syarat lokasi per jenis usaha', ''),
-    ('peta', 'Peta Sebaran', ''),
-    ('analisis_area', 'Analisis area yang digambar pengguna', ''),
-    ('keuangan', 'Keuangan & model usaha', ''),
-    ('sumber_data', 'Sumber data & masa berlaku', ''),
+    ('syarat_lokasi', 'Syarat lokasi per jenis usaha', '', 'analisis'),
+    ('peta', 'Peta Sebaran', '', 'analisis'),
+    ('analisis_area', 'Analisis area yang digambar pengguna', '', 'analisis'),
+    ('keuangan', 'Analisis keuangan', '', 'analisis'),
+    ('sumber_data', 'Sumber data & masa berlaku', '', 'analisis'),
     ('rumus', 'Rumus skor & bobot (untuk tim ahli)',
-     'Ubah hanya berdasarkan kajian tim ahli. Nilai bawaan mengikuti metodologi aplikasi.'),
+     'Ubah hanya berdasarkan kajian tim ahli. Nilai bawaan mengikuti metodologi aplikasi.', 'analisis'),
+    ('profil_keuangan', 'Model usaha & asumsi keuangan', '', 'profil'),
+    ('profil_susunan', 'Lokasi prioritas & susunan dokumen', '', 'profil'),
+    ('profil_teks', 'Teks per jenis usaha', '', 'profil'),
+    ('profil_kebijakan', 'Kebijakan nasional', '', 'profil'),
 ]
 
 
 def _d(kunci, kelompok, label, keterangan='', satuan='', dampak=(), batas=(0, None), jumlah_satu=False,
-       kolom=None, baris=None, bulat=False, istilah='', persen=False):
+       kolom=None, baris=None, bulat=False, istilah='', persen=False, teks=None):
     return {
         'kunci': kunci, 'kelompok': kelompok, 'label': label, 'keterangan': keterangan, 'satuan': satuan,
         'dampak': list(dampak), 'batas': list(batas), 'jumlah_satu': jumlah_satu, 'kolom': kolom, 'baris': baris,
-        'bulat': bulat, 'istilah': istilah, 'persen': persen,
+        'bulat': bulat, 'istilah': istilah, 'persen': persen, 'teks': list(teks) if teks else None,
     }
 
 
@@ -95,11 +99,39 @@ DAFTAR = [
        'ini.', 'km', (), (1, 1000), istilah='Lokasi alternatif'),
     _d('JUMLAH_LOKASI_ALTERNATIF', 'analisis_area', 'Jumlah lokasi pengganti yang ditawarkan',
        'Banyaknya lokasi pengganti yang ditampilkan bila area tidak sesuai.', 'lokasi', (), (1, 20), bulat=True),
-    _d('MODEL_USAHA', 'keuangan', 'Model usaha per sub-jenis',
+    _d('MODEL_USAHA', 'profil_keuangan', 'Model usaha per sub-jenis',
        'Dipakai halaman analisis finansial Profil Investasi. Kosongkan harga untuk memakai harga produsen BPS provinsi; '
        'sub-jenis tanpa volume, investasi, atau harga ditulis belum memiliki model usaha.'),
-    _d('ASUMSI_MODEL_USAHA', 'keuangan', 'Asumsi keuangan Profil Investasi',
+    _d('ASUMSI_MODEL_USAHA', 'profil_keuangan', 'Asumsi keuangan Profil Investasi',
        'Berlaku untuk semua model usaha. CSR dihitung dari pendapatan bersih tahun sebelumnya.', batas=(0, 100)),
+    _d('JUMLAH_LOKASI_PRIORITAS', 'profil_susunan', 'Lokasi prioritas per bab',
+       'Banyaknya lokasi Peta Sebaran terbaik yang ditampilkan di tiap bab Profil Investasi.', 'lokasi', (), (1, 6),
+       bulat=True),
+    _d('AMBANG_TERBANGUN_PERSEN', 'profil_susunan', 'Batas bagian zona yang sudah terbangun',
+       'Zona yang terbangun sebesar ini atau lebih tidak menjadi lokasi prioritas Profil Investasi.', '%', (),
+       (0, 100)),
+    _d('JUMLAH_UNGGULAN', 'profil_susunan', 'Jumlah komoditas unggulan',
+       'Komoditas dengan nilai produksi dan ruang sesuai tertinggi yang dijadikan bab. Juga dipakai panel detail '
+       'provinsi di Peta Spasial.', 'komoditas', (), (1, 4), bulat=True),
+    _d('JUMLAH_JENIS_UNGGULAN', 'profil_susunan', 'Jumlah jenis usaha tambahan',
+       'Jenis usaha tanpa data produksi BPS yang ikut dijadikan bab, dipilih dari ruang sesuai terluas. Tiap bab menambah '
+       'sekitar 6 halaman.', 'jenis', (), (0, 5), bulat=True),
+    _d('JUMLAH_KEAHLIAN', 'profil_susunan', 'Jumlah keahlian tenaga kerja',
+       'Banyaknya keahlian prioritas yang dicantumkan untuk tiap jenis usaha.', 'keahlian', (), (1, 7), bulat=True),
+    _d('RANTAI_PASOK', 'profil_teks', 'Rantai nilai inti per jenis usaha',
+       'Langkah rantai nilai dari hulu ke hilir pada halaman peta rantai pasar. Tulis satu langkah per baris, 3 sampai 7 '
+       'langkah.', teks=(3, 7, 60)),
+    _d('LINGKUNGAN_BISNIS', 'profil_teks', 'Lingkungan pendukung bisnis per jenis usaha',
+       'Nilai dan regulasi pada bagian bawah halaman peta rantai pasar, satu butir per baris. Jenis usaha tanpa daftar '
+       'sendiri memakai daftar Jenis lain (umum).', teks=(1, 6, 60)),
+    _d('KEBUTUHAN_TEKNOLOGI', 'profil_teks', 'Kebutuhan teknologi per jenis usaha',
+       'Melengkapi kalimat "Kebutuhan utama: ..." pada tabel risiko dan mitigasi.', teks=(1, 1, 160)),
+    _d('REKOMENDASI_KESESUAIAN', 'profil_teks', 'Rekomendasi menurut kelas kesesuaian',
+       'Kalimat rekomendasi untuk lokasi sangat sesuai (S1) dan sesuai (S2) pada halaman lokasi prioritas.',
+       teks=(1, 1, 140)),
+    _d('KEBIJAKAN_NASIONAL', 'profil_kebijakan', 'Daftar kebijakan nasional',
+       'Regulasi nasional yang dikutip di halaman kebijakan, paling banyak 8. Perda RTRW provinsi ditambahkan otomatis.',
+       kolom=['Nomor', 'Judul', 'Peran'], teks=(1, 8, 120)),
     _d('FINANCIAL_WEIGHTS', 'keuangan', 'Bobot unsur skor keuangan',
        'Seberapa besar NPV, IRR, masa balik modal, dan ROI menentukan skor keuangan proyek. Jumlahnya harus 100%.',
        istilah='Bobot NPV, IRR, payback, ROI', **BOBOT),
@@ -234,9 +266,6 @@ DAFTAR = [
     _d('KELAS_KELAYAKAN_ZONA', 'rumus', 'Batas kelas kelayakan zona',
        'Skor minimal untuk tiap kelas kelayakan zona, dari tinggi ke sangat rendah.', dampak=(SKOR,),
        kolom=['Kelas', 'Skor minimum'], **PERSEN),
-    _d('AMBANG_TERBANGUN_PERSEN', 'rumus', 'Batas bagian zona yang sudah terbangun',
-       'Zona yang terbangun sebesar ini atau lebih tidak menjadi lokasi prioritas Profil Investasi.', '%', (),
-       (0, 100)),
 ]
 TERDAFTAR = {d['kunci']: d for d in DAFTAR}
 
@@ -266,6 +295,7 @@ LABEL_BAGIAN = {
     'umur_tahun': 'Umur proyek (tahun)', 'diskonto_persen': 'Tingkat diskonto atau MARR (%)',
     'kenaikan_harga_persen': 'Kenaikan harga per tahun (%)', 'kenaikan_biaya_persen': 'Kenaikan biaya per tahun (%)',
     'csr_persen': 'CSR (% pendapatan bersih)', 'batas_pbp_tahun': 'Batas masa pengembalian modal (tahun)',
+    'UMUM': 'Jenis lain (umum)', 'S1': 'Sangat sesuai (S1)', 'S2': 'Sesuai (S2)',
 }
 
 BAWAAN = {kunci: json.loads(json.dumps(getattr(konstanta, kunci))) for kunci in TERDAFTAR}
@@ -390,10 +420,48 @@ def _model_usaha(nilai):
                 _angka(v, f'{jalur} > {k}', meta, boleh_kosong=True)
 
 
+def _teks(nilai, bawaan, meta, sektor):
+    minimal, maksimal, panjang = meta['teks']
+
+    def kalimat(v, jalur):
+        if not isinstance(v, str) or not v.strip():
+            raise NilaiTidakSah(f'{jalur}: wajib diisi.')
+        if len(v) > panjang:
+            raise NilaiTidakSah(f'{jalur}: paling panjang {panjang} huruf.')
+
+    def daftar(v, jalur, isi):
+        if not isinstance(v, list) or not minimal <= len(v) <= maksimal:
+            raise NilaiTidakSah(f'{jalur}: isi {minimal} sampai {maksimal} butir.')
+        for i, x in enumerate(v, 1):
+            isi(x, f'{jalur} > {i}')
+
+    def baris(v, jalur):
+        if not isinstance(v, list) or len(v) != len(meta['kolom']):
+            raise NilaiTidakSah(f'{jalur}: isi semua kolom.')
+        for k, x in zip(meta['kolom'], v):
+            kalimat(x, f'{jalur} > {k}')
+
+    if isinstance(bawaan, list):
+        daftar(nilai, meta['label'], baris)
+        return
+    if not isinstance(nilai, dict) or not set(bawaan) <= set(nilai) <= set(bawaan) | sektor:
+        raise NilaiTidakSah(f"{meta['label']}: susunan isian tidak sesuai.")
+    contoh = next(iter(bawaan.values()))
+    for k, v in nilai.items():
+        jalur = f"{meta['label']} > {LABEL_BAGIAN.get(k, k)}"
+        if isinstance(contoh, list):
+            daftar(v, jalur, kalimat)
+        else:
+            kalimat(v, jalur)
+
+
 def periksa(kunci, nilai):
     from inti.models import SektorInvestasi
 
     meta = TERDAFTAR[kunci]
+    if meta['teks']:
+        _teks(nilai, BAWAAN[kunci], meta, set(SektorInvestasi.objects.values_list('kode', flat=True)))
+        return
     if kunci == 'KRITERIA_JENIS':
         _kriteria(nilai, set(SektorInvestasi.objects.values_list('kode', flat=True)))
         return
