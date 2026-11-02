@@ -83,6 +83,7 @@ def hitung_ulang():
                 call_command('hitung_skor_zona', progres=_progres('Skor kelayakan zona'))
                 cache.clear()
             StatusHitungUlang.objects.filter(pk=1, versi=versi).update(perlu_lokasi=None, perlu_skor=False)
+        jadwalkan_isi_cache_profil()
     except Exception as e:
         logger.exception('[HITUNG ULANG] gagal')
         connection.close()
@@ -112,6 +113,7 @@ def seleksi_nasional():
 
     Command()._seleksi_nasional()
     cache.clear()
+    jadwalkan_isi_cache_profil()
 
 
 def jadwalkan_seleksi_nasional():
@@ -119,3 +121,32 @@ def jadwalkan_seleksi_nasional():
         seleksi_nasional.delay()
     except Exception as e:
         logger.error(f'[SELEKSI NASIONAL] Antrean tugas tidak tersedia: {e}')
+
+
+@shared_task
+def isi_cache_profil():
+    from analitik.services.profil_investasi import profil_siap_kirim, versi_profil
+    from inti.models import Provinsi, SektorInvestasi
+
+    if not cache.add('isi-cache-profil:berjalan', 1, 3 * 3600):
+        return
+    try:
+        while True:
+            versi = versi_profil(segar=True)
+            for provinsi in Provinsi.objects.all():
+                for sektor in [None, *SektorInvestasi.objects.filter(aktif=True)]:
+                    try:
+                        profil_siap_kirim(provinsi, sektor, versi)
+                    except Exception as e:
+                        logger.warning(f'[CACHE PROFIL] {provinsi.nama} {sektor or "semua"}: {type(e).__name__}: {e}')
+            if versi_profil(segar=True) == versi:
+                break
+    finally:
+        cache.delete('isi-cache-profil:berjalan')
+
+
+def jadwalkan_isi_cache_profil():
+    try:
+        isi_cache_profil.apply_async(countdown=30)
+    except Exception as e:
+        logger.error(f'[CACHE PROFIL] Antrean tugas tidak tersedia: {e}')

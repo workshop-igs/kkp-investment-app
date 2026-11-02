@@ -16,4 +16,8 @@ app.conf.beat_schedule = {
         'task': 'penarikan_data.tasks.perbarui_sumber_data',
         'schedule': crontab(minute=0, hour=1, day_of_week='sun'),
     },
+    'isi-cache-profil': {
+        'task': 'analitik.tasks.isi_cache_profil',
+        'schedule': crontab(minute=0, hour=4),
+    },
 }
