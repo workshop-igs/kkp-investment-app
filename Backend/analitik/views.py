@@ -29,7 +29,7 @@ from .models import (
 )
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial
-from .services.kriteria import uraian
+from .services.kriteria import kbli_sub, uraian
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
 from .services.parameter_tambahan import geojson_area
@@ -452,6 +452,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
             'persen_sesuai': round(r['persen_sesuai']),
             'luas_ha': round(r['luas_ha'], 1),
             'karakter': uraian(r['jenis'][0], r['rincian'].get('sub_sektor_kode')) if len(r['jenis']) == 1 else None,
+            'kbli': kbli_sub(r['jenis'][0], r['rincian'].get('sub_sektor_kode')) if len(r['jenis']) == 1 else None,
         }
 
 

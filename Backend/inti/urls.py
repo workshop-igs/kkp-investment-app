@@ -2,7 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .asisten import daftar_alat, obrolan, pakai_alat
-from .pencarian import cari_lokasi
+from .pencarian import cari_kbli, cari_lokasi
 from .views import (
     DesaKelurahanViewSet,
     KabupatenKotaViewSet,
@@ -50,6 +50,7 @@ admin_router.register(r'parameter-tambahan', AdminParameterTambahanViewSet, base
 
 urlpatterns = [
     path('cari/', cari_lokasi, name='cari-lokasi'),
+    path('kbli/', cari_kbli, name='cari-kbli'),
     path('wpp/', wpp_peta, name='wpp-peta'),
     path('asisten/alat/', daftar_alat, name='asisten-alat'),
     path('asisten/alat/<str:nama>/', pakai_alat, name='asisten-pakai-alat'),

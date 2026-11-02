@@ -591,7 +591,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
     sektor = SektorInvestasi.objects.filter(kode=sektor_kode).first()
     if sektor is None:
         raise ValueError(f'Jenis investasi "{sektor_kode}" tidak dikenal.')
-    daftar_sub = {s['kode']: s['nama'] for s in sub_jenis(sektor.kode)}
+    daftar_sub = {s['kode']: s for s in sub_jenis(sektor.kode)}
     if sub_kode and sub_kode not in daftar_sub:
         raise ValueError(f'Sub-jenis "{sub_kode}" bukan bagian dari {sektor.nama}.')
 
@@ -704,7 +704,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         'lanjut': lanjut,
         'sektor': sektor.kode,
         'sektor_nama': sektor.nama,
-        'sub_jenis': {'kode': sub_kode, 'nama': daftar_sub[sub_kode]} if sub_kode else None,
+        'sub_jenis': {k: daftar_sub[sub_kode][k] for k in ('kode', 'nama', 'kbli')} if sub_kode else None,
         'luas_m2': luas_aoi,
         'cakupan_persen': round(cakupan * 100, 1),
         'acuan': tingkat_dipakai,
@@ -716,6 +716,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
             'label': 'Cocok' if cocok else 'Belum dapat dinilai' if data_kurang else 'Tidak cocok',
             'alasan': alasan_karakter,
             'sub_sektor': terbaik['nama'] if terbaik else None,
+            'sub_sektor_kbli': terbaik['kbli'] if terbaik else None,
             'syarat': [],
         },
         'sub_sektor': fisik,

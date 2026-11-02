@@ -231,7 +231,16 @@ const KontrolPeta = ({
         >
           <Search className="w-5 h-5" />
         </button>
-        {panelAktif === 'cari' && <PanelPencarian onTuju={tujuLokasi} />}
+        {panelAktif === 'cari' && (
+          <PanelPencarian
+            onTuju={tujuLokasi}
+            onJenis={(kode) => {
+              if (!activeLayers.includes('potensi')) toggleLayer('potensi');
+              setSektorLapisan?.('potensi', kode);
+              setPanelAktif('layer');
+            }}
+          />
+        )}
       </div>
 
       <div>

@@ -367,6 +367,7 @@ def _sama_bentuk(nilai, bawaan, jalur, meta):
 
 def _kriteria(nilai, sektor):
     from analitik.services.kriteria import PARAMETER
+    from inti.kbli import ringkas as ringkas_kbli
 
     meta = {'batas': [None, None], 'bulat': False}
     if not isinstance(nilai, dict) or not set(nilai) <= sektor | set(konstanta.KRITERIA_JENIS):
@@ -378,8 +379,10 @@ def _kriteria(nilai, sektor):
             jalur = f'{kode} > {sub}'
             if not re.fullmatch(r'[A-Z0-9_]{2,40}', sub):
                 raise NilaiTidakSah(f'{jalur}: kode sub-sektor hanya huruf kapital, angka, dan garis bawah, paling panjang 40.')
-            if not isinstance(isi, dict) or not {'nama', 'ranah', 'kriteria'} <= set(isi) <= {'nama', 'ranah', 'kriteria', 'unggulan'}:
-                raise NilaiTidakSah(f'{jalur}: isian harus nama, ranah, kriteria, dan (bila ada) unggulan.')
+            if not isinstance(isi, dict) or not {'nama', 'kbli', 'ranah', 'kriteria'} <= set(isi) <= {'nama', 'kbli', 'ranah', 'kriteria', 'unggulan'}:
+                raise NilaiTidakSah(f"{isi.get('nama') or jalur if isinstance(isi, dict) else jalur}: pilih KBLI dan isi nama, ranah, serta kriteria.")
+            if ringkas_kbli(isi['kbli']) is None:
+                raise NilaiTidakSah(f"{isi['nama'] or jalur}: kode KBLI {isi['kbli']} tidak ada di KBLI 2025.")
             if not isinstance(isi['nama'], str) or not isi['nama'].strip():
                 raise NilaiTidakSah(f'{jalur}: nama sub-sektor wajib diisi.')
             if not isinstance(isi['ranah'], list) or not isi['ranah'] or not set(isi['ranah']) <= {'LAUT', 'DARAT'}:

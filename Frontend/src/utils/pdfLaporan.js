@@ -728,7 +728,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       sc.sub_sektor.forEach((h) => {
         const unggul = Object.fromEntries((h.unggulan?.kriteria || []).map((x) => [x.kunci, x]));
         const khusus = (h.unggulan?.kriteria || []).filter((x) => !h.kriteria.some((y) => y.kunci === x.kunci));
-        k.teks(`${h.nama}: ${h.cocok ? 'cocok' : h.gagal.length ? 'tidak cocok' : 'data belum cukup'} `
+        k.teks(`${h.nama}${h.kbli ? ` (KBLI ${h.kbli.kode})` : ''}: ${h.cocok ? 'cocok' : h.gagal.length ? 'tidak cocok' : 'data belum cukup'} `
           + `(${h.terukur} dari ${h.total} kriteria terukur${h.unggulan?.skor != null ? `, skor mutu ${h.unggulan.skor}` : ''})`
           + `${h.unggulan?.lolos ? ', lokasi unggulan' : ''}`,
         { tebal: true, warna: h.cocok ? HIJAU_TEKS : MERAH_TEKS, ukuran: 7 });

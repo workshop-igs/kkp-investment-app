@@ -6,6 +6,7 @@ from django.db import connection
 from analitik.services.konstanta import INFORMASI_JENIS, KM_PER_DERAJAT, KRITERIA_PELENGKAP, KRITERIA_TANPA_SKOR
 from analitik.services.oseanografi import raster_tersedia
 from analitik.services.pengaturan import atur
+from inti.kbli import ringkas
 
 PARAMETER = {
     'klorofil': ('Klorofil-a', 'mg/m³', 'KLOROFIL'),
@@ -302,7 +303,8 @@ def nilai_sub(sub, data, tersedia, bersyarat=False, informasi=None):
     cukup = terukur >= math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * len(dihitung))
     skor = skor_mutu(sub, data, bersyarat)
     return {
-        'nama': sub['nama'], 'kriteria': kriteria, 'umum': umum, 'terukur': terukur, 'total': len(dihitung),
+        'nama': sub['nama'], 'kbli': ringkas(sub.get('kbli')),
+        'kriteria': kriteria, 'umum': umum, 'terukur': terukur, 'total': len(dihitung),
         'informasi': baris_informasi(sub, data.get, informasi),
         'gagal': [k['label'] for k in gagal], 'cukup_data': cukup, 'cocok': not gagal and cukup,
         'unggulan': {
@@ -329,8 +331,12 @@ def ranah_jenis(sektor_kode, sub_kode=None):
 
 
 def sub_jenis(sektor_kode):
-    return [{'kode': kode, 'nama': sub['nama'], 'ranah': sub['ranah']}
+    return [{'kode': kode, 'nama': sub['nama'], 'ranah': sub['ranah'], 'kbli': ringkas(sub.get('kbli'))}
             for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items()]
+
+
+def kbli_sub(sektor_kode, sub_kode):
+    return ringkas(atur('KRITERIA_JENIS').get(sektor_kode, {}).get(sub_kode or '', {}).get('kbli'))
 
 
 def alasan(sektor_kode, data, hasil, sub_kode=None):
