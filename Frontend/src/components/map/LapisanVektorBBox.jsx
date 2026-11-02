@@ -103,15 +103,27 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
       return { bidang, titik, fitur: f };
     };
 
+    let popupTerbuka = null;
+
     const buang = (e) => {
       [e.bidang, e.titik].forEach((l) => {
         if (!l) return;
+        if (l.isPopupOpen?.()) popupTerbuka = { id: e.fitur.id, latlng: l.getPopup().getLatLng() };
         pin.delete(l);
         bulat.delete(l);
         noktah.delete(l);
       });
       if (e.bidang) geo.removeLayer(e.bidang);
       if (e.titik) grupTitik.removeLayer(e.titik);
+    };
+
+    const bukaLagi = () => {
+      if (!popupTerbuka) return;
+      const { id, latlng } = popupTerbuka;
+      popupTerbuka = null;
+      const e = [...entri.values()].find((x) => x.fitur.id === id);
+      const l = e && (e.titik || e.bidang);
+      if (l) setTimeout(() => l.openPopup(latlng));
     };
 
     const terapkan = (fitur, tol) => {
@@ -140,6 +152,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
       if (ditambah) {
         fitur.forEach((f, i) => entri.get(kunci(f, i))?.bidang?.bringToFront?.());
       }
+      bukaLagi();
     };
 
     const saatZoom = () => {
@@ -156,6 +169,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
           buang(e);
           if (masuk) entri.set(k, tambah(e.fitur));
         });
+        bukaLagi();
         if (dimuat) dimuat = { ...dimuat, batas };
         return;
       }
