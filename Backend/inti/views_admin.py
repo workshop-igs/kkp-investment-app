@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.cache import cache
 from django.db import connection, transaction
+from django.db.models import Q
 from django.db.models.deletion import Collector
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -21,6 +22,7 @@ from rest_framework.response import Response
 from analitik.models import (
     AreaParameter,
     KetentuanRuang,
+    LokasiPotensial,
     NilaiWilayahParameter,
     ParameterTambahan,
     PengaturanAnalisis,
@@ -30,7 +32,7 @@ from analitik.services import konstanta, pengaturan
 from analitik.services.asal_data import ringkasan_sumber
 from analitik.services.kriteria import PARAMETER
 from analitik.services.parameter_tambahan import geojson_area, kunci_nama
-from analitik.tasks import jadwalkan_hitung_ulang
+from analitik.tasks import jadwalkan_hitung_ulang, jadwalkan_seleksi_nasional
 from inti.models import (
     KabupatenKota,
     LogAktivitas,
@@ -398,6 +400,41 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
             **self._baris(pengaturan.TERDAFTAR[kunci], self._simpanan(kunci=kunci)),
             'hitung_ulang': status_hitung_ulang(),
         })
+
+    @action(detail=False, methods=['get', 'post'], url_path='hapus-sub-jenis')
+    def hapus_sub_jenis(self, request):
+        sumber = request.query_params if request.method == 'GET' else request.data
+        sektor, sub = sumber.get('sektor'), sumber.get('sub')
+        kriteria = pengaturan.atur('KRITERIA_JENIS')
+        per_sub = kriteria.get(sektor) or {}
+        if sub not in per_sub:
+            raise NotFound('Sub-jenis tidak ditemukan.')
+        if len(per_sub) == 1:
+            raise ValidationError({'detail': 'Ini sub-jenis terakhir dari jenisnya. Hapus jenis investasinya di halaman '
+                                             'Jenis Investasi bila memang tidak dipakai lagi.'})
+        nama = per_sub[sub]['nama']
+        lokasi = LokasiPotensial.objects.filter(
+            Q(rincian__sub_sektor_kode=sub) | Q(sektor__kode=sektor, rincian__sub_sektor=nama))
+        proyek = ProyekInvestasi.objects.filter(sektor__kode=sektor, sub_sektor=sub)
+        if request.method == 'GET':
+            return Response({'nama': nama, 'lokasi': lokasi.count(), 'proyek': proyek.count()})
+        with transaction.atomic():
+            baru = {**kriteria, sektor: {k: v for k, v in per_sub.items() if k != sub}}
+            PengaturanAnalisis.objects.update_or_create(
+                kunci='KRITERIA_JENIS', defaults={'nilai': baru, 'diubah_oleh': request.user})
+            model = PengaturanAnalisis.objects.filter(kunci='MODEL_USAHA').first()
+            if model and sub in model.nilai:
+                model.nilai = {k: v for k, v in model.nilai.items() if k != sub}
+                model.save(update_fields=['nilai'])
+            jumlah_lokasi = lokasi.count()
+            lokasi.delete()
+            jumlah_proyek = proyek.update(sub_sektor='')
+        pengaturan.segarkan()
+        cache.clear()
+        catat(request, f"Menghapus sub-jenis '{nama}'", 'Pengaturan',
+              [f'{jumlah_lokasi} lokasi Peta Sebaran dihapus', f'{jumlah_proyek} proyek kini tanpa sub-jenis'])
+        jadwalkan_seleksi_nasional()
+        return Response({'lokasi': jumlah_lokasi, 'proyek': jumlah_proyek})
 
     @action(detail=False, methods=['get', 'post'], url_path='hitung-ulang')
     def hitung_ulang(self, request):

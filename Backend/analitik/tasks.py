@@ -104,3 +104,18 @@ def lanjutkan_hitung_ulang(**_):
         logger.exception('[HITUNG ULANG] Gagal memeriksa hitung ulang yang terputus')
     finally:
         connection.close()
+
+
+@shared_task
+def seleksi_nasional():
+    from analitik.management.commands.hitung_lokasi_potensial import Command
+
+    Command()._seleksi_nasional()
+    cache.clear()
+
+
+def jadwalkan_seleksi_nasional():
+    try:
+        seleksi_nasional.delay()
+    except Exception as e:
+        logger.error(f'[SELEKSI NASIONAL] Antrean tugas tidak tersedia: {e}')
