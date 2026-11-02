@@ -457,13 +457,6 @@ KRITERIA_JENIS = {
         },
     },
     'BIOTEKNOLOGI_KELAUTAN': {
-        'BIOTEK_KOSMETIK': {
-            'nama': 'Kosmetik dan Perawatan Kulit', 'kbli': '20232', 'ranah': ['LAUT'],
-            'kriteria': {'kd490': [None, 0.15], 'jarak_zona_budidaya_km': [None, 20.0], 'jarak_muara_pelabuhan_km': [5.0, None],
-                         'jarak_bandara_lab_km': [None, 150.0], 'shannon': [2.0, None]},
-            'unggulan': {'kd490': [None, 0.1], 'jarak_zona_budidaya_km': [None, 10.0], 'jarak_muara_pelabuhan_km': [10.0, None],
-                         'jarak_bandara_lab_km': [None, 100.0], 'shannon': [3.0, None]},
-        },
         'BIOTEK_BIOPLASTIK': {
             'nama': 'Bioplastik Ramah Lingkungan', 'kbli': '20131', 'ranah': ['DARAT'],
             'kriteria': {'jarak_zona_budidaya_km': [None, 30.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
