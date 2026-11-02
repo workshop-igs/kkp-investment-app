@@ -99,7 +99,7 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
                 PengaturanAnalisis.objects.aggregate(t=Max('updated_at'))['t'],
             )
         )
-        kunci = f'profil-provinsi:v3:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi}'
+        kunci = f'profil-provinsi:v4:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi}'
         profil = cache.get(kunci)
         if profil is None:
             profil = profil_provinsi(provinsi, sektor)

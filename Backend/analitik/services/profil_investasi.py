@@ -42,11 +42,8 @@ RANAH_KOMODITAS = {'TANGKAP_LAUT': 'Tangkap laut', 'BUDIDAYA': 'Budidaya laut', 
 SUB_ZONA_BERNAMA = {'LAINNYA', 'BELUM_DIATUR', 'TIDAK_DIBAGI', 'DARAT_LAINNYA'}
 BATAS_ZONA_PETA = 600
 BATAS_ZONA_PETA_SEKTOR = 120
-JUMLAH_LOKASI_PRIORITAS = 6
-JUMLAH_UNGGULAN = 4
-JUMLAH_JENIS_UNGGULAN = 3
-JUMLAH_KEAHLIAN = 8
 JUMLAH_RINCIAN = 4
+TEKS_PROFIL = ('RANTAI_PASOK', 'LINGKUNGAN_BISNIS', 'KEBUTUHAN_TEKNOLOGI', 'REKOMENDASI_KESESUAIAN', 'KEBIJAKAN_NASIONAL')
 
 
 def _toleransi(cakupan):
@@ -261,7 +258,7 @@ def _lokasi(c, provinsi, sektor, subs):
     hasil = []
     for lok in LokasiPotensial.objects.filter(
         sektor=sektor, provinsi=provinsi, tampil=True, rincian__sub_sektor_kode__in=subs,
-    ).order_by('-persen_sesuai', '-luas_ha')[:JUMLAH_LOKASI_PRIORITAS]:
+    ).order_by('-persen_sesuai', '-luas_ha')[:atur('JUMLAH_LOKASI_PRIORITAS')]:
         titik = lok.geometry.point_on_surface
         r = lok.rincian
         hasil.append({
@@ -324,7 +321,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
         'karakter': uraian(sektor.kode),
         'rincian_matriks': _rincian_matriks(provinsi, sektor),
         'peta': [{'kelas': kelas_zona[i], 'geometry': _geojson(g)} for i, g in c.fetchall() if g],
-        'keahlian': _matriks(sektor.kode)[:JUMLAH_KEAHLIAN],
+        'keahlian': _matriks(sektor.kode)[:atur('JUMLAH_KEAHLIAN')],
     }
 
 
@@ -411,7 +408,7 @@ def peringkat_unggulan(komoditas, luas_sektor):
         k['skor_unggulan'] = round(0.5 * (k['nilai_juta_rp'] or 0) / maks_nilai + 0.5 * k['luas_sesuai_ha'] / maks_luas, 3)
     komoditas.sort(key=lambda k: -k['skor_unggulan'])
     for i, k in enumerate(komoditas):
-        k['unggulan'] = i < JUMLAH_UNGGULAN
+        k['unggulan'] = i < atur('JUMLAH_UNGGULAN')
     return komoditas
 
 
@@ -458,9 +455,9 @@ def profil_provinsi(provinsi, sektor=None):
     )
     if sektor is None:
         bab = [k for k in komoditas if k['unggulan']] + [{'kode': s.kode, 'nama': s.nama, 'sektor': s.kode}
-                                                          for s in jenis_lain[:JUMLAH_JENIS_UNGGULAN]]
+                                                          for s in jenis_lain[:atur('JUMLAH_JENIS_UNGGULAN')]]
     elif sektor.kode in berkomoditas:
-        bab = [k for k in komoditas if k['sektor'] == sektor.kode][:JUMLAH_UNGGULAN]
+        bab = [k for k in komoditas if k['sektor'] == sektor.kode][:atur('JUMLAH_UNGGULAN')]
     else:
         bab = [{'kode': sektor.kode, 'nama': sektor.nama, 'sektor': sektor.kode}]
     sektor_bab = {s.kode: s for s in (aktif.get(b['sektor']) or sektor for b in bab)}
@@ -493,6 +490,7 @@ def profil_provinsi(provinsi, sektor=None):
         'ekosistem': _ekosistem(provinsi),
         'alki': ZonasiRuangLaut.objects.filter(provinsi=provinsi, jenis_zona='ALKI').exists(),
         'asumsi_finansial': atur('ASUMSI_MODEL_USAHA'),
+        'teks': {kunci.lower(): atur(kunci) for kunci in TEKS_PROFIL},
         'sosial': {
             'kabupaten': [k for k in _kabupaten(provinsi) if k['pesisir']],
             'ketenagakerjaan': _ketenagakerjaan(provinsi),
