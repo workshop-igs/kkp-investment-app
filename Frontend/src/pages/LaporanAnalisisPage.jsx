@@ -593,6 +593,7 @@ const LaporanAnalisisPage = () => {
               <KartuTabelSpasial bagian={bagian('oseanografi')} />
               <KartuTabelSpasial bagian={bagian('karbon_biru')} />
               <KartuTabelSpasial bagian={bagian('daya_dukung')} />
+              <KartuTabelSpasial bagian={bagian('pulau_kecil')} />
             </>
           )}
 

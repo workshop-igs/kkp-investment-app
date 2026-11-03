@@ -861,6 +861,67 @@ def bagian_daya_dukung(geom) -> Dict[str, Any]:
     }
 
 
+JARAK_PULAU_DERAJAT = 0.01
+
+
+def pulau_kecil(geom) -> Optional[Dict[str, Any]]:
+    from django.db import connection
+
+    from analitik.services.pengaturan import atur
+
+    d = JARAK_PULAU_DERAJAT
+    with connection.cursor() as c:
+        c.execute(
+            """
+            SELECT ST_Area(b.geom::geography) / 10000
+            FROM (SELECT (ST_Dump(p.geometry)).geom AS geom FROM inti_provinsi p
+                  WHERE p.geometry && ST_Expand(ST_GeomFromEWKT(%s), %s)) b
+            WHERE ST_DWithin(b.geom, ST_GeomFromEWKT(%s), %s)
+            ORDER BY ST_Distance(b.geom, ST_GeomFromEWKT(%s)) LIMIT 1
+            """,
+            [geom.ewkt, d, geom.ewkt, d, geom.ewkt],
+        )
+        baris = c.fetchone()
+    if not baris or baris[0] > atur('BATAS_PULAU_KECIL_KM2') * 100:
+        return None
+    luas = float(baris[0])
+    usaha = luas * (1 - atur('PORSI_NEGARA_PULAU_KECIL'))
+    rth = usaha * atur('PORSI_RTH_PULAU_KECIL')
+    return {'luas_ha': luas, 'maks_dimanfaatkan_ha': usaha, 'rth_minimal_ha': rth, 'maks_terbangun_ha': usaha - rth}
+
+
+def bagian_pulau_kecil(geom) -> Dict[str, Any]:
+    from analitik.services.pengaturan import atur
+
+    p = pulau_kecil(geom)
+    baris = [{'sel': [label, _desimal(nilai, 2)], 'sumber': 'Perpres 34/2019, Permen KP 10/2024'} for label, nilai in (
+        ('Luas pulau', p['luas_ha']),
+        (f"Paling luas dimanfaatkan pelaku usaha ({_desimal((1 - atur('PORSI_NEGARA_PULAU_KECIL')) * 100, 0)}%)",
+         p['maks_dimanfaatkan_ha']),
+        (f"Ruang terbuka hijau paling sedikit ({_desimal(atur('PORSI_RTH_PULAU_KECIL') * 100, 0)}% lahan usaha)",
+         p['rth_minimal_ha']),
+        ('Paling luas lahan terbangun', p['maks_terbangun_ha']),
+    )] if p else []
+    return {
+        **_bagian(
+            kunci='pulau_kecil',
+            judul='Batas Pemanfaatan Pulau Kecil',
+            ukuran='tabel',
+            sumber='batas daratan provinsi; Perpres 34/2019 dan Permen KP 10/2024, angka di Pengaturan Profil Investasi',
+            diperiksa=1,
+            baris=baris,
+            sorotan={'nilai': f"{_desimal(p['maks_terbangun_ha'], 1)} ha", 'label': 'paling luas lahan terbangun'} if p else None,
+            ringkas=(
+                f"Area berada di atau dekat pulau kecil seluas {_desimal(p['luas_ha'], 1)} ha. Pulau kecil tidak dapat "
+                'diperjualbelikan; sebagian luasnya dikuasai negara untuk kawasan lindung dan kepentingan publik, dan '
+                'pelaku usaha wajib menyisihkan ruang terbuka hijau dari lahan yang dimanfaatkan.'
+            ) if p else '',
+            catatan_kosong='Area tidak berada di atau dekat pulau kecil, sehingga batas pemanfaatan pulau kecil tidak berlaku.',
+        ),
+        'kolom': ['Ukuran', 'Luas (ha)'],
+    }
+
+
 def _ribuan(n) -> str:
     return f'{n:,.0f}'.replace(',', '.')
 
@@ -928,6 +989,7 @@ def bangun_laporan(geometry: Dict[str, Any]) -> Dict[str, Any]:
         ('oseanografi', lambda: bagian_oseanografi(geom)),
         ('karbon_biru', lambda: bagian_karbon_biru(geom)),
         ('daya_dukung', lambda: bagian_daya_dukung(geom)),
+        ('pulau_kecil', lambda: bagian_pulau_kecil(geom)),
     ]
 
     bagian = []

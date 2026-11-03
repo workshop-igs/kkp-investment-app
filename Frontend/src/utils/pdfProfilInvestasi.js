@@ -1448,6 +1448,12 @@ function lokasiSesuai(dek, o, b, i, citra) {
         dd.panjang_pantai_m >= 1 && `pantai ${angka(dd.panjang_pantai_m)} m`,
       ].filter(Boolean).join('  ·  ')), lebar - 18)[0], x + 11.6, yb);
     }
+    if (l.pulau_kecil) {
+      const pk = l.pulau_kecil;
+      yb += 2.9;
+      dek.gaya(5.9, C.navy);
+      d.text(d.splitTextToSize(bersih(`pulau kecil ${angka(pk.luas_ha, 1)} ha  ·  dimanfaatkan ≤${angka(pk.maks_dimanfaatkan_ha, 1)} ha  ·  terbangun ≤${angka(pk.maks_terbangun_ha, 1)} ha`), lebar - 18)[0], x + 11.6, yb);
+    }
     if (kelas) {
       yb += 2.9;
       dek.gaya(5.9, gelap(WARNA_S[kelas], 0.75));
