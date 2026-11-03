@@ -592,6 +592,7 @@ const LaporanAnalisisPage = () => {
               <KartuIrisan kunci="wilayah" judul="Wilayah Administratif" kolomNama="Provinsi" />
               <KartuTabelSpasial bagian={bagian('oseanografi')} />
               <KartuTabelSpasial bagian={bagian('karbon_biru')} />
+              <KartuTabelSpasial bagian={bagian('daya_dukung')} />
             </>
           )}
 

@@ -781,6 +781,86 @@ def bagian_karbon_biru(geom) -> Dict[str, Any]:
     }
 
 
+JARAK_PANTAI_DAYA_DUKUNG_DERAJAT = 0.005
+
+
+def daya_dukung(geom) -> Optional[Dict[str, Any]]:
+    from django.db import connection
+
+    from analitik.services.pengaturan import LABEL_BAGIAN, atur
+
+    d = JARAK_PANTAI_DAYA_DUKUNG_DERAJAT
+    with connection.cursor() as c:
+        c.execute(
+            """
+            SELECT
+              (SELECT COALESCE(SUM(ST_Area(ST_Intersection(ST_MakeValid(s.geometry), t.g)::geography)), 0)
+                 FROM inventarisasi_sumber_daya_alam s
+                 WHERE s.jenis = 'TERUMBU_KARANG' AND s.geometry && t.g AND ST_Intersects(s.geometry, t.g)),
+              (SELECT COALESCE(SUM(ST_Length(ST_Intersection(
+                         ST_Boundary(ST_Intersection(ST_MakeValid(p.geometry), ST_Buffer(t.g, %s))),
+                         ST_Buffer(t.g, %s))::geography)), 0)
+                 FROM inti_provinsi p WHERE p.geometry && ST_Buffer(t.g, %s))
+            FROM (SELECT ST_GeomFromEWKT(%s) AS g) t
+            """,
+            [2 * d, d, d, geom.ewkt],
+        )
+        karang_m2, pantai_m = (float(x or 0) for x in c.fetchone())
+    ruang = {'SELAM': karang_m2, 'SNORKELING': karang_m2, 'PANTAI': pantai_m}
+    aktivitas = [
+        {'kode': kode, 'label': LABEL_BAGIAN.get(kode, kode), 'ruang': ruang[kode],
+         'kunjungan': orang * (ruang[kode] / satuan) * (buka / lama)}
+        for kode, orang, satuan, buka, lama in atur('DAYA_DUKUNG_WISATA')
+        if ruang.get(kode, 0) >= 1 and satuan and lama
+    ]
+    if not aktivitas:
+        return None
+    kunjungan = sum(a['kunjungan'] for a in aktivitas)
+    tamu = kunjungan / atur('KUNJUNGAN_PER_TAMU')
+    return {
+        'luas_karang_ha': karang_m2 / 10000,
+        'panjang_pantai_m': pantai_m,
+        'aktivitas': aktivitas,
+        'kunjungan_per_hari': kunjungan,
+        'tamu_per_hari': tamu,
+        'kuota_uji': int(tamu * (1 - atur('MARGIN_DAYA_DUKUNG'))),
+    }
+
+
+def bagian_daya_dukung(geom) -> Dict[str, Any]:
+    from analitik.services.pengaturan import atur
+
+    dd = daya_dukung(geom)
+    baris = [{
+        'sel': [a['label'],
+                f"{_desimal(a['ruang'] / 10000, 2)} ha karang" if a['kode'] != 'PANTAI' else f"{_ribuan(a['ruang'])} m pantai",
+                _ribuan(a['kunjungan'])],
+        'sumber': 'terumbu karang Sidako KKP' if a['kode'] != 'PANTAI' else 'garis pantai batas daratan provinsi',
+    } for a in (dd['aktivitas'] if dd else [])]
+    return {
+        **_bagian(
+            kunci='daya_dukung',
+            judul='Daya Dukung Wisata Bahari',
+            ukuran='tabel',
+            sumber='rumus daya dukung fisik (PCC) dengan koefisien di Pengaturan Profil Investasi; '
+                   'terumbu karang Sidako KKP; garis pantai batas daratan provinsi',
+            diperiksa=len(atur('DAYA_DUKUNG_WISATA')),
+            baris=baris,
+            sorotan={'nilai': _ribuan(dd['kuota_uji']), 'label': 'tamu per hari (kuota uji)'} if dd else None,
+            ringkas=(
+                f"Habitat di area ini menampung sekitar {_ribuan(dd['kunjungan_per_hari'])} kunjungan situs per hari, "
+                f"setara {_ribuan(dd['tamu_per_hari'])} tamu bila tiap tamu mengunjungi {_desimal(atur('KUNJUNGAN_PER_TAMU'), 1)} "
+                f"situs. Setelah margin kehati-hatian {_desimal(atur('MARGIN_DAYA_DUKUNG') * 100, 0)}%, kuota uji "
+                f"{_ribuan(dd['kuota_uji'])} tamu per hari. Kuota akhir mengikuti pembatas terketat: air bersih, IPAL, "
+                'sampah, daya tampung perairan, dan keselamatan perlu diuji di lapangan.'
+            ) if dd else '',
+            catatan_kosong='Tidak ada terumbu karang terdata maupun garis pantai di sekitar area ini; daya dukung '
+                           'wisata bahari tidak dihitung.',
+        ),
+        'kolom': ['Aktivitas', 'Ruang di area', 'Kunjungan per hari'],
+    }
+
+
 def _ribuan(n) -> str:
     return f'{n:,.0f}'.replace(',', '.')
 
@@ -847,6 +927,7 @@ def bangun_laporan(geometry: Dict[str, Any]) -> Dict[str, Any]:
         ('infrastruktur', lambda: _bagian_infrastruktur(geom)),
         ('oseanografi', lambda: bagian_oseanografi(geom)),
         ('karbon_biru', lambda: bagian_karbon_biru(geom)),
+        ('daya_dukung', lambda: bagian_daya_dukung(geom)),
     ]
 
     bagian = []

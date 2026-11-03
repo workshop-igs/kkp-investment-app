@@ -505,6 +505,13 @@ ASUMSI_MODEL_USAHA = {
     'umur_tahun': 10, 'diskonto_persen': 12.0, 'kenaikan_harga_persen': 0.0, 'kenaikan_biaya_persen': 0.0,
     'csr_persen': 2.5, 'batas_pbp_tahun': 10,
 }
+DAYA_DUKUNG_WISATA = [
+    ('SELAM', 2, 2000, 8, 2),
+    ('SNORKELING', 1, 250, 6, 3),
+    ('PANTAI', 1, 50, 6, 3),
+]
+KUNJUNGAN_PER_TAMU = 2
+MARGIN_DAYA_DUKUNG = 0.2
 JUMLAH_LOKASI_PRIORITAS = 6
 JUMLAH_UNGGULAN = 4
 JUMLAH_JENIS_UNGGULAN = 3
