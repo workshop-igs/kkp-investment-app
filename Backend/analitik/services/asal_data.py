@@ -234,6 +234,14 @@ def _status(batas, lewat, total):
     return 'BERLAKU' if not lewat else 'LEWAT' if lewat == total else 'SEBAGIAN'
 
 
+def _rentang_unggah(kode, satuan):
+    from analitik.management.commands.muat_berkas_raster import RENTANG_KONDISI
+
+    bawah, atas = RENTANG_KONDISI[kode]
+    bawah, atas = (f'{x:,}'.replace(',', '.') for x in (bawah, atas))
+    return ' '.join(filter(None, [satuan.get(kode, ''), f'(nilai {bawah} sampai {atas})']))
+
+
 def ringkasan_sumber():
     from penarikan_data.models import KonfigurasiAPI, LogPenarikan
     from penarikan_data.tasks import JADWAL, TARIK_MANUAL, daftar_unggah, jatuh_tempo
@@ -294,7 +302,8 @@ def ringkasan_sumber():
                 'berikutnya': jatuh_tempo(cfg) if terjadwal and cfg else None,
                 'gagal': (g.error_message[:300] or 'gagal') if g and g.result == 'FAILED' else '',
                 'berjalan': bool(g and g.completed_at is None and g.started_at > timezone.now() - timedelta(hours=12)),
-                'satuan': 'indeks 0 sampai 1' if kelompok == 'bencana' else satuan.get(kode.removeprefix('UNGGAH-'), ''),
+                'satuan': '' if not kode.startswith('UNGGAH-') else 'indeks 0 sampai 1' if kelompok == 'bencana'
+                else _rentang_unggah(kode.removeprefix('UNGGAH-'), satuan),
             })
         baris.append({'kode': kunci, 'label': label, 'sumber': sumber, 'data': data, 'status': status,
                       'catatan': catatan, 'jadwal': [t for t in tarik if t['terjadwal']],
