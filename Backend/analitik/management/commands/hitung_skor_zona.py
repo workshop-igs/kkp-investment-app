@@ -458,7 +458,7 @@ class Command(BaseCommand):
 
         zona = list(
             ZonasiRuangLaut.objects.filter(provinsi_id=prov.id).values_list(
-                'id', 'sub_zona', 'jenis_zona', 'luas_ha', 'ranah', 'matriks_id'
+                'id', 'sub_zona', 'jenis_zona', 'luas_ha', 'ranah', 'matriks_id', 'nama_zona'
             )
         )
         if not zona:
@@ -477,7 +477,7 @@ class Command(BaseCommand):
         tersedia = sumber_tersedia()
 
         baris = []
-        for zona_id, sub_zona, jenis_zona, luas_zona, ranah, matriks_id in zona:
+        for zona_id, sub_zona, jenis_zona, luas_zona, ranah, matriks_id, nama_zona in zona:
             b = bencana.get(zona_id, {})
             j = jarak.get(zona_id, {})
             p = potensi.get(zona_id, [])
@@ -487,7 +487,8 @@ class Command(BaseCommand):
             for sektor in sektor_list:
                 ket = _ketentuan(
                     aturan.get(sektor.id, {}),
-                    {'jenis_zona': jenis_zona, 'sub_zona': sub_zona, 'provinsi_id': prov.id, 'matriks_id': matriks_id},
+                    {'jenis_zona': jenis_zona, 'sub_zona': sub_zona, 'provinsi_id': prov.id, 'matriks_id': matriks_id,
+                     'nama_zona': nama_zona},
                 )
                 nilai = self._skor(
                     sub_zona, ket['status'], sektor.kode, b, j, p, n, e, luas_zona,

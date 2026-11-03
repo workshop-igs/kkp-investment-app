@@ -16,6 +16,7 @@ from analitik.services import pengecualian
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
     INFORMASI_JENIS,
+    KETENTUAN_KONSERVASI_PEMANFAATAN,
     KM_PER_DERAJAT,
     KRITERIA_PELENGKAP,
     KRITERIA_TANPA_SKOR,
@@ -47,7 +48,14 @@ from analitik.services.oseanografi import nilai_titik
 from analitik.services.parameter_tambahan import sesuai_ambang
 from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
-from analitik.services.screening_ruang import BOLEH, LABEL_ADAT, _aturan_per_sektor, _ketentuan, screening_ruang
+from analitik.services.screening_ruang import (
+    BOLEH,
+    LABEL_ADAT,
+    _aturan_per_sektor,
+    _ketentuan,
+    screening_ruang,
+    zona_konservasi_pemanfaatan,
+)
 from inti.models import Provinsi, SektorInvestasi
 from inventarisasi.klasifikasi import jenis_unsur
 from inventarisasi.models import ZonasiRuangLaut
@@ -199,9 +207,9 @@ class Command(BaseCommand):
         status = {
             (zid, s.kode): _ketentuan(
                 self.aturan.get(s.id, {}),
-                {'jenis_zona': jenis, 'sub_zona': sub, 'provinsi_id': prov.id, 'matriks_id': matriks_id},
+                {'jenis_zona': jenis, 'sub_zona': sub, 'provinsi_id': prov.id, 'matriks_id': matriks_id, 'nama_zona': nama},
             )['status']
-            for zid, sub, jenis, _, _, matriks_id in zona.values() for s in self.sektor
+            for zid, sub, jenis, _, nama, matriks_id in zona.values() for s in self.sektor
         }
         kandidat = [zid for zid in zona if any(status[(zid, s.kode)] in BOLEH for s in self.sektor)]
         if not kandidat:
@@ -503,8 +511,9 @@ class Command(BaseCommand):
         minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * sum(k not in KRITERIA_TANPA_SKOR for k, _ in kriteria))
         bobot, skor_minimal = atur('BOBOT_RUANG_BERSYARAT'), atur('SKOR_MINIMAL_LOKASI_UNGGULAN')
         peruntukan = set(SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, ()))
-        utama = {z for z in zona if status[(z, sektor.kode)] == 'DIIZINKAN'
-                 or (zona[z][1] in peruntukan and status[(z, sektor.kode)] in BOLEH)}
+        wisata_konservasi = sektor.kode in KETENTUAN_KONSERVASI_PEMANFAATAN
+        utama = {z for z in zona if status[(z, sektor.kode)] == 'DIIZINKAN' or (status[(z, sektor.kode)] in BOLEH and (
+            zona[z][1] in peruntukan or (wisata_konservasi and zona_konservasi_pemanfaatan(zona[z][1], zona[z][4]))))}
         khusus = {r: any(zona[z][3] == r for z in utama) for r in sub['ranah']}
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
