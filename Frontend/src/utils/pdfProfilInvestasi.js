@@ -1642,8 +1642,7 @@ function finansial(dek, o, b, i, perJenis) {
   const h = f.hasil;
   const kiri = 118;
   const adaKelas = f.kelas?.length > 0;
-  const tinggiAtas = perJenis ? (adaKelas ? 42 : 55) : 64;
-  const ukuranTabel = adaKelas ? 5.6 : 6.2;
+  const tinggiAtas = perJenis ? 55 : (adaKelas ? 52 : 64);
   let yy = dek.kartu(TEPI, y, kiri, tinggiAtas, { judul: 'Struktur investasi', ikon: 'finansial', aksen });
   const ukuranDonut = Math.min(tinggiAtas - 26, 29);
   [[h.investasi, `Investasi awal ${rp(h.investasi_total)}`], [h.operasional, `Operasional per tahun ${rp(h.operasional_total)}`]].forEach(([komponen, judul], n) => {
@@ -1679,26 +1678,29 @@ function finansial(dek, o, b, i, perJenis) {
     ['Kondisi', `Volume/tahun (${h.satuan_produk})`, 'Pendapatan/tahun', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Biaya KKPRL', 'Lokasi prioritas'],
     h.skenario.map((s) => [s.label, angka(s.volume), rp(s.pendapatan), rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2),
       s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, rp(h.biaya_kkprl), s.kode === 'riil' ? '-' : (lp(s.kode).join(', ') || '-')]),
-    { bagian: [0.12, 0.1, 0.1, 0.1, 0.06, 0.06, 0.08, 0.09, 0.29], rataKanan: [1, 2, 3, 4, 5, 6, 7], ukuran: ukuranTabel,
+    { bagian: [0.12, 0.1, 0.1, 0.1, 0.06, 0.06, 0.08, 0.09, 0.29], rataKanan: [1, 2, 3, 4, 5, 6, 7], ukuran: 6.2,
       sorot: h.skenario.map((s, n) => (s.layak ? n : -1)).filter((n) => n >= 0), aksen });
-  let yLanjut = yAkhir;
+  const kembali = (s) => (s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`);
+  const separuh = (W - TEPI * 2 - 4) / 2;
   if (adaKelas) {
     const riil = (k) => k.hasil?.skenario.find((s) => s.kode === 'riil') || k.hasil?.skenario[0];
-    yLanjut = dek.tabel(TEPI, yAkhir + 1, W - TEPI * 2,
-      ['Kelas usaha', 'Satuan usaha', 'Investasi awal', 'Pendapatan/tahun', 'NPV', 'IRR', 'Masa kembali', 'Status'],
+    dek.tabel(TEPI, yAkhir + 1, perJenis ? separuh : W - TEPI * 2, ['Kelas usaha', 'Investasi awal', 'NPV', 'IRR', 'Masa kembali', 'Status'],
       f.kelas.map((k) => {
         const s = riil(k);
-        return s ? [k.nama, k.hasil.satuan_usaha, rp(k.hasil.investasi_total), rp(s.pendapatan), rp(s.npv), irrTeks(s.irr),
-          s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, s.layak ? 'Layak' : 'Tidak layak']
-          : [k.nama, '-', '-', '-', '-', '-', '-', 'Model belum lengkap'];
+        return s ? [k.nama, rp(k.hasil.investasi_total), rp(s.npv), irrTeks(s.irr), kembali(s), s.layak ? 'Layak' : 'Tidak layak']
+          : [k.nama, '-', '-', '-', '-', 'Model belum lengkap'];
       }),
-      { bagian: [0.17, 0.2, 0.12, 0.12, 0.12, 0.07, 0.09, 0.11], rataKanan: [2, 3, 4, 5, 6], ukuran: ukuranTabel,
+      { bagian: [0.34, 0.14, 0.14, 0.1, 0.13, 0.15], rataKanan: [1, 2, 3, 4], ukuran: 6.2,
         sorot: f.kelas.map((k, n) => (riil(k)?.layak ? n : -1)).filter((n) => n >= 0), aksen });
   }
   if (perJenis) {
-    dek.tabel(TEPI, yLanjut + 1, W - TEPI * 2, ['Analisis sensitivitas', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Status'],
-      h.sensitivitas.map((s) => [s.label, rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2), s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, s.layak ? 'Layak' : 'Tidak layak']),
-      { bagian: [0.3, 0.16, 0.12, 0.12, 0.14, 0.16], rataKanan: [1, 2, 3, 4], ukuran: ukuranTabel, aksen });
+    const xs = adaKelas ? TEPI + separuh + 4 : TEPI;
+    dek.tabel(xs, yAkhir + 1, adaKelas ? separuh : W - TEPI * 2,
+      adaKelas ? ['Analisis sensitivitas', 'NPV', 'IRR', 'Masa kembali', 'Status'] : ['Analisis sensitivitas', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Status'],
+      h.sensitivitas.map((s) => (adaKelas ? [s.label, rp(s.npv), irrTeks(s.irr), kembali(s), s.layak ? 'Layak' : 'Tidak layak']
+        : [s.label, rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2), kembali(s), s.layak ? 'Layak' : 'Tidak layak'])),
+      { bagian: adaKelas ? [0.36, 0.17, 0.12, 0.17, 0.18] : [0.3, 0.16, 0.12, 0.12, 0.14, 0.16],
+        rataKanan: adaKelas ? [1, 2, 3] : [1, 2, 3, 4], ukuran: 6.2, aksen });
   }
   const lain = b.finansial.filter((x2) => x2 !== f);
   dek.sumber(`Baris disorot = layak (NPV > 0, IRR > ${angka(h.asumsi.diskonto_persen, 1)}%, BCR > 1, masa kembali paling lama ${angka(h.asumsi.batas_pbp_tahun)} tahun). Model usaha: Pengaturan Profil Investasi aplikasi${lain.length ? `; sub-jenis lain ${lain.map((x2) => `${x2.nama.toLowerCase()} (${x2.hasil ? 'ada model' : 'belum ada model'})`).join(', ')}` : ''}.`);
