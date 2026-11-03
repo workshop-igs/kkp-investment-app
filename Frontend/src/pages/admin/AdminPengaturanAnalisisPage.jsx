@@ -762,7 +762,7 @@ const ModelUsahaEditor = ({ nilai, onUbah, data }) => {
   );
 };
 
-const STATUS_SUMBER = {
+export const STATUS_SUMBER = {
   BERLAKU: ['Berlaku', 'bg-emerald-50 text-emerald-700'],
   SEBAGIAN: ['Sebagian lewat', 'bg-amber-50 text-amber-700'],
   LEWAT: ['Lewat masa berlaku', 'bg-rose-50 text-rose-700'],

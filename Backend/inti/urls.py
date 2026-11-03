@@ -25,6 +25,7 @@ from .views import (
 from .views_admin import (
     AdminLogAktivitasViewSet,
     AdminParameterTambahanViewSet,
+    AdminPembaruanDataViewSet,
     AdminPengaturanAnalisisViewSet,
     AdminProyekViewSet,
     AdminSektorViewSet,
@@ -47,6 +48,7 @@ admin_router.register(r'sektor', AdminSektorViewSet, basename='admin-sektor')
 admin_router.register(r'log-aktivitas', AdminLogAktivitasViewSet, basename='admin-log-aktivitas')
 admin_router.register(r'pengaturan-analisis', AdminPengaturanAnalisisViewSet, basename='admin-pengaturan-analisis')
 admin_router.register(r'parameter-tambahan', AdminParameterTambahanViewSet, basename='admin-parameter-tambahan')
+admin_router.register(r'pembaruan-data', AdminPembaruanDataViewSet, basename='admin-pembaruan-data')
 
 urlpatterns = [
     path('cari/', cari_lokasi, name='cari-lokasi'),

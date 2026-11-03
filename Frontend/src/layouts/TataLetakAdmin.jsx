@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useNavigate, Navigate, Link } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Briefcase,
-  Map, LogOut, Menu, ShieldCheck, ArrowLeft, ScrollText, SlidersHorizontal, Layers, FileText
+  Map, LogOut, Menu, ShieldCheck, ArrowLeft, ScrollText, SlidersHorizontal, Layers, FileText, DatabaseZap
 } from 'lucide-react';
 import { useAuth } from '../context/KonteksAuth';
 
@@ -40,6 +40,7 @@ const TataLetakAdmin = () => {
       items: [
         { name: 'Pengaturan Analisis', path: '/admin/pengaturan-analisis', icon: SlidersHorizontal },
         { name: 'Parameter Tambahan', path: '/admin/parameter-tambahan', icon: Layers },
+        { name: 'Pembaruan Data', path: '/admin/pembaruan-data', icon: DatabaseZap },
         { name: 'Pengaturan Profil Investasi', path: '/admin/pengaturan-profil', icon: FileText },
       ],
     },

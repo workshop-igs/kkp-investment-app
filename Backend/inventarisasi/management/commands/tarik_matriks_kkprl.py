@@ -1,3 +1,4 @@
+import io
 import json
 import os
 import re
@@ -324,6 +325,87 @@ def nama_blok(e, dipakai):
     return nama[:255]
 
 
+KOLOM_TEMPLAT = ('kode_zona', 'nama_zona', 'bujur', 'lintang', 'diperbolehkan', 'bersyarat', 'tidak_diperbolehkan',
+                 'ketentuan_khusus')
+HALAMAN_PDF_MAKS = 150
+
+
+def templat_excel():
+    from openpyxl import Workbook
+    from openpyxl.styles import Alignment, Font
+
+    buku = Workbook()
+    lembar = buku.active
+    lembar.title = 'Matriks KKPRL'
+    lembar.append(KOLOM_TEMPLAT)
+    for kode, bujur, lintang in (('KPU-PB-001', 128.4512, -3.6871), ('KPU-PB-002', 128.9034, -3.4410)):
+        lembar.append([kode, 'Zona Perikanan Budi Daya', bujur, lintang,
+                       'Pembudidayaan ikan sesuai ketentuan\nPenelitian dan pendidikan',
+                       'Wisata bahari sesuai daya dukung\nPenangkapan ikan skala kecil',
+                       'Budidaya dengan metode yang merusak lingkungan', ''])
+    for sel in lembar[1]:
+        sel.font = Font(bold=True)
+    for kolom, lebar in zip('ABCDEFGH', (14, 32, 11, 11, 45, 45, 45, 30)):
+        lembar.column_dimensions[kolom].width = lebar
+    for baris in lembar.iter_rows(min_row=2):
+        for sel in baris:
+            sel.alignment = Alignment(wrap_text=True, vertical='top')
+    berkas = io.BytesIO()
+    buku.save(berkas)
+    return berkas.getvalue()
+
+
+def _daftar_sel(teks):
+    return [b for b in (re.sub(r'^[•\-–\s]+', '', x).strip() for x in re.split(r'[\n;]+', str(teks or ''))) if b]
+
+
+def blok_dari_excel(berkas):
+    import pandas as pd
+
+    tabel = pd.read_excel(berkas, dtype=str).fillna('')
+    tabel.columns = [re.sub(r'\W+', '_', str(k).strip().lower()) for k in tabel.columns]
+    kurang = {'nama_zona', 'diperbolehkan', 'bersyarat', 'tidak_diperbolehkan'} - set(tabel.columns)
+    if kurang:
+        raise ValueError(f'Kolom wajib tidak ditemukan: {", ".join(sorted(kurang))}. Gunakan templat Excel.')
+    blok = {}
+    for no, baris in enumerate(tabel.to_dict('records'), 2):
+        nama = bersih(baris['nama_zona'])
+        if not nama:
+            continue
+        isi = {p: _daftar_sel(baris[p]) for p in ('diperbolehkan', 'bersyarat', 'tidak_diperbolehkan')}
+        khusus = bersih(baris.get('ketentuan_khusus', ''))
+        kunci_blok = (nama, khusus, *(tuple(v) for v in isi.values()))
+        b = blok.setdefault(kunci_blok, {'nama_zona': nama[:255], 'halaman': no, 'kode_zona': {}, **isi,
+                                         'ketentuan_khusus': khusus})
+        kode = re.sub(r'\s+', '', baris.get('kode_zona', ''))
+        if kode:
+            b['kode_zona'][kode] = [koordinat(baris.get('bujur', ''), False), koordinat(baris.get('lintang', ''), False)]
+    return list(blok.values())
+
+
+def blok_dari_pdf(berkas, awal, akhir):
+    with pdfplumber.open(berkas) as pdf:
+        if not 1 <= awal <= akhir <= len(pdf.pages):
+            raise ValueError(f'Rentang halaman harus di antara 1 dan {len(pdf.pages)}.')
+        if akhir - awal + 1 > HALAMAN_PDF_MAKS:
+            raise ValueError(f'Paling banyak {HALAMAN_PDF_MAKS} halaman sekali unggah; isi rentang halaman lampiran matriks saja.')
+        entri = ekstrak(pdf, awal, akhir)
+    dipakai = Counter(nama_dasar(e) for e in entri)
+    return [{'nama_zona': nama_blok(e, dipakai), 'halaman': e['halaman'], 'kode_zona': e['kode_zona'],
+             'diperbolehkan': butir(e['boleh']), 'bersyarat': butir(e['bersyarat']),
+             'tidak_diperbolehkan': butir(e['tidak']), 'ketentuan_khusus': re.sub(r'\s*\n\s*', ' ', e['khusus']).strip()}
+            for e in entri]
+
+
+def blok_transkripsi(provinsi, daftar, sumber):
+    return [(MatriksKKPRL(
+        provinsi=provinsi, nama_zona=b['nama_zona'], sub_zona=sub_zona(b['nama_zona'], jenis_kawasan(b['nama_zona'])),
+        kode_zona=list(b.get('kode_zona', [])), diperbolehkan=b['diperbolehkan'], bersyarat=b['bersyarat'],
+        tidak_diperbolehkan=b['tidak_diperbolehkan'], ketentuan_khusus=b.get('ketentuan_khusus', ''),
+        sumber=sumber[:255], halaman=b['halaman'],
+    ), b['kode_zona'] if isinstance(b.get('kode_zona'), dict) else {}) for b in daftar]
+
+
 def cari_berkas(fid, pola, jalur=()):
     for folder, id_, nama in _isi_folder(fid):
         if folder and not nama.lower().endswith('.gdb'):
@@ -365,13 +447,7 @@ class Command(BaseCommand):
             data = transkripsi[kode]
             self.stdout.write(self.style.MIGRATE_HEADING(f'{provinsi.nama}: transkripsi {data["berkas"]}'))
             sumber = f'{data["perda"]}, {PENANDA_MATRIKS} ({data.get("cara", "transkripsi lampiran pindaian")})'
-            blok = [(MatriksKKPRL(
-                provinsi=provinsi, nama_zona=b['nama_zona'], sub_zona=sub_zona(b['nama_zona'], jenis_kawasan(b['nama_zona'])),
-                kode_zona=list(b.get('kode_zona', [])), diperbolehkan=b['diperbolehkan'], bersyarat=b['bersyarat'],
-                tidak_diperbolehkan=b['tidak_diperbolehkan'], ketentuan_khusus=b.get('ketentuan_khusus', ''),
-                sumber=sumber[:255], halaman=b['halaman'],
-            ), b['kode_zona'] if isinstance(b.get('kode_zona'), dict) else {}) for b in data['blok']]
-            self._simpan(provinsi, blok, sumber)
+            self._simpan(provinsi, blok_transkripsi(provinsi, data['blok'], sumber), sumber)
         if not diminta & set(MATRIKS):
             return
         for folder, fid, nama in _isi_folder(FOLDER_DRIVE):

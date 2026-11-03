@@ -25,6 +25,13 @@ JADWAL = [
     ('KKP-RTRW', 'tata_ruang', 'RTRW Provinsi beserta matriks KKPRL, folder data KKP', 'perbarui_rtrw', True),
 ]
 
+TARIK_MANUAL = [
+    ('KKP-MANGROVE', 'ekosistem', 'Sebaran dan kondisi mangrove, Portal Satu Data KKP', 'tarik_ekosistem_wfs', True),
+    ('SIDAKO', 'ekosistem', 'Padang lamun dan terumbu karang, Sidako KKP', 'tarik_ekosistem_sidako', True),
+    ('KKP-UNSUR-RUANG', 'adat', 'Unsur ruang laut dan wilayah kelola masyarakat hukum adat, Portal Satu Data KKP',
+     'tarik_unsur_ruang_wfs', True),
+]
+
 
 def jatuh_tempo(cfg):
     if not cfg.last_successful_fetch:
@@ -40,43 +47,63 @@ def konfigurasi(kode, nama):
     )[0]
 
 
+def tarik_sumber(kode, nama, perintah, paksa=False):
+    from penarikan_data.models import LogPenarikan
+
+    cfg = konfigurasi(kode, nama)
+    log = LogPenarikan.objects.create(api_config=cfg, endpoint=perintah, result='', request_params={'paksa': paksa})
+    mulai = time.time()
+    try:
+        hasil = call_command(perintah)
+        galat = ''
+    except Exception as e:
+        hasil, galat = None, f'{type(e).__name__}: {e}'
+        logger.warning(f'[PEMBARUAN DATA] {perintah} gagal: {galat}')
+    ringkasan = json.loads(hasil) if isinstance(hasil, str) and hasil.startswith('{') else {}
+    if galat:
+        cfg.retry_count = (cfg.retry_count or 0) + 1
+        cfg.save(update_fields=['retry_count', 'updated_at'])
+    else:
+        cfg.last_successful_fetch = timezone.now()
+        cfg.retry_count = 0
+        cfg.save(update_fields=['last_successful_fetch', 'retry_count', 'updated_at'])
+    log.completed_at = timezone.now()
+    log.result = 'FAILED' if galat else 'SUCCESS'
+    log.response_time_ms = int((time.time() - mulai) * 1000)
+    log.error_message = galat[:2000]
+    log.response_summary = ringkasan
+    log.save()
+    return not galat, not galat and ringkasan.get('dimuat', True)
+
+
 @shared_task
 def perbarui_sumber_data(paksa=False):
     from analitik.tasks import jadwalkan_hitung_ulang
-    from penarikan_data.models import LogPenarikan
 
     diperbarui, berubah, hitung_ulang = [], False, False
     for kode, _, nama, perintah, memicu in JADWAL:
-        cfg = konfigurasi(kode, nama)
-        tempo = jatuh_tempo(cfg)
+        tempo = jatuh_tempo(konfigurasi(kode, nama))
         if not paksa and tempo and timezone.now() < tempo:
             continue
-        mulai = time.time()
-        try:
-            hasil = call_command(perintah)
-            galat = ''
-        except Exception as e:
-            hasil, galat = None, f'{type(e).__name__}: {e}'
-            logger.warning(f'[PEMBARUAN DATA] {perintah} gagal: {galat}')
-        ringkasan = json.loads(hasil) if isinstance(hasil, str) and hasil.startswith('{') else {}
-        if galat:
-            cfg.retry_count = (cfg.retry_count or 0) + 1
-            cfg.save(update_fields=['retry_count', 'updated_at'])
-        else:
-            cfg.last_successful_fetch = timezone.now()
-            cfg.retry_count = 0
-            cfg.save(update_fields=['last_successful_fetch', 'retry_count', 'updated_at'])
+        berhasil, dimuat = tarik_sumber(kode, nama, perintah, paksa)
+        if berhasil:
             diperbarui.append(kode)
-            if ringkasan.get('dimuat', True):
-                berubah = True
-                hitung_ulang = hitung_ulang or memicu
-        LogPenarikan.objects.create(
-            api_config=cfg, endpoint=perintah, completed_at=timezone.now(),
-            result='FAILED' if galat else 'SUCCESS', response_time_ms=int((time.time() - mulai) * 1000),
-            error_message=galat[:2000], request_params={'paksa': paksa}, response_summary=ringkasan,
-        )
+        if dimuat:
+            berubah = True
+            hitung_ulang = hitung_ulang or memicu
     if berubah:
         cache.clear()
     if hitung_ulang:
         jadwalkan_hitung_ulang(lokasi=[], skor=True)
     return f"Diperbarui: {', '.join(diperbarui) or 'tidak ada'}."
+
+
+@shared_task
+def perbarui_satu_sumber(kode):
+    from analitik.tasks import jadwalkan_hitung_ulang
+
+    _, _, nama, perintah, memicu = next(j for j in (*JADWAL, *TARIK_MANUAL) if j[0] == kode)
+    if tarik_sumber(kode, nama, perintah, paksa=True)[1]:
+        cache.clear()
+        if memicu:
+            jadwalkan_hitung_ulang(lokasi=[], skor=True)
