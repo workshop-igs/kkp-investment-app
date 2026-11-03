@@ -1,9 +1,8 @@
-from django.contrib import admin
 from django.urls import include, path
+from oauth2_provider.urls import base_urlpatterns
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('o/', include((base_urlpatterns, 'oauth2_provider'), namespace='oauth2_provider')),
     path('api/v1/inti/', include('inti.urls')),
     path('api/v1/inventarisasi/', include('inventarisasi.urls')),
     path('api/v1/analitik/', include('analitik.urls')),

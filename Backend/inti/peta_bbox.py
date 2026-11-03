@@ -1,6 +1,7 @@
 import gzip
 import hashlib
 import json
+import math
 
 from django.contrib.gis.db.models import Extent, GeometryField
 from django.contrib.gis.db.models.functions import AsGeoJSON, PointOnSurface
@@ -24,7 +25,16 @@ class Simplify(Func):
     output_field = GeometryField()
 
 
-def jawaban_peta(request, kunci, bangun, umur):
+def kotak_berkisi(minx, miny, maxx, maxy):
+    lebar = max(maxx - minx, maxy - miny)
+    if lebar <= 0:
+        return minx, miny, maxx, maxy
+    sel = 2.0 ** math.floor(math.log2(lebar / 8))
+    return (math.floor(minx / sel) * sel, math.floor(miny / sel) * sel,
+            math.ceil(maxx / sel) * sel, math.ceil(maxy / sel) * sel)
+
+
+def jawaban_peta(request, kunci, bangun, umur, umur_klien=None):
     simpanan = cache_bawaan.get(kunci)
     if simpanan is None:
         muatan = bangun()
@@ -41,7 +51,7 @@ def jawaban_peta(request, kunci, bangun, umur):
 
     def berkepala(resp):
         resp['ETag'] = simpanan['etag']
-        resp['Cache-Control'] = f'public, max-age={umur}'
+        resp['Cache-Control'] = f'public, max-age={umur_klien or umur}'
         return resp
 
     if request.headers.get('If-None-Match') == simpanan['etag']:
@@ -100,10 +110,31 @@ class PetaBBoxMixin:
             self._simpanan_label = {}
         return self._simpanan_label
 
-    CACHE_PETA_DETIK = 300
+    CACHE_PETA_DETIK = 1800
+    CACHE_PETA_KLIEN_DETIK = 300
+
+    def _bbox(self, request):
+        bbox = request.query_params.get('bbox')
+        if not bbox:
+            return self.BBOX_INDONESIA, self.BBOX_INDONESIA[2] - self.BBOX_INDONESIA[0], 1.0
+        minx, miny, maxx, maxy = (float(v) for v in bbox.split(','))
+        kotak = kotak_berkisi(minx, miny, maxx, maxy)
+        luas = (maxx - minx) * (maxy - miny)
+        rasio = (kotak[2] - kotak[0]) * (kotak[3] - kotak[1]) / luas if luas > 0 else 1.0
+        return kotak, abs(maxx - minx), math.ceil(rasio * 4) / 4
 
     def _kunci_cache(self, request, aksi):
         bagian = sorted(request.query_params.items())
+        if aksi == 'peta' and request.query_params.get('bbox'):
+            try:
+                kotak, lebar, rasio = self._bbox(request)
+                bagian = [b for b in bagian if b[0] != 'bbox'] + [
+                    ('bbox', repr(kotak)),
+                    ('skala', repr((self._skala(lebar), self.kolom_geometri(request, lebar),
+                                    self.hanya_titik(lebar), lebar >= self.LEBAR_JAUH, rasio))),
+                ]
+            except (ValueError, TypeError):
+                pass
         sidik = hashlib.md5(
             repr(bagian).encode('utf-8'), usedforsecurity=False
         ).hexdigest()
@@ -131,6 +162,7 @@ class PetaBBoxMixin:
             self._kunci_cache(request, 'peta'),
             lambda: self._bangun_peta(request),
             self.CACHE_PETA_DETIK,
+            self.CACHE_PETA_KLIEN_DETIK,
         )
 
     def _bangun_peta(self, request):
@@ -142,29 +174,26 @@ class PetaBBoxMixin:
 
         qs = self.peta_queryset_tambahan(qs, request)
 
-        bbox = request.query_params.get('bbox')
-        if bbox:
-            try:
-                minx, miny, maxx, maxy = (float(v) for v in bbox.split(','))
-            except (ValueError, TypeError):
-                return Response({'detail': 'Parameter bbox harus berupa minx,miny,maxx,maxy.'}, status=400)
-        else:
-            minx, miny, maxx, maxy = self.BBOX_INDONESIA
+        try:
+            (minx, miny, maxx, maxy), lebar, rasio = self._bbox(request)
+        except (ValueError, TypeError):
+            return Response({'detail': 'Parameter bbox harus berupa minx,miny,maxx,maxy.'}, status=400)
         kotak = Polygon.from_bbox((minx, miny, maxx, maxy))
         kotak.srid = 4326
-        geometri = self.kolom_geometri(request, abs(maxx - minx))
+        geometri = self.kolom_geometri(request, lebar)
         qs = qs.filter(**{f'{geometri}__intersects': kotak})
-        toleransi, batas = self._skala(abs(maxx - minx))
-        if self.BATAS_JAUH and abs(maxx - minx) >= self.LEBAR_JAUH:
+        toleransi, batas = self._skala(lebar)
+        if self.BATAS_JAUH and lebar >= self.LEBAR_JAUH:
             batas = min(batas, self.BATAS_JAUH)
 
         if provinsi:
             batas = self.BATAS_FITUR
+        batas = int(batas * rasio)
 
         qs = self.peta_urutan(qs, request, batas)
 
         sertakan = self.sertakan_titik(request)
-        hanya_titik = self.hanya_titik(abs(maxx - minx))
+        hanya_titik = self.hanya_titik(lebar)
         if sertakan or hanya_titik:
             qs = qs.annotate(titik_wakil=PointOnSurface(geometri))
 

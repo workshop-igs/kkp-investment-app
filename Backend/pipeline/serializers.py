@@ -5,6 +5,11 @@ from .models import ProyekInvestasi, RekapRealisasi, RiwayatStatus
 LABEL_TANPA_PROVINSI = 'Perairan nasional'
 
 
+def boleh_hapus(request, proyek):
+    pengguna = getattr(request, 'user', None)
+    return bool(pengguna and pengguna.is_authenticated and (pengguna.is_staff or proyek.created_by_id == pengguna.pk))
+
+
 class RiwayatStatusSerializer(serializers.ModelSerializer):
     diubah_oleh_nama = serializers.SerializerMethodField()
     status_lama_display = serializers.SerializerMethodField()
@@ -56,6 +61,7 @@ class ProyekInvestasiSerializer(serializers.ModelSerializer):
     sektor_kode = serializers.CharField(source='sektor.kode', read_only=True, default=None)
     sub_sektor_nama = serializers.SerializerMethodField()
     sub_sektor_kbli = serializers.SerializerMethodField()
+    boleh_hapus = serializers.SerializerMethodField()
     status_display = serializers.CharField(source='get_status_display', read_only=True)
 
     def get_provinsi_nama(self, obj):
@@ -71,6 +77,9 @@ class ProyekInvestasiSerializer(serializers.ModelSerializer):
         from analitik.services.kriteria import kbli_sub
 
         return kbli_sub(obj.sektor.kode, obj.sub_sektor) if obj.sektor_id else None
+
+    def get_boleh_hapus(self, obj):
+        return boleh_hapus(self.context.get('request'), obj)
 
     class Meta:
         model = ProyekInvestasi
@@ -90,6 +99,7 @@ class ProyekInvestasiSerializer(serializers.ModelSerializer):
             'sub_sektor',
             'sub_sektor_nama',
             'sub_sektor_kbli',
+            'boleh_hapus',
             'nilai_investasi_miliar',
             'nilai_realisasi_miliar',
             'status',
@@ -116,6 +126,7 @@ class ProyekInvestasiListSerializer(serializers.ModelSerializer):
     sektor_nama = serializers.CharField(source='sektor.nama', read_only=True, default=None)
     sektor_kode = serializers.CharField(source='sektor.kode', read_only=True, default=None)
     sub_sektor_kbli = serializers.SerializerMethodField()
+    boleh_hapus = serializers.SerializerMethodField()
 
     def get_provinsi_nama(self, obj):
         return obj.provinsi.nama if obj.provinsi_id else LABEL_TANPA_PROVINSI
@@ -124,6 +135,9 @@ class ProyekInvestasiListSerializer(serializers.ModelSerializer):
         from analitik.services.kriteria import kbli_sub
 
         return kbli_sub(obj.sektor.kode, obj.sub_sektor) if obj.sektor_id else None
+
+    def get_boleh_hapus(self, obj):
+        return boleh_hapus(self.context.get('request'), obj)
 
     class Meta:
         model = ProyekInvestasi
@@ -136,6 +150,7 @@ class ProyekInvestasiListSerializer(serializers.ModelSerializer):
             'sektor_nama',
             'sektor_kode',
             'sub_sektor_kbli',
+            'boleh_hapus',
             'nilai_investasi_miliar',
             'status',
             'progress_pct',

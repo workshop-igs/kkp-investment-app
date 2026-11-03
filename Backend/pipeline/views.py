@@ -1,6 +1,7 @@
 from django.db.models import Count, Sum
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 
 from inti.audit import catat, simpan_berjejak
@@ -12,6 +13,7 @@ from .serializers import (
     ProyekInvestasiListSerializer,
     ProyekInvestasiSerializer,
     RekapRealisasiSerializer,
+    boleh_hapus,
 )
 
 
@@ -51,6 +53,8 @@ class ProyekInvestasiViewSet(viewsets.ModelViewSet):
         catat(self.request, f"Mengubah proyek '{p.nama}'", f'Proyek {p.kode_proyek}', rincian)
 
     def perform_destroy(self, instance):
+        if not boleh_hapus(self.request, instance):
+            raise PermissionDenied('Proyek hanya dapat dihapus oleh pembuatnya atau administrator.')
         catat(self.request, f"Menghapus proyek '{instance.nama}'", f'Proyek {instance.kode_proyek}')
         instance.delete()
 
