@@ -12,9 +12,11 @@ from analitik.models import KetentuanRuang, LokasiPotensial, PengaturanAnalisis,
 from analitik.services.finansial import hitung_model_usaha
 from analitik.services.konstanta import (
     KETENTUAN_DARAT_BAWAAN,
+    KETENTUAN_KONSERVASI_PEMANFAATAN,
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
     SEKTOR_SUB_ZONA_COCOK,
+    ZONA_KONSERVASI_PEMANFAATAN,
 )
 from analitik.services.kriteria import kbli_sub, uraian
 from analitik.services.laporan_spasial import daya_dukung, pulau_kecil
@@ -174,7 +176,10 @@ def _kabupaten_terdekat(c, provinsi_id, x, y):
 def ruang_utama(skor, kode):
     peruntukan = [*SEKTOR_SUB_ZONA_COCOK.get(kode, []),
                   *(z for z, v in KETENTUAN_DARAT_BAWAAN.get(kode, {}).items() if v == 'DIIZINKAN')]
-    utama = skor.filter(zona__sub_zona__in=peruntukan)
+    syarat = Q(zona__sub_zona__in=peruntukan)
+    if kode in KETENTUAN_KONSERVASI_PEMANFAATAN:
+        syarat |= Q(zona__sub_zona='KONSERVASI', zona__nama_zona__iregex=ZONA_KONSERVASI_PEMANFAATAN)
+    utama = skor.filter(syarat)
     return utama if utama.exists() else skor
 
 
@@ -556,7 +561,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v9:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v10:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))

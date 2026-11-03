@@ -1,4 +1,5 @@
 import json
+import re
 from typing import Any, Dict, List, Optional
 
 from django.contrib.gis.geos import GeometryCollection, GEOSException, GEOSGeometry
@@ -15,11 +16,13 @@ from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
     JENIS_ZONA_TERLARANG,
     KETENTUAN_DARAT_BAWAAN,
+    KETENTUAN_KONSERVASI_PEMANFAATAN,
     KM_PER_DERAJAT,
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
     SEKTOR_SUB_ZONA_COCOK,
     SUB_ZONA_TANPA_RINCIAN,
+    ZONA_KONSERVASI_PEMANFAATAN,
 )
 from analitik.services.kriteria import (
     KARANG,
@@ -233,7 +236,16 @@ def _aturan_per_sektor(matriks=None) -> Dict[int, Dict[tuple, Any]]:
                     'sumber': f'{m.sumber} ({m.nama_zona})'[:255],
                     'rincian': rincian,
                 }
+    kode_ke_id = dict(SektorInvestasi.objects.filter(kode__in=KETENTUAN_KONSERVASI_PEMANFAATAN).values_list('kode', 'id'))
+    for kode, (status, syarat, sumber) in KETENTUAN_KONSERVASI_PEMANFAATAN.items():
+        if kode in kode_ke_id:
+            hasil.setdefault(kode_ke_id[kode], {})[('KONSERVASI_PEMANFAATAN', None)] = {
+                'status': status, 'syarat': syarat, 'sumber': sumber}
     return hasil
+
+
+def zona_konservasi_pemanfaatan(sub_zona, nama_zona) -> bool:
+    return sub_zona == 'KONSERVASI' and bool(re.search(ZONA_KONSERVASI_PEMANFAATAN, nama_zona or '', re.I))
 
 
 def _ketentuan(aturan, zona) -> Dict[str, Any]:
@@ -243,6 +255,9 @@ def _ketentuan(aturan, zona) -> Dict[str, Any]:
     dari_matriks = aturan.get(('MATRIKS', zona.get('matriks_id')))
     if dari_matriks and (k is None or PENANDA_MATRIKS in k.sumber):
         return dari_matriks
+    khusus = aturan.get(('KONSERVASI_PEMANFAATAN', None))
+    if khusus and zona_konservasi_pemanfaatan(zona['sub_zona'], zona.get('nama_zona')):
+        return khusus
     k = k or aturan.get((zona['sub_zona'], None))
     if k is None:
         return {'status': None, 'syarat': '', 'sumber': ''}
@@ -305,6 +320,7 @@ def _zona_efektif(c, geom, luas_aoi):
             efektif.append({
                 'id': zid,
                 'nama': _nama_zona(nama, sub, prov_nama),
+                'nama_zona': nama,
                 'jenis_zona': jenis,
                 'jenis_label': LABEL_JENIS_ZONA.get(jenis, jenis),
                 'sub_zona': sub,
