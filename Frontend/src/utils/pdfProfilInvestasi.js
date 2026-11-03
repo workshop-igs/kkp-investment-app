@@ -1678,12 +1678,13 @@ function finansial(dek, o, b, i, perJenis) {
   dek.legenda(x + 5, y + tinggiAtas - 3, lebar - 10, seri.map((s) => ({ label: s.label, warna: s.warna })), { keAtas: true });
 
   const yt = y + tinggiAtas + 4;
+  const ringkasLokasi = (daftar) => (daftar.length > 2 ? `${daftar.slice(0, 2).join(', ')}, dan ${daftar.length - 2} lainnya` : daftar.join(', ') || '-');
   const lp = (kode) => [...new Set(b.lokasi.filter((l) => kelasS(l.kelas) === kode.toUpperCase())
     .map((l) => `${namaRapi(l.nama, 26)} (${l.kabupaten || '-'})`))];
   const yAkhir = dek.tabel(TEPI, yt, W - TEPI * 2,
     ['Kondisi', `Volume/tahun (${h.satuan_produk})`, 'Pendapatan/tahun', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Biaya KKPRL', 'Lokasi prioritas'],
     h.skenario.map((s) => [s.label, angka(s.volume), rp(s.pendapatan), rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2),
-      s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, rp(h.biaya_kkprl), s.kode === 'riil' ? '-' : (lp(s.kode).join(', ') || '-')]),
+      s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, rp(h.biaya_kkprl), s.kode === 'riil' ? '-' : ringkasLokasi(lp(s.kode))]),
     { bagian: [0.12, 0.1, 0.1, 0.1, 0.06, 0.06, 0.08, 0.09, 0.29], rataKanan: [1, 2, 3, 4, 5, 6, 7], ukuran: 6.2,
       sorot: h.skenario.map((s, n) => (s.layak ? n : -1)).filter((n) => n >= 0), aksen });
   const kembali = (s) => (s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`);
