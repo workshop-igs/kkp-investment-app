@@ -1396,7 +1396,8 @@ function lokasiSesuai(dek, o, b, i, citra) {
     cakupan: o.wilayah.cakupan,
     batas: o.wilayah.batas,
     citra,
-    lapisan: [{ fitur: j.peta, warna: (f) => warnaKelasKelayakan(f.kelas), isi: 0.7 }],
+    lapisan: [{ fitur: j.peta, warna: '#ffffff', isi: 0, tebal: 10 },
+      { fitur: j.peta, warna: (f) => warnaKelasKelayakan(f.kelas), isi: 0.85, tebal: 5 }],
     titik: b.lokasi.map((l, n) => ({ titik: l.titik, warna: aksen, label: n + 1 })),
   }), TEPI + 3, y + 3, lebarPeta, tinggiPeta);
   dek.legenda(TEPI + 5, y + tinggiPeta + 8.2, lebarPeta, [
