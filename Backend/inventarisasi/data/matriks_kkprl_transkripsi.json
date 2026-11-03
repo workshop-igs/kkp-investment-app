@@ -14713,6 +14713,3139 @@
       }
     ]
   },
+  "81": {
+    "perda": "Perda Provinsi Maluku No. 2/2025",
+    "berkas": "81_lampiran_perda_Maluku.pdf",
+    "cara": "ekstraksi teks Lampiran XVII, sel daftar kegiatan dibaca per bentang",
+    "blok": [
+      {
+        "nama_zona": "Kawasan Konservasi - Taman",
+        "halaman": 163,
+        "kode_zona": {
+          "KK-T-001": [
+            127.90681388888889,
+            -2.979416111111111
+          ],
+          "KK-T-002": [
+            129.1704472222222,
+            -2.7952988888888886
+          ],
+          "KK-T-003": [
+            129.35518472222222,
+            -2.825526111111111
+          ],
+          "KK-T-004": [
+            128.6926711111111,
+            -3.6044319444444444
+          ],
+          "KK-T-005": [
+            131.1329488888889,
+            -3.9110230555555554
+          ],
+          "KK-T-006": [
+            131.21404833333332,
+            -3.9447138888888893
+          ],
+          "KK-T-007": [
+            131.19913333333335,
+            -3.926306111111111
+          ],
+          "KK-T-008": [
+            129.9134463888889,
+            -4.5250152777777775
+          ],
+          "KK-T-009": [
+            129.9152025,
+            -4.514418333333333
+          ],
+          "KK-T-010": [
+            129.7070986111111,
+            -4.5498625
+          ],
+          "KK-T-011": [
+            132.55957916666668,
+            -5.862600277777777
+          ],
+          "KK-T-012": [
+            132.47376555555556,
+            -5.9576400000000005
+          ],
+          "KK-T-013": [
+            131.5933325,
+            -7.048380833333333
+          ]
+        },
+        "diperbolehkan": [
+          "Pelindungan lingkungan laut",
+          "Penanaman tanaman bakau dan nipah",
+          "Budidaya mangrove",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Pelayaran rakyat dan nelayan kecil di luar zona inti",
+          "Pelayaran kapal penumpang reguler domestik di luar zona inti",
+          "Lalu lintas kapal penangkap ikan ukuran >5 GT di luar zona inti"
+        ],
+        "bersyarat": [
+          "Pelayaran Kapal Penumpang wisata/kapal pesiar pada zona pemanfaatan terbatas dan/atau zona lain sesuai peruntukan kawasan",
+          "Penelitian",
+          "Pendidikan di luar zona inti",
+          "Penangkapan ikan pada zona pemanfaatan terbatas menggunakan kapal penangkap ikan paling besar berukuran 5 gross tonnage (GT)",
+          "Penangkapan ikan oleh nelayan yang bermukim di sekitar kawasan konservasi pada zona pemanfaatan terbatas menggunakan kapal penangkap ikan paling besar berukuran 5 GT",
+          "Pembudidayaan ikan pada zona pemanfaatan terbatas",
+          "Kegiatan pariwisata alam perairan pada zona"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang mengakibatkan pencemaran lingkungan",
+          "Penangkapan ikan yang dilindungi dan/atau terancam punah",
+          "Kegiatan yang menyebabkan kerusakan ekosistem pesisir (lamun, mangrove, dan terumbu karang)",
+          "Reklamasi (pengerukan, pengurugan, dan/atau pengeringan lahan), kecuali untuk kegiatan strategis nasional yang ditetapkan presiden dan kepentingan pengelolaan kawasan konservasi",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Kawasan Konservasi Lainnya",
+        "halaman": 164,
+        "kode_zona": {
+          "KK-T-014": [
+            128.5053286111111,
+            -7.279876944444444
+          ],
+          "KK-T-015": [
+            128.33186305555554,
+            -8.083640833333334
+          ],
+          "KK-T-016": [
+            127.54327944444444,
+            -7.560910833333333
+          ],
+          "KK-T-017": [
+            134.56769833333334,
+            -6.930051666666667
+          ],
+          "KK-KKL-001": [
+            128.36365944444444,
+            -2.8154325
+          ],
+          "KK-KKL-002": [
+            128.6338486111111,
+            -2.837476666666667
+          ],
+          "KK-KKL-003": [
+            128.68616277777778,
+            -2.813525555555555
+          ],
+          "KK-KKL-004": [
+            130.06978444444445,
+            -2.9435100000000003
+          ],
+          "KK-KKL-005": [
+            129.94353472222224,
+            -2.921201111111111
+          ],
+          "KK-KKL-006": [
+            132.7592786111111,
+            -5.6528413888888895
+          ],
+          "KK-KKL-007": [
+            128.74409166666666,
+            -2.8416055555555557
+          ],
+          "KK-KKL-008": [
+            130.04063833333333,
+            -4.593286944444444
+          ],
+          "KK-KKL-009": [
+            128.0630763888889,
+            -3.02683
+          ],
+          "KK-KKL-010": [
+            128.14597277777776,
+            -3.3044141666666667
+          ],
+          "KK-KKL-011": [
+            128.37574972222222,
+            -3.530299444444444
+          ],
+          "KK-KKL-012": [
+            134.43497972222224,
+            -6.245644722222222
+          ]
+        },
+        "diperbolehkan": [],
+        "bersyarat": [
+          "pemanfaatan terbatas",
+          "Penyediaan infrastruktur pariwisata alam perairan pada zona pemanfaatan terbatas sesuai daya dukung dan daya tampung lingkungan",
+          "Pendirian dan/atau penempatan bangunan laut pada zona pemanfaatan terbatas dan zona lain sesuai peruntukan Kawasan",
+          "Penempatan instalasi di laut pada zona pemanfaatan terbatas dan/atau zona lain sesuai peruntukan Kawasan",
+          "Pemanfaatan air laut selain energi pada zona pemanfaatan terbatas",
+          "Pembuatan foto, film, dan video komersial pada zona pemanfaatan terbatas dan/atau zona lain sesuai peruntukan Kawasan",
+          "Landing, take off, dan taxiing seaplane pada zona pemanfaatan terbatas",
+          "Pengelolaan energi"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan penebangan dan pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Pertambangan mineral dan batubara dengan metode terbuka",
+          "Pembuangan (dumping)",
+          "Pembuangan air balas kapal",
+          "Pelayaran rakyat dan nelayan kecil pada zona inti",
+          "Pelayaran kapal penumpang reguler domestik pada zona inti",
+          "Pelayaran kapal penumpang wisata/kapal pesiar pada zona inti",
+          "Lalu lintas kapal penangkap ikan ukuran >5 GT pada zona inti"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Pencadangan/Indikasi Kawasan Konservasi",
+        "halaman": 165,
+        "kode_zona": {
+          "KK-PKK-001": [
+            126.859955,
+            -3.092976666666667
+          ],
+          "KK-PKK-002": [
+            125.96699083333334,
+            -3.3106052777777775
+          ],
+          "KK-PKK-003": [
+            129.70102666666665,
+            -4.321658611111111
+          ],
+          "KK-PKK-004": [
+            129.59736527777778,
+            -6.66130888888889
+          ],
+          "KK-PKK-005": [
+            129.85658277777776,
+            -6.542442222222222
+          ],
+          "KK-PKK-006": [
+            132.20183194444442,
+            -5.593405277777777
+          ],
+          "KK-PKK-007": [
+            131.9892688888889,
+            -5.430064722222222
+          ],
+          "KK-PKK-008": [
+            132.72263611111111,
+            -5.4502075
+          ],
+          "KK-PKK-009": [
+            132.78573944444443,
+            -5.4615375
+          ],
+          "KK-PKK-010": [
+            134.46586138888887,
+            -5.31177
+          ],
+          "KK-PKK-011": [
+            134.3947963888889,
+            -5.27121
+          ],
+          "KK-PKK-012": [
+            129.7942036111111,
+            -7.7987825
+          ],
+          "KK-PKK-013": [
+            125.89110083333334,
+            -7.647354999999999
+          ],
+          "KK-PKK-014": [
+            127.62197111111111,
+            -5.465701944444445
+          ],
+          "KK-PKK-015": [
+            134.86052,
+            -6.089525
+          ],
+          "KK-PKK-016": [
+            134.69663555555556,
+            -6.598963333333333
+          ],
+          "KK-PKK-017": [
+            130.87930444444444,
+            -3.3974208333333333
+          ],
+          "KK-PKK-018": [
+            130.77395944444444,
+            -3.401766388888889
+          ]
+        },
+        "diperbolehkan": [],
+        "bersyarat": [],
+        "tidak_diperbolehkan": [
+          "Pendidikan pada zona inti",
+          "Penangkapan ikan pada zona inti dan/atau zona lain sesuai peruntukan kawasan",
+          "Penangkapan ikan oleh nelayan yang bermukim di sekitar kawasan konservasi pada zona inti dan/atau zona lain sesuai peruntukan kawasan",
+          "Penangkapan ikan dengan cara atau alat yang merusak atau tidak sesuai atau tidak diperbolehkan oleh peraturan perundang-undangan",
+          "Penempatan rumpon",
+          "Pembudidayaan ikan pada zona inti dan/atau zona lain sesuai peruntukan kawasan",
+          "Kegiatan pariwisata alam perairan pada zona inti dan/atau zona lain sesuai peruntukan kawasan",
+          "Penyediaan infrastruktur pariwisata alam perairan pada zona inti dan/atau zona lain sesuai peruntukan kawasan",
+          "Penempatan instalasi di laut pada zona inti",
+          "Pemanfaatan air laut selain energi pada zona inti dan/atau zona lain sesuai peruntukan kawasan",
+          "Pembuatan foto, film, dan video komersial pada zona inti",
+          "Landing, take off, dan taxiing seaplane pada zona inti dan/atau zona lain sesuai peruntukan kawasan",
+          "Pemanfaatan lainnya yang tidak sesuai dengan peruntukan kawasan",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Penetapan rute pelayaran internasional",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perikanan Budidaya",
+        "halaman": 167,
+        "kode_zona": {
+          "KPU-PB-001": [
+            127.1188286111111,
+            -3.2579141666666667
+          ],
+          "KPU-PB-002": [
+            127.11638472222222,
+            -3.248955
+          ],
+          "KPU-PB-003": [
+            127.0526075,
+            -3.296516111111111
+          ],
+          "KPU-PB-004": [
+            127.13313833333332,
+            -3.3658180555555557
+          ],
+          "KPU-PB-005": [
+            126.80538388888888,
+            -3.817175833333333
+          ],
+          "KPU-PB-006": [
+            126.43960527777779,
+            -3.7639930555555554
+          ],
+          "KPU-PB-007": [
+            126.39900444444446,
+            -3.711496388888889
+          ],
+          "KPU-PB-008": [
+            127.20483666666667,
+            -3.892343888888889
+          ],
+          "KPU-PB-009": [
+            127.913775,
+            -3.1239894444444443
+          ],
+          "KPU-PB-010": [
+            128.5384797222222,
+            -3.4626411111111115
+          ],
+          "KPU-PB-011": [
+            128.32406472222223,
+            -3.3277527777777776
+          ],
+          "KPU-PB-012": [
+            128.28437833333334,
+            -3.2443905555555554
+          ],
+          "KPU-PB-013": [
+            128.20546472222222,
+            -3.211026388888889
+          ],
+          "KPU-PB-014": [
+            128.14789166666665,
+            -3.1240133333333335
+          ],
+          "KPU-PB-015": [
+            127.99348222222223,
+            -3.379751111111111
+          ],
+          "KPU-PB-016": [
+            128.86703333333335,
+            -3.219245277777778
+          ],
+          "KPU-PB-017": [
+            128.9348938888889,
+            -3.2877894444444444
+          ],
+          "KPU-PB-018": [
+            129.87068083333335,
+            -4.50348
+          ],
+          "KPU-PB-019": [
+            129.95779444444443,
+            -4.497387777777778
+          ],
+          "KPU-PB-020": [
+            129.96307249999998,
+            -4.524656944444445
+          ],
+          "KPU-PB-021": [
+            129.95942,
+            -4.533110277777777
+          ],
+          "KPU-PB-022": [
+            129.88237166666667,
+            -4.567960277777778
+          ],
+          "KPU-PB-023": [
+            130.28896805555556,
+            -2.970217777777778
+          ],
+          "KPU-PB-024": [
+            130.28966305555556,
+            -2.963616388888889
+          ],
+          "KPU-PB-025": [
+            130.42368472222222,
+            -3.024994722222222
+          ],
+          "KPU-PB-026": [
+            130.41857,
+            -3.0089325
+          ],
+          "KPU-PB-027": [
+            130.86082305555556,
+            -3.8711683333333333
+          ],
+          "KPU-PB-028": [
+            130.9176236111111,
+            -3.8861294444444443
+          ],
+          "KPU-PB-029": [
+            130.95568916666664,
+            -3.878159166666667
+          ]
+        },
+        "diperbolehkan": [
+          "Penelitian dan pendidikan",
+          "Pembudidayaan ikan dengan metode, alat, komoditas yang dibudidayakan, dan teknologi budidaya yang sesuai dengan ketentuan peraturan perundang-undangan",
+          "Pemanfaatan lainnya yang selaras dengan peruntukan zona budidaya",
+          "Penangkapan ikan oleh nelayan tradisional",
+          "Penanaman tanaman bakau dan nipah",
+          "Budidaya mangrove",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Pengambilan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Pengangkutan ikan hasil budidaya sesuai ketentuan peraturan perundang- undangan"
+        ],
+        "bersyarat": [
+          "Wisata bahari sesuai daya dukung dan daya tampung",
+          "Budidaya laut skala besar dan menengah",
+          "Penangkapan ikan skala kecil oleh nelayan kecil sesuai ketentuan peraturan perundang-undangan",
+          "Peletakan pelindung pantai sesuai kajian",
+          "Peletakan Sarana Bantu Navigasi Pelayaran",
+          "Penempatan saluran pipa/kabel bawah laut untuk telekomunikasi",
+          "Penempatan tambatan perahu sesuai peruntukan zona",
+          "Kegiatan budaya atau adat",
+          "Pemanfaatan lainnya yang selaras dan tidak mengganggu keberlanjutan kegiatan pembudidayaan ikan",
+          "Pembangunan Tempat Pendaratan Ikan",
+          "Pengelolaan energi"
+        ],
+        "tidak_diperbolehkan": [
+          "Budidaya yang menggunakan metode yang tidak berwawasan lingkungan",
+          "Budidaya jenis ikan yang dilarang peraturan perundang-undangan",
+          "Penggunaan pakan yang berlebihan tanpa kontrol dampaknya terhadap kondisi perairan",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Kegiatan yang mengancam kelestarian sumber daya ikan",
+          "Reklamasi (pengerukan, pengurugan, dan/atau pengeringan lahan)",
+          "Penempatan kapal, alat tangkap dan alat bantu penangkapan ikan yang merusak atau tidak sesuai atau tidak diperbolehkan sesuai peraturan perundang- undangan",
+          "Penangkapan ikan dengan kapal > 30 GT",
+          "Penangkapan biota laut yang dilindungi atau terancam punah",
+          "Pertambangan atau penggalian pasir laut",
+          "Pertambangan atau penggalian mineral dan batu bara",
+          "Pembuangan (dumping)",
+          "Pembuangan air balas kapal",
+          "Kegiatan bandar udara",
+          "Kegiatan angkutan udara di atas perairan",
+          "Penempatan rumpon",
+          "Pengujian kapal perikanan/perahu ikan bermotor",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Pengolahan dan Pemurnian Mineral logam",
+          "Penetapan tempat alih muat antar kapal",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan terminal peti kemas",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan terminal Roro",
+          "Pembangunan Tempat perbaikan kapal",
+          "Penempatan kapal mati"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perikanan Budidaya",
+        "halaman": 169,
+        "kode_zona": {
+          "KPU-PB-030": [
+            null,
+            null
+          ],
+          "KPU-PB-031": [
+            130.94562611111112,
+            -3.9001930555555555
+          ],
+          "KPU-PB-032": [
+            130.99294416666666,
+            -3.9004138888888886
+          ],
+          "KPU-PB-033": [
+            131.04442138888888,
+            -3.914407222222222
+          ],
+          "KPU-PB-034": [
+            131.22388972222222,
+            -4.017134444444444
+          ],
+          "KPU-PB-035": [
+            131.36402972222223,
+            -3.985441388888889
+          ],
+          "KPU-PB-036": [
+            131.38258833333333,
+            -4.020966111111111
+          ],
+          "KPU-PB-037": [
+            131.43428777777777,
+            -3.997761666666667
+          ],
+          "KPU-PB-038": [
+            131.34332333333333,
+            -4.153425833333333
+          ],
+          "KPU-PB-039": [
+            131.35783277777776,
+            -4.150246388888889
+          ],
+          "KPU-PB-040": [
+            131.60449583333332,
+            -4.397856111111111
+          ],
+          "KPU-PB-041": [
+            131.62234333333333,
+            -4.438773611111111
+          ],
+          "KPU-PB-042": [
+            131.74363416666665,
+            -4.7456233333333335
+          ],
+          "KPU-PB-043": [
+            132.7944161111111,
+            -5.520815
+          ],
+          "KPU-PB-044": [
+            132.77697722222223,
+            -5.50683
+          ]
+        },
+        "diperbolehkan": [],
+        "bersyarat": [],
+        "tidak_diperbolehkan": [
+          "Penetapan alur pelayaran dari dan ke pelabuhan perikanan",
+          "Uji coba kapal",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan",
+          "Usaha bongkar muat barang : pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Usaha tally mandiri : kegiatan cargdoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Pengerukan di wilayah perairan Pelabuhan Pengumpan Regional dan Lokal",
+          "Usaha angkutan laut pelayaran rakyat atau badan usaha pada lintas pelabuhan antar kab/kota dalam provinsi, antar provinsi dan pelabuhan internasional",
+          "Usaha jasa angkutan perairan pelabuhan",
+          "Usaha jasa penyewaan peralatan angkutan laut",
+          "Pengelolaan TUKS",
+          "Operasi Kapal Angkutan Penyeberangan Dalam Provinsi",
+          "Kegiatan penerbangan diatas alur kepulauan",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perikanan Budidaya",
+        "halaman": 170,
+        "kode_zona": {
+          "KPU-PB-045": [
+            132.6675661111111,
+            -5.603099444444444
+          ],
+          "KPU-PB-046": [
+            132.69924333333333,
+            -5.640783611111111
+          ],
+          "KPU-PB-047": [
+            132.79280444444444,
+            -5.6751700000000005
+          ],
+          "KPU-PB-048": [
+            132.80306833333336,
+            -5.784298888888888
+          ],
+          "KPU-PB-049": [
+            132.71977833333332,
+            -5.901936388888889
+          ],
+          "KPU-PB-050": [
+            132.7461136111111,
+            -5.609649722222222
+          ],
+          "KPU-PB-051": [
+            134.29447194444444,
+            -5.5286019444444445
+          ],
+          "KPU-PB-052": [
+            134.3234636111111,
+            -5.630266666666667
+          ],
+          "KPU-PB-053": [
+            134.2756413888889,
+            -5.5991027777777775
+          ],
+          "KPU-PB-054": [
+            134.63653694444443,
+            -5.392908888888889
+          ],
+          "KPU-PB-055": [
+            134.5056275,
+            -5.510868333333334
+          ],
+          "KPU-PB-056": [
+            134.76605694444444,
+            -5.739968055555556
+          ],
+          "KPU-PB-057": [
+            134.6689397222222,
+            -5.849906944444444
+          ],
+          "KPU-PB-058": [
+            134.36680444444445,
+            -6.311370277777778
+          ],
+          "KPU-PB-059": [
+            null,
+            null
+          ],
+          "KPU-PB-060": [
+            134.2118683333333,
+            -5.8261836111111105
+          ],
+          "KPU-PB-061": [
+            134.2508138888889,
+            -5.831325833333333
+          ],
+          "KPU-PB-062": [
+            134.75578166666668,
+            -6.2821863888888885
+          ],
+          "KPU-PB-063": [
+            134.26542361111112,
+            -5.672541111111111
+          ],
+          "KPU-PB-064": [
+            134.17399,
+            -6.145851111111112
+          ],
+          "KPU-PB-065": [
+            131.76685666666668,
+            -7.178357777777778
+          ],
+          "KPU-PB-066": [
+            131.81188833333334,
+            -7.0966249999999995
+          ],
+          "KPU-PB-067": [
+            131.67631694444444,
+            -7.137416111111111
+          ],
+          "KPU-PB-068": [
+            131.68087916666667,
+            -7.389795555555556
+          ],
+          "KPU-PB-069": [
+            131.08281694444443,
+            -7.761605833333333
+          ],
+          "KPU-PB-070": [
+            130.94361694444444,
+            -7.727291666666667
+          ],
+          "KPU-PB-071": [
+            131.01417416666666,
+            -7.517759444444445
+          ],
+          "KPU-PB-072": [
+            131.0208352777778,
+            -7.509173611111111
+          ],
+          "KPU-PB-073": [
+            131.68589222222224,
+            -7.4206586111111115
+          ],
+          "KPU-PB-074": [
+            130.99869249999998,
+            -7.666857777777778
+          ]
+        },
+        "diperbolehkan": [],
+        "bersyarat": [],
+        "tidak_diperbolehkan": [
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Konstruksi Pertambangan Garam",
+          "Pembangunan Fasilitas Infrastruktur (Saluran Primer, Sekunder dan pantai air)",
+          "Industri penggaraman",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah non B3",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alat alat terapung saja",
+          "Kegiatan pembuatan mesin mesin utama/pembantu",
+          "Kegiatan pembuatan alat- alat perlengkapan lain yang khusus dipergunakan dalam kapal",
+          "Kegiatan pembuatan alat alat maritim lainnya",
+          "Kegiatan pekerjaan penyelaman (diving works)",
+          "Kegiatan pemindahan muatan dan atau bahan bakar (cargo and fuel transferring)",
+          "Penarikan (Towing)"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perikanan Budidaya",
+        "halaman": 172,
+        "kode_zona": {
+          "KPU-PB-075": [
+            128.2172402777778,
+            -3.6441519444444443
+          ],
+          "KPU-PB-076": [
+            128.18329277777778,
+            -3.6650663888888886
+          ]
+        },
+        "diperbolehkan": [],
+        "bersyarat": [],
+        "tidak_diperbolehkan": [
+          "Pengapungan (refloating)",
+          "Pembangunan pembangkitan, transmisi, distribusi dan penjualan tenaga listrik",
+          "Pembangunan stasiun pengisian bahan bakar nelayan",
+          "Latihan militer",
+          "Pengambilan terumbu karang"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pemanfaatan Air Laut Selain Energi",
+        "halaman": 172,
+        "kode_zona": {
+          "KPU-AL-001": [
+            129.28419333333332,
+            -2.8876333333333335
+          ],
+          "KPU-AL-002": [
+            129.36659166666666,
+            -2.7992605555555556
+          ],
+          "KPU-AL-003": [
+            129.36834972222223,
+            -2.7986655555555555
+          ],
+          "KPU-AL-004": [
+            129.6420922222222,
+            -2.8262063888888886
+          ],
+          "KPU-AL-005": [
+            129.79341416666668,
+            -2.8820533333333334
+          ],
+          "KPU-AL-006": [
+            129.83701055555557,
+            -2.906251388888889
+          ],
+          "KPU-AL-007": [
+            131.24134583333333,
+            -7.999155277777778
+          ]
+        },
+        "diperbolehkan": [
+          "Pengambilan air laut sebagai produk",
+          "Pengambilan air sebagai bahan pendukung",
+          "Pengambilan air laut untuk ekstraksi garam",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Rehabilitasi ekosistem pesisir"
+        ],
+        "bersyarat": [
+          "Penempatan instalasi pengolahan air laut untuk air minum sesuai kriteria kelayakan berdasarkan peraturan yang berlaku",
+          "Penelitian dan pendidikan",
+          "Penempatan tambatan perahu dengan metode tiang pancang atau metode apung",
+          "Penangkapan ikan oleh nelayan tradisional",
+          "Kegiatan wisata",
+          "Penempatan Sarana Bantu Navigasi Pelayaran",
+          "Kegiatan perbaikan instalasi di bawah air",
+          "Penempatan bangunan dan/atau instalasi sesuai dengan peruntukan zona",
+          "Kegiatan budidaya laut",
+          "Pengelolaan energi"
+        ],
+        "tidak_diperbolehkan": [
+          "Penangkapan ikan yang dilindungi dan/atau terancam punah",
+          "Pemanfaatan air laut yang berdampak negatif pada fungsi sosial dan/atau lingkungan hidup",
+          "Pemanfaatan air laut yang mengancam keselamatan kekayaan negara dan kelestarian lingkungan",
+          "Penempatan bangunan dan instalasi di laut yang tidak memenuhi persyaratan teknis sesuai peraturan yang berlaku",
+          "Penempatan bangunan dan/atau instalasi yang tidak sesuai dengan fungsi zona",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Kegiatan yang mengancam kelestarian sumber daya ikan atau habitat penting biota laut",
+          "Penempatan atau penggunaan alat tangkap dan alat bantu penangkapan ikan yang tidak sesuai dengan peraturan perundang- undangan",
+          "Penangkapan ikan menggunakan kapal, alat tangkap, dan alat bantu penangkapan ikan yang tidak diperbolehkan pada jalur I dan/atau jalur II WPPNRI 714, 715, dan 718",
+          "Reklamasi (pengerukan, pengurugan, dan/atau pengeringan lahan)",
+          "Pembuangan (dumping)",
+          "Pembuangan air balas kapal",
+          "Penempatan kapal mati",
+          "Kegiatan bandar udara"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Bandar Udara",
+        "halaman": 174,
+        "kode_zona": {
+          "KPU-BU-01": [
+            128.07850583333334,
+            -3.7235780555555555
+          ]
+        },
+        "diperbolehkan": [
+          "Kegiatan bandar udara",
+          "Kegiatan lainnya yang boleh dilakukan di zona bandar udara disesuaikan dengan peraturan perundang- undangan yang berlaku"
+        ],
+        "bersyarat": [
+          "Penelitian atau pendidikan",
+          "Rehabilitasi ekosistem",
+          "Penempatan pelindung pantai",
+          "Peletakan Sarana Bantu Navigasi Pelayaran",
+          "Kegiatan lainnya yang boleh dilakukan dengan syarat di zona bandar udara disesuaikan dengan peraturan perundang- undangan yang berlaku",
+          "Pembangunan tempat pendaratan ikan"
+        ],
+        "tidak_diperbolehkan": [
+          "Perluasan wilayah bandar udara yang tidak sesuai daya dukung",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Kegiatan yang mengancam kelestarian sumber daya ikan atau habitat penting biota laut",
+          "Penangkapan biota laut yang dilindungi dan/atau terancam punah",
+          "Penempatan atau penggunaan alat tangkap dan alat bantu penangkapan ikan yang tidak sesuai dengan peraturan perundang- undangan",
+          "Penangkapan ikan menggunakan kapal, alat tangkap, dan alat bantu penangkapan ikan yang tidak diperbolehkan pada jalur I dan/atau jalur II WPPNRI 714, 715, dan 718",
+          "Kegiatan wisata",
+          "Penempatan bangunan di atas laut yang tidak sesuai dengan peruntukan zona",
+          "Kegiatan pertambangan",
+          "Kegiatan industri maritim",
+          "Kegiatan jasa perdagangan",
+          "Kegiatan pelabuhan",
+          "Kegiatan budaya atau adat",
+          "Pembuangan (dumping)",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Kegiatan perikanan oleh kapal asing",
+          "Latihan militer oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Riset atau survey hidrografi oleh kapal asing, kecuali telah memiliki izin",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perdagangan Barang Dan/Atau Jasa",
+        "halaman": 175,
+        "kode_zona": {
+          "KPU-DG-001": [
+            4.910116375,
+            -3.2817013888888886
+          ],
+          "KPU-DG-002": [
+            2.197457578,
+            -4.522029722222222
+          ],
+          "KPU-DG-003": [
+            11.2741805,
+            -3.6838536111111115
+          ]
+        },
+        "diperbolehkan": [
+          "Kegiatan Jasa/Perdagangan",
+          "Kegiatan pendukung perdagangan barang dan jasa",
+          "Kegiatan Wisata",
+          "Pendidikan dan penelitian"
+        ],
+        "bersyarat": [
+          "Penempatan bangunan dan/atau instalasi di laut sesuai peruntukan zona",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Pembangunan stasiun pengisian bahan bakar nelayan",
+          "Penataan lokasi kegiatan jasa/perdagangan"
+        ],
+        "tidak_diperbolehkan": [
+          "Perluasan wilayah jasa/perdagangan yang tidak sesuai daya dukung",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perdagangan Barang Dan/Atau Jasa",
+        "halaman": 176,
+        "kode_zona": {
+          "KPU-DG-004": [
+            14.10857326,
+            -3.6718108333333332
+          ],
+          "KPU-DG-005": [
+            1.654453116,
+            -3.6610841666666665
+          ],
+          "KPU-DG-006": [
+            6.636422243,
+            -3.6527241666666668
+          ],
+          "KPU-DG-007": [
+            7.41246363,
+            -3.645722777777778
+          ],
+          "KPU-DG-008": [
+            1.577876373,
+            -3.6430883333333335
+          ],
+          "KPU-DG-009": [
+            10.55320666,
+            -3.6512030555555555
+          ],
+          "KPU-DG-010": [
+            7.02960908,
+            -7.963447777777778
+          ]
+        },
+        "diperbolehkan": [],
+        "bersyarat": [
+          "Pengelolaan lingkungan jasa/perdagangan",
+          "Kegiatan Penangkapan Ikan menggunakan kapal, alat tangkap, dan alat penangkapan ikan yang diperbolehkan pada jalur I WPP 714, 715 dan 718",
+          "Kegiatan Budidaya Laut",
+          "Kegiatan Industri Maritim",
+          "Kegiatan pelabuhan",
+          "Penempatan sarana prasarana umum",
+          "Penelitian atau pendidikan",
+          "Kegiatan budaya atau adat",
+          "Rehabilitasi ekosistem",
+          "Pembangunan Sarana Bantu Navigasi Pelayaran (SBNP)",
+          "Penempatan pelindung pantai",
+          "Pengelolaan Energi"
+        ],
+        "tidak_diperbolehkan": [
+          "karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Kegiatan yang mengancam kelestarian sumber daya ikan atau habitat penting biota laut",
+          "Penangkapan ikan yang dilindungi dan/atau terancam punah",
+          "Penangkapan ikan menggunakan kapal, alat tangkap, dan alat bantu penangkapan ikan yang tidak diperbolehkan dioperasikan",
+          "Penempatan bangunan dan/atau instalasi di laut yang tidak sesuai dengan peruntukan zona",
+          "Pembuangan (dumping)",
+          "Pembangunan fasilitas energi",
+          "Kegiatan pengelolaan energi",
+          "Operasi bandar udara",
+          "Kegiatan pemindahan muatan dan atau bahan bakar (cargo and fuel transferring)",
+          "Pengintroduksian organisme hasil rekayasa genetika ke lingkungan",
+          "Pengambilan terumbu karang",
+          "Perluasan areal fasilitas umum yang tidak sesuai daya dukung",
+          "Pembudidayaan ikan untuk kepentingan industri",
+          "Usaha budidaya perikanan terapung (jaring apung dan pen sistem seluas > 5 Ha dengan jumlah 1000 unit)",
+          "Pengangkutan ikan hasil budidaya dengan Kapal Pengangkut Ikan Hidup Berbendera Asing",
+          "Pengangkutan ikan hasil penangkapan dengan Kapal Pengangkut Ikan Hidup Berbendera Asing",
+          "Bongkar muat ikan oleh kapal asing",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Eksplorasi mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Eksploitasi (Operasi Produksi) Batubara",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Eksploitasi (Operasi Produksi) Mineral bukan logam atau mineral batuan",
+          "Eksploitasi (Operasi Produksi) Mineral radioaktif",
+          "Penempatan tailing (bahan yang tertinggal setelah pemisahan fraksi) di bawah laut",
+          "Pengolahan & Pemurnian Batubara",
+          "Pengolahan & Pemurnian Mineral logam",
+          "Pengolahan & Pemurnian Mineral bukan logam atau mineral batuan",
+          "Pengolahan & Pemurnian Mineral radioaktif",
+          "Pembangunan terminal peti kemas",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan terminal roro",
+          "Pembangunan Tempat perbaikan kapal",
+          "Penempatan kapal mati",
+          "Uji coba kapal",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan : dock/slipway, bengkel dan tempat perbaikan jaring",
+          "Usaha bongkar muat barang : pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Usaha tally mandiri : kegiatan cargodoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Pengelolaan (TUKS) di dalam DLKR/DLKP pelabuhan pengumpan regional",
+          "Operasi Kapal Angkutan Penyeberangan Dalam Provinsi",
+          "Kegiatan penerbangan diatas alur kepulauan",
+          "Penempatan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Penetapan rute pelayaran internasional",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai",
+          "Usaha pelayanan jasa pemanduan kapal",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Pembangunan Fasilitas Infrastruktur (Saluran Primer, Sekunder dan pantai air) Industri penggaraman",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah non B3",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Kegiatan pembuatan alat- alat maritim lainnya",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alatalat terapung saja",
+          "Kegiatan pembuatan mesin- mesin utama/pembantu",
+          "Kegiatan pembuatan alat- alat perlengkapan lain yang khusus dipergunakan dalam kapal"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pengelolaan Ekosistem Pesisir (Cadangan Karbon Biru)",
+        "halaman": 180,
+        "kode_zona": {
+          "KPU-EK-001": [
+            127.08395666666667,
+            -3.3695316666666666
+          ],
+          "KPU-EK-002": [
+            127.06974972222221,
+            -3.344912777777778
+          ]
+        },
+        "diperbolehkan": [
+          "Rehabilitasi ekosistem pesisir (mangrove, karang, dan lamun)",
+          "Rehabilitasi vegetasi pesisir non mangrove",
+          "Usaha wisata edukasi",
+          "Usaha wisata bentang alam",
+          "Usaha wisata alam perairan",
+          "Jasa Wisata Tirta (bahari)",
+          "Pengambilan foto/video bawah laut",
+          "Penanaman tanaman bakau dan nipah",
+          "Aktivitas Budaya/Adat",
+          "Perlindungan"
+        ],
+        "bersyarat": [
+          "Usaha wisata olahraga tirta",
+          "Usaha wisata dayung",
+          "Usaha dermaga wisata",
+          "Usaha kegiatan hiburan dan rekreasi",
+          "Usaha angkutan laut wisata dalam negeri",
+          "Usaha jasa perjalanan wisata",
+          "Usaha wisata ekstrim (beresiko tinggi)",
+          "Usaha restoran di atas laut",
+          "Usaha vila (cottage) di atas laut"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove",
+          "Kegiatan penebangan dan pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pengelolaan Ekosistem Pesisir (Cadangan Karbon Biru)",
+        "halaman": 181,
+        "kode_zona": {
+          "KPU-EK-003": [
+            null,
+            null
+          ],
+          "KPU-EK-004": [
+            128.2275575,
+            -3.6322083333333333
+          ],
+          "KPU-EK-005": [
+            128.24318194444444,
+            -3.63622
+          ],
+          "KPU-EK-006": [
+            128.43158138888887,
+            -3.5255758333333334
+          ]
+        },
+        "diperbolehkan": [
+          "keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Penelitian kegiatan konservasi",
+          "Penelitian dan pengembangan perikanan",
+          "Pendidikan kegiatan konservasi",
+          "Survei dan/atau penelitian ilmiah",
+          "Penanaman mangrove"
+        ],
+        "bersyarat": [
+          "Usaha wisata snorkeling",
+          "Usaha wisata memancing",
+          "Usaha wisata alam perairan",
+          "Jasa Wisata Tirta (bahari)",
+          "Pembangunan tracking mangrove",
+          "Pemungutan hasil hutan bukan kayu pada hutan mangrove (madu; getah; daun; buah dan biji; tanin; ikan; hasil hutan bukan kayu lainnya)",
+          "Pengambilan benda muatan kapal tenggelam",
+          "Usaha jasa perjalanan wisata",
+          "Penangkapan ikan oleh nelayan tradisional setempat",
+          "Pengangkutan ikan hasil budidaya dengan kapal nelayan kecil",
+          "Penempatan Sarana Bantu Navigasi Pelayaran",
+          "Penempatan tambatan perahu dengan metode ramah lingkungan sesuai peruntukan zona",
+          "Penempatan titik labuh (mooring buoy)",
+          "Budidaya laut atau payau skala kecil",
+          "Penangkapan ikan oleh nelayan tradisional",
+          "Penggelaran pipa/kabel bawah laut",
+          "Usaha pemanfaatan jasa penyimpanan dan penyerapan karbon",
+          "Pengelolaan Energi"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Reklamasi (pengerukan, pengurugan, dan/atau pengeringan lahan)",
+          "Kegiatan jasa/perdagangan",
+          "Penggunaan galah untuk mendorong perahu",
+          "Pengambilan terumbu karang",
+          "Penangkapan ikan dengan kapal '",
+          "Penangkapan ikan menggunakan alat penangkapan yang mengganggu dan merusak keberlanjutan sumber daya ikan, antara lain",
+          "jaring tarik (dogol, pair seine, cantrang, lampara dasar)",
+          "jaring hela (pukat hela dasar berpalang, pukat hela dasar udang, pukat hela kembar berpapan, pukat hela dasar dua kapal, pukat hela pertengahan dua kapal, pukat ikan)",
+          "jaring insang (perangkap ikan peloncat)",
+          "API lainnya (muro ami)",
+          "Perburuan dan/atau penangkapan mamalia laut, termasuk paus",
+          "Penangkapan Ikan dengan cara merusak keberlanjutan sumber daya ikan yang menggunakan bahan peledak, racun, listrik, dan/atau alat atau bahan berbahaya lainnya",
+          "Pelepasan jangkar",
+          "Kegiatan bandar udara",
+          "Kegiatan angkutan udara di atas perairan",
+          "Budidaya laut skala menengah dan besar",
+          "Usaha budidaya perikanan terapung (jaring apung dan pen sistem seluas ≥ 5 Ha dengan jumlah 1000 unit",
+          "Pengambilan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Pembudidayaan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Budidaya Ikan hasil rekayasa genetik",
+          "Penempatan Keramba Jaring Apung",
+          "Pemasangan rumpon perairan dalam",
+          "Pemasangan rumpon perairan dangkal",
+          "Bongkar muat ikan",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Eksplorasi mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Pengerukan perairan dengan capital dredging",
+          "Pengerukan perairan laut dengan capital dredging yang memotong material karang dan/atau batu",
+          "Kegiatan pertambangan pasir, mineral dan batubara",
+          "Eksploitasi (Operasi Produksi) Batubara",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Eksploitasi (Operasi Produksi) Mineral bukan logam atau mineral batuan",
+          "Eksploitasi (Operasi Produksi) Mineral radioaktif",
+          "Pengolahan & Pemurnian Batubara",
+          "Pengolahan & Pemurnian Mineral logam",
+          "Pengolahan & Pemurnian Mineral bukan logam atau mineral batuan",
+          "Pengolahan & Pemurnian Mineral radioaktif",
+          "Penempatan tailing (bahan yang tertinggal setelah pemisahan fraksi) di bawah laut",
+          "Penempatan tempat alih muat antar kapal",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan terminal peti kemas",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan terminal roro",
+          "Pembangunan Tempat perbaikan kapal",
+          "Penempatan kapal mati",
+          "Usaha tally mandiri : kegiatan cargodoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Usaha jasa penyewaan peralatan angkutan laut",
+          "Pengelolaan (TUKS) di dalam DLKR/DLKP pelabuhan pengumpan regional",
+          "Pembuangan (dumping)",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah non B3",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alat-alat terapung saja",
+          "Kegiatan pembuatan mesinmesin utama/pembantu",
+          "Kegiatan pembuatan alat- alat perlengkapan lain yang khusus dipergunakan dalam kapal",
+          "Kegiatan pembuatan alat- alat maritim lainnya",
+          "Kegiatan pekerjaan penyelaman (diving works dalam rangka industri maritim)",
+          "Kegiatan pemindahan muatan dan atau bahan bakar (cargo and fuel transferring)",
+          "Penarikan (Towing)",
+          "Pengapungan (refloating)",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pengelolaan Energi",
+        "halaman": 186,
+        "kode_zona": {
+          "KPU-EN-001": [
+            127.77683555555555,
+            -3.1581105555555555
+          ],
+          "KPU-EN-002": [
+            127.83835111111111,
+            -3.1564733333333335
+          ],
+          "KPU-EN-003": [
+            128.33614305555557,
+            -3.5524391666666664
+          ],
+          "KPU-EN-004": [
+            134.50103972222223,
+            -5.529223333333333
+          ],
+          "KPU-EN-005": [
+            134.41167805555557,
+            -5.997953333333333
+          ],
+          "KPU-EN-006": [
+            134.26099444444444,
+            -6.118703055555555
+          ]
+        },
+        "diperbolehkan": [
+          "Penempatan fasilitas penunjang pengelolaan energi sesuai daya dukung dan daya tampung lingkungan",
+          "Penempatan pipa/kabel bawah laut untuk kepentingan pengelolaan energi",
+          "Kegiatan yang mendukung zona energi lainnya",
+          "Penanaman tanaman bakau dan nipah",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan"
+        ],
+        "bersyarat": [
+          "Kegiatan Wisata",
+          "Kegiatan Penelitian/Pendidikan",
+          "Kegiatan Budaya/Adat",
+          "Kegiatan Rehabilitasi Ekosistem",
+          "Penempatan pelindung pantai",
+          "Peletakan Sarana Bantu Navigasi Pelayaran",
+          "Kegiatan pengelolaan energi; dan",
+          "Penelitian kegiatan konservasi",
+          "Pendidikan kegiatan konservasi",
+          "Survei dan/atau penelitian ilmiah",
+          "Pelepasan jangkar",
+          "Pengambilan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Penangkapan ikan dengan kapasitas kapal ≤ 10 GT",
+          "Penelitian dan pengembangan perikanan",
+          "Penempatan dan/atau pemancangan kabel atau tiang serta sarana di laut",
+          "Pembangunan breakwater (pemecah gelombang)",
+          "Pembangunan turap (revetment), pembangunan groin",
+          "Pembangunan dan pengoperasian Jetty",
+          "Usaha pelayanan jasa pemanduan kapal",
+          "Pembangunan Fasilitas Infrastruktur (Saluran Primer, Sekunder dan pantai air)",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alat alat terapung saja",
+          "Kegiatan pekerjaan penyelaman (diving works)",
+          "Kegiatan membantu pekerjaan teknis terhadap kapal-kapal yang masih mengapung tetapi sedang mendapat malapetaka",
+          "Pengelolaan Energi",
+          "Pembangunan, pemindahan, dan/atau pembongkaran bangunan atau instalasi",
+          "Penempatan tambat labuh",
+          "Penetapan tempat alih muat antar kapal",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Kegiatan pemindahan muatan dan atau bahan bakar (cargo and fuel transferring)",
+          "Penarikan (Towing)",
+          "Pengapungan (refloating)"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove",
+          "Kegiatan penebangan dan pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Reklamasi (pengerukan, pengurugan, dan/atau pengeringan lahan)",
+          "Penangkapan ikan yang dilindungi dan/atau terancam punah",
+          "Pengembangan pemukiman",
+          "Kegiatan penambangan pasir laut",
+          "Kegiatan penambangan mineral",
+          "Kegiatan penangkapan ikan",
+          "Kegiatan budidaya laut",
+          "Kegiatan industri maritim",
+          "Kegiatan bandar udara",
+          "Kegiatan angkutan udara di atas perairan",
+          "Kegiatan jasa/perdagangan",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure; Kegiatan riset atau survei hidrografi oleh kapal asing",
+          "Pemasangan rumpon",
+          "Kegiatan pengangkutan ikan",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Pengerukan perairan laut dengan capital dredging yang memotong material karang dan/atau batu",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Pengolahan dan Pemurnian Mineral logam",
+          "Pembangunan terminal peti kemas",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan terminal Roro",
+          "Pembangunan tempat perbaikan kapal",
+          "Penempatan kapal mati",
+          "Pembangunan tempat pendaratan ikan",
+          "Penempatan alur pelayaran dari dan ke pelabuhan perikanan",
+          "Uji coba kapal",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan",
+          "Usaha pelayanan logistik dan perbekalan kapal perikanan",
+          "Pembangunan dermaga perikanan",
+          "Usaha bongkar muat barang :pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Usaha tally mandiri : kegiatan cargodoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Pengerukan di wilayah perairan Pelabuhan Pengumpan Regional dan Lokal",
+          "Reklamasi di wilayah perairan Pelabuhan",
+          "Usaha angkutan laut badan usaha pada lintas pelabuhan antar kab/kota dalam Provinsi",
+          "Usaha angkutan laut pelayaran rakyat atau badan usaha pada lintas pelabuhan antar kab/kota, antar provinsi dan pelabuhan internasional",
+          "Usaha jasa angkutan perairan pelabuhan",
+          "Usaha jasa penyewaan peralatan angkutan laut",
+          "Pengelolaan (TUKS) di dalam DLKR/DLKP pelabuhan pengumpan regional",
+          "Operasi Kapal Angkutan Penyeberangan Dalam Provinsi",
+          "Kegiatan penerbangan diatas alur kepulauan",
+          "Penempatan rute pelayaran internasional",
+          "Konstruksi Pertambangan Garam",
+          "Industri penggaraman",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan pembuatan mesin mesin utama/pembantu",
+          "Kegiatan pembuatan alat alat perlengkapan lain yang khusus dipergunakan dalam kapal",
+          "Kegiatan pembuatan alat alat maritim lainnya",
+          "Kegiatan budidaya biota laut untuk kepentingan industri Biofarmakologi /Bioteknologi Laut",
+          "Pengintroduksian organisme hasil rekayasa genetika ke lingkungan",
+          "Pembangunan stasiun pengisian bahan bakar nelayan",
+          "Pengerukan perairan dengan capital dredging",
+          "Penggunaan galah untuk mendorong perahu",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Latihan militer",
+          "Pemungutan hasil hutan bukan kayu pada hutan mangrove (madu; getah; daun; buah dan biji; tanin; ikan; hasil hutan bukan kayu lainnya)",
+          "Pengambilan terumbu karang",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Fasilitas Umum",
+        "halaman": 191,
+        "kode_zona": {
+          "KPU-FU-001": [
+            128.11381916666667,
+            -3.689528611111111
+          ],
+          "KPU-FU-002": [
+            126.70548000000001,
+            -3.8546216666666666
+          ]
+        },
+        "diperbolehkan": [
+          "Penataan lokasi fasilitas umum",
+          "Kegiatan wisata sesuai daya dukung dan daya tampung lingkungan",
+          "Usaha wisata edukasi",
+          "Usaha wisata dayung",
+          "Usaha wisata selam"
+        ],
+        "bersyarat": [
+          "Kegiatan Budidaya Laut",
+          "Kegiatan Rehabilitasi Ekosistem",
+          "Penempatan pelindung pantai",
+          "Peletakan Sarana Bantu Navigasi Pelayaran",
+          "Kegiatan"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Fasilitas Umum",
+        "halaman": 192,
+        "kode_zona": {
+          "KPU-FU-003": [
+            null,
+            null
+          ],
+          "KPU-FU-004": [
+            128.18103944444442,
+            -3.6622469444444445
+          ],
+          "KPU-FU-005": [
+            128.16928694444442,
+            -3.702073888888889
+          ],
+          "KPU-FU-006": [
+            128.15550166666668,
+            -3.7071300000000003
+          ],
+          "KPU-FU-007": [
+            132.7428711111111,
+            -5.642294166666666
+          ]
+        },
+        "diperbolehkan": [
+          "Usaha kegiatan hiburan dan rekreasi",
+          "Usaha jasa perjalanan wisata",
+          "Usaha wisata snorkeling",
+          "Usaha wisata tontonan",
+          "Usaha wisata berenang",
+          "Usaha wisata alam perairan",
+          "Jasa Wisata Tirta (bahari)",
+          "Penempatan tambat labuh",
+          "Kegiatan penangkapan ikan",
+          "Kegiatan penelitian/Pendidikan",
+          "Penataan lokasi fasilitas umum",
+          "Penanaman tanaman bakau dan nipah",
+          "Usaha dermaga wisata",
+          "Usaha dermaga perikanan",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Penelitian kegiatan konservasi",
+          "Pendidikan kegiatan konservasi",
+          "Survei dan/atau penelitian ilmiah",
+          "Penempatan kolam pendidikan maritim",
+          "Kegiatan keagamaan",
+          "Budidaya mangrove",
+          "Penelitian dan pengembangan perikanan",
+          "Kegiatan membantu pekerjaan teknis terhadap kapal-kapal yang masih mengapung tetapi sedang mendapat malapetaka",
+          "Mitigasi bencana dan penanganan kondisi darurat di laut"
+        ],
+        "bersyarat": [
+          "Jasa/Perdagangan",
+          "Usaha wisata memancing",
+          "Usaha wisata selancar",
+          "Usaha wisata olahraga tirta",
+          "Usaha wisata ekstrim (beresiko tinggi)",
+          "Usaha angkutan laut wisata dalam negeri",
+          "Usaha angkutan laut wisata",
+          "Usaha vila (cottage) di atas laut",
+          "Usaha restoran di atas laut",
+          "Pengembangan kuliner makanan laut",
+          "Pendidikan dan penelitian",
+          "Pengambilan foto/video bawah laut",
+          "Pemungutan hasil hutan bukan kayu pada hutan mangrove (madu; getah; daun; buah dan biji; tanin; ikan; hasil hutan bukan kayu lainnya)",
+          "Penempatan sarana prasarana umum",
+          "Pengangkatan benda muatan kapal tenggelam",
+          "Pengambilan air laut untuk kegiatan budidaya perikanan",
+          "Usaha pembudidayaan ikan laut",
+          "Pengambilan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Pembudidayaan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Pengangkutan ikan hasil budidaya dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Pengangkutan ikan hasil budidaya dengan Kapal nelayan kecil",
+          "Pemasangan Keramba Jaring Apung pembudidaya skala kecil",
+          "Penempatan kapal, alat tangkap, dan alat bantu penangkapan ikan sesuai peraturan perundang- undangan",
+          "Pembangunan pembangkitan, transmisi, distribusi dan penjualan tenaga listrik",
+          "Pembangunan, pemindahan, dan/atau pembongkaran bangunan atau instalasi pipa di perairan",
+          "Penanaman kabel",
+          "Pembangunan kabel telekomunikasi Local Port Service (LPS)",
+          "Penanaman dan atau pemancangan kabel atau tiang serta sarana di laut",
+          "Penetapan tempat alih muat antar kapal",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan tempat pendaratan ikan",
+          "Pembangunan pelindung pantai",
+          "Penetapan alur pelayaran dari dan ke pelabuhan",
+          "Usaha pelayanan logistik dan perbekalan kapal perikanan",
+          "Pembangunan dermaga perikanan",
+          "Usaha angkutan laut badan usaha pada lintas pelabuhan antar kab/kota dalam Provinsi",
+          "Usaha jasa angkutan perairan pelabuhan",
+          "Usaha jasa penyewaan peralatan angkutan laut",
+          "Kegiatan riset atau survei hidrografi",
+          "Pengangkutan dan penjualan Garam",
+          "Kegiatan pekerjaan penyelaman (diving works dalam rangka industri maritim)",
+          "Penarikan (Towing)",
+          "Pengapungan (refloating)",
+          "pengambilan air laut selain energi",
+          "Kegiatan budidaya biota laut untuk kepentingan industri Biofarmakologi / Bioteknologi Laut",
+          "Pipa intake dan ouitake industri garam dan perikanan budidaya",
+          "Latihan militer",
+          "Penempatan bangunan dan/atau instalasi di laut sesuai peraturan perundang- undangan",
+          "Pembangunan stasiun pengisian bahan bakar nelayan",
+          "Bongkar muat ikan",
+          "Pengelolaan energi"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Penangkapan ikan yang dilindungi dan/atau terancam punah",
+          "Pengambilan terumbu karang",
+          "Perluasan areal fasilitas umum yang tidak sesuai daya dukung",
+          "Penangkapan ikan dengan kapasitas kapal > 10 GT",
+          "Pembudidayaan ikan untuk kepentingan industri",
+          "Usaha budidaya perikanan terapung (jaring apung dan pen sistem seluas > 5 Ha dengan jumlah 1000 unit)",
+          "Pengangkutan ikan hasil budidaya dengan Kapal Pengangkut Ikan Hidup Berbendera Asing",
+          "Pengangkutan ikan hasil penangkapan dengan Kapal Pengangkut Ikan Hidup Berbendera Asing",
+          "Penangkapan ikan menggunakan sarana penangkapan yang tidak boleh dioperasikan sesuai peraturan perundang- undangan",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Eksplorasi mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Eksploitasi (Operasi Produksi) Batubara",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Eksploitasi (Operasi Produksi) Mineral bukan logam atau mineral batuan",
+          "Eksploitasi (Operasi Produksi) Mineral radioaktif",
+          "Pengolahan & Pemurnian Batubara",
+          "Pengolahan & Pemurnian Mineral logam",
+          "Pengolahan & Pemurnian Mineral bukan logam atau mineral batuan",
+          "Pengolahan & Pemurnian Mineral radioaktif",
+          "Penempatan tailing (bahan yang tertinggal setelah pemisahan fraksi) di bawah laut",
+          "Pembangunan terminal peti kemas",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan terminal roro",
+          "Pembangunan Tempat perbaikan kapal",
+          "Penempatan kapal mati",
+          "Uji coba kapal",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan : dock/slipway, bengkel dan tempat perbaikan jaring",
+          "Usaha bongkar muat barang : pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Usaha tally mandiri : kegiatan cargodoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Pengelolaan (TUKS) di dalam DLKR/DLKP pelabuhan pengumpan regional",
+          "Operasi Kapal Angkutan Penyeberangan Dalam Provinsi",
+          "Kegiatan penerbangan diatas alur kepulauan",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Kegiatan perikanan oleh kapal asing",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai",
+          "Usaha pelayanan jasa pemanduan kapal",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Pembangunan Fasilitas Infrastruktur (Saluran Primer, Sekunder dan pantai air) Industri penggaraman",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah non B3",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alat-alat terapung saja",
+          "Kegiatan pembuatan mesin- mesin utama/pembantu",
+          "Kegiatan pembuatan alat- alat perlengkapan lain yang khusus dipergunakan dalam kapal",
+          "Kegiatan pembuatan alat- alat maritim lainnya",
+          "Kegiatan pemindahan muatan dan atau bahan bakar (cargo and fuel transferring)",
+          "Pengintroduksian organisme hasil rekayasa genetika ke lingkungan"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pertahanan dan Keamanan",
+        "halaman": 196,
+        "kode_zona": {
+          "KPU-HK-001": [
+            128.23088444444446,
+            -3.6495972222222224
+          ],
+          "KPU-HK-002": [
+            128.23974916666666,
+            -3.6406619444444446
+          ]
+        },
+        "diperbolehkan": [
+          "Penelitian dan pengembangan perikanan kelautan",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Rehabilitasi ekosistem",
+          "Penanaman tanaman bakau dan nipah",
+          "Perlindungan keanekaragaman hayati",
+          "Survei dan/atau penelitian ilmiah",
+          "Mitigasi Bencana dan Kondisi darurat di laut",
+          "Latihan militer",
+          "Pembangunan pendukung pos militer",
+          "Kegiatan lainnya yang boleh dilaksanakan di bidang pertahanan keamanan sesuai peraturan perundang- undangan",
+          "Penempatan fasilitas"
+        ],
+        "bersyarat": [
+          "Budidaya laut oleh nelayan kecil",
+          "Penangkapan ikan oleh nelayan kecil",
+          "Wisata",
+          "Pengambilan benda muatan kapal tenggelam",
+          "Kegiatan budaya, adat, dan kearifan lokal masyarakat",
+          "Lalu lintas Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Penempatan instalasi militer di laut",
+          "Pengambilan air laut untuk kegiatan budidaya perikanan",
+          "Kegiatan lainnya yang diperbolehkan terlaksana secara terbatas dengan izin di bidang pertahanan keamanan sesuai peraturan perundang-undangan",
+          "Kegiatan penelitian atau"
+        ],
+        "tidak_diperbolehkan": [
+          "Aktivitas yang mengakibatkan pencemaran lingkungan",
+          "Penangkapan ikan yang dilindungi dan/atau terancam punah",
+          "Aktivitas yang menyebabkan kerusakan ekosistem pesisir (lamun, mangrove, dan terumbu karang)",
+          "Usaha vila (cottage) di atas laut",
+          "Usaha restoran di atas laut",
+          "Pengambilan terumbu karang",
+          "Pemungutan hasil hutan bukan kayu pada hutan mangrove (madu; getah; daun; buah dan biji; tanin; ikan; hasil hutan bukan kayu lainnya)",
+          "Usaha budidaya perikanan terapung (jaring apung dan pen system seluas ≥ 5 Ha dengan jumlah 1000 unit",
+          "Pengangkutan ikan hasil budidaya dengan Kapal Pengangkut Ikan Hidup Berbendera Asing",
+          "Penangkapan ikan menggunakan pukat hela (trawls), payang, cantrang, jaring lampara, dogol, dan sejenisnya",
+          "Pembangunan Terminal Regasifikasi LNG",
+          "Pembangunan TPI",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan : dock/slipway, bengkel dan tempat perbaikan jaring",
+          "Usaha pelayanan logistik dan perbekalan kapal perikanan",
+          "Usaha bongkar muat barang: pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Usaha tally mandiri: kegiatan cargodoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Pengerukan di wilayah perairan Pelabuhan Pengumpan Regional dan Lokal",
+          "Pengelolaan (TUKS) di dalam DLKR/DLKP pelabuhan pengumpan regional",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah non B3",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alatalat terapung saja",
+          "Kegiatan budidaya biota laut untuk kepentingan industri Biofarmakologi / Bioteknologi Laut",
+          "Pengintroduksian organisme hasil rekayasa genetika ke lingkungan",
+          "Pembangunan stasiun pengisian bahan bakar nelayan",
+          "Penempatan bangunan dan instalasi di laut yang tidak memenuhi persyaratan teknis sesuai peraturan yang berlaku Kegiatan lainnya yang tidak boleh dilakukan sesuai peraturan perundang- undangan",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai",
+          "Kegiatan Bandar Udara"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pertambangan Mineral dan Batu Bara",
+        "halaman": 200,
+        "kode_zona": {
+          "MB-001": [
+            null,
+            null
+          ],
+          "KPU-MB-002": [
+            129.5677988888889,
+            -3.4554725000000004
+          ],
+          "KPU-MB-003": [
+            133.95707166666665,
+            -6.470325555555556
+          ]
+        },
+        "diperbolehkan": [
+          "penunjang pertambangan mineral dan batubara",
+          "Penyaringan mineral laut dengan metode ramah lingkungan",
+          "Eksplorasi mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Kegiatan membantu pekerjaan teknis terhadap kapal-kapal yang masih mengapung tetapi sedang mendapat malapetaka"
+        ],
+        "bersyarat": [
+          "pendidikan",
+          "Survei dan/atau penelitian ilmiah",
+          "Usaha wisata selam",
+          "Usaha wisata memancing",
+          "Usaha wisata selancar",
+          "Usaha wisata olahraga tirta",
+          "Usaha dermaga wisata",
+          "Usaha kegiatan hiburan dan rekreasi",
+          "Usaha wisata ekstrim (beresiko tinggi)",
+          "Usaha angkutan laut wisata dalam negeri",
+          "Usaha angkutan laut internasional wisata",
+          "Usaha jasa perjalanan wisata",
+          "Usaha vila (cottage) di atas laut",
+          "Usaha wisata snorkeling",
+          "Usaha wisata tontonan",
+          "Usaha wisata berenang",
+          "Usaha restoran di atas laut",
+          "Usaha wisata alam perairan",
+          "Jasa Wisata Tirta (bahari)",
+          "Pengambilan foto/video bawah laut",
+          "Kegiatan Budaya atau adat",
+          "Rehabilitasi Ekosistem pesisir",
+          "Penangkapan ikan dengan kapasitas kapal < 30GT",
+          "Budidaya Laut skala kecil",
+          "Penempatan pelindung pantai",
+          "Peletakan sarana bantu navigasi pelayaran",
+          "Penempatan bangunan dan instalasi sesuai peruntukan zona",
+          "Pengambilan barang- barang purbakala",
+          "Pengambilan barang- barang selain barang purbakala",
+          "Pelepasan jangkar",
+          "Pengangkutan ikan hasil budidaya dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Pengangkutan ikan hasil budidaya dengan Kapal nelayan kecil",
+          "Pemasangan rumpon perairan dangkal",
+          "Pengangkutan ikan hasil penangkapan dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Penangkapan ikan skala kecil",
+          "Penelitian dan pengembangan perikanan",
+          "Penempatan tailing (bahan yang tertinggal setelah pemisahan fraksi) di bawah laut pada jarak lebih dari 4 mil laut dan kedalaman lebih dari 200 meter di bawah permukaan laut",
+          "Penanaman dan atau pemancangan kabel atau tiang serta sarana di laut",
+          "Pembangunan Sarana Bantu Navigasi Pelayaran (SBNP)",
+          "Penetapan rute pelayaran internasional",
+          "Penarikan (Towing)",
+          "Pengapungan (refloating)",
+          "Latihan militer",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Penelitian kegiatan konservasi",
+          "Pendidikan kegiatan konservasi",
+          "Eksploitasi (Operasi Produksi) Batubara",
+          "Eksploitasi (Operasi Produksi) Mineral radioaktif",
+          "Pengolahan & Pemurnian Batubara",
+          "Pengolahan & Pemurnian Mineral radioaktif",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Eksploitasi (Operasi Produksi) Mineral bukan logam atau mineral batuan",
+          "Pengolahan & Pemurnian Mineral logam",
+          "Pengolahan & Pemurnian Mineral bukan logam atau mineral batuan",
+          "Pembangunan tempat pendaratan",
+          "Pengelolaan energi"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan Angkutan Udara Diatas Perairan",
+          "Kegiatan Jasa/Perdagangan",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove",
+          "Kegiatan penebangan dan pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Reklamasi (pengerukan, pengurugan, dan/atau pengeringan lahan)",
+          "Penangkapan biota laut yang dilindungi dan/atau terancam punah",
+          "Penangkapan ikan menggunakan",
+          "Pengembangan pemukiman",
+          "Pengambilan foto/video bawah laut",
+          "Penangkapan ikan dengan kapasitas kapal ≥ 30GT",
+          "Pengambilan terumbu karang",
+          "Pembudidayaan ikan skala menengah dan besar",
+          "Pemasangan rumpon perairan dalam",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Kegiatan industri maritim",
+          "Penetapan tempat labuh",
+          "Penetapan tempat alih muat antar kapal",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan terminal peti kemas",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan terminal ro- ro",
+          "Pembangunan tempat perbaikan kapal",
+          "Penempatan kapal mati",
+          "Penetapan alur pelayaran dari dan ke pelabuhan",
+          "Pemasangan fasilitas turbin generator energi",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pelabuhan Laut",
+        "halaman": 202,
+        "kode_zona": {
+          "KPU-PL-001": [
+            126.12709583333333,
+            -3.150948888888889
+          ],
+          "KPU-PL-002": [
+            126.16147083333334,
+            -3.1726866666666664
+          ]
+        },
+        "diperbolehkan": [
+          "Pembangunan fasilitas pokok dan revitalisasi dermaga sesuai dengan ketentuan peraturan perundang- undangan di bidang kepelabuhanan"
+        ],
+        "bersyarat": [
+          "Pengerukan kolam dan alur pelabuhan",
+          "Pengelolaan limbah yang berasal dari kegiatan rutin operasional kapal dan/atau kegiatan penunjang"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang mengganggu dan/atau merusak fungsi fasilitas pokok dan fasilitas penunjang pelabuhan",
+          "Kegiatan yang mengganggu dan/atau merusak sarana"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pelabuhan Laut",
+        "halaman": 203,
+        "kode_zona": {
+          "KPU-PL-003": [
+            126.21254027777778,
+            -3.1820613888888887
+          ],
+          "KPU-PL-004": [
+            126.2248963888889,
+            -3.1723241666666664
+          ],
+          "KPU-PL-005": [
+            126.23165555555556,
+            -3.1349555555555555
+          ],
+          "KPU-PL-006": [
+            126.38110333333333,
+            -3.0942869444444447
+          ],
+          "KPU-PL-007": [
+            126.50465388888888,
+            -3.0764872222222226
+          ],
+          "KPU-PL-008": [
+            126.54238111111111,
+            -3.0713758333333336
+          ],
+          "KPU-PL-009": [
+            126.88496861111112,
+            -3.1184641666666666
+          ],
+          "KPU-PL-010": [
+            127.08453722222222,
+            -3.273025
+          ],
+          "KPU-PL-011": [
+            127.07383583333333,
+            -3.3257999999999996
+          ],
+          "KPU-PL-012": [
+            127.11022305555555,
+            -3.3802125
+          ],
+          "KPU-PL-013": [
+            127.12899527777778,
+            -3.380285833333333
+          ],
+          "KPU-PL-014": [
+            127.25100472222222,
+            -3.4406425
+          ],
+          "KPU-PL-015": [
+            127.25138277777778,
+            -3.5189594444444445
+          ],
+          "KPU-PL-016": [
+            127.24743111111111,
+            -3.577150833333333
+          ],
+          "KPU-PL-017": [
+            127.24314944444444,
+            -3.6170316666666666
+          ],
+          "KPU-PL-018": [
+            null,
+            null
+          ],
+          "KPU-PL-019": [
+            126.95945916666668,
+            -3.7632083333333335
+          ],
+          "KPU-PL-020": [
+            126.72404888888889,
+            -3.853987777777778
+          ],
+          "KPU-PL-021": [
+            126.51123638888889,
+            -3.7804380555555555
+          ],
+          "KPU-PL-022": [
+            126.39732361111112,
+            -3.7144747222222225
+          ],
+          "KPU-PL-023": [
+            126.17993,
+            -3.609526111111111
+          ],
+          "KPU-PL-024": [
+            126.01769805555556,
+            -3.3367758333333333
+          ],
+          "KPU-PL-025": [
+            126.0156475,
+            -3.208469444444445
+          ],
+          "KPU-PL-026": [
+            126.0166786111111,
+            -3.187510833333333
+          ],
+          "KPU-PL-027": [
+            126.05879055555555,
+            -3.145566111111111
+          ],
+          "KPU-PL-028": [
+            127.15908777777778,
+            -3.8291105555555554
+          ],
+          "KPU-PL-029": [
+            127.1777175,
+            -3.8205891666666663
+          ],
+          "KPU-PL-030": [
+            126.01087861111111,
+            -3.343112777777778
+          ],
+          "KPU-PL-031": [
+            126.90824055555557,
+            -3.779155
+          ],
+          "KPU-PL-032": [
+            127.59037277777777,
+            -3.3485725
+          ],
+          "KPU-PL-033": [
+            127.6551613888889,
+            -3.2345111111111113
+          ]
+        },
+        "diperbolehkan": [
+          "Penempatan dan/atau pemasangan sarana bantu navigasi pelayaran",
+          "Pemeliharaan sarana bantu navigasi pelayaran",
+          "Pemeliharan lebar dan kedalaman alur",
+          "Penyelenggaraan kenavigasian pada Alur Pelayaran",
+          "Pelaksanaan hak lintas alur Laut kepulauan",
+          "Pembatasan kecepatan kapal yang bernavigasi pada Alur Pelayaran yang berdekatan dengan alur migrasi biota Laut dan/atau melintasi Kawasan Konservasi di Laut sesuai dengan ketentuan peraturan perundang-undangan",
+          "Pelaksanaan hak dan kewajiban kapal dan pesawat udara asing dalam meiaksanakan hak lintas alur Laut kepulauan melalui alur Laut yang ditetapkan sesuai dengan ketentuan peraturan perundang-undangan di bidang pelayaran",
+          "Pengembangan pelabuhan sesuai rencana induk pelabuhan",
+          "Kegiatan sektor informal pendukung aktivitas pelabuhan",
+          "Kegiatan bongkar muat barang dan penumpang",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Kegiatan tambat-labuh",
+          "Pengembangan aktivitas kepelabuhanan lainnya"
+        ],
+        "bersyarat": [
+          "pelabuhan",
+          "Wisata bahari",
+          "Penelitian dan pendidikan",
+          "Penempatan pelindung pantai",
+          "Penempatan sarana prasarana umum",
+          "Penempatan fasilitas penunjang pelabuhan",
+          "Kegiatan pemanfaatan lainnya yang tidak merubah fungsi kawasan dan dilaksanakan sesuai ketentuan peraturan perundang-undangan",
+          "kegiatan yang diperbolehkan dengan syarat meliputi kegiatan selain yang diperbolehkan yang tidak mengganggu fungsi jaringan prasarana dan sarana Laut",
+          "Pengelolaan energi"
+        ],
+        "tidak_diperbolehkan": [
+          "bantu navigasi pelayaran",
+          "Pendirian, penempatan, dan/atau pembongkaran bangrrnan dan instalasi di Laut yang mengganggu Alur Pelayaran dan/ atau keselamatan pelayaran",
+          "Kegiatan yang mengganggu ruang udara bebas di atas perairan dan di bawah perairan yang berdampak pada keberadaan Alur Pelayaran",
+          "Kegiatan yang mengganggu fungsi sistem jaringan prasarana dan sarana Laut",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove",
+          "Kegiatan penebangan dan pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Penempatan rumpon",
+          "Penempatan Keramba jaring Apung",
+          "Kegiatan yang melanggar ketentuan hak lintas damai bagi kapal asing"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pelabuhan Perikanan",
+        "halaman": 217,
+        "kode_zona": {
+          "KPU-PP-001": [
+            127.12385666666665,
+            -3.3796916666666665
+          ],
+          "KPU-PP-002": [
+            126.0139638888889,
+            -3.3295852777777775
+          ],
+          "KPU-PP-003": [
+            126.6116886111111,
+            -3.824691944444444
+          ],
+          "KPU-PP-004": [
+            126.74791194444444,
+            -3.8480147222222225
+          ],
+          "KPU-PP-005": [
+            126.94440194444445,
+            -3.7725225
+          ],
+          "KPU-PP-006": [
+            128.13969722222222,
+            -2.9253377777777776
+          ],
+          "KPU-PP-007": [
+            128.19257333333334,
+            -3.069511388888889
+          ],
+          "KPU-PP-008": [
+            128.9158075,
+            -3.3313902777777775
+          ],
+          "KPU-PP-009": [
+            128.62175611111113,
+            -3.584843888888889
+          ],
+          "KPU-PP-010": [
+            128.3398486111111,
+            -3.5892327777777777
+          ],
+          "KPU-PP-011": [
+            128.34989611111112,
+            -3.5459891666666667
+          ],
+          "KPU-PP-012": [
+            128.32848055555556,
+            -3.5827444444444443
+          ],
+          "KPU-PP-013": [
+            127.94647833333333,
+            -3.669656388888889
+          ],
+          "KPU-PP-014": [
+            131.67719944444443,
+            -4.501257222222222
+          ],
+          "KPU-PP-015": [
+            129.89983055555555,
+            -4.517820555555556
+          ],
+          "KPU-PP-016": [
+            132.73975527777776,
+            -5.6083380555555555
+          ],
+          "KPU-PP-017": [
+            132.75100416666666,
+            -5.6744369444444445
+          ]
+        },
+        "diperbolehkan": [
+          "Pembangunan fasilitas pokok, fasilitas penunjang, dan revitalisasi dermaga sesuai dengan ketentuan peraturan perundang- undangan di bidang kepelabuhanan berdasarkani rencana induk pelabuhan yang telah ditetapkan",
+          "Penanaman tanaman bakau dan nipah",
+          "Budidaya mangrove",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Pelepasan jangkar",
+          "Penggunaan galah untuk mendorong perahu",
+          "Pengangkutan ikan hasil penangkapan dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Pengangkutan ikan hasil budidaya dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Bongkar muat ikan",
+          "Penelitian dan pengembangan perikanan",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Pengerukan perairan dengan capital dredging",
+          "Penetapan tambat labuh",
+          "Penetapan tempat alih muat antar kapal",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan Tempat perbaikan kapal",
+          "Penempatan kapal mati",
+          "Pembangunan Tempat Pendaratan Ikan",
+          "Penetapan alur pelayaran dari dan ke pelabuhan perikanan",
+          "Pembangunan dermaga perikanan",
+          "Kegiatan pemindahan muatan dan atau bahan bakar"
+        ],
+        "bersyarat": [
+          "Usaha dermaga wisata",
+          "Usaha kegiatan hiburan dan rekreasi",
+          "Penelitian kegiatan konservasi",
+          "Pendidikan kegiatan konservasi",
+          "Survei dan/atau penelitian ilmiah",
+          "Eksplorasi",
+          "Pembangunan, pemindahan, dan/atau pembongkaran bangunan atau instalasi di atas laut sesuai peruntukan zona",
+          "Pembangunan kabel telekomunikasi Local Port Service (LPS)",
+          "Penanaman dan atau pemancangan kabel atau tiang serta sarana di laut",
+          "Pembangunan Sarana Bantu Navigasi Pelayaran (SBNP)",
+          "Pembangunan breakwater (pemecah gelombang)",
+          "Pembangunan turap (revetment), pembangunan groin",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Kegiatan membantu pekerjaan teknis terhadap kapal-kapal yang masih mengapung tetapi sedang mendapat malapetaka",
+          "Penarikan (Towing)",
+          "Pengapungan (refloating)",
+          "Pengangkutan ikan hasil budidaya dengan Kapal nelayan kecil",
+          "Pembangunan terminal Roro",
+          "Pembangunan terminal peti kemas",
+          "Reklamasi di wilayah perairan Pelabuhan",
+          "Usaha angkutan laut badan usaha pada lintas pelabuhan"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang mengganggu dan/atau merusak fungsi fasilitas pokok dan fasilitas penunjang pelabuhan perikanan",
+          "Kegiatan yang mengganggu dan/atau merusak sarana bantu navigasi pelayaran",
+          "Pendirian, penempatan, dan/atau pembongkaran bangunan dan instalasi di Laut yang mengganggu Alur Pelayaran dan/ atau keselamatan pelayaran",
+          "Kegiatan yang mengganggu ruang udara bebas di atas perairan dan di bawah perairan yang berdampak pada keberadaan Alur Pelayaran",
+          "Kegiatan yang mengganggu fungsi sistem jaringan prasarana dan sarana laut",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove",
+          "Kegiatan penebangan dan pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pelabuhan Perikanan",
+        "halaman": 219,
+        "kode_zona": {
+          "KPU-PP-018": [
+            null,
+            null
+          ],
+          "KPU-PP-019": [
+            132.74093777777776,
+            -5.683685555555556
+          ],
+          "KPU-PP-020": [
+            132.72507333333334,
+            -5.918453055555556
+          ],
+          "KPU-PP-021": [
+            132.648505,
+            -5.7113072222222225
+          ],
+          "KPU-PP-022": [
+            134.25462861111112,
+            -5.8042925
+          ],
+          "KPU-PP-023": [
+            134.28031972222223,
+            -6.063315277777778
+          ],
+          "KPU-PP-024": [
+            134.12822722222222,
+            -6.459751666666667
+          ],
+          "KPU-PP-025": [
+            134.09051583333334,
+            -6.535451111111111
+          ],
+          "KPU-PP-026": [
+            134.84587222222223,
+            -6.302408611111111
+          ],
+          "KPU-PP-027": [
+            131.28735027777776,
+            -7.936721944444445
+          ],
+          "KPU-PP-028": [
+            127.7855825,
+            -8.151297222222222
+          ],
+          "KPU-PP-029": [
+            128.12411472222223,
+            -3.7611580555555557
+          ],
+          "KPU-PP-030": [
+            125.81428972222221,
+            -7.894219444444444
+          ],
+          "KPU-PP-031": [
+            128.18158888888888,
+            -3.6775088888888887
+          ]
+        },
+        "diperbolehkan": [
+          "(cargo and fuel transferring)",
+          "Pembangunan stasiun pengisian bahan bakar nelayan"
+        ],
+        "bersyarat": [
+          "antar kab/kota dalam Provinsi",
+          "Usaha angkutan laut pelayaran rakyat atau badan usaha pada lintas pelabuhan antar kab/kota dalam, antar provinsi dan pelabuhan internasional",
+          "Usaha jasa angkutan perairan pelabuhan",
+          "Usaha jasa penyewaan peralatan angkutan laut",
+          "Operasi Kapal Angkutan Penyeberangan Dalam Provinsi",
+          "Usaha pelayanan jasa pemanduan kapal",
+          "Pemungutan hasil hutan bukan kayu pada hutan mangrove (madu; getah; daun; buah dan biji; tanin; ikan; hasil hutan bukan kayu lainnya)",
+          "Usaha bongkar muat barang :pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Usaha tally mandiri : kegiatan cargodoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian Jetty",
+          "Pembangunan Fasilitas Infrastruktur (Saluran Primer, Sekunder dan pantai air)",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alat alat terapung saja",
+          "Uji coba kapal",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan",
+          "Usaha pelayanan logistik dan perbekalan kapal perikanan",
+          "Wisata sesuai daya dukung Kawasan wisata",
+          "Pengelolaan energi"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Penempatan Keramba jaring Apung",
+          "Kegiatan yang melanggar ketentuan hak lintas damai bagi kapal asing",
+          "Pengambilan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Pemasangan rumpon",
+          "Penangkapan ikan menggunakan kapal dan alat yang tidak sesuai dengan ketentuan peraturan perundang-undangan",
+          "Usaha pembudidayaan ikan laut (kerapu,kakap, baronang)",
+          "Pembudidayaan ikan untuk kepentingan industri",
+          "Usaha budidaya perikanan terapung (jaring apung)",
+          "Pembudidayaan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Budidaya Ikan hasil rekayasa genetik",
+          "Pemasangan Keramba Jaring Apung",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Pengolahan dan Pemurnian Mineral logam",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Kegiatan penerbangan diatas alur kepulauan",
+          "Konstruksi Pertambangan Garam",
+          "Industri penggaraman",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan pembuatan mesin mesin utama/pembantu",
+          "Kegiatan pembuatan alat alat perlengkapan lain yang khusus dipergunakan dalam kapal",
+          "Kegiatan pembuatan alat alat maritim lainnya",
+          "Kegiatan pekerjaan penyelaman (diving works)",
+          "Kegiatan budidaya biota laut untuk kepentingan industri Biofarmakologi /Bioteknologi Laut",
+          "Pengintroduksian organisme hasil rekayasa genetika ke lingkungan",
+          "Pembangunan pembangkitan, transmisi, distribusi dan penjualan tenaga listrik",
+          "Latihan militer",
+          "Pengambilan terumbu karang",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perikanan Tangkap",
+        "halaman": 221,
+        "kode_zona": {
+          "KPU-PT-001": [
+            130.02296361111112,
+            -2.9248641666666666
+          ]
+        },
+        "diperbolehkan": [
+          "Lalu Lintas Pelayaran/Penyeberangan",
+          "Penanaman tanaman bakau dan nipah",
+          "Budidaya mangrove",
+          "Rehabilitasi ekosistem pesisir"
+        ],
+        "bersyarat": [
+          "Kegiatan Jasa/Perdagangan",
+          "Permukiman Nelayan",
+          "Kegiatan Pelabuhan",
+          "Kegiatan Budidaya Laut",
+          "Kegiatan Industri Maritim"
+        ],
+        "tidak_diperbolehkan": [
+          "Penempatan dan/atau penggunaan kapal, alat tangkap, dan/atau alat bantu penangkapan pada Jalur I dan II Wilayah Pengelolaan Perikanan 714, 715 dan/atau"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Perikanan Tangkap",
+        "halaman": 222,
+        "kode_zona": {
+          "KPU-PT-002": [
+            129.589425,
+            -2.653980277777778
+          ],
+          "KPU-PT-003": [
+            126.65961194444445,
+            -2.939336388888889
+          ],
+          "KPU-PT-004": [
+            128.62785250000002,
+            -3.7417025
+          ],
+          "KPU-PT-005": [
+            127.1910288888889,
+            -3.8567958333333334
+          ],
+          "KPU-PT-006": [
+            129.0030863888889,
+            -3.719406388888889
+          ],
+          "KPU-PT-007": [
+            129.6830236111111,
+            -3.532886111111111
+          ],
+          "KPU-PT-008": [
+            128.2609263888889,
+            -3.7469347222222225
+          ],
+          "KPU-PT-009": [
+            128.27741694444447,
+            -3.7401980555555556
+          ],
+          "KPU-PT-010": [
+            128.40609694444444,
+            -3.6113125
+          ],
+          "KPU-PT-011": [
+            129.83090083333332,
+            -4.418565555555555
+          ],
+          "KPU-PT-012": [
+            129.92169027777777,
+            -4.565489444444444
+          ],
+          "KPU-PT-013": [
+            129.89984833333332,
+            -4.721126388888889
+          ],
+          "KPU-PT-014": [
+            129.8544825,
+            -4.317916944444444
+          ],
+          "KPU-PT-015": [
+            129.9190961111111,
+            -4.4792411111111115
+          ],
+          "KPU-PT-016": [
+            131.3154641666667,
+            -4.095216111111111
+          ],
+          "KPU-PT-017": [
+            131.91744388888887,
+            -5.451156666666667
+          ],
+          "KPU-PT-018": [
+            132.84003472222224,
+            -5.75892
+          ],
+          "KPU-PT-019": [
+            134.2873172222222,
+            -6.017566944444444
+          ],
+          "KPU-PT-020": [
+            134.22317083333334,
+            -5.612228055555555
+          ],
+          "KPU-PT-021": [
+            134.31585750000002,
+            -5.802269722222222
+          ],
+          "KPU-PT-022": [
+            130.83395805555557,
+            -7.871544722222223
+          ],
+          "KPU-PT-023": [
+            131.48959916666666,
+            -7.249108888888889
+          ],
+          "KPU-PT-024": [
+            131.95194222222221,
+            -7.0364547222222225
+          ],
+          "KPU-PT-025": [
+            131.28235861111114,
+            -8.023504444444445
+          ],
+          "KPU-PT-026": [
+            130.7757938888889,
+            -7.944750277777778
+          ],
+          "KPU-PT-027": [
+            131.06350944444446,
+            -8.052503333333334
+          ],
+          "KPU-PT-028": [
+            131.10528055555554,
+            -8.071854444444444
+          ],
+          "KPU-PT-029": [
+            131.27880055555556,
+            -7.965836111111111
+          ],
+          "KPU-PT-030": [
+            129.7425008333333,
+            -7.709654722222222
+          ],
+          "KPU-PT-031": [
+            128.68718305555555,
+            -7.043606111111111
+          ],
+          "KPU-PT-032": [
+            128.25562166666666,
+            -8.111125555555555
+          ],
+          "KPU-PT-033": [
+            128.41085833333335,
+            -8.349943611111112
+          ],
+          "KPU-PT-034": [
+            126.58673833333333,
+            -7.547710277777778
+          ],
+          "KPU-PT-035": [
+            126.66086583333333,
+            -6.637215277777777
+          ],
+          "KPU-PT-036": [
+            128.95372805555556,
+            -1.3676052777777779
+          ]
+        },
+        "diperbolehkan": [
+          "dan laut",
+          "Penangkapan ikan dengan kapasitas kapal ≤ 5GT",
+          "Penangkapan ikan dengan kapasitas kapal ≥ 5 - 10 GT",
+          "Pelepasan jangkar",
+          "Penggunaan galah untuk mendorong perahu",
+          "Pengangkutan ikan hasil penangkapan dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Pengangkutan ikan hasil budidaya dengan Kapal nelayan kecil",
+          "Penetapan alur pelayaran dari dan ke pelabuhan perikanan",
+          "Penarikan (Towing)",
+          "Pengapungan (refloating)",
+          "Penangkapan ikan dengan ukuran armada dan/atau alat penangkapan ikan yang diperbolehkan sesuai peraturan perundangan",
+          "Peenangkapan ikan yang diperbolehkan pada wilayah pengelolaan perikanan 714, 715, 718",
+          "Penggunaan alat penangkapan ikan yang selektif",
+          "Penangkapan ikan ukuran layak tangkap",
+          "Penggunaan alat penangkapan ikan ramah lingkungan",
+          "Penangkapan ikan tidak pada saat musim kawin ikan- ikan tertentu",
+          "Penelitian kegiatan konservasi",
+          "Pendidikan kegiatan konservasi",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan"
+        ],
+        "bersyarat": [
+          "Kegiatan Penelitian/Pendidikan",
+          "Kegiatan penangkapan ikan menggunakan alat penangkapan ikan dan/atau alat bantu penangkapan ikan untuk tujuan komersial sesuai peraturan perundang- undangan",
+          "Kegiatan Budaya/Adat",
+          "Pembangunan Tanggul Laut",
+          "Peletakan Alat Bantu Navigasi Pelayaran",
+          "Wisata alam bentang laut",
+          "Wisata alam bawah laut",
+          "Wisata sejarah",
+          "Wisata budaya",
+          "Wisata olahraga air",
+          "Usaha dermaga wisata",
+          "Usaha kegiatan hiburan dan rekreasi",
+          "Usaha wisata ekstrim (beresiko tinggi)",
+          "Usaha angkutan laut wisata dalam negeri",
+          "Usaha angkutan laut internasional wisata",
+          "Usaha jasa perjalanan wisata",
+          "Usaha vila (cottage) di atas laut",
+          "Usaha wisata berenang",
+          "Jasa Wisata Tirta (bahari)",
+          "Pengambilan foto/video bawah laut",
+          "Survei dan/atau penelitian ilmiah",
+          "Usaha budidaya perikanan terapung (jaring apung)",
+          "Pembangunan terminal Roro",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Pemasangan Keramba Jaring Apung",
+          "Pemasangan rumpon sesuai ketentuan perundang- undanga",
+          "Penelitian dan pengembangan perikanan",
+          "Penelitian dan pemanfaatan sumber daya ikan untuk tujuan pendidikan",
+          "Usaha angkutan laut badan usaha pada lintas pelabuhan antar kab/kota dalam Provinsi",
+          "Usaha angkutan laut pelayaran rakyat atau badan usaha pada lintas pelabuhan antar kab/kota dalam, antar provinsi dan pelabuhan internasional",
+          "Usaha jasa angkutan perairan pelabuhan",
+          "Usaha jasa penyewaan peralatan angkutan laut",
+          "Usaha pembudidayaan ikan laut sesuai ketentuan perundang-undangan",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Eksplorasi",
+          "Pengerukan perairan dengan capital dredging",
+          "Pengerukan perairan laut dengan capital dredging yang memotong material karang dan/atau batu",
+          "Pengelolaan energi",
+          "Pembangunan, pemindahan, dan/atau pembongkaran bangunan atau instalasi",
+          "Penempatan kabel bawah laut",
+          "Pembangunan kabel telekomunikasi Local Port Service (LPS)",
+          "Penempatan dan atau pemancangan tiang serta instalasi di laut",
+          "Pembangunan Sarana Bantu Navigasi Pelayaran (SBNP)",
+          "Penetapan tambat labuh",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan Tempat Pelelangan Ikan",
+          "Konstruksi Pertambangan Garam",
+          "Industri penggaraman",
+          "Peletakan pelindung pantai",
+          "Uji coba kapal",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan",
+          "Usaha pelayanan logistik dan perbekalan kapal perikanan",
+          "Pembangunan dermaga perikanan",
+          "Usaha bongkar muat barang :pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Pembangunan dan pengoperasian Jetty",
+          "Pengelolaan (TUKS) di dalam DLKR/DLKP pelabuhan pengumpan regional",
+          "Operasi Kapal Angkutan Penyeberangan Dalam Provinsi",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan riset atau survei hidrografi",
+          "Usaha pelayanan jasa pemanduan kapal",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Pembangunan Fasilitas Infrastruktur (Saluran Primer, Sekunder dan pantai air)",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Kegiatan pekerjaan penyelaman (diving works)",
+          "Kegiatan membantu pekerjaan teknis terhadap kapalkapal yang masih mengapung tetapi sedang mendapat malapetaka",
+          "Kegiatan pemindahan muatan dan atau bahan bakar (cargo and fuel transferring)",
+          "Pengintroduksian organisme hasil rekayasa genetika ke lingkungan",
+          "Pembangunan stasiun pengisian bahan bakar nelayan",
+          "Latihan militer",
+          "Pemungutan hasil hutan bukan kayu pada hutan mangrove (madu; getah; daun; buah dan biji; tanin; ikan; hasil hutan bukan kayu lainnya)",
+          "Pelatihan perang dengan menggunakan amunisi",
+          "Kegiatan lain yang tidak sejalan dengan fungsi zona perikanan tangkap",
+          "Kegiatan pembuatan kapal perikanan/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal perikanan/alat alat terapung saja",
+          "Kegiatan pembuatan mesin-mesin utama/pembantu kapal perikanan",
+          "Kegiatan pembuatan alat- alat perlengkapan lain yang khusus dipergunakan dalam kapal perikanan",
+          "Kegiatan pembuatan alat- alat maritim lainnya",
+          "Kegiatan budidaya biota laut untuk kepentingan industri Biofarmakologi /Bioteknologi Laut",
+          "Kegiatan berlabuh jangkar",
+          "Aktivitas pengambilan mineral ramah lingkungan"
+        ],
+        "tidak_diperbolehkan": [
+          "718 yang dilarang atau tidak sesuai dengan ketentuan peraturan perundang- undangan; '",
+          "Penempatan andon penangkapan ikan diatas 30 GT",
+          "Penempatan andon penangkapan ikan pada Wilayah Pengelolaan Perikanan 714",
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove",
+          "Kegiatan penebangan dan pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses keluar masuk nelayan tradisional",
+          "Kegiatan yang berpotensi merubah fungsi kawasan",
+          "Kegiatan yang berpotensi merusak sumber daya ikan dan/atau habitat sumberdaya ikan",
+          "Kegiatan yang mengganggu ruang penghidupan dan akses nelayan kecil, nelayan tradisional, pembudidaya ikan kecil, dan petambak garam kecil",
+          "Kegiatan yang beresiko tinggi dan berdampak luas terhadap lingkungan",
+          "Kegiatan yang merubah fungsi kawasan; '",
+          "Penangkapan ikan melebihi Jumlah Tangkapan Yang Diperbolehkan (JTB) '",
+          "Penangkapan ikan menggunakan kapal > 30 GT '",
+          "Penangkapan ikan menggunakan alat penangkapan yang mengganggu dan merusak keberlanjutan sumber daya ikan, antara lain",
+          "jaring tarik (dogol, pair seine, cantrang, lampara dasar)",
+          "jaring hela (pukat hela dasar berpalang, pukat hela dasar udang, pukat hela kembar berpapan, pukat hela dasar dua kapal, pukat hela pertengahan dua kapal, pukat ikan)",
+          "jaring insang (perangkap ikan peloncat)",
+          "API lainnya (muro ami)",
+          "alat tangkap lainnya yang dianggap mengancam kelestarian sumberdaya ikan",
+          "Perburuan dan/atau penangkapan mamalia laut, termasuk paus",
+          "Penangkapan Ikan dengan cara merusak keberlanjutan sumber daya ikan yang menggunakan bahan peledak, racun, listrik, dan/atau alat atau bahan berbahaya lainnya",
+          "Penangkapan ikan pada saat musim kawin ikan-ikan tertentu",
+          "Penangkapan ikan pada wilayah sebagai tempat berpijah dan daerah asuhan",
+          "Penangkapan ikan pada alur pelayaran",
+          "Penangkapan ikan pada zona inti kawasan konservasi perairan",
+          "Penangkapan ikan pada alur migrasi biota laut",
+          "Penangkapan ikan pada daerah penangkapan ikan lainnya yang ditetapkan oleh Menteri",
+          "Penempatan Rumpon menetap dengan jarak antar rumpon kurang dari 10 (sepuluh) mil laut",
+          "Penempatan Rumpon menetap yang tidak sesuai dengan daerah Penangkapan Ikan",
+          "Penempatan Rumpon menetap pada alur laut kepulauan Indonesia",
+          "Penempatan Rumpon menetap pada alur migrasi biota laut",
+          "Penempatan Rumpon menetap pada alur pelayaran",
+          "Penempatan Rumpon menetap dasar pada jalur penangkapan ikan I (berjarak sampai dengan 4 mil laut diukur dari garis pantai ke arah luar ke Laut Lepas dan/atau ke arah perairan kepulauan) yang bukan dilakukan oleh Pemerintah Pusat dan Pemerintah Daerah provinsi",
+          "Penempatan rumpon bukan milik pemerintah pusat atau pemerintah daerah provinsi di WPP 714",
+          "Penangkapan ikan madidihang (Thunnus albacares) di daerah pemijahan dan daerah bertelur di WPP 714 pada bulan Oktober - Desember",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3 dan limbah non B3 di laut",
+          "Kegiatan bandar udara",
+          "Kegiatan angkutan udara di atas perairan",
+          "Kegiatan penambangan pasir, mineral dan batuan",
+          "Pembuangan (dumping) dibawah 4 mil laut dan kurang dari kedalaman 200 meter di bawah permukaan laut",
+          "Penempatan tailing (bahan yang tertinggal setelah pemisahan fraksi) di bawah laut",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing",
+          "Perbuatan yang bertujuan untuk mengumpulkan informasi yang merugikan bagi pertahanan atau keamanan negara",
+          "Perbuatan propaganda yang bertujuan mempengaruhi pertahanan atau keamanan negara pantai",
+          "Riset atau survey oleh kapal asing",
+          "Perbuatan yang bertujuan mengganggu setiap sistem komunikasi atau setiap fasilitas atau instalasi lainnya milik negara",
+          "Setiap kegiatan lainnya yang tidak berhubungan langsung dengan hak lintas damai kapal asing",
+          "Pelanggaran lain terhadap ketentuan hak lintas damai"
+        ],
+        "ketentuan_khusus": ""
+      },
+      {
+        "nama_zona": "Zona Pariwisata",
+        "halaman": 228,
+        "kode_zona": {
+          "KPU-W-001": [
+            126.22479861111111,
+            -3.1805016666666663
+          ],
+          "KPU-W-002": [
+            127.13612166666667,
+            -3.3728008333333332
+          ],
+          "KPU-W-003": [
+            126.39371111111112,
+            -3.7139547222222222
+          ],
+          "KPU-W-004": [
+            126.40082638888889,
+            -3.7132933333333336
+          ],
+          "KPU-W-005": [
+            126.41316361111112,
+            -3.737592777777778
+          ],
+          "KPU-W-006": [
+            126.742675,
+            -3.8517680555555556
+          ],
+          "KPU-W-007": [
+            126.48324138888889,
+            -3.7699902777777776
+          ],
+          "KPU-W-008": [
+            126.51111583333333,
+            -3.7945647222222223
+          ],
+          "KPU-W-009": [
+            126.7676788888889,
+            -3.8376372222222224
+          ],
+          "KPU-W-010": [
+            126.87729888888889,
+            -3.7958688888888887
+          ],
+          "KPU-W-011": [
+            126.95552361111112,
+            -3.7704505555555556
+          ],
+          "KPU-W-012": [
+            null,
+            null
+          ],
+          "KPU-W-013": [
+            127.47264722222222,
+            -3.3018116666666666
+          ],
+          "KPU-W-014": [
+            127.58708444444444,
+            -3.3615347222222223
+          ],
+          "KPU-W-015": [
+            127.61579611111111,
+            -3.3011619444444444
+          ],
+          "KPU-W-016": [
+            127.54837083333334,
+            -3.250910833333333
+          ],
+          "KPU-W-017": [
+            127.77342944444445,
+            -3.1585705555555554
+          ],
+          "KPU-W-018": [
+            127.94079777777777,
+            -3.101671666666667
+          ],
+          "KPU-W-019": [
+            128.12892277777777,
+            -2.9009888888888886
+          ],
+          "KPU-W-020": [
+            128.4731688888889,
+            -3.45935
+          ],
+          "KPU-W-021": [
+            128.7112125,
+            -2.8490169444444446
+          ],
+          "KPU-W-022": [
+            128.3584813888889,
+            -3.355767222222222
+          ],
+          "KPU-W-023": [
+            128.33423416666668,
+            -3.3314613888888887
+          ],
+          "KPU-W-024": [
+            128.31719444444445,
+            -3.3109752777777777
+          ],
+          "KPU-W-025": [
+            128.2826,
+            -3.2224175
+          ],
+          "KPU-W-026": [
+            128.16235777777777,
+            -3.2253975
+          ],
+          "KPU-W-027": [
+            128.1955913888889,
+            -3.071623055555556
+          ],
+          "KPU-W-028": [
+            128.87989333333334,
+            -3.205641944444445
+          ],
+          "KPU-W-029": [
+            129.54335444444445,
+            -3.3083216666666666
+          ],
+          "KPU-W-030": [
+            129.64859916666666,
+            -3.3169255555555552
+          ],
+          "KPU-W-031": [
+            128.29655083333333,
+            -3.6259461111111113
+          ],
+          "KPU-W-032": [
+            128.32779805555555,
+            -3.6352972222222224
+          ],
+          "KPU-W-033": [
+            128.3547086111111,
+            -3.5955850000000003
+          ],
+          "KPU-W-034": [
+            128.33539444444446,
+            -3.501955277777778
+          ],
+          "KPU-W-035": [
+            128.30471,
+            -3.497193888888889
+          ],
+          "KPU-W-036": [
+            128.20623138888888,
+            -3.5279986111111112
+          ],
+          "KPU-W-037": [
+            127.91970916666668,
+            -3.7066386111111114
+          ],
+          "KPU-W-038": [
+            128.02801166666669,
+            -3.7533777777777777
+          ],
+          "KPU-W-039": [
+            130.44555888888888,
+            -2.9165341666666666
+          ],
+          "KPU-W-040": [
+            130.44613361111112,
+            -3.0532641666666667
+          ],
+          "KPU-W-041": [
+            130.44432416666666,
+            -3.050173611111111
+          ],
+          "KPU-W-042": [
+            130.30547222222222,
+            -5.543669444444444
+          ],
+          "KPU-W-043": [
+            null,
+            null
+          ],
+          "KPU-W-044": [
+            130.470525,
+            -3.059919444444444
+          ],
+          "KPU-W-045": [
+            130.84322972222222,
+            -3.7779866666666666
+          ],
+          "KPU-W-046": [
+            130.7181163888889,
+            -3.8459866666666667
+          ],
+          "KPU-W-047": [
+            130.90592111111113,
+            -3.869533888888889
+          ],
+          "KPU-W-048": [
+            131.38930249999999,
+            -3.937065555555556
+          ],
+          "KPU-W-049": [
+            131.69676416666667,
+            -4.567756944444445
+          ],
+          "KPU-W-050": [
+            131.44538833333334,
+            -4.0290952777777775
+          ],
+          "KPU-W-051": [
+            132.58983444444445,
+            -5.566949166666666
+          ],
+          "KPU-W-052": [
+            132.7219875,
+            -5.611630833333333
+          ],
+          "KPU-W-053": [
+            132.66734444444444,
+            -5.5787080555555555
+          ],
+          "KPU-W-054": [
+            132.79886222222223,
+            -5.544678611111111
+          ],
+          "KPU-W-055": [
+            132.8256761111111,
+            -5.613695555555555
+          ],
+          "KPU-W-056": [
+            132.8209572222222,
+            -5.6839200000000005
+          ],
+          "KPU-W-057": [
+            134.25320833333333,
+            -5.548399444444445
+          ],
+          "KPU-W-058": [
+            134.85897277777778,
+            -6.254165833333333
+          ],
+          "KPU-W-059": [
+            134.2083386111111,
+            -5.797501944444444
+          ],
+          "KPU-W-060": [
+            134.25411111111111,
+            -5.842834444444444
+          ],
+          "KPU-W-061": [
+            134.13434305555555,
+            -6.011053333333333
+          ],
+          "KPU-W-062": [
+            134.10879972222222,
+            -6.306619722222222
+          ],
+          "KPU-W-063": [
+            134.07740416666667,
+            -6.695365833333334
+          ],
+          "KPU-W-064": [
+            131.43539,
+            -7.850807499999999
+          ],
+          "KPU-W-065": [
+            130.94513833333335,
+            -7.761959444444445
+          ],
+          "KPU-W-066": [
+            130.93141555555556,
+            -7.676543888888889
+          ],
+          "KPU-W-067": [
+            130.94546333333335,
+            -7.643321944444444
+          ],
+          "KPU-W-068": [
+            131.24348972222222,
+            -8.023521111111112
+          ],
+          "KPU-W-069": [
+            131.2292077777778,
+            -8.036101111111112
+          ],
+          "KPU-W-070": [
+            131.11384666666666,
+            -7.993261666666667
+          ],
+          "KPU-W-071": [
+            131.07270833333334,
+            -8.034636666666666
+          ],
+          "KPU-W-072": [
+            131.30946527777778,
+            -8.013954166666666
+          ]
+        },
+        "diperbolehkan": [
+          "Wisata sesuai daya dukung kawasan wisata",
+          "Wisata alam bentang laut",
+          "Wisata alam bawah laut",
+          "Wisata sejarah",
+          "Wisata budaya",
+          "Wisata olahraga air",
+          "Usaha dermaga wisata",
+          "Budidaya mangrove",
+          "Perlindungan keanekaragaman hayati",
+          "Penyelamatan dan perlindungan lingkungan",
+          "Aktivitas rehabilitasi ekosistem",
+          "Penelitian kegiatan konservasi",
+          "Pendidikan kegiatan konservasi",
+          "Penangkapan ikan tanpa kapal menggunakan alat pancing",
+          "Pengangkutan ikan hasil budidaya dengan Kapal nelayan kecil"
+        ],
+        "bersyarat": [
+          "Usaha wisata ekstrim (beresiko tinggi)",
+          "Usaha villa (cottage) di atas laut",
+          "Survei dan/atau penelitian ilmiah",
+          "Penangkapan ikan menggunakan kapal, alat tangkap, dan alat bantu penangkapan ikan yang sesuai dengan ketentuan peraturan perundang- undangan",
+          "Penelitian dan pengembangan perikanan",
+          "Pemasangan / Penggelaran Pipa Migas",
+          "Pembangunan kabel telekomunikasi Local Port Service (LPS)",
+          "Penanaman dan/atau pemancangan kabel atau tiang serta sarana di laut",
+          "Pembangunan Sarana Bantu Navigasi Pelayaran (SBNP)",
+          "Penempatan tambat labuh",
+          "Penempatan pelindung pantai",
+          "Pembangunan Fasilitas Infrastruktur (Saluran Primer, Sekunder dan pantai air)",
+          "Kegiatan membantu pekerjaan teknis terhadap kapalkapal yang masih mengapung tetapi sedang mendapat malapetaka",
+          "Penarikan (Towing)",
+          "Pengapungan (refloating)",
+          "Pembangunan infrastruktur umum yang tidak diperuntukan bagi kegiatan ekowisata",
+          "Usaha pembudidayaan ikan laut",
+          "Usaha budidaya perikanan terapung (jaring apung)",
+          "Pemasangan Keramba Jaring Apung",
+          "Pembudidayaan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Pembangunan, pemindahan, dan/atau pembongkaran bangunan atau instalasi",
+          "Pembangunan dermaga perikanan",
+          "Usaha jasa angkutan perairan pelabuhan",
+          "Usaha jasa penyewaan peralatan angkutan laut",
+          "Pemungutan hasil hutan bukan kayu pada hutan mangrove (madu; getah; daun; buah dan biji; tanin; ikan; hasil hutan bukan kayu lainnya)",
+          "Usaha pelayanan jasa pemanduan kapal",
+          "Penempatan kabel bawah laut",
+          "Penetapan alur pelayaran dari dan ke pelabuhan",
+          "Operasi Kapal Angkutan Penyeberangan Dalam Provinsi",
+          "Pengelolaan energi",
+          "Pengangkutan ikan hasil budidaya dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia",
+          "Pengangkutan ikan hasil penangkapan dengan Kapal Pengangkut Ikan Hidup Berbendera Indonesia; perikanan/perahu ikan bermotor",
+          "Biofarmakologi /Bioteknologi Laut",
+          "Kegiatan pekerjaan penyelaman (diving works)"
+        ],
+        "tidak_diperbolehkan": [
+          "Kegiatan yang mengakibatkan pencemaran",
+          "Kegiatan yang menyebabkan penurunan kualitas perairan",
+          "Kegiatan yang menguasai kawasan hutan mangrove",
+          "Kegiatan penebangan dan/atau pembakaran hutan mangrove",
+          "Kegiatan yang memanfaatkan kayu hidup yang berasal dari kawasan hutan mangrove untuk kepentingan ekonomi",
+          "Kegiatan yang menurunkan kualitas ekosistem pesisir",
+          "Kegiatan memperdagangkan kayu yang berasal dari hutan mangrove",
+          "Kegiatan yang dapat mengubah, mengurangi luas, dan/atau mencemari ekosistem",
+          "Kegiatan yang mengakibatkan kerusakan ekosistem perairan (lamun, karang, dan/atau mangrove)",
+          "Kegiatan yang mengakibatkan terganggunya alur migrasi biota",
+          "Kegiatan yang mengakibatkan terganggunya instalasi di dasar laut",
+          "Kegiatan yang mengganggu akses publik dan/atau keluar masuk nelayan tradisional",
+          "Kegiatan yang merubah fungsi kawasan",
+          "Penangkapan ikan yang dilindungi dan/atau terancam punah",
+          "Pelepasan jangkar dikecualikan bagi kegiatan Proyek Strategis Nasional diperbolehkan dengan syarat",
+          "Pengambilan sumber daya laut non ikan untuk kepentingan ekonomi",
+          "Pemasangan rumpon perairan dalam",
+          "Pemasangan rumpon perairan dangkal",
+          "Pengangkutan ikan hasil penangkapan dengan Kapal Pengangkut Ikan Hidup Berbendera Asing",
+          "Bongkar muat ikan",
+          "Penangkapan ikan menggunakan cara atau alat merusak atau yang tidak sesuai dengan ketentuan peraturan perundang- undangan",
+          "Kegiatan pengujian kapal perikanan/perahu ikan bermotor",
+          "Pengangkutan mineral logam, mineral bukan logam, batuan, batubara, mineral radioaktif",
+          "Pengerukan perairan dengan capital dredging",
+          "Pengerukan perairan laut dengan capital dredging yang memotong material karang dan/atau batu",
+          "Eksploitasi (Operasi Produksi) Mineral logam",
+          "Pengolahan dan Pemurnian Mineral logam",
+          "Penetapan tempat alih muat antar kapal",
+          "Pembangunan Kolam pelabuhan untuk kebutuhan sandar dan olah gerak kapal",
+          "Pembangunan terminal peti kemas",
+          "Pembangunan terminal curah kering",
+          "Pembangunan terminal curah CAIR",
+          "Pembangunan terminal Roro",
+          "Pembangunan Tempat perbaikan kapal",
+          "Penempatan kapal mati",
+          "Pembangunan TPI",
+          "Uji coba kapal",
+          "Usaha pelayanan perbaikan dan pemeliharaan kapal perikanan",
+          "Usaha pelayanan logistik dan perbekalan kapal",
+          "Usaha bongkar muat barang :pengemasan, penumpukan, dan penyimpanan di pelabuhan",
+          "Usaha tally mandiri : kegiatan cargodoring, receiving/delivery, stuffing, dan stripping peti kemas bagi kepentingannya sendiri",
+          "Pembangunan dan pengoperasian cement grinding plant dan cement packing plant",
+          "Pengoperasian Pelabuhan Pengumpan Regional dan Lokal",
+          "Pengerukan di wilayah perairan Pelabuhan Pengumpan Regional dan Lokal",
+          "Reklamasi di wilayah perairan Pelabuhan",
+          "Usaha angkutan laut badan usaha pada lintas pelabuhan antar kab/kota dalam Provinsi",
+          "Usaha angkutan laut pelayaran rakyat atau badan usaha pada lintas pelabuhan antar kab/kota dalam, antar provinsi dan pelabuhan internasional",
+          "Pengelolaan (TUKS) di dalam DLKR/DLKP pelabuhan pengumpan regional",
+          "Kegiatan penerbangan di atas alur kepulauan",
+          "Penetapan rute pelayaran internasional",
+          "Kegiatan bongkar muat oleh kapal asing",
+          "Pembangunan dan pengoperasian terminal khusus",
+          "Konstruksi Pertambangan Garam",
+          "Industri penggaraman",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah B3",
+          "Kegiatan pengumpulan, pemanfaatan, pengolahan, pembuangan, dan penimbunan limbah non B3",
+          "Kegiatan Industri Galangan Kapal dengan sistem Graving Dock Kapal",
+          "Pembangunan industri yang terintegrasi dengan pelabuhan",
+          "Kegiatan pembuatan kapal/alat terapung saja",
+          "Kegiatan perbaikan atau pemeliharaan kapal/alat alat terapung saja",
+          "Kegiatan pembuatan mesin mesin utama/pembantu",
+          "Kegiatan pembuatan alat alat perlengkapan lain yang khusus dipergunakan dalam kapal",
+          "Kegiatan pembuatan alat alat maritim lainnya",
+          "Kegiatan pemindahan muatan dan atau bahan bakar (cargo and fuel transferring)",
+          "Pengintroduksian organisme hasil rekayasa genetika ke lingkungan",
+          "Pembangunan stasiun pengisian bahan bakar",
+          "Latihan militer",
+          "Pengambilan terumbu karang",
+          "Kegiatan perikanan oleh kapal asing",
+          "Berhenti atau labuh jangkar oleh kapal asing, kecuali dalam keadaan force majeure",
+          "Lalu lintas kapal asing",
+          "Penangkapan ikan oleh kapal asing",
+          "Bongkar muat oleh kapal asing",
+          "Kegiatan yang mengancam keamanan negara",
+          "Kegiatan riset atau survei hidrografi oleh kapal asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap pesawat udara milik asing",
+          "Peluncuran, pendaratan, atau penerimaan setiap peralatan dan perlengkapan militer milik asing",
+          "Latihan atau praktek senjata apapun oleh kapal asing"
+        ],
+        "ketentuan_khusus": ""
+      }
+    ]
+  },
   "91": {
     "perda": "Perda Provinsi Papua No. 9/2023",
     "berkas": "PERDA NO 9 TAHUN 2023 TTG RTRW PROVINSI PAPUA TAHUN 2023-2042_Cetak.pdf",
