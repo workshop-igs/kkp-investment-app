@@ -25,7 +25,7 @@ from .serializers import (
 )
 
 
-class PotensiInvestasiViewSet(PetaBBoxMixin, viewsets.ModelViewSet):
+class PotensiInvestasiViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
     queryset = PotensiInvestasi.objects.select_related('provinsi', 'sektor').all()
     serializer_class = PotensiInvestasiSerializer
     filterset_fields = ['provinsi', 'sektor', 'tingkat_potensi']

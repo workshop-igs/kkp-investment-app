@@ -207,6 +207,11 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
         b.getEast().toFixed(4),
         b.getNorth().toFixed(4),
       ].join(',');
+      const sel = 2 ** Math.floor(Math.log2(Math.max(b.getEast() - b.getWest(), b.getNorth() - b.getSouth()) / 8));
+      const kisi = L.latLngBounds(
+        [Math.floor(b.getSouth() / sel) * sel, Math.floor(b.getWest() / sel) * sel],
+        [Math.ceil(b.getNorth() / sel) * sel, Math.ceil(b.getEast() / sel) * sel],
+      );
 
       if (pembatal) pembatal.abort();
       const kontrol = new AbortController();
@@ -220,7 +225,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
           const fc = d && d.type === 'FeatureCollection' ? d : null;
           const tol = fc?.meta?.toleransi_penyederhanaan ?? 0;
           terapkan(fc?.features || [], tol);
-          dimuat = { batas: b, lengkap: !!fc && !fc.meta?.dipangkas && !fc.meta?.sebagai_titik && tol === 0 };
+          dimuat = { batas: kisi, lengkap: !!fc && !fc.meta?.dipangkas && !fc.meta?.sebagai_titik && tol === 0 };
           statusTerakhir = {
             memuat: false,
             galat: null,

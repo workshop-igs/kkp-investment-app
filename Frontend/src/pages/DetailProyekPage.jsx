@@ -572,13 +572,15 @@ const DetailProyekPage = () => {
             >
               <Printer className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setModalHapus(true)}
-              title="Hapus proyek"
-              className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {proyek.boleh_hapus && (
+              <button
+                onClick={() => setModalHapus(true)}
+                title="Hapus proyek"
+                className="p-1.5 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
