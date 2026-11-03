@@ -1465,7 +1465,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
       d.line(x + 5, yy - 3.2, x + lebar - 5, yy - 3.2);
     }
   });
-  dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi (lolos matriks Perda, pengecualian, dan batas unggulan sub-jenis); kelas S1/S2 dari kelas kesesuaian zona; oseanografi NOAA;${b.lokasi.some((l) => l.daya_dukung) ? ' daya dukung: rumus daya dukung fisik pada area potensial (karang Sidako KKP, garis pantai) dikurangi margin kehati-hatian, sebelum uji air, limbah, dan keselamatan;' : ''} ${ATRIBUSI_CITRA}. Hasil indikatif, bukan pengganti Persetujuan KKPRL.`);
+  dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi (lolos matriks Perda, pengecualian, dan batas unggulan sub-jenis); kelas S1/S2 dari kelas kesesuaian zona; oseanografi NOAA;${b.lokasi.some((l) => l.daya_dukung) ? ' daya dukung fisik area potensial dikurangi margin;' : ''} ${ATRIBUSI_CITRA}. Hasil indikatif, bukan pengganti Persetujuan KKPRL.`);
 }
 
 function lokasiDetail(dek, o, b, i, citraLokasi) {
@@ -1641,7 +1641,9 @@ function finansial(dek, o, b, i, perJenis) {
   }
   const h = f.hasil;
   const kiri = 118;
-  const tinggiAtas = perJenis ? 55 : 64;
+  const adaKelas = f.kelas?.length > 0;
+  const tinggiAtas = perJenis ? (adaKelas ? 42 : 55) : 64;
+  const ukuranTabel = adaKelas ? 5.6 : 6.2;
   let yy = dek.kartu(TEPI, y, kiri, tinggiAtas, { judul: 'Struktur investasi', ikon: 'finansial', aksen });
   const ukuranDonut = Math.min(tinggiAtas - 26, 29);
   [[h.investasi, `Investasi awal ${rp(h.investasi_total)}`], [h.operasional, `Operasional per tahun ${rp(h.operasional_total)}`]].forEach(([komponen, judul], n) => {
@@ -1677,10 +1679,10 @@ function finansial(dek, o, b, i, perJenis) {
     ['Kondisi', `Volume/tahun (${h.satuan_produk})`, 'Pendapatan/tahun', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Biaya KKPRL', 'Lokasi prioritas'],
     h.skenario.map((s) => [s.label, angka(s.volume), rp(s.pendapatan), rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2),
       s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, rp(h.biaya_kkprl), s.kode === 'riil' ? '-' : (lp(s.kode).join(', ') || '-')]),
-    { bagian: [0.12, 0.1, 0.1, 0.1, 0.06, 0.06, 0.08, 0.09, 0.29], rataKanan: [1, 2, 3, 4, 5, 6, 7], ukuran: 6.2,
+    { bagian: [0.12, 0.1, 0.1, 0.1, 0.06, 0.06, 0.08, 0.09, 0.29], rataKanan: [1, 2, 3, 4, 5, 6, 7], ukuran: ukuranTabel,
       sorot: h.skenario.map((s, n) => (s.layak ? n : -1)).filter((n) => n >= 0), aksen });
   let yLanjut = yAkhir;
-  if (f.kelas?.length) {
+  if (adaKelas) {
     const riil = (k) => k.hasil?.skenario.find((s) => s.kode === 'riil') || k.hasil?.skenario[0];
     yLanjut = dek.tabel(TEPI, yAkhir + 1, W - TEPI * 2,
       ['Kelas usaha', 'Satuan usaha', 'Investasi awal', 'Pendapatan/tahun', 'NPV', 'IRR', 'Masa kembali', 'Status'],
@@ -1690,13 +1692,13 @@ function finansial(dek, o, b, i, perJenis) {
           s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, s.layak ? 'Layak' : 'Tidak layak']
           : [k.nama, '-', '-', '-', '-', '-', '-', 'Model belum lengkap'];
       }),
-      { bagian: [0.17, 0.2, 0.12, 0.12, 0.12, 0.07, 0.09, 0.11], rataKanan: [2, 3, 4, 5, 6], ukuran: 6.2,
+      { bagian: [0.17, 0.2, 0.12, 0.12, 0.12, 0.07, 0.09, 0.11], rataKanan: [2, 3, 4, 5, 6], ukuran: ukuranTabel,
         sorot: f.kelas.map((k, n) => (riil(k)?.layak ? n : -1)).filter((n) => n >= 0), aksen });
   }
   if (perJenis) {
     dek.tabel(TEPI, yLanjut + 1, W - TEPI * 2, ['Analisis sensitivitas', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Status'],
       h.sensitivitas.map((s) => [s.label, rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2), s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, s.layak ? 'Layak' : 'Tidak layak']),
-      { bagian: [0.3, 0.16, 0.12, 0.12, 0.14, 0.16], rataKanan: [1, 2, 3, 4], ukuran: 6.2, aksen });
+      { bagian: [0.3, 0.16, 0.12, 0.12, 0.14, 0.16], rataKanan: [1, 2, 3, 4], ukuran: ukuranTabel, aksen });
   }
   const lain = b.finansial.filter((x2) => x2 !== f);
   dek.sumber(`Baris disorot = layak (NPV > 0, IRR > ${angka(h.asumsi.diskonto_persen, 1)}%, BCR > 1, masa kembali paling lama ${angka(h.asumsi.batas_pbp_tahun)} tahun). Model usaha: Pengaturan Profil Investasi aplikasi${lain.length ? `; sub-jenis lain ${lain.map((x2) => `${x2.nama.toLowerCase()} (${x2.hasil ? 'ada model' : 'belum ada model'})`).join(', ')}` : ''}.`);
