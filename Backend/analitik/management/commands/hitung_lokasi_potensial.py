@@ -530,7 +530,8 @@ class Command(BaseCommand):
             skor = tembolok[kunci] * (bobot if khusus[next(iter(ranah))] and not set(zids) <= utama else 1)
             if skor >= skor_minimal:
                 lolos[i] = (skor, kunci[0], kunci[1])
-        return lolos
+        di_utama = {i: v for i, v in lolos.items() if set(d['zona'][i]) <= utama}
+        return di_utama or lolos
 
     @staticmethod
     def _wilayah(lolos, ij):
