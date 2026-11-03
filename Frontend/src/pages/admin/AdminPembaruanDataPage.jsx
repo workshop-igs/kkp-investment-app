@@ -11,7 +11,7 @@ const pesanGalat = (e) => e.response?.data?.detail || 'Gagal menghubungi server.
 
 const UNGGAH_LAIN = 'Data tambahan dari KKP berupa area atau nilai per wilayah diunggah di menu Parameter Tambahan.';
 const PANDUAN = {
-  tata_ruang: 'Matriks KKPRL diunggah di bagian bawah halaman ini: isi templat Excel (satu baris per kegiatan per zona, kolom kode zona beserta koordinatnya bila ada), atau unggah PDF lampiran Perda yang tabelnya berupa teks (bukan hasil pindaian) dengan rentang halaman matriks. Poligon RTRW diperbarui dengan tombol Periksa pembaruan dari folder data KKP.',
+  tata_ruang: 'Matriks KKPRL diunggah di bagian Unggah matriks KKPRL: isi templat Excel (satu baris per kegiatan per zona, kolom kode zona beserta koordinatnya bila ada), atau unggah PDF lampiran Perda yang tabelnya berupa teks (bukan hasil pindaian) dengan rentang halaman matriks. Poligon RTRW diperbarui dengan tombol Periksa pembaruan dari folder data KKP.',
   kkprl: 'Diperbarui otomatis dari Portal Satu Data KKP. Tekan Periksa pembaruan untuk menarik data terbaru sekarang.',
   izin_tambang: 'Diperbarui otomatis dari Geoportal ESDM. Tekan Periksa pembaruan untuk menarik data terbaru sekarang.',
   infrastruktur: 'Diperbarui otomatis dari Portal Satu Data KKP dan OpenStreetMap.',
@@ -236,9 +236,9 @@ const AdminPembaruanDataPage = () => {
       <StatusHitungUlang status={status} onMulai={mulai} />
       {galat && <p className="text-sm text-rose-600">{galat}</p>}
       <UnggahMatriks provinsi={data.matriks} onTerapkan={(d) => { setData(d); setStatus(d.hitung_ulang); }} />
-      <div className="rounded-xl border border-slate-200 bg-white overflow-x-auto">
+      <div className="max-h-80 rounded-xl border border-slate-200 bg-white overflow-auto">
         <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 text-slate-500">
+          <thead className="bg-slate-50 text-slate-500 sticky top-0">
             <tr>
               <th className="px-3 py-2 font-semibold">Provinsi</th>
               <th className="px-3 py-2 font-semibold">Blok matriks</th>
