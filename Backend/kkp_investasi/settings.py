@@ -176,11 +176,11 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'anon': os.getenv('THROTTLE_ANON', '20000/hour'),
-        'user': os.getenv('THROTTLE_USER', '6000/hour'),
-        'peta': os.getenv('THROTTLE_PETA', '20000/hour'),
-        'asisten': os.getenv('THROTTLE_ASISTEN', '120/hour'),
-        'asisten_publik': os.getenv('THROTTLE_ASISTEN_PUBLIK', '30/hour'),
+        'anon': os.getenv('THROTTLE_ANON') or '20000/hour',
+        'user': os.getenv('THROTTLE_USER') or '6000/hour',
+        'peta': os.getenv('THROTTLE_PETA') or '20000/hour',
+        'asisten': os.getenv('THROTTLE_ASISTEN') or '120/hour',
+        'asisten_publik': os.getenv('THROTTLE_ASISTEN_PUBLIK') or '30/hour',
     },
     'NUM_PROXIES': int(os.getenv('NUM_PROXIES', '1')),
     'DEFAULT_RENDERER_CLASSES': (
