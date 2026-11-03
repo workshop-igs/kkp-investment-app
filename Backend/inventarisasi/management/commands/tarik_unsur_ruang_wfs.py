@@ -4,7 +4,7 @@ import time
 
 import httpx
 from django.contrib.gis.geos import GEOSGeometry
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
 
 from inti.models import Provinsi
@@ -104,6 +104,7 @@ class Command(BaseCommand):
         parser.add_argument('--hapus', action='store_true', help='Hapus hasil tarikan saja.')
         parser.add_argument('--layer', action='append', help='Tarik hanya lapisan ini.')
 
+    @transaction.atomic
     def handle(self, *args, **options):
         daftar = options['layer']
         pasangan = [x for x in LAPISAN if not daftar or x[0] in daftar]
@@ -204,3 +205,5 @@ class Command(BaseCommand):
         for layer, pesan in gagal:
             self.stdout.write(self.style.WARNING('Gagal: %s — %s' % (layer, pesan)))
         self.stdout.write('Sumber: Portal Satu Data KKP (WFS) dan Sidako KKP (wilayah kelola MHA 2024).')
+        if gagal:
+            raise CommandError(f'{len(gagal)} lapisan gagal ditarik; seluruh data lama dipertahankan.')

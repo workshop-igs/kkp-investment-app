@@ -25,6 +25,7 @@ import AdminSectorsPage from './pages/admin/AdminSectorsPage';
 import AdminLogAktivitasPage from './pages/admin/AdminLogAktivitasPage';
 import AdminPengaturanAnalisisPage from './pages/admin/AdminPengaturanAnalisisPage';
 import AdminParameterTambahanPage from './pages/admin/AdminParameterTambahanPage';
+import AdminPembaruanDataPage from './pages/admin/AdminPembaruanDataPage';
 
 const AppLayout = () => {
   const location = useLocation();
@@ -43,6 +44,7 @@ const AppLayout = () => {
           <Route path="log-aktivitas" element={<AdminLogAktivitasPage />} />
           <Route path="pengaturan-analisis" element={<AdminPengaturanAnalisisPage />} />
           <Route path="parameter-tambahan" element={<AdminParameterTambahanPage />} />
+          <Route path="pembaruan-data" element={<AdminPembaruanDataPage />} />
           <Route path="pengaturan-profil" element={<AdminPengaturanAnalisisPage key="profil" halaman="profil" />} />
         </Route>
       </Routes>
