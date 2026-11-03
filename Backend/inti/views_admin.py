@@ -9,8 +9,9 @@ from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.cache import cache
 from django.db import connection, transaction
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.db.models.deletion import Collector
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
@@ -40,9 +41,18 @@ from inti.models import (
     Provinsi,
     SektorInvestasi,
 )
-from inventarisasi.models import ZonasiRuangLaut
+from inventarisasi.klasifikasi import PENANDA_MATRIKS
+from inventarisasi.management.commands.tarik_matriks_kkprl import Command as PemuatMatriks
+from inventarisasi.management.commands.tarik_matriks_kkprl import (
+    blok_dari_excel,
+    blok_dari_pdf,
+    blok_transkripsi,
+    templat_excel,
+)
+from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
 from ketenagakerjaan.models import KalibrasiPelatihanSektor, MatriksKeahlianSektor
 from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
+from penarikan_data.tasks import JADWAL, TARIK_MANUAL, perbarui_satu_sumber
 from pipeline.models import ProyekInvestasi
 
 from .audit import catat, potret, selisih, simpan_berjejak
@@ -608,3 +618,131 @@ def _simpan_tabel(p, df):
         p.nilai_wilayah.all().delete()
         NilaiWilayahParameter.objects.bulk_create(simpan.values())
     return {'cocok': len(simpan), 'tidak_cocok': gagal[:50], 'jumlah_tidak_cocok': len(gagal)}
+
+
+def _sah_blok(daftar):
+    if not isinstance(daftar, list) or not 0 < len(daftar) <= 2000:
+        raise ValidationError({'detail': 'Data matriks kosong atau terlalu besar. Ulangi pratinjau dari berkas.'})
+    for b in daftar:
+        sah = (
+            isinstance(b, dict) and isinstance(b.get('nama_zona'), str) and b['nama_zona'].strip()
+            and (b.get('halaman') is None or isinstance(b['halaman'], int))
+            and isinstance(b.get('ketentuan_khusus', ''), str)
+            and all(isinstance(b.get(p), list) and all(isinstance(x, str) for x in b[p])
+                    for p in ('diperbolehkan', 'bersyarat', 'tidak_diperbolehkan'))
+            and isinstance(b.get('kode_zona'), dict)
+            and all(isinstance(k, str) and isinstance(v, list) and len(v) == 2
+                    and all(x is None or (isinstance(x, (int, float)) and not isinstance(x, bool)) for x in v)
+                    for k, v in b['kode_zona'].items())
+        )
+        if not sah:
+            raise ValidationError({'detail': 'Format data matriks tidak sah. Ulangi pratinjau dari berkas.'})
+    return daftar
+
+
+def _ringkas_blok(blok):
+    kode = [xy for b in blok for xy in b['kode_zona'].values()]
+    peringatan = []
+    tanpa_koordinat = sum(None in xy for xy in kode)
+    if tanpa_koordinat:
+        peringatan.append(f'{tanpa_koordinat} kode zona tanpa koordinat; zona itu hanya ditautkan menurut jenis zona.')
+    tanpa_kode = sum(not b['kode_zona'] for b in blok)
+    if tanpa_kode:
+        peringatan.append(f'{tanpa_kode} blok tanpa kode zona; blok itu hanya ditautkan menurut jenis zona.')
+    kosong = [b['nama_zona'] for b in blok if not (b['diperbolehkan'] or b['bersyarat'] or b['tidak_diperbolehkan'])]
+    if kosong:
+        peringatan.append(f'{len(kosong)} blok tanpa daftar kegiatan: {", ".join(kosong[:5])}.')
+    return {'jumlah_blok': len(blok), 'jumlah_kode': len(kode),
+            'jumlah_butir': sum(len(b[p]) for b in blok for p in ('diperbolehkan', 'bersyarat', 'tidak_diperbolehkan')),
+            'peringatan': peringatan}
+
+
+def _halaman(nilai, label):
+    try:
+        return int(nilai)
+    except (TypeError, ValueError):
+        raise ValidationError({'detail': f'Isi {label} dengan nomor halaman.'}) from None
+
+
+class AdminPembaruanDataViewSet(viewsets.ViewSet):
+    permission_classes = [IsAdminUser]
+
+    def _data(self):
+        provinsi = Provinsi.objects.annotate(
+            blok=Count('matriks_kkprl', distinct=True),
+            zona_laut=Count('zonasi_laut', filter=Q(zonasi_laut__ranah='LAUT'), distinct=True),
+        ).order_by('kode_bps')
+        sumber = dict(MatriksKKPRL.objects.order_by('provinsi_id', '-updated_at').distinct('provinsi_id')
+                      .values_list('provinsi_id', 'sumber'))
+        return {
+            'kelompok': ringkasan_sumber(),
+            'matriks': [{'kode': p.kode_bps, 'nama': p.nama, 'blok': p.blok, 'zona_laut': p.zona_laut,
+                         'sumber': sumber.get(p.id, '')} for p in provinsi],
+            'hitung_ulang': status_hitung_ulang(),
+        }
+
+    def list(self, request):
+        return Response(self._data())
+
+    @action(detail=False, methods=['post'])
+    def tarik(self, request):
+        kode = request.data.get('kode')
+        sumber = next((j for j in (*JADWAL, *TARIK_MANUAL) if j[0] == kode), None)
+        if sumber is None:
+            raise ValidationError({'detail': 'Sumber data tidak dikenal.'})
+        if any(t['berjalan'] for b in ringkasan_sumber() for t in b['tarik'] if t['kode'] == kode):
+            raise ValidationError({'detail': 'Pembaruan sumber ini masih berjalan.'})
+        try:
+            perbarui_satu_sumber.delay(kode)
+        except Exception:
+            return Response({'detail': 'Antrean tugas latar tidak tersedia; coba lagi beberapa saat lagi.'},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        catat(request, f"Meminta pembaruan data '{sumber[2]}'", 'Pembaruan data')
+        return Response(self._data())
+
+    @action(detail=False, methods=['get'], url_path='templat-matriks')
+    def templat_matriks(self, request):
+        jawaban = HttpResponse(
+            templat_excel(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        jawaban['Content-Disposition'] = 'attachment; filename="templat-matriks-kkprl.xlsx"'
+        return jawaban
+
+    @action(detail=False, methods=['post'], url_path='pratinjau-matriks', parser_classes=[MultiPartParser, FormParser])
+    def pratinjau_matriks(self, request):
+        berkas = request.FILES.get('berkas')
+        if berkas is None:
+            raise ValidationError({'detail': 'Pilih berkas Excel (.xlsx) atau PDF.'})
+        nama = berkas.name.lower()
+        if nama.endswith('.pdf'):
+            awal = _halaman(request.data.get('halaman_awal'), 'halaman awal')
+            akhir = _halaman(request.data.get('halaman_akhir'), 'halaman akhir')
+        elif not nama.endswith('.xlsx'):
+            raise ValidationError({'detail': 'Format berkas harus Excel (.xlsx) atau PDF.'})
+        try:
+            blok = blok_dari_pdf(berkas, awal, akhir) if nama.endswith('.pdf') else blok_dari_excel(berkas)
+        except ValueError as e:
+            raise ValidationError({'detail': str(e)}) from None
+        except Exception:
+            raise ValidationError(
+                {'detail': 'Berkas tidak dapat dibaca. Pastikan berkas tidak rusak dan tidak dikunci sandi.'}) from None
+        if not blok:
+            raise ValidationError({'detail': 'Tidak ada tabel matriks yang terbaca dari berkas ini. '
+                                             'Periksa rentang halaman, atau salin isinya ke templat Excel.'})
+        return Response({'blok': blok, **_ringkas_blok(blok)})
+
+    @action(detail=False, methods=['post'], url_path='terapkan-matriks')
+    def terapkan_matriks(self, request):
+        provinsi = Provinsi.objects.filter(kode_bps=str(request.data.get('provinsi') or '')).first()
+        perda = re.sub(r'\s+', ' ', str(request.data.get('perda') or '')).strip()
+        if provinsi is None:
+            raise ValidationError({'detail': 'Pilih provinsi.'})
+        if len(perda) < 5:
+            raise ValidationError({'detail': 'Isi sumber matriks, misalnya "Perda Provinsi Maluku No. 2/2025".'})
+        blok = _sah_blok(request.data.get('blok'))
+        sumber = f'{perda[:150]}, {PENANDA_MATRIKS} (unggahan admin)'
+        keluaran = io.StringIO()
+        PemuatMatriks(stdout=keluaran)._simpan(provinsi, blok_transkripsi(provinsi, blok, sumber), sumber)
+        jadwalkan_hitung_ulang(lokasi=[provinsi.kode_bps], skor=True)
+        catat(request, f'Memperbarui matriks KKPRL Provinsi {provinsi.nama}', f'Matriks KKPRL {provinsi.nama}',
+              [f'Sumber: {perda}', f'{len(blok)} blok zona'])
+        return Response({'pesan': re.sub(r'\x1b\[[0-9;]*m', '', keluaran.getvalue()).strip(), **self._data()})

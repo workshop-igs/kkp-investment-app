@@ -1,4 +1,5 @@
 import re
+from datetime import timedelta
 
 from django.core.cache import cache
 from django.db.models import Max, Min
@@ -235,7 +236,7 @@ def _status(batas, lewat, total):
 
 def ringkasan_sumber():
     from penarikan_data.models import KonfigurasiAPI, LogPenarikan
-    from penarikan_data.tasks import JADWAL, jatuh_tempo
+    from penarikan_data.tasks import JADWAL, TARIK_MANUAL, jatuh_tempo
 
     masa = atur('MASA_BERLAKU_DATA')
     terbaru = _terbaru()
@@ -272,7 +273,8 @@ def ringkasan_sumber():
         hasil[kunci] = (f'tahun {tahun}' if tahun else 'belum tersedia',
                         _status(masa.get(kunci), int(bool(lewat_masa(kunci, tahun=tahun))), int(bool(tahun))), '')
 
-    konfigurasi = {c.kode: c for c in KonfigurasiAPI.objects.filter(kode__in=[j[0] for j in JADWAL])}
+    semua = (*JADWAL, *TARIK_MANUAL)
+    konfigurasi = {c.kode: c for c in KonfigurasiAPI.objects.filter(kode__in=[j[0] for j in semua])}
     log = {}
     for g in (LogPenarikan.objects.filter(api_config__kode__in=konfigurasi).select_related('api_config')
               .order_by('api_config__kode', '-started_at')):
@@ -280,15 +282,18 @@ def ringkasan_sumber():
     baris = []
     for kunci, (label, sumber) in KELOMPOK_DATA.items():
         data, status, catatan = hasil[kunci]
-        jadwal = []
-        for kode, kelompok, nama, _, _ in JADWAL:
+        tarik = []
+        for kode, kelompok, nama, _, _ in semua:
             if kelompok != kunci:
                 continue
             cfg, g = konfigurasi.get(kode), log.get(kode)
-            jadwal.append({
-                'nama': nama, 'terakhir': cfg and cfg.last_successful_fetch, 'berikutnya': cfg and jatuh_tempo(cfg),
+            terjadwal = kode in {j[0] for j in JADWAL}
+            tarik.append({
+                'kode': kode, 'nama': nama, 'terjadwal': terjadwal, 'terakhir': cfg and cfg.last_successful_fetch,
+                'berikutnya': jatuh_tempo(cfg) if terjadwal and cfg else None,
                 'gagal': (g.error_message[:300] or 'gagal') if g and g.result == 'FAILED' else '',
+                'berjalan': bool(g and g.completed_at is None and g.started_at > timezone.now() - timedelta(hours=12)),
             })
         baris.append({'kode': kunci, 'label': label, 'sumber': sumber, 'data': data, 'status': status,
-                      'catatan': catatan, 'jadwal': jadwal})
+                      'catatan': catatan, 'jadwal': [t for t in tarik if t['terjadwal']], 'tarik': tarik})
     return baris
