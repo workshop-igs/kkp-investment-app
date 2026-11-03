@@ -1438,6 +1438,16 @@ function lokasiSesuai(dek, o, b, i, citra) {
       dek.gaya(5.9, WARNA_LAUT);
       d.text(d.splitTextToSize(bersih(teksLaut), lebar - 18)[0], x + 11.6, yb);
     }
+    if (l.daya_dukung) {
+      const dd = l.daya_dukung;
+      yb += 2.9;
+      dek.gaya(5.9, C.navy, true);
+      d.text(d.splitTextToSize(bersih([
+        `daya dukung ±${angka(dd.kuota_uji)} tamu/hari (kuota uji)`,
+        dd.luas_karang_ha >= 0.01 && `karang ${angka(dd.luas_karang_ha, 1)} ha`,
+        dd.panjang_pantai_m >= 1 && `pantai ${angka(dd.panjang_pantai_m)} m`,
+      ].filter(Boolean).join('  ·  ')), lebar - 18)[0], x + 11.6, yb);
+    }
     if (kelas) {
       yb += 2.9;
       dek.gaya(5.9, gelap(WARNA_S[kelas], 0.75));
@@ -1455,7 +1465,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
       d.line(x + 5, yy - 3.2, x + lebar - 5, yy - 3.2);
     }
   });
-  dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi (lolos matriks Perda, pengecualian, dan batas unggulan sub-jenis); kelas S1/S2 dari kelas kesesuaian zona; oseanografi NOAA; ${ATRIBUSI_CITRA}. Hasil indikatif, bukan pengganti Persetujuan KKPRL.`);
+  dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi (lolos matriks Perda, pengecualian, dan batas unggulan sub-jenis); kelas S1/S2 dari kelas kesesuaian zona; oseanografi NOAA;${b.lokasi.some((l) => l.daya_dukung) ? ' daya dukung: rumus daya dukung fisik pada area potensial (karang Sidako KKP, garis pantai) dikurangi margin kehati-hatian, sebelum uji air, limbah, dan keselamatan;' : ''} ${ATRIBUSI_CITRA}. Hasil indikatif, bukan pengganti Persetujuan KKPRL.`);
 }
 
 function lokasiDetail(dek, o, b, i, citraLokasi) {
@@ -1669,8 +1679,22 @@ function finansial(dek, o, b, i, perJenis) {
       s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, rp(h.biaya_kkprl), s.kode === 'riil' ? '-' : (lp(s.kode).join(', ') || '-')]),
     { bagian: [0.12, 0.1, 0.1, 0.1, 0.06, 0.06, 0.08, 0.09, 0.29], rataKanan: [1, 2, 3, 4, 5, 6, 7], ukuran: 6.2,
       sorot: h.skenario.map((s, n) => (s.layak ? n : -1)).filter((n) => n >= 0), aksen });
+  let yLanjut = yAkhir;
+  if (f.kelas?.length) {
+    const riil = (k) => k.hasil?.skenario.find((s) => s.kode === 'riil') || k.hasil?.skenario[0];
+    yLanjut = dek.tabel(TEPI, yAkhir + 1, W - TEPI * 2,
+      ['Kelas usaha', 'Satuan usaha', 'Investasi awal', 'Pendapatan/tahun', 'NPV', 'IRR', 'Masa kembali', 'Status'],
+      f.kelas.map((k) => {
+        const s = riil(k);
+        return s ? [k.nama, k.hasil.satuan_usaha, rp(k.hasil.investasi_total), rp(s.pendapatan), rp(s.npv), irrTeks(s.irr),
+          s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, s.layak ? 'Layak' : 'Tidak layak']
+          : [k.nama, '-', '-', '-', '-', '-', '-', 'Model belum lengkap'];
+      }),
+      { bagian: [0.17, 0.2, 0.12, 0.12, 0.12, 0.07, 0.09, 0.11], rataKanan: [2, 3, 4, 5, 6], ukuran: 6.2,
+        sorot: f.kelas.map((k, n) => (riil(k)?.layak ? n : -1)).filter((n) => n >= 0), aksen });
+  }
   if (perJenis) {
-    dek.tabel(TEPI, yAkhir + 1, W - TEPI * 2, ['Analisis sensitivitas', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Status'],
+    dek.tabel(TEPI, yLanjut + 1, W - TEPI * 2, ['Analisis sensitivitas', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Status'],
       h.sensitivitas.map((s) => [s.label, rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2), s.pbp == null ? 'tidak tercapai' : `${angka(s.pbp, 1)} th`, s.layak ? 'Layak' : 'Tidak layak']),
       { bagian: [0.3, 0.16, 0.12, 0.12, 0.14, 0.16], rataKanan: [1, 2, 3, 4], ukuran: 6.2, aksen });
   }

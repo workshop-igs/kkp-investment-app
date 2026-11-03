@@ -17,6 +17,7 @@ from analitik.services.konstanta import (
     SEKTOR_SUB_ZONA_COCOK,
 )
 from analitik.services.kriteria import kbli_sub, uraian
+from analitik.services.laporan_spasial import daya_dukung
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.pengaturan import BAWAAN, atur
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
@@ -292,6 +293,7 @@ def _lokasi(c, provinsi, sektor, subs):
             'cakupan': list(lok.geometry.extent),
             'batas': _geojson(lok.geometry.simplify(0.0002).json),
             'oseanografi': {k: v['rata2'] for k, v in _oseanografi(lok.geometry, PARAMETER_OSEANOGRAFI_LOKASI).items()},
+            'daya_dukung': daya_dukung(lok.wilayah) if sektor.kode == 'PARIWISATA_BAHARI' else None,
         })
     return hasil
 
@@ -301,10 +303,16 @@ def _finansial(subs, nama_sub, harga_kg=None):
     hasil = []
     for sub in subs:
         m = model.get(sub) or BAWAAN['MODEL_USAHA'].get(sub)
+
+        def hitung(isi):
+            return hitung_model_usaha(isi, harga_kg if isi['satuan_produk'] == 'kg' else None)
+
         hasil.append({
             'kode': sub,
             'nama': nama_sub.get(sub, sub),
-            'hasil': m and hitung_model_usaha(m, harga_kg if m['satuan_produk'] == 'kg' else None),
+            'hasil': m and hitung(m),
+            'kelas': [{'nama': m.get('nama_kelas') or 'Kelas acuan', 'hasil': hitung(m)}]
+            + [{'nama': k['nama'], 'hasil': hitung(k)} for k in m.get('kelas', [])] if m and m.get('kelas') else [],
         })
     return hasil
 
@@ -547,7 +555,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v7:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v8:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))
