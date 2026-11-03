@@ -8,14 +8,20 @@ from oauthlib.oauth2.rfc6749 import errors
 
 logger = logging.getLogger('inti')
 
-GAGAL_MAKS_AKUN = 10
-GAGAL_MAKS_ALAMAT = 30
 JEDA_GAGAL_DETIK = 900
 
 
 class TerlaluBanyakPercobaan(errors.OAuth2Error):
     error = 'terlalu_banyak_percobaan'
     status_code = 429
+
+
+def catat_gagal(kunci):
+    cache.add(kunci, 0, JEDA_GAGAL_DETIK)
+    try:
+        cache.incr(kunci)
+    except ValueError:
+        cache.set(kunci, 1, JEDA_GAGAL_DETIK)
 
 
 def alamat_klien(headers):
@@ -37,14 +43,15 @@ class EmailOrUsernameOAuth2Validator(OAuth2Validator):
 
         kunci_akun = f'gagal-masuk:akun:{identifier.lower()}'
         kunci_alamat = f'gagal-masuk:alamat:{alamat_klien(request.headers)}'
-        if cache.get(kunci_akun, 0) >= GAGAL_MAKS_AKUN or cache.get(kunci_alamat, 0) >= GAGAL_MAKS_ALAMAT:
+        if (cache.get(kunci_akun, 0) >= settings.LOGIN_GAGAL_MAKS_AKUN
+                or cache.get(kunci_alamat, 0) >= settings.LOGIN_GAGAL_MAKS_ALAMAT):
             logger.info('[OAuth2] Masuk ditahan karena terlalu banyak percobaan gagal: %s', identifier)
             raise TerlaluBanyakPercobaan(
                 description='Terlalu banyak percobaan masuk yang gagal. Coba lagi dalam 15 menit.', request=request
             )
         if not self._periksa_kredensial(identifier, password, request):
-            for kunci in (kunci_akun, kunci_alamat):
-                cache.set(kunci, cache.get(kunci, 0) + 1, JEDA_GAGAL_DETIK)
+            catat_gagal(kunci_akun)
+            catat_gagal(kunci_alamat)
             return False
         cache.delete(kunci_akun)
         return True
