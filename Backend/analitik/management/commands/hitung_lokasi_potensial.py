@@ -19,6 +19,7 @@ from analitik.services.konstanta import (
     KM_PER_DERAJAT,
     KRITERIA_PELENGKAP,
     KRITERIA_TANPA_SKOR,
+    SEKTOR_SUB_ZONA_COCOK,
     SEKTOR_TERSENDIRI_DI_PETA,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
@@ -501,7 +502,10 @@ class Command(BaseCommand):
         harus = tuple(wajib(k, d['tersedia']) for k, _ in kriteria)
         minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * sum(k not in KRITERIA_TANPA_SKOR for k, _ in kriteria))
         bobot, skor_minimal = atur('BOBOT_RUANG_BERSYARAT'), atur('SKOR_MINIMAL_LOKASI_UNGGULAN')
-        khusus = {r: any(status[(z, sektor.kode)] == 'DIIZINKAN' for z in zona if zona[z][3] == r) for r in sub['ranah']}
+        peruntukan = set(SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, ()))
+        utama = {z for z in zona if status[(z, sektor.kode)] == 'DIIZINKAN'
+                 or (zona[z][1] in peruntukan and status[(z, sektor.kode)] in BOLEH)}
+        khusus = {r: any(zona[z][3] == r for z in utama) for r in sub['ranah']}
         tembolok, lolos = {}, {}
         for i in range(1, d['banyak'] + 1):
             zids = d['zona'][i]
@@ -523,7 +527,7 @@ class Command(BaseCommand):
                 tembolok[kunci] = self._cocok(kriteria, layak, *kunci, harus, minimal)
             if tembolok[kunci] is None:
                 continue
-            skor = tembolok[kunci] * (bobot if 'BERSYARAT' in st and khusus[next(iter(ranah))] else 1)
+            skor = tembolok[kunci] * (bobot if khusus[next(iter(ranah))] and not set(zids) <= utama else 1)
             if skor >= skor_minimal:
                 lolos[i] = (skor, kunci[0], kunci[1])
         return lolos
