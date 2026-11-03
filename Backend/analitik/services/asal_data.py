@@ -236,7 +236,7 @@ def _status(batas, lewat, total):
 
 def ringkasan_sumber():
     from penarikan_data.models import KonfigurasiAPI, LogPenarikan
-    from penarikan_data.tasks import JADWAL, TARIK_MANUAL, jatuh_tempo
+    from penarikan_data.tasks import JADWAL, TARIK_MANUAL, daftar_unggah, jatuh_tempo
 
     masa = atur('MASA_BERLAKU_DATA')
     terbaru = _terbaru()
@@ -273,12 +273,13 @@ def ringkasan_sumber():
         hasil[kunci] = (f'tahun {tahun}' if tahun else 'belum tersedia',
                         _status(masa.get(kunci), int(bool(lewat_masa(kunci, tahun=tahun))), int(bool(tahun))), '')
 
-    semua = (*JADWAL, *TARIK_MANUAL)
+    semua = (*JADWAL, *TARIK_MANUAL, *daftar_unggah())
     konfigurasi = {c.kode: c for c in KonfigurasiAPI.objects.filter(kode__in=[j[0] for j in semua])}
     log = {}
     for g in (LogPenarikan.objects.filter(api_config__kode__in=konfigurasi).select_related('api_config')
               .order_by('api_config__kode', '-started_at')):
         log.setdefault(g.api_config.kode, g)
+    satuan = dict(RasterOseanografi.objects.order_by('parameter').distinct('parameter').values_list('parameter', 'satuan'))
     baris = []
     for kunci, (label, sumber) in KELOMPOK_DATA.items():
         data, status, catatan = hasil[kunci]
@@ -293,7 +294,10 @@ def ringkasan_sumber():
                 'berikutnya': jatuh_tempo(cfg) if terjadwal and cfg else None,
                 'gagal': (g.error_message[:300] or 'gagal') if g and g.result == 'FAILED' else '',
                 'berjalan': bool(g and g.completed_at is None and g.started_at > timezone.now() - timedelta(hours=12)),
+                'satuan': 'indeks 0 sampai 1' if kelompok == 'bencana' else satuan.get(kode.removeprefix('UNGGAH-'), ''),
             })
         baris.append({'kode': kunci, 'label': label, 'sumber': sumber, 'data': data, 'status': status,
-                      'catatan': catatan, 'jadwal': [t for t in tarik if t['terjadwal']], 'tarik': tarik})
+                      'catatan': catatan, 'jadwal': [t for t in tarik if t['terjadwal']],
+                      'tarik': [t for t in tarik if not t['kode'].startswith('UNGGAH-')],
+                      'unggah': [t for t in tarik if t['kode'].startswith('UNGGAH-')]})
     return baris

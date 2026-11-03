@@ -1,10 +1,13 @@
 import io
 import json
+import os
 import re
+import uuid
 from collections import Counter
 from datetime import timedelta
 
 import pandas as pd
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.cache import cache
@@ -20,6 +23,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import IsAdminUser
 from rest_framework.response import Response
 
+from analitik.management.commands.muat_berkas_raster import baca_berkas
 from analitik.models import (
     AreaParameter,
     KetentuanRuang,
@@ -52,7 +56,7 @@ from inventarisasi.management.commands.tarik_matriks_kkprl import (
 from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
 from ketenagakerjaan.models import KalibrasiPelatihanSektor, MatriksKeahlianSektor
 from ketenagakerjaan.proyeksi import MATRIKS_KEAHLIAN
-from penarikan_data.tasks import JADWAL, TARIK_MANUAL, perbarui_satu_sumber
+from penarikan_data.tasks import JADWAL, TARIK_MANUAL, daftar_unggah, muat_unggahan, perbarui_satu_sumber
 from pipeline.models import ProyekInvestasi
 
 from .audit import catat, potret, selisih, simpan_berjejak
@@ -664,6 +668,9 @@ def _halaman(nilai, label):
         raise ValidationError({'detail': f'Isi {label} dengan nomor halaman.'}) from None
 
 
+AKHIRAN_UNGGAH = {'.tif', '.tiff', '.zip', '.geojson', '.json', '.gpkg', '.kml'}
+
+
 class AdminPembaruanDataViewSet(viewsets.ViewSet):
     permission_classes = [IsAdminUser]
 
@@ -698,6 +705,42 @@ class AdminPembaruanDataViewSet(viewsets.ViewSet):
             return Response({'detail': 'Antrean tugas latar tidak tersedia; coba lagi beberapa saat lagi.'},
                             status=status.HTTP_503_SERVICE_UNAVAILABLE)
         catat(request, f"Meminta pembaruan data '{sumber[2]}'", 'Pembaruan data')
+        return Response(self._data())
+
+    @action(detail=False, methods=['post'], parser_classes=[MultiPartParser, FormParser])
+    def unggah(self, request):
+        kode = request.data.get('kode')
+        data = next((j for j in daftar_unggah() if j[0] == kode), None)
+        if data is None:
+            raise ValidationError({'detail': 'Data tidak dikenal.'})
+        keterangan = re.sub(r'\s+', ' ', str(request.data.get('keterangan') or '')).strip()
+        if len(keterangan) < 5:
+            raise ValidationError({'detail': 'Isi sumber data, misalnya "BNPB InaRISK 2025".'})
+        berkas = request.FILES.get('berkas')
+        akhiran = os.path.splitext(berkas.name.lower())[1] if berkas else ''
+        if akhiran not in AKHIRAN_UNGGAH:
+            raise ValidationError({'detail': 'Format berkas harus GeoTIFF (.tif), Shapefile dalam .zip, GeoJSON, '
+                                             'GeoPackage, atau KML.'})
+        if any(t['berjalan'] for b in ringkasan_sumber() for t in b['unggah'] if t['kode'] == kode):
+            raise ValidationError({'detail': 'Unggahan sebelumnya untuk data ini masih diproses.'})
+        folder = settings.MEDIA_ROOT / 'unggahan'
+        folder.mkdir(parents=True, exist_ok=True)
+        jalur = str(folder / f'{uuid.uuid4().hex}{akhiran}')
+        with open(jalur, 'wb') as f:
+            for potong in berkas.chunks():
+                f.write(potong)
+        try:
+            baca_berkas(jalur, data[1] == 'bencana')
+            muat_unggahan.delay(kode, jalur, keterangan)
+        except ValueError as e:
+            os.remove(jalur)
+            raise ValidationError({'detail': str(e)}) from None
+        except Exception:
+            os.remove(jalur)
+            return Response({'detail': 'Antrean tugas latar tidak tersedia; coba lagi beberapa saat lagi.'},
+                            status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        catat(request, f"Mengunggah pembaruan data '{data[2]}'", 'Pembaruan data',
+              [f'Sumber: {keterangan}', f'Berkas: {berkas.name}'])
         return Response(self._data())
 
     @action(detail=False, methods=['get'], url_path='templat-matriks')
