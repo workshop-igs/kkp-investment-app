@@ -1,11 +1,13 @@
+import contextlib
 import json
 import logging
+import os
 import time
 from datetime import timedelta
 
 from celery import shared_task
 from django.core.cache import cache
-from django.core.management import call_command
+from django.core.management import CommandError, call_command
 from django.utils import timezone
 
 logger = logging.getLogger('penarikan_data')
@@ -33,6 +35,19 @@ TARIK_MANUAL = [
 ]
 
 
+def daftar_unggah():
+    from analitik.models import RasterOseanografi, RasterRisikoBencana
+    from analitik.services.asal_data import kelompok_raster
+
+    return [
+        *((f'UNGGAH-{k}', 'bencana', f'Risiko {n.lower()}', 'muat_berkas_raster', True)
+          for k, n in RasterRisikoBencana.JENIS_CHOICES),
+        *((f'UNGGAH-{k}', 'kondisi_tetap', n, 'muat_berkas_raster', True)
+          for k, n in RasterOseanografi.PARAMETER_CHOICES
+          if kelompok_raster(k) == 'kondisi_tetap' and k != 'PRODUKSI_KABUPATEN'),
+    ]
+
+
 def jatuh_tempo(cfg):
     if not cfg.last_successful_fetch:
         return None
@@ -47,15 +62,17 @@ def konfigurasi(kode, nama):
     )[0]
 
 
-def tarik_sumber(kode, nama, perintah, paksa=False):
+def tarik_sumber(kode, nama, perintah, paksa=False, argumen=()):
     from penarikan_data.models import LogPenarikan
 
     cfg = konfigurasi(kode, nama)
     log = LogPenarikan.objects.create(api_config=cfg, endpoint=perintah, result='', request_params={'paksa': paksa})
     mulai = time.time()
     try:
-        hasil = call_command(perintah)
+        hasil = call_command(perintah, *argumen)
         galat = ''
+    except CommandError as e:
+        hasil, galat = None, str(e)
     except Exception as e:
         hasil, galat = None, f'{type(e).__name__}: {e}'
         logger.warning(f'[PEMBARUAN DATA] {perintah} gagal: {galat}')
@@ -107,3 +124,20 @@ def perbarui_satu_sumber(kode):
         cache.clear()
         if memicu:
             jadwalkan_hitung_ulang(lokasi=[], skor=True)
+
+
+@shared_task
+def muat_unggahan(kode, berkas, keterangan):
+    from analitik.tasks import jadwalkan_hitung_ulang
+
+    _, kelompok, nama, perintah, _ = next(j for j in daftar_unggah() if j[0] == kode)
+    try:
+        dimuat = tarik_sumber(kode, nama, perintah, argumen=[
+            '--kelompok', kelompok, '--kode', kode.removeprefix('UNGGAH-'), '--berkas', berkas, '--keterangan', keterangan,
+        ])[1]
+    finally:
+        with contextlib.suppress(OSError):
+            os.remove(berkas)
+    if dimuat:
+        cache.clear()
+        jadwalkan_hitung_ulang(lokasi=dimuat if isinstance(dimuat, list) else [], skor=True)

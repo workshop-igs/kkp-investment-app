@@ -10,6 +10,7 @@ const tanggal = (iso) => new Date(iso).toLocaleDateString('id-ID', { dateStyle: 
 const pesanGalat = (e) => e.response?.data?.detail || 'Gagal menghubungi server.';
 
 const UNGGAH_LAIN = 'Data tambahan dari KKP berupa area atau nilai per wilayah diunggah di menu Parameter Tambahan.';
+const ATURAN_UNGGAH = 'Hanya wilayah yang dicakup berkas yang diganti; wilayah lain tetap memakai data lama, dan piksel kosong di dalam berkas juga mempertahankan nilai lama. Ukuran berkas paling besar 50 MB; data nasional yang lebih besar diunggah per provinsi atau per pulau. Setelah dimuat, skor dan Peta Sebaran provinsi yang terdampak dihitung ulang otomatis.';
 const PANDUAN = {
   tata_ruang: 'Matriks KKPRL diunggah di bagian Unggah matriks KKPRL: isi templat Excel (satu baris per kegiatan per zona, kolom kode zona beserta koordinatnya bila ada), atau unggah PDF lampiran Perda yang tabelnya berupa teks (bukan hasil pindaian) dengan rentang halaman matriks. Poligon RTRW diperbarui dengan tombol Periksa pembaruan dari folder data KKP.',
   kkprl: 'Diperbarui otomatis dari Portal Satu Data KKP. Tekan Periksa pembaruan untuk menarik data terbaru sekarang.',
@@ -17,15 +18,62 @@ const PANDUAN = {
   infrastruktur: 'Diperbarui otomatis dari Portal Satu Data KKP dan OpenStreetMap.',
   oseanografi: 'Diperbarui otomatis dari NOAA dan NASA (rata-rata 12 bulan terakhir).',
   aktivitas_tangkap: 'Diperbarui otomatis dari Global Fishing Watch.',
-  kondisi_tetap: `Kondisi jangka panjang (kedalaman, pasang surut, curah hujan, angin) jarang berubah dan tidak ditarik ulang. ${UNGGAH_LAIN}`,
+  kondisi_tetap: `Kondisi jangka panjang (kedalaman, pasang surut, curah hujan, gempa, angin, dan lainnya) tidak ditarik ulang. Untuk memperbaruinya, tekan Unggah pembaruan pada data yang dimaksud lalu pilih raster GeoTIFF (.tif) dalam sistem koordinat apa pun, dengan nilai dalam satuan yang tertera (kedalaman laut ditulis negatif, misalnya -25 untuk 25 m). ${ATURAN_UNGGAH} ${UNGGAH_LAIN}`,
   ekosistem: 'Mangrove, lamun, dan terumbu karang ditarik dari Portal Satu Data KKP dan Sidako bila ditekan Periksa pembaruan.',
-  bencana: `Risiko bencana InaRISK disimpan di dalam aplikasi dan tidak ditarik ulang. ${UNGGAH_LAIN}`,
+  bencana: `Risiko bencana InaRISK disimpan di dalam aplikasi dan tidak ditarik ulang. Untuk memperbaruinya, tekan Unggah pembaruan pada jenis bencana yang dimaksud lalu pilih salah satu: raster GeoTIFF (.tif) berisi indeks risiko 0 sampai 1 seperti unduhan InaRISK, atau poligon (Shapefile dalam .zip, GeoJSON, GeoPackage, KML) dengan kolom "indeks" bernilai 0 sampai 1 atau kolom "kelas" berisi rendah, sedang, atau tinggi. Kelas di peta: rendah di bawah 0,33, sedang 0,33 sampai 0,67, tinggi di atasnya. ${ATURAN_UNGGAH}`,
   adat: 'Wilayah kelola masyarakat hukum adat ditarik dari Portal Satu Data KKP bila ditekan Periksa pembaruan.',
   bps_produksi: 'Diperbarui otomatis dari BPS setiap tahun data baru terbit.',
   bps_kerja: 'Diperbarui otomatis dari BPS setiap tahun data baru terbit.',
 };
 
-const Kelompok = ({ k, onTarik, proses }) => {
+const Unggah = ({ t, onUnggah, proses }) => {
+  const [buka, setBuka] = useState(false);
+  const [berkas, setBerkas] = useState(null);
+  const [keterangan, setKeterangan] = useState('');
+  const [galat, setGalat] = useState('');
+  const kirim = async () => {
+    const hasil = await onUnggah(t, berkas, keterangan);
+    setGalat(typeof hasil === 'string' ? hasil : '');
+    if (hasil === true) {
+      setBuka(false);
+      setBerkas(null);
+      setKeterangan('');
+    }
+  };
+  return (
+    <div className="rounded-lg bg-slate-50 px-3 py-2 text-xs space-y-2">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <div className="text-slate-600">
+          <div className="font-medium text-slate-700">{t.nama}{t.satuan && <span className="font-normal text-slate-500"> · {t.satuan}</span>}</div>
+          {t.terakhir ? `Terakhir diunggah ${tanggal(t.terakhir)}` : 'Belum pernah diunggah dari halaman ini'}
+          {t.gagal && <div className="text-rose-600">Unggahan terakhir gagal: {t.gagal}</div>}
+        </div>
+        <button type="button" className={kelasTombol} disabled={t.berjalan || proses} onClick={() => setBuka(!buka)}>
+          <Upload className={`w-3.5 h-3.5 ${t.berjalan ? 'animate-pulse' : ''}`} />
+          {t.berjalan ? 'Sedang dimuat...' : 'Unggah pembaruan'}
+        </button>
+      </div>
+      {buka && !t.berjalan && (
+        <div className="grid gap-2 sm:grid-cols-[auto_1fr_auto] items-end">
+          <label className={`${kelasTombol} cursor-pointer`}>
+            <Upload className="w-3.5 h-3.5" /> {berkas ? berkas.name : 'Pilih berkas'}
+            <input type="file" className="hidden" accept=".tif,.tiff,.zip,.geojson,.json,.gpkg,.kml"
+              onChange={(e) => { setBerkas(e.target.files?.[0] || null); e.target.value = ''; }} />
+          </label>
+          <input className={kelasInput} placeholder="Sumber data: lembaga dan tahun, mis. BNPB InaRISK 2025" value={keterangan}
+            onChange={(e) => setKeterangan(e.target.value)} />
+          <button type="button" disabled={!berkas || keterangan.trim().length < 5 || proses} onClick={kirim}
+            className="px-4 py-2 rounded-lg bg-kkp-800 text-white text-sm font-semibold hover:bg-kkp-900 disabled:opacity-50">
+            {proses ? 'Mengirim...' : 'Muat'}
+          </button>
+        </div>
+      )}
+      {galat && <p className="text-rose-600">{galat}</p>}
+    </div>
+  );
+};
+
+const Kelompok = ({ k, onTarik, onUnggah, proses }) => {
   const [panduan, setPanduan] = useState(false);
   const [teks, kelas] = STATUS_SUMBER[k.status];
   return (
@@ -57,6 +105,7 @@ const Kelompok = ({ k, onTarik, proses }) => {
           </button>
         </div>
       ))}
+      {k.unggah.map((t) => <Unggah key={t.kode} t={t} onUnggah={onUnggah} proses={proses} />)}
     </div>
   );
 };
@@ -202,7 +251,7 @@ const AdminPembaruanDataPage = () => {
 
   const muat = useCallback(() => api.get(URL).then(({ data: d }) => setData(d)).catch((e) => setGalat(pesanGalat(e))), []);
   useEffect(() => { muat(); }, [muat]);
-  const berjalan = data?.kelompok.some((k) => k.tarik.some((t) => t.berjalan));
+  const berjalan = data?.kelompok.some((k) => [...k.tarik, ...k.unggah].some((t) => t.berjalan));
   useEffect(() => {
     if (!berjalan) return undefined;
     const t = setInterval(muat, 15000);
@@ -222,6 +271,23 @@ const AdminPembaruanDataPage = () => {
     }
   };
 
+  const unggah = async (t, berkas, keterangan) => {
+    if (!window.confirm(`Ganti data "${t.nama}" di wilayah yang dicakup berkas ${berkas.name}?`)) return false;
+    setProses(true);
+    try {
+      const form = new FormData();
+      form.append('kode', t.kode);
+      form.append('keterangan', keterangan);
+      form.append('berkas', berkas);
+      setData((await api.post(`${URL}unggah/`, form)).data);
+      return true;
+    } catch (e) {
+      return e.response?.status === 413 ? 'Berkas lebih besar dari 50 MB; unggah per provinsi atau per pulau.' : pesanGalat(e);
+    } finally {
+      setProses(false);
+    }
+  };
+
   if (!data) return <div className="p-8 text-slate-500">{galat || 'Memuat sumber data...'}</div>;
 
   return (
@@ -230,7 +296,7 @@ const AdminPembaruanDataPage = () => {
         <div className="p-2 bg-sky-50 rounded-xl text-sky-600"><DatabaseZap className="w-5 h-5" /></div>
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Pembaruan Data</h1>
-          <p className="text-slate-500 text-sm mt-1">Perbarui data dari sumbernya atau unggah matriks KKPRL terbaru.</p>
+          <p className="text-slate-500 text-sm mt-1">Perbarui data dari sumbernya, atau unggah matriks KKPRL dan data yang disimpan di aplikasi.</p>
         </div>
       </div>
       <StatusHitungUlang status={status} onMulai={mulai} />
@@ -259,7 +325,7 @@ const AdminPembaruanDataPage = () => {
         </table>
       </div>
       <div className="grid gap-3 lg:grid-cols-2">
-        {data.kelompok.map((k) => <Kelompok key={k.kode} k={k} onTarik={tarik} proses={proses} />)}
+        {data.kelompok.map((k) => <Kelompok key={k.kode} k={k} onTarik={tarik} onUnggah={unggah} proses={proses} />)}
       </div>
     </div>
   );
