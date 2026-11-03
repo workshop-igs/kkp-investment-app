@@ -192,6 +192,16 @@ SEKTOR_SUB_ZONA_COCOK = {
     'KONSERVASI_PESISIR': ['KONSERVASI', 'MANGROVE'],
 }
 
+ZONA_KONSERVASI_PEMANFAATAN = r'pemanfaatan terbatas|sub ?zona pariwisata'
+KETENTUAN_KONSERVASI_PEMANFAATAN = {
+    'PARIWISATA_BAHARI': (
+        'BERSYARAT',
+        'Wisata alam perairan di zona pemanfaatan terbatas atau subzona pariwisata kawasan konservasi: memerlukan '
+        'persetujuan pengelola kawasan, mengikuti rencana pengelolaan dan zonasi (RPZ), dan kuota daya dukung.',
+        'PP 60/2007 tentang Konservasi Sumber Daya Ikan; Permen KP 31/2020 tentang Pengelolaan Kawasan Konservasi',
+    ),
+}
+
 KETENTUAN_DARAT_BAWAAN = {
     'GARAM': {'DARAT_PERGARAMAN': 'DIIZINKAN', 'DARAT_PERIKANAN': 'BERSYARAT', 'DARAT_INDUSTRI': 'BERSYARAT'},
     'PERIKANAN_BUDIDAYA': {'DARAT_PERIKANAN': 'DIIZINKAN', 'DARAT_PERGARAMAN': 'BERSYARAT'},
