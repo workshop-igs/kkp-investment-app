@@ -336,14 +336,14 @@ const PipelinePage = () => {
                             <Eye className="w-3.5 h-3.5" />
                             <span>Detail</span>
                           </Link>
-                          <button
+                          {p.boleh_hapus && <button
                             onClick={() => setProjectToDelete(p)}
                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 text-xs font-semibold transition-colors"
                             title="Hapus proyek ini"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                             <span>Hapus</span>
-                          </button>
+                          </button>}
                         </div>
                       </td>
                     </tr>
