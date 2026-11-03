@@ -512,6 +512,9 @@ DAYA_DUKUNG_WISATA = [
 ]
 KUNJUNGAN_PER_TAMU = 2
 MARGIN_DAYA_DUKUNG = 0.2
+BATAS_PULAU_KECIL_KM2 = 2000
+PORSI_NEGARA_PULAU_KECIL = 0.3
+PORSI_RTH_PULAU_KECIL = 0.3
 JUMLAH_LOKASI_PRIORITAS = 6
 JUMLAH_UNGGULAN = 4
 JUMLAH_JENIS_UNGGULAN = 3
@@ -544,6 +547,9 @@ LINGKUNGAN_BISNIS = {
     'PERIKANAN_BUDIDAYA': ['PKKPRL atau PKKPR', 'Cara Budi Daya Ikan yang Baik', 'SPPL, UKL-UPL, atau AMDAL',
                            'Karantina dan mutu ekspor', 'Tata kelola lahan'],
     'PENGOLAHAN_HASIL_LAUT': ['PKKPR', 'HACCP', 'Sertifikasi halal', 'SPPL, UKL-UPL, atau AMDAL', 'Mutu ekspor'],
+    'PARIWISATA_BAHARI': ['PKKPRL dan izin kawasan konservasi', 'Kajian daya dukung dan dokumen lingkungan',
+                          'Standar selam ISO 21416 dan Green Fins', 'Kriteria destinasi berkelanjutan GSTC',
+                          'Batas pemanfaatan pulau kecil', 'Kemitraan masyarakat dan BUMDes'],
 }
 KEBUTUHAN_TEKNOLOGI = {
     'UMUM': 'teknologi produksi dan standar mutu',

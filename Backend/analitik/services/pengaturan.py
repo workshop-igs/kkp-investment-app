@@ -117,6 +117,13 @@ DAFTAR = [
        'dibagi angka ini menjadi tamu per hari.', 'kunjungan', (), (1, 10)),
     _d('MARGIN_DAYA_DUKUNG', 'profil_susunan', 'Margin kehati-hatian daya dukung',
        'Kuota uji = tamu per hari dikurangi margin ini, untuk ketidakpastian data habitat.', **PERSEN),
+    _d('BATAS_PULAU_KECIL_KM2', 'profil_susunan', 'Batas luas pulau kecil',
+       'Pulau seluas ini atau kurang diperiksa batas pemanfaatannya pada lokasi wisata bahari dan laporan analisis '
+       'area (UU 1/2014).', 'km²', (), (1, None)),
+    _d('PORSI_NEGARA_PULAU_KECIL', 'profil_susunan', 'Bagian pulau kecil yang dikuasai negara',
+       'Sisanya paling banyak dapat dimanfaatkan pelaku usaha (Perpres 34/2019, Permen KP 10/2024).', **PERSEN),
+    _d('PORSI_RTH_PULAU_KECIL', 'profil_susunan', 'Ruang terbuka hijau dari lahan usaha di pulau kecil',
+       'Bagian lahan yang dimanfaatkan pelaku usaha yang wajib menjadi ruang terbuka hijau.', **PERSEN),
     _d('AMBANG_TERBANGUN_PERSEN', 'profil_susunan', 'Batas bagian zona yang sudah terbangun',
        'Zona yang terbangun sebesar ini atau lebih tidak menjadi lokasi prioritas Profil Investasi.', '%', (),
        (0, 100)),
