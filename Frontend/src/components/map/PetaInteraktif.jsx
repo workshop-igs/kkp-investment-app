@@ -6,7 +6,7 @@ import { Crosshair, Move } from 'lucide-react';
 import 'leaflet/dist/leaflet.css';
 import KontrolPeta from './KontrolPeta';
 import { BATAS_TITIK_UBAH, DrawingLayer, MapOverlayLayers } from './AlatGambar';
-import UnggahGeospasial from './UnggahGeospasial';
+import UnggahGeospasial, { areaProyek, luasHa } from './UnggahGeospasial';
 import PetaMini from './PetaMini';
 import PanelDetailProvinsi from './PanelDetailProvinsi';
 import LegendaPeta from './LegendaPeta';
@@ -241,6 +241,8 @@ const PetaInteraktif = ({
   const [provinsiTerpilih, setProvinsiTerpilih] = useState(null);
   const [error, setError] = useState(null);
   const [peringatanUnggah, setPeringatanUnggah] = useState([]);
+  const [poligonUnggah, setPoligonUnggah] = useState(null);
+  const refUnggah = useRef(null);
   const [layerVisibility, setLayerVisibility] = useState({});
 
   const { isAuthenticated } = useAuth();
@@ -415,6 +417,28 @@ const PetaInteraktif = ({
     }
   };
 
+  const pilihPoligon = (fitur, diabaikan = 0) => {
+    setError(null);
+    try {
+      const { geometry, peringatan } = areaProyek({ features: [fitur], diabaikan });
+      drawerRef.current?.loadGeometry(geometry);
+      refUnggah.current?.bringToFront();
+      setPeringatanUnggah(peringatan);
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  const terimaUnggahan = (koleksi) => {
+    if (koleksi.features.length === 1) {
+      setPoligonUnggah(null);
+      pilihPoligon(koleksi.features[0], koleksi.diabaikan);
+      return;
+    }
+    setPoligonUnggah({ ...koleksi, kunci: Date.now() });
+    refPeta.current?.fitBounds(L.geoJSON(koleksi).getBounds(), { padding: [50, 50] });
+  };
+
   const handleStartDrawing = () => {
     setModeUkur(false);
     setModeUbah(false);
@@ -422,6 +446,7 @@ const PetaInteraktif = ({
     setIsDrawing(true);
     setHasPolygon(false);
     setPeringatanUnggah([]);
+    setPoligonUnggah(null);
     setVertexCount(0);
     setLayerVisibility({});
     setError(null);
@@ -453,6 +478,7 @@ const PetaInteraktif = ({
     setLayerVisibility({});
     setError(null);
     setPeringatanUnggah([]);
+    setPoligonUnggah(null);
     setPanelOpen(false);
   };
 
@@ -652,6 +678,28 @@ const PetaInteraktif = ({
           <ScaleControl position="bottomleft" imperial={false} maxWidth={200} />
           <MouseTracker onMouseMove={setMousePosition} />
 
+          {poligonUnggah && (
+            <GeoJSON
+              key={`unggah-${poligonUnggah.kunci}-${isDrawing || modeUbah}`}
+              ref={refUnggah}
+              data={poligonUnggah}
+              interactive={!isDrawing && !modeUbah}
+              style={{ color: '#0284c7', weight: 2, dashArray: '6 4', fillColor: '#38bdf8', fillOpacity: 0.15 }}
+              onEachFeature={(f, layer) => {
+                const nama = ['nama', 'Nama', 'NAMA', 'name', 'Name', 'NAME']
+                  .map((k) => f.properties?.[k]).find((v) => typeof v === 'string' && v.trim());
+                const luas = luasHa(f.geometry).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+                layer.bindTooltip(`${nama || `Poligon ${poligonUnggah.features.indexOf(f) + 1}`} · ${luas} ha — klik untuk menganalisis`,
+                  { sticky: true, className: 'map-tooltip' });
+                layer.on({
+                  click: () => pilihPoligon(f, poligonUnggah.diabaikan),
+                  mouseover: (e) => e.target.setStyle({ fillOpacity: 0.35 }),
+                  mouseout: (e) => e.target.setStyle({ fillOpacity: 0.15 }),
+                });
+              }}
+            />
+          )}
+
           <DrawingLayer ref={drawerRef} onPolygonCompleted={handlePolygonCompletedInternal} onVertexCountChange={setVertexCount} />
           
           <MapOverlayLayers layers={mapLayers} visibility={layerVisibility} />
@@ -737,6 +785,13 @@ const PetaInteraktif = ({
             data-aksi-peta
             className="absolute bottom-24 left-4 right-[4.5rem] sm:left-1/2 sm:right-auto sm:-translate-x-1/2 z-[1000] flex flex-col gap-3 sm:w-max sm:max-w-[calc(100vw-10rem)]"
           >
+            {poligonUnggah && !panelOpen && (
+              <p className="self-center rounded-lg bg-white/95 backdrop-blur-md border border-slate-200 px-4 py-2 text-xs text-slate-600 shadow-lg text-center">
+                {hasPolygon
+                  ? 'Klik poligon lain di peta untuk menganalisis area yang berbeda.'
+                  : `File berisi ${poligonUnggah.features.length} poligon. Klik salah satu di peta untuk menganalisisnya.`}
+              </p>
+            )}
             {!hasPolygon && (
               <div className="flex flex-wrap justify-center gap-3">
                 <button data-tur="gambar" onClick={handleStartDrawing}
@@ -745,7 +800,7 @@ const PetaInteraktif = ({
                   Gambar Area Proyek Baru
                 </button>
                 <UnggahGeospasial
-                  onUploadSuccess={(geometry) => drawerRef.current?.loadGeometry(geometry)}
+                  onUploadSuccess={terimaUnggahan}
                   onError={setError}
                   onPeringatan={setPeringatanUnggah}
                   disabled={false}
@@ -779,7 +834,7 @@ const PetaInteraktif = ({
                   Ubah Titik
                 </button>
                 <UnggahGeospasial
-                  onUploadSuccess={(geometry) => drawerRef.current?.loadGeometry(geometry)}
+                  onUploadSuccess={terimaUnggahan}
                   onError={setError}
                   onPeringatan={setPeringatanUnggah}
                   disabled={false}

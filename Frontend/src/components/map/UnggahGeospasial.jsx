@@ -82,14 +82,8 @@ export async function bacaGeospasial(file) {
 
 export function areaProyek({ features, diabaikan = 0 }) {
   const peringatan = [];
-  const geometry = features[0].geometry;
+  const { geometry } = features[0];
   const luas = luasHa(geometry);
-  if (features.length > 1) {
-    peringatan.push(
-      `File berisi ${features.length} poligon; hanya poligon pertama (${ha(luas)} ha) yang dipakai. `
-      + 'Unggah satu poligon per area proyek, atau gabungkan poligonnya lebih dulu bila memang satu area.'
-    );
-  }
   if (diabaikan) peringatan.push(`${diabaikan} fitur titik/garis di dalam file diabaikan.`);
   if (geometry.type === 'MultiPolygon' && geometry.coordinates.length > 1) {
     peringatan.push(`Poligon terdiri atas ${geometry.coordinates.length} bagian terpisah; semuanya dianalisis sebagai satu area.`);
@@ -123,9 +117,7 @@ export default function UnggahGeospasial({ onUploadSuccess, onError, onPeringata
     onPeringatan?.([]);
 
     try {
-      const { geometry, peringatan } = areaProyek(await bacaGeospasial(file));
-      onUploadSuccess(geometry);
-      onPeringatan?.(peringatan);
+      onUploadSuccess(await bacaGeospasial(file));
     } catch (err) {
       console.error(err);
       onError(err.message || 'Gagal memproses file geospasial.');
