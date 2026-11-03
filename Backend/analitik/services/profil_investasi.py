@@ -126,11 +126,7 @@ def _zona(c, provinsi, sumber, tol, sektor=None):
         return {'sumber_label': None, 'label_data': None, 'regulasi': None, 'baris': [], 'total_ha': 0, 'peta': []}
     qs = ZonasiRuangLaut.objects.filter(provinsi=provinsi, sumber_data=sumber, tingkat_acuan='RTRW_PROVINSI')
     if sektor:
-        sesuai = skor_sesuai(sektor, provinsi)
-        peruntukan = [*SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, []),
-                      *(z for z, v in KETENTUAN_DARAT_BAWAAN.get(sektor.kode, {}).items() if v == 'DIIZINKAN')]
-        utama = sesuai.filter(zona__sub_zona__in=peruntukan)
-        qs = ZonasiRuangLaut.objects.filter(id__in=(utama if utama.exists() else sesuai).values('zona_id'))
+        qs = ZonasiRuangLaut.objects.filter(id__in=ruang_utama(skor_sesuai(sektor, provinsi), sektor.kode).values('zona_id'))
     baris = list(qs.values('sub_zona').annotate(luas=Sum('luas_ha'), n=Count('id')).order_by('-luas'))
     total = sum(b['luas'] or 0 for b in baris)
     ids = list(qs.order_by('-luas_ha').values_list('id', flat=True)[:BATAS_ZONA_PETA])
@@ -174,21 +170,26 @@ def _kabupaten_terdekat(c, provinsi_id, x, y):
     return r[0] if r else ''
 
 
+def ruang_utama(skor, kode):
+    peruntukan = [*SEKTOR_SUB_ZONA_COCOK.get(kode, []),
+                  *(z for z, v in KETENTUAN_DARAT_BAWAAN.get(kode, {}).items() if v == 'DIIZINKAN')]
+    utama = skor.filter(zona__sub_zona__in=peruntukan)
+    return utama if utama.exists() else skor
+
+
 def _luas_jenis(provinsi):
-    return {
-        r['sektor__kode']: {
-            'sesuai_ha': r['sesuai'] or 0,
-            'tinggi_ha': r['tinggi'] or 0,
-            'sedang_ha': r['sedang'] or 0,
-            'jumlah_zona_tinggi': r['n_tinggi'] or 0,
-        }
-        for r in skor_sesuai(provinsi=provinsi).values('sektor__kode').annotate(
+    semua = skor_sesuai(provinsi=provinsi)
+    hasil = {}
+    for kode in set(semua.values_list('sektor__kode', flat=True)):
+        r = ruang_utama(semua.filter(sektor__kode=kode), kode).aggregate(
             sesuai=Sum('zona__luas_ha'),
             tinggi=Sum('zona__luas_ha', filter=Q(kelas='TINGGI')),
             sedang=Sum('zona__luas_ha', filter=Q(kelas='SEDANG')),
             n_tinggi=Count('id', filter=Q(kelas='TINGGI')),
         )
-    }
+        hasil[kode] = {'sesuai_ha': r['sesuai'] or 0, 'tinggi_ha': r['tinggi'] or 0, 'sedang_ha': r['sedang'] or 0,
+                       'jumlah_zona_tinggi': r['n_tinggi'] or 0}
+    return hasil
 
 
 PARAMETER_OSEANOGRAFI_LOKASI = ('KEDALAMAN', 'SUHU', 'GELOMBANG', 'KLOROFIL')
@@ -306,7 +307,7 @@ def _rinci_jenis(c, provinsi, sektor, tol, luas):
     from ketenagakerjaan.proyeksi import _matriks
 
     status = _status_sub_zona(provinsi, sektor)
-    skor = belum_dimanfaatkan(skor_sesuai(sektor, provinsi).filter(kelas__in=['TINGGI', 'SEDANG']))
+    skor = belum_dimanfaatkan(ruang_utama(skor_sesuai(sektor, provinsi), sektor.kode).filter(kelas__in=['TINGGI', 'SEDANG']))
     kelas_zona = dict(skor.order_by('-zona__luas_ha').values_list('zona_id', 'kelas')[:BATAS_ZONA_PETA_SEKTOR])
     c.execute(
         'SELECT id, ST_AsGeoJSON(ST_SimplifyPreserveTopology(geometry, %s), 4) '
@@ -540,7 +541,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v6:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v7:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))
