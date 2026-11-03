@@ -666,6 +666,44 @@ const GrupAngka = ({ judul, isi, label = {}, onUbah, petunjuk }) => (
   </div>
 );
 
+const StatusModel = ({ m }) => {
+  const ada = (o) => Object.values(o).some((v) => v);
+  const lengkap = (m.harga_per_satuan || m.satuan_produk === 'kg') && ada(m.volume_per_tahun) && ada(m.investasi);
+  return (
+    <span className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${lengkap ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
+      {lengkap ? 'Siap dihitung' : 'Belum lengkap'}
+    </span>
+  );
+};
+
+const FormModel = ({ m, ubah }) => {
+  const isian = (bagian) => (k, x) => ubah({ [bagian]: { ...m[bagian], [k]: x } });
+  return (
+    <>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <label className="text-[11px] text-slate-500">
+          Satuan usaha
+          <input value={m.satuan_usaha} onChange={(e) => ubah({ satuan_usaha: e.target.value })} className={kelasInput} />
+        </label>
+        <label className="text-[11px] text-slate-500">
+          Satuan produk
+          <input value={m.satuan_produk} onChange={(e) => ubah({ satuan_produk: e.target.value })} className={kelasInput} />
+        </label>
+        <label className="text-[11px] text-slate-500">
+          Harga per {m.satuan_produk || 'satuan'} (Rp)
+          <Angka nilai={m.harga_per_satuan} kosong petunjuk={m.satuan_produk === 'kg' ? 'harga BPS provinsi' : 'wajib diisi'}
+            onUbah={(x) => ubah({ harga_per_satuan: x })} />
+        </label>
+      </div>
+      <GrupAngka judul={`Volume produksi per tahun (${m.satuan_produk || 'satuan'})`} isi={m.volume_per_tahun}
+        label={LABEL_VOLUME} petunjuk="kosong" onUbah={isian('volume_per_tahun')} />
+      <GrupAngka judul="Investasi awal (Rp)" isi={m.investasi} petunjuk="kosong" onUbah={isian('investasi')} />
+      <GrupAngka judul="Biaya operasional per tahun (Rp)" isi={m.operasional_per_tahun} petunjuk="kosong"
+        onUbah={isian('operasional_per_tahun')} />
+    </>
+  );
+};
+
 const ModelUsahaEditor = ({ nilai, onUbah, data }) => {
   const kriteria = data.daftar.find((d) => d.kunci === 'KRITERIA_JENIS')?.nilai || {};
   const [kode, setKode] = useState(data.sektor[0]?.kode);
@@ -677,37 +715,46 @@ const ModelUsahaEditor = ({ nilai, onUbah, data }) => {
       {Object.entries(kriteria[kode] || {}).map(([sub, isi]) => {
         const m = nilai[sub] || data.templat_model_usaha[kode];
         const ubah = (baru) => onUbah({ ...nilai, [sub]: { ...m, ...baru } });
-        const isian = (bagian) => (k, x) => ubah({ [bagian]: { ...m[bagian], [k]: x } });
-        const ada = (o) => Object.values(o).some((v) => v);
-        const lengkap = (m.harga_per_satuan || m.satuan_produk === 'kg') && ada(m.volume_per_tahun) && ada(m.investasi);
+        const kelas = m.kelas || [];
+        const ubahKelas = (n, baru) => ubah({ kelas: kelas.map((k, i) => (i === n ? { ...k, ...baru } : k)) });
         return (
           <div key={sub} className="rounded-lg border border-slate-100 p-3 space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <span className="text-sm font-semibold text-slate-800">{isi.nama}</span>
-              <span className={`rounded-full px-2 py-0.5 text-[10.5px] font-semibold ${lengkap ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
-                {lengkap ? 'Siap dihitung' : 'Belum lengkap'}
-              </span>
+              <StatusModel m={m} />
             </div>
-            <div className="grid gap-2 sm:grid-cols-3">
-              <label className="text-[11px] text-slate-500">
-                Satuan usaha
-                <input value={m.satuan_usaha} onChange={(e) => ubah({ satuan_usaha: e.target.value })} className={kelasInput} />
+            {kelas.length > 0 && (
+              <label className="block text-[11px] text-slate-500 max-w-sm">
+                Nama kelas model ini
+                <input value={m.nama_kelas || ''} placeholder="mis. Menengah" onChange={(e) => ubah({ nama_kelas: e.target.value })}
+                  className={kelasInput} />
               </label>
-              <label className="text-[11px] text-slate-500">
-                Satuan produk
-                <input value={m.satuan_produk} onChange={(e) => ubah({ satuan_produk: e.target.value })} className={kelasInput} />
-              </label>
-              <label className="text-[11px] text-slate-500">
-                Harga per {m.satuan_produk || 'satuan'} (Rp)
-                <Angka nilai={m.harga_per_satuan} kosong petunjuk={m.satuan_produk === 'kg' ? 'harga BPS provinsi' : 'wajib diisi'}
-                  onUbah={(x) => ubah({ harga_per_satuan: x })} />
-              </label>
-            </div>
-            <GrupAngka judul={`Volume produksi per tahun (${m.satuan_produk || 'satuan'})`} isi={m.volume_per_tahun}
-              label={LABEL_VOLUME} petunjuk="kosong" onUbah={isian('volume_per_tahun')} />
-            <GrupAngka judul="Investasi awal (Rp)" isi={m.investasi} petunjuk="kosong" onUbah={isian('investasi')} />
-            <GrupAngka judul="Biaya operasional per tahun (Rp)" isi={m.operasional_per_tahun} petunjuk="kosong"
-              onUbah={isian('operasional_per_tahun')} />
+            )}
+            <FormModel m={m} ubah={ubah} />
+            {kelas.map((k, n) => (
+              <div key={n} className="rounded-lg border border-dashed border-slate-200 p-3 space-y-3 bg-slate-50/50">
+                <div className="flex flex-wrap items-end justify-between gap-2">
+                  <label className="text-[11px] text-slate-500 flex-1 max-w-sm">
+                    Nama kelas usaha tambahan
+                    <input value={k.nama} placeholder="mis. Desa wisata (BUMDes) atau Premium"
+                      onChange={(e) => ubahKelas(n, { nama: e.target.value })} className={kelasInput} />
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <StatusModel m={k} />
+                    <button type="button" title="Hapus kelas" onClick={() => ubah({ kelas: kelas.filter((_, i) => i !== n) })}
+                      className="p-1 text-rose-500 hover:bg-rose-50 rounded"><Trash2 className="w-3.5 h-3.5" /></button>
+                  </div>
+                </div>
+                <FormModel m={k} ubah={(baru) => ubahKelas(n, baru)} />
+              </div>
+            ))}
+            {kelas.length < 2 && (
+              <button type="button"
+                onClick={() => ubah({ kelas: [...kelas, { ...data.templat_model_usaha[kode], nama: '' }], nama_kelas: m.nama_kelas || 'Kelas acuan' })}
+                className="rounded-md border border-dashed border-slate-300 px-2 py-1 text-xs text-slate-600 bg-white hover:bg-slate-50">
+                + Tambah kelas usaha (mis. desa wisata atau premium)
+              </button>
+            )}
           </div>
         );
       })}

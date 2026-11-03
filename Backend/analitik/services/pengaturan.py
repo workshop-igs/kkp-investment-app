@@ -107,6 +107,16 @@ DAFTAR = [
     _d('JUMLAH_LOKASI_PRIORITAS', 'profil_susunan', 'Lokasi prioritas per bab',
        'Banyaknya lokasi Peta Sebaran terbaik yang ditampilkan di tiap bab Profil Investasi.', 'lokasi', (), (1, 6),
        bulat=True),
+    _d('DAYA_DUKUNG_WISATA', 'profil_susunan', 'Daya dukung wisata bahari',
+       'Jumlah kunjungan per hari = pengunjung per satuan ruang × (luas karang atau panjang pantai ÷ satuan ruang) × '
+       '(jam buka ÷ lama kunjungan). Dipakai di lokasi prioritas Wisata Bahari dan laporan analisis area.',
+       kolom=['Aktivitas', 'Pengunjung per satuan ruang (orang)', 'Satuan ruang (m² karang; m pantai)',
+              'Jam buka per hari', 'Lama kunjungan (jam)'], istilah='Physical carrying capacity'),
+    _d('KUNJUNGAN_PER_TAMU', 'profil_susunan', 'Kunjungan situs per tamu per hari',
+       'Seorang tamu rata-rata mengunjungi sekian situs per hari, misalnya snorkeling lalu pantai; jumlah kunjungan '
+       'dibagi angka ini menjadi tamu per hari.', 'kunjungan', (), (1, 10)),
+    _d('MARGIN_DAYA_DUKUNG', 'profil_susunan', 'Margin kehati-hatian daya dukung',
+       'Kuota uji = tamu per hari dikurangi margin ini, untuk ketidakpastian data habitat.', **PERSEN),
     _d('AMBANG_TERBANGUN_PERSEN', 'profil_susunan', 'Batas bagian zona yang sudah terbangun',
        'Zona yang terbangun sebesar ini atau lebih tidak menjadi lokasi prioritas Profil Investasi.', '%', (),
        (0, 100)),
@@ -296,6 +306,7 @@ LABEL_BAGIAN = {
     'kenaikan_harga_persen': 'Kenaikan harga per tahun (%)', 'kenaikan_biaya_persen': 'Kenaikan biaya per tahun (%)',
     'csr_persen': 'CSR (% pendapatan bersih)', 'batas_pbp_tahun': 'Batas masa pengembalian modal (tahun)',
     'UMUM': 'Jenis lain (umum)', 'S1': 'Sangat sesuai (S1)', 'S2': 'Sesuai (S2)',
+    'SELAM': 'Selam', 'SNORKELING': 'Snorkeling', 'PANTAI': 'Rekreasi pantai',
 }
 
 BAWAAN = {kunci: json.loads(json.dumps(getattr(konstanta, kunci))) for kunci in TERDAFTAR}
@@ -401,16 +412,17 @@ def _kriteria(nilai, sektor):
                     raise NilaiTidakSah(f'{jalur} > {PARAMETER[k][0]}: batas bawah melebihi batas atas.')
 
 
+KELAS_MODEL_USAHA_MAKS = 2
+
+
 def _model_usaha(nilai):
     dikenal = {sub: (jenis, isi['nama']) for sumber in (konstanta.KRITERIA_JENIS, atur('KRITERIA_JENIS'))
                for jenis, per_sub in sumber.items() for sub, isi in per_sub.items()}
     meta = {'batas': [0, None], 'bulat': False}
     if not isinstance(nilai, dict) or not set(nilai) <= set(dikenal):
         raise NilaiTidakSah('Model usaha: ada sub-jenis yang tidak dikenal.')
-    for sub, isi in nilai.items():
-        jenis, jalur = dikenal[sub]
-        contoh = konstanta.model_usaha_kosong(jenis, sub)
-        if not isinstance(isi, dict) or set(isi) != set(contoh):
+    def satu(isi, contoh, jalur, tambahan=()):
+        if not isinstance(isi, dict) or not set(contoh) <= set(isi) <= set(contoh) | set(tambahan):
             raise NilaiTidakSah(f'{jalur}: susunan isian tidak sesuai.')
         for k in ('satuan_usaha', 'satuan_produk'):
             if not isinstance(isi[k], str) or not isi[k].strip() or len(isi[k]) > 40:
@@ -421,6 +433,23 @@ def _model_usaha(nilai):
                 raise NilaiTidakSah(f'{jalur}: susunan isian tidak sesuai.')
             for k, v in isi[bagian].items():
                 _angka(v, f'{jalur} > {k}', meta, boleh_kosong=True)
+
+    def nama(v, jalur):
+        if not isinstance(v, str) or not v.strip() or len(v) > 60:
+            raise NilaiTidakSah(f'{jalur}: nama kelas wajib diisi, paling panjang 60 huruf.')
+
+    for sub, isi in nilai.items():
+        jenis, jalur = dikenal[sub]
+        contoh = konstanta.model_usaha_kosong(jenis, sub)
+        satu(isi, contoh, jalur, ('nama_kelas', 'kelas'))
+        if 'nama_kelas' in isi:
+            nama(isi['nama_kelas'], jalur)
+        kelas = isi.get('kelas', [])
+        if not isinstance(kelas, list) or len(kelas) > KELAS_MODEL_USAHA_MAKS:
+            raise NilaiTidakSah(f'{jalur}: paling banyak {KELAS_MODEL_USAHA_MAKS} kelas usaha tambahan.')
+        for n, k in enumerate(kelas, 1):
+            nama(k.get('nama') if isinstance(k, dict) else None, f'{jalur} > kelas {n}')
+            satu(k, contoh, f'{jalur} > kelas {n}', ('nama',))
 
 
 def _teks(nilai, bawaan, meta, sektor):
