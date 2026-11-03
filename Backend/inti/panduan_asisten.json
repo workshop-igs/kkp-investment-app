@@ -135,7 +135,7 @@
       "luas maksimum",
       "beberapa poligon"
     ],
-    "isi": "Selain menggambar, area proyek dapat ditentukan dengan menekan Upload File Geospasial lalu memilih shapefile yang dikemas dalam .zip, berkas KML, atau GeoJSON. Koordinat wajib dalam derajat WGS 84 (EPSG:4326); shapefile tanpa berkas .prj atau berproyeksi UTM ditolak dengan petunjuk mengekspor ulang, begitu pula koordinat lintang-bujur yang tertukar. Bila file berisi beberapa poligon, hanya poligon pertama yang dipakai dan muncul peringatan; fitur titik atau garis diabaikan. Luas area harus 0,01 sampai 50.000 ha (batas dapat diubah administrator). Setelah terunggah, area tampil di peta dan langkah berikutnya sama dengan area yang digambar: periksa batasnya lalu tekan Isi Parameter Analisis."
+    "isi": "Selain menggambar, area proyek dapat ditentukan dengan menekan Upload File Geospasial lalu memilih shapefile yang dikemas dalam .zip, berkas KML, atau GeoJSON. Koordinat wajib dalam derajat WGS 84 (EPSG:4326); shapefile tanpa berkas .prj atau berproyeksi UTM ditolak dengan petunjuk mengekspor ulang, begitu pula koordinat lintang-bujur yang tertukar. Bila file berisi beberapa poligon, semua poligon tampil di peta beserta nama dan luasnya; klik poligon yang ingin dianalisis, dan poligon lain tetap dapat diklik untuk berganti area. Fitur titik atau garis diabaikan. Luas area harus 0,01 sampai 50.000 ha (batas dapat diubah administrator). Setelah terunggah, area tampil di peta dan langkah berikutnya sama dengan area yang digambar: periksa batasnya lalu tekan Isi Parameter Analisis."
   },
   {
     "id": "ukur-dan-unduh-peta",
@@ -267,7 +267,7 @@
       "pancing",
       "aturan provinsi"
     ],
-    "isi": "Ketentuan kegiatan per zona diturunkan dari matriks kesesuaian kegiatan pemanfaatan ruang laut (KKPRL) pada lampiran Perda RTRW Provinsi, yang sudah dimuat untuk 27 provinsi: Aceh, Sumatera Utara, Jambi, Sumatera Selatan, Bengkulu, Lampung, Kepulauan Bangka Belitung, DKI Jakarta, Jawa Barat, Jawa Tengah, DI Yogyakarta, Jawa Timur, Banten, Bali, Nusa Tenggara Barat, Nusa Tenggara Timur, Kalimantan Barat, Kalimantan Tengah, Kalimantan Selatan, Kalimantan Timur, Sulawesi Tengah, Sulawesi Selatan, Sulawesi Tenggara, Gorontalo, Maluku Utara, Papua Barat, dan Papua; matriks Jambi, Sumatera Selatan, Nusa Tenggara Timur, Gorontalo, Papua Barat, dan Papua berupa pindaian sehingga isinya ditranskripsi dari citra lampiran; matriks Aceh (Qanun 1/2020), Sumatera Utara, Kepulauan Bangka Belitung, Kalimantan Tengah, dan Sulawesi Tenggara diambil dari matriks rincian pemanfaatan ruang RZWP-3-K yang rinciannya dikelompokkan per jenis investasi; provinsi lain memakai ketentuan bawaan sistem. Status jenis investasi diputuskan dari rincian kegiatannya di matriks zona itu sendiri, karena satu jenis bisa diperbolehkan untuk rincian tertentu dan dilarang untuk rincian lain, misalnya penangkapan ikan dengan pancing diperbolehkan tetapi dengan pukat hela atau kapal 30 GT ke atas dilarang: diizinkan bila seluruh rinciannya diperbolehkan, diizinkan bersyarat bila sebagian rinciannya bersyarat atau dilarang, dan tidak diizinkan bila seluruh rinciannya dilarang atau Perda melarang semua jenis kegiatan itu tanpa pengecualian. Larangan umum seperti memakai alat atau bahan terlarang tidak dihitung sebagai rincian. Di kawasan konservasi pun status mengikuti matriks Perda zona itu. Aturan provinsi yang dibuat administrator mengalahkan matriks. Laporan menampilkan komposisi zona pada area beserta porsi dan ketentuannya, rincian kegiatan jenis yang dipilih per zona dengan rincian yang dibatasi atau dilarang di urutan pertama, serta ketentuan kegiatan per zona yang dapat dibuka satu per satu dalam tab diperbolehkan, bersyarat, dan tidak diperbolehkan beserta kode zona, ketentuan khusus, dan nomor Perdanya; daftarnya dapat dicari."
+    "isi": "Ketentuan kegiatan per zona diturunkan dari matriks kesesuaian kegiatan pemanfaatan ruang laut (KKPRL) pada lampiran Perda RTRW Provinsi, yang sudah dimuat untuk 28 provinsi: Aceh, Sumatera Utara, Jambi, Sumatera Selatan, Bengkulu, Lampung, Kepulauan Bangka Belitung, DKI Jakarta, Jawa Barat, Jawa Tengah, DI Yogyakarta, Jawa Timur, Banten, Bali, Nusa Tenggara Barat, Nusa Tenggara Timur, Kalimantan Barat, Kalimantan Tengah, Kalimantan Selatan, Kalimantan Timur, Sulawesi Tengah, Sulawesi Selatan, Sulawesi Tenggara, Gorontalo, Maluku, Maluku Utara, Papua Barat, dan Papua; matriks Jambi, Sumatera Selatan, Nusa Tenggara Timur, Gorontalo, Papua Barat, dan Papua berupa pindaian sehingga isinya ditranskripsi dari citra lampiran; matriks Aceh (Qanun 1/2020), Sumatera Utara, Kepulauan Bangka Belitung, Kalimantan Tengah, dan Sulawesi Tenggara diambil dari matriks rincian pemanfaatan ruang RZWP-3-K yang rinciannya dikelompokkan per jenis investasi; provinsi lain memakai ketentuan bawaan sistem. Status jenis investasi diputuskan dari rincian kegiatannya di matriks zona itu sendiri, karena satu jenis bisa diperbolehkan untuk rincian tertentu dan dilarang untuk rincian lain, misalnya penangkapan ikan dengan pancing diperbolehkan tetapi dengan pukat hela atau kapal 30 GT ke atas dilarang: diizinkan bila seluruh rinciannya diperbolehkan, diizinkan bersyarat bila sebagian rinciannya bersyarat atau dilarang, dan tidak diizinkan bila seluruh rinciannya dilarang atau Perda melarang semua jenis kegiatan itu tanpa pengecualian. Larangan umum seperti memakai alat atau bahan terlarang tidak dihitung sebagai rincian. Di kawasan konservasi pun status mengikuti matriks Perda zona itu; khusus Wisata Bahari, zona pemanfaatan terbatas dan subzona pariwisata kawasan konservasi dinilai diizinkan bersyarat (persetujuan pengelola kawasan, rencana pengelolaan dan zonasi, serta kuota daya dukung), sedangkan zona inti tetap tidak diizinkan. Matriks provinsi yang belum ada atau Perda baru diunggah administrator di halaman Pembaruan Data. Aturan provinsi yang dibuat administrator mengalahkan matriks. Laporan menampilkan komposisi zona pada area beserta porsi dan ketentuannya, rincian kegiatan jenis yang dipilih per zona dengan rincian yang dibatasi atau dilarang di urutan pertama, serta ketentuan kegiatan per zona yang dapat dibuka satu per satu dalam tab diperbolehkan, bersyarat, dan tidak diperbolehkan beserta kode zona, ketentuan khusus, dan nomor Perdanya; daftarnya dapat dicari."
   },
   {
     "id": "kriteria-fisik",
@@ -592,7 +592,7 @@
       "jenis investasi",
       "nasional"
     ],
-    "isi": "Pilih provinsi pada daftar atau klik provinsi di peta, lalu pilih semua jenis investasi atau satu jenis saja. Tombol Unduh Profil Investasi Provinsi menghasilkan PDF berisi gambaran wilayah, komoditas unggulan, ruang laut yang tersedia, lokasi prioritas per jenis investasi, sosial dan ketenagakerjaan, serta sumber datanya. Komoditas unggulan diurutkan dari gabungan nilai produksi BPS dan luas zona yang sesuai. Lokasi prioritas diambil dari titik lokasi potensial jenis itu pada Peta Sebaran Wilayah Potensial Investasi, berurutan menurut jumlah kriteria yang terukur lalu luasnya, lengkap dengan sub-sektor, nilai kriteria yang terpenuhi, dan kriteria yang masih perlu dinilai di lapangan. Halaman kajian menyebut kriteria per sub-sektor jenis itu dan ringkasan rincian kegiatannya menurut matriks Perda provinsi: berapa blok zona yang mengizinkan penuh, hanya rincian tertentu atau bersyarat, dan melarang. Dari Peta Spasial, panel ringkasan provinsi juga menyediakan unduhan profil yang sama."
+    "isi": "Pilih provinsi pada daftar atau klik provinsi di peta, lalu pilih semua jenis investasi atau satu jenis saja. Tombol Unduh Profil Investasi Provinsi menghasilkan PDF berisi gambaran wilayah, komoditas unggulan, ruang laut yang tersedia, lokasi prioritas per jenis investasi, sosial dan ketenagakerjaan, serta sumber datanya. Komoditas unggulan diurutkan dari gabungan nilai produksi BPS dan luas zona yang sesuai. Lokasi prioritas diambil dari titik lokasi potensial jenis itu pada Peta Sebaran Wilayah Potensial Investasi, berurutan menurut jumlah kriteria yang terukur lalu luasnya, lengkap dengan sub-sektor, nilai kriteria yang terpenuhi, dan kriteria yang masih perlu dinilai di lapangan. Halaman kajian menyebut kriteria per sub-sektor jenis itu dan ringkasan rincian kegiatannya menurut matriks Perda provinsi: berapa blok zona yang mengizinkan penuh, hanya rincian tertentu atau bersyarat, dan melarang. Untuk Wisata Bahari, setiap lokasi prioritas dilengkapi daya dukung (kuota uji tamu per hari dari luas terumbu karang dan panjang pantai) dan, bila berada di pulau kecil, batas pemanfaatannya: paling luas dimanfaatkan, ruang terbuka hijau, dan paling luas terbangun; analisis finansial dapat membandingkan kelas usaha seperti desa wisata, menengah, dan premium. Dari Peta Spasial, panel ringkasan provinsi juga menyediakan unduhan profil yang sama."
   },
   {
     "id": "dashboard",
@@ -695,7 +695,7 @@
       "keluar",
       "login"
     ],
-    "isi": "Halaman Profil Saya, dibuka dari nama pengguna di pojok kanan atas, menampilkan data akun, formulir ganti kata sandi, dan riwayat aktivitas beserta alamat IP-nya. Kata sandi baru minimal 8 karakter, tidak seluruhnya angka, bukan kata sandi yang umum dipakai, dan tidak mirip nama pengguna, nama, atau surel."
+    "isi": "Akun memiliki tiga level: Pengguna Dasar (akun baru; Beranda, Peta Spasial, analisis area, dan Profil Investasi, tanpa menyimpan ke Proyek Investasi), Pengguna Penuh (ditambah Dashboard Nasional dan Proyek Investasi setelah diberi izin administrator), dan Administrator (ditambah menu Administrator, hanya diberikan oleh Super Admin). Login ditahan 15 menit setelah terlalu sering salah kata sandi. Lupa kata sandi diatur ulang oleh administrator. Halaman Profil Saya, dibuka dari nama pengguna di pojok kanan atas, menampilkan data akun, formulir ganti kata sandi, dan riwayat aktivitas beserta alamat IP-nya. Kata sandi baru minimal 8 karakter, tidak seluruhnya angka, bukan kata sandi yang umum dipakai, dan tidak mirip nama pengguna, nama, atau surel."
   },
   {
     "id": "administrator",
@@ -706,24 +706,35 @@
     "kata_kunci": [
       "admin",
       "administrator",
-      "pengguna",
-      "kelola pengguna",
-      "sektor",
-      "rasio naker",
-      "ketentuan",
-      "kompetensi",
-      "log aktivitas",
-      "realisasi",
-      "pengaturan analisis",
       "ambang",
       "bobot",
-      "parameter tambahan",
-      "unggah shp",
+      "geotiff",
       "hitung ulang",
+      "inarisk",
+      "kbli",
+      "kelola pengguna",
+      "ketentuan",
+      "kompetensi",
       "kondisi aplikasi",
-      "pengguna aktif"
+      "level akses",
+      "log aktivitas",
+      "matriks",
+      "model usaha",
+      "parameter tambahan",
+      "pembaruan data",
+      "pengaturan analisis",
+      "pengaturan profil investasi",
+      "pengguna",
+      "pengguna aktif",
+      "pengguna dasar",
+      "pengguna penuh",
+      "rasio naker",
+      "realisasi",
+      "sektor",
+      "unggah",
+      "unggah shp"
     ],
-    "isi": "Menu Administrator hanya tampil untuk akun administrator. Isinya ringkasan sistem (jumlah pengguna terdaftar dan aktif, serta kondisi aplikasi hijau, kuning, atau merah beserta penyebabnya), kelola pengguna (ubah profil dan hapus akun), proyek investasi (termasuk mengisi nilai realisasi dan tahap), sektor investasi (rasio tenaga kerja per miliar, ketentuan kegiatan per sub-zona, dan kompetensi yang dibutuhkan), serta log aktivitas yang mencatat masuk, keluar, perubahan data, analisis, dan upaya akses yang ditolak. Menu Pengaturan Analisis memuat seluruh ambang, bobot, dan skor analisis yang dapat diubah tanpa mengubah kode, dikelompokkan menjadi kriteria kesesuaian per jenis dan sub-sektor (setiap parameter beserta batas bawah dan atasnya, mis. kedalaman, gelombang, klorofil-a, dan jarak ke pelabuhan), aturan Peta Sebaran Wilayah Potensial Investasi (termasuk jarak aman kabel, pipa, dan alur pelayaran), analisis area, analisis finansial, skor AHP dan keputusan kelayakan, skor lokasi dan risiko, serta skor kelayakan zona; setiap angka diperiksa rentangnya dan dapat dikembalikan ke nilai bawaan. Menu Parameter Tambahan dipakai untuk menambah parameter analisis sendiri, berupa area geospasial yang diunggah dari Shapefile (.zip), KML, atau GeoJSON (mis. area cadangan perikanan tangkap) atau tabel nilai per provinsi atau kabupaten/kota dari CSV atau Excel, untuk jenis investasi dan provinsi tertentu, dengan peran gerbang wajib, parameter dinilai, atau informasi saja. Perubahan pada kedua menu langsung dipakai analisis area; bila memengaruhi Peta Sebaran Wilayah Potensial Investasi atau skor zona, keduanya dihitung ulang otomatis di latar dan progresnya tampil di bagian atas halaman."
+    "isi": "Menu Administrator hanya tampil untuk akun administrator. Dashboard Admin menampilkan kondisi aplikasi (hijau, kuning, atau merah beserta penyebabnya), jumlah pengguna, ringkasan proyek, dan aktivitas terbaru. Pengguna & Peran dipakai untuk menambah akun beserta levelnya, mengubah profil, mengubah level akses (Pengguna Dasar, Pengguna Penuh, Administrator; level Administrator hanya oleh Super Admin), menonaktifkan, atau menghapus akun. Proyek Investasi admin dipakai untuk mengubah seluruh isian proyek, termasuk nilai dan tenaga kerja realisasi, tahap, dan tanggal, atau menghapus proyek. Jenis Investasi dipakai untuk menambah, mengubah, atau menghapus jenis investasi (penghapusan menampilkan dampaknya lebih dulu), rasio tenaga kerja per miliar, ketentuan kegiatan per sub-zona, dan kompetensi tenaga kerja. Pengaturan Analisis memuat seluruh angka analisis dalam enam kelompok: syarat lokasi per jenis usaha (kriteria per sub-jenis dengan batas layak dan batas unggulan; sub-jenis baru ditambah dengan memilih kode KBLI 2025), Peta Sebaran, analisis area, analisis keuangan, sumber data dan masa berlakunya, serta rumus skor dan bobot untuk tim ahli; setiap angka diperiksa rentangnya dan dapat dikembalikan ke nilai bawaan. Parameter Tambahan dipakai untuk menambah parameter sendiri berupa area geospasial (Shapefile .zip, KML, GeoJSON) atau tabel nilai per provinsi atau kabupaten/kota (CSV, Excel) dengan peran gerbang wajib, parameter dinilai, atau informasi saja. Pembaruan Data memuat tombol Periksa pembaruan untuk setiap sumber yang dapat ditarik otomatis, unggah matriks KKPRL dari templat Excel atau PDF lampiran Perda dengan pratinjau sebelum diterapkan per provinsi, serta unggah pembaruan risiko bencana (GeoTIFF indeks 0 sampai 1, atau poligon berkolom indeks atau kelas) dan data kondisi fisik jangka panjang (GeoTIFF dengan rentang nilai yang diperiksa); hanya wilayah yang dicakup berkas yang diganti dan tombol Panduan menjelaskan format tiap data. Pengaturan Profil Investasi mengatur model usaha per sub-jenis beserta kelas usahanya, asumsi keuangan, lokasi prioritas, daya dukung wisata, batas pulau kecil, susunan dokumen, teks per jenis usaha, dan kebijakan nasional pada PDF Profil Investasi. Log Aktivitas mencatat masuk, keluar, perubahan data beserta nilai sebelum dan sesudahnya, analisis, dan upaya akses yang ditolak. Perubahan pengaturan langsung dipakai analisis area; bila memengaruhi Peta Sebaran atau skor zona, keduanya dihitung ulang otomatis di latar dan progresnya tampil di bagian atas halaman."
   },
   {
     "id": "format-angka",
