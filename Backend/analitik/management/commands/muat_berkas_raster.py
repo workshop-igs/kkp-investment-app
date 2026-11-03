@@ -22,6 +22,24 @@ from penarikan_data.inarisk import AMBANG_KELAS, VARIAN_JENIS
 ASAL = (94.0, -11.0, 142.0, 7.0)
 PETAK_OSEANOGRAFI = 6.0
 NILAI_KELAS = {'RENDAH': 0.2, 'SEDANG': 0.5, 'TINGGI': 0.85}
+RENTANG_KONDISI = {
+    'KEDALAMAN': (-11000, 0),
+    'KEMIRINGAN_DASAR': (0, 90),
+    'KEMIRINGAN': (0, 500),
+    'PASUT': (0, 15),
+    'GELOMBANG_EKSTREM': (0, 30),
+    'CURAH_HUJAN': (0, 2000),
+    'BULAN_KERING': (0, 12),
+    'PGA': (0, 3),
+    'ANGIN_100M': (0, 40),
+    'GHI': (0, 12),
+    'BEDA_SUHU_1000M': (0, 35),
+    'TANAH_LIAT': (0, 100),
+    'SHANNON': (0, 15),
+    'ABRASI_PANTAI': (0, 500),
+    'EKS_MANGROVE': (0, 1),
+    'LUAS_EKS_MANGROVE': (0, 100000),
+}
 
 
 def jalur_gdal(berkas):
@@ -173,6 +191,13 @@ def muat_kondisi(berkas, kode, keterangan):
     if contoh is None:
         raise ValueError(f'Parameter {kode} belum pernah dimuat.')
     resolusi = round(contoh.rast.scale.x, 6)
+    bawah, atas = RENTANG_KONDISI[kode]
+
+    def sah(kecil, besar):
+        if kecil < bawah or besar > atas:
+            raise ValueError(
+                f'Nilai harus {bawah:g} sampai {atas:g} {contoh.satuan}; berkas berisi {kecil:.2f} sampai {besar:.2f}. '
+                'Periksa satuan dan tanda angkanya, misalnya kedalaman laut ditulis negatif.')
 
     def lama(kotak):
         r = RasterOseanografi.objects.filter(parameter=kode, cakupan__equals=poligon(kotak)).only('rast').first()
@@ -184,7 +209,7 @@ def muat_kondisi(berkas, kode, keterangan):
         RasterOseanografi.objects.create(parameter=kode, rast=gdal_raster(kotak, data, resolusi), cakupan=batas,
                                          satuan=contoh.satuan, sumber=keterangan[:400])
 
-    return timpa(berkas, False, resolusi, PETAK_OSEANOGRAFI, lama, simpan)
+    return timpa(berkas, False, resolusi, PETAK_OSEANOGRAFI, lama, simpan, sah)
 
 
 class Command(BaseCommand):
