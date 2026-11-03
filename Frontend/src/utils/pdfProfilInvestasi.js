@@ -1074,7 +1074,9 @@ function zonaRuang(dek, o, citra) {
     cakupan: o.wilayah.cakupan,
     batas: o.wilayah.batas,
     citra,
-    lapisan: [{ fitur: z.peta, warna: (f) => warnaZona(f.sub_zona), isi: 0.5 }],
+    lapisan: jenis
+      ? [{ fitur: z.peta, warna: '#ffffff', isi: 0, tebal: 10 }, { fitur: z.peta, warna: (f) => warnaZona(f.sub_zona), isi: 0.85, tebal: 5 }]
+      : [{ fitur: z.peta, warna: (f) => warnaZona(f.sub_zona), isi: 0.5 }],
   }), TEPI + 3, y + 3, lebarPeta, tinggiPeta);
 
   const x = TEPI + lebarPeta + 12;
