@@ -258,17 +258,23 @@ def _rincian_matriks(provinsi, sektor):
 
 def _lokasi(c, provinsi, sektor, subs):
     sesuai = skor_sesuai(sektor, provinsi)
-    hasil = []
-    for lok in LokasiPotensial.objects.filter(
+    label_utama = {LABEL_SUB_ZONA.get(z, z) for z in SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, [])}
+
+    def utama(lok):
+        return lok.rincian['status_tata_ruang'] == 'DIIZINKAN' or lok.rincian['sub_zona'] in label_utama
+
+    calon = LokasiPotensial.objects.filter(
         sektor=sektor, provinsi=provinsi, tampil=True, rincian__sub_sektor_kode__in=subs,
-    ).order_by('-persen_sesuai', '-luas_ha')[:atur('JUMLAH_LOKASI_PRIORITAS')]:
+    ).order_by('-persen_sesuai', '-luas_ha')
+    hasil = []
+    for lok in sorted(calon, key=lambda lok: not utama(lok))[:atur('JUMLAH_LOKASI_PRIORITAS')]:
         titik = lok.geometry.point_on_surface
         r = lok.rincian
         hasil.append({
             'id': lok.id,
             'nama': r['nama'],
             'sub_zona_label': r['sub_zona'],
-            'peruntukan_utama': r['status_tata_ruang'] == 'DIIZINKAN',
+            'peruntukan_utama': utama(lok),
             'kabupaten': _kabupaten_terdekat(c, provinsi.id, titik.x, titik.y),
             'luas_ha': lok.luas_ha,
             'luas_wilayah_ha': r.get('luas_wilayah_ha'),
