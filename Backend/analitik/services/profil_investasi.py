@@ -48,7 +48,8 @@ SUB_ZONA_BERNAMA = {'LAINNYA', 'BELUM_DIATUR', 'TIDAK_DIBAGI', 'DARAT_LAINNYA'}
 BATAS_ZONA_PETA = 600
 BATAS_ZONA_PETA_SEKTOR = 120
 JUMLAH_RINCIAN = 4
-TEKS_PROFIL = ('RANTAI_PASOK', 'LINGKUNGAN_BISNIS', 'KEBUTUHAN_TEKNOLOGI', 'REKOMENDASI_KESESUAIAN', 'KEBIJAKAN_NASIONAL')
+TEKS_PROFIL = ('RANTAI_PASOK', 'LINGKUNGAN_BISNIS', 'KEBUTUHAN_TEKNOLOGI', 'REKOMENDASI_KESESUAIAN', 'KEBIJAKAN_NASIONAL',
+               'MATRIKS_PERIZINAN')
 
 
 def _toleransi(cakupan):
@@ -561,7 +562,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v10:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v11:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))
