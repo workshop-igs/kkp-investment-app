@@ -176,7 +176,7 @@ const MENU_ADMIN = [
   ['/admin/log-aktivitas', ScrollText, 'Log Aktivitas', 'Lihat siapa melakukan apa, termasuk akses yang ditolak.'],
 ];
 
-const AdminDashboardPage = () => {
+const AdminPanelPage = () => {
   const [ringkas, setRingkas] = useState(null);
   const [perStatus, setPerStatus] = useState([]);
   const [pengguna, setPengguna] = useState([]);
@@ -414,4 +414,4 @@ const AdminDashboardPage = () => {
   );
 };
 
-export default AdminDashboardPage;
+export default AdminPanelPage;

@@ -199,7 +199,7 @@ const HapusProyek = ({ proyek, onTutup, onSelesai }) => {
   );
 };
 
-const AdminPipelinePage = () => {
+const AdminProyekInvestasiPage = () => {
   const [projects, setProjects] = useState([]);
   const [sektor, setSektor] = useState([]);
   const [provinsi, setProvinsi] = useState([]);
@@ -368,4 +368,4 @@ const AdminPipelinePage = () => {
   );
 };
 
-export default AdminPipelinePage;
+export default AdminProyekInvestasiPage;

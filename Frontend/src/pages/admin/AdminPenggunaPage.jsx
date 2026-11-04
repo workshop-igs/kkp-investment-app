@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { api, ambilDaftar } from '../../api/klien';
-import { useAuth } from '../../context/KonteksAuth';
+import { useAutentikasi } from '../../context/KonteksAutentikasi';
 import {
   UserCheck, UserX, Pencil, Trash2, X, UserPlus, ShieldCheck, Loader2, CheckCircle2, AlertTriangle,
 } from 'lucide-react';
@@ -90,8 +90,8 @@ const Dialog = ({ judul, onTutup, children }) => createPortal(
   document.body,
 );
 
-const AdminUsersPage = () => {
-  const { user: saya } = useAuth();
+const AdminPenggunaPage = () => {
+  const { user: saya } = useAutentikasi();
   const [aksesDiubah, setAksesDiubah] = useState(null);
   const [mengubahAkses, setMengubahAkses] = useState(false);
   const [galatAkses, setGalatAkses] = useState(null);
@@ -596,4 +596,4 @@ const AdminUsersPage = () => {
   );
 };
 
-export default AdminUsersPage;
+export default AdminPenggunaPage;

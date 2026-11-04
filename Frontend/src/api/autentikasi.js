@@ -49,7 +49,7 @@ const pesanGalat = (error) => {
     return 'Username/email atau kata sandi tidak valid.';
   }
   if (data.error === 'invalid_client') {
-    return 'Aplikasi OAuth2 belum terdaftar dengan benar. Jalankan: python manage.py setup_oauth_app';
+    return 'Aplikasi OAuth2 belum terdaftar dengan benar. Jalankan: python manage.py siapkan_aplikasi_oauth';
   }
   if (data.error === 'unsupported_grant_type') {
     return 'Konfigurasi OAuth2 tidak sesuai (grant type tidak didukung).';

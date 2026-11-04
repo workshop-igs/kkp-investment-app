@@ -4,7 +4,7 @@ import {
   Menu, ChevronDown, LogIn, UserPlus, LogOut, ShieldCheck, UserRound, KeyRound, X,
   Home, LayoutDashboard, BriefcaseBusiness, Map as IkonPeta, FileText,
 } from 'lucide-react';
-import { useAuth } from '../../context/KonteksAuth';
+import { useAutentikasi } from '../../context/KonteksAutentikasi';
 import { inisialNama } from '../../utils/pemformat';
 
 const BERANDA = { label: 'Beranda', link: '/', ikon: Home };
@@ -47,7 +47,7 @@ const kelasMenu = (aktif) => `flex h-10 items-center gap-2 whitespace-nowrap rou
 const HeaderPeta = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAuthenticated, bolehPortofolio, logout } = useAuth();
+  const { user, isAuthenticated, bolehPortofolio, logout } = useAutentikasi();
 
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [adminMenuOpen, setAdminMenuOpen] = useState(false);
