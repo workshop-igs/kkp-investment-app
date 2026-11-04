@@ -36,6 +36,8 @@ PARAMETER = {
     'jarak_bandara_lab_km': ('Jarak ke bandara/fasilitas riset (±2 jam)', 'km', ('BANDARA', 'KAMPUS_RISET')),
     'arus': ('Kecepatan arus permukaan', 'm/s', 'ARUS'),
     'salinitas': ('Salinitas air laut', 'ppt', 'SALINITAS'),
+    'ph': ('pH air laut', '', 'PH'),
+    'oksigen': ('Oksigen terlarut (DO)', 'mg/L', 'OKSIGEN'),
     'tss': ('Padatan tersuspensi (TSS)', 'mg/L', 'TSS'),
     'kemiringan_lahan': ('Kemiringan lahan', '%', 'KEMIRINGAN'),
     'produksi_ikan_kabupaten_ton': ('Produksi ikan kabupaten/kota (perkiraan)', 'ton/tahun', 'PRODUKSI_KABUPATEN'),
@@ -60,7 +62,7 @@ BINER = {'karang', 'eks_mangrove_mudflat', 'intertidal'}
 RASTER_DATA = {
     'kedalaman': 'KEDALAMAN', 'gelombang': 'GELOMBANG', 'suhu_rata': 'SUHU', 'klorofil': 'KLOROFIL', 'kd490': 'KD490',
     'periode_gelombang': 'PERIODE_GLB', 'curah_hujan': 'CURAH_HUJAN', 'bulan_kering_berturut': 'BULAN_KERING',
-    'arus': 'ARUS', 'arus_dasar': 'ARUS_DASAR', 'salinitas': 'SALINITAS', 'tss': 'TSS', 'kemiringan_lahan': 'KEMIRINGAN',
+    'arus': 'ARUS', 'arus_dasar': 'ARUS_DASAR', 'salinitas': 'SALINITAS', 'ph': 'PH', 'oksigen': 'OKSIGEN', 'tss': 'TSS', 'kemiringan_lahan': 'KEMIRINGAN',
     'kemiringan_dasar_laut': 'KEMIRINGAN_DASAR', 'tunggang_pasut': 'PASUT', 'pga': 'PGA',
     'gelombang_ekstrem': 'GELOMBANG_EKSTREM', 'angin_100m': 'ANGIN_100M', 'ghi': 'GHI',
     'beda_suhu_1000m': 'BEDA_SUHU_1000M', 'tanah_liat': 'TANAH_LIAT', 'shannon': 'SHANNON',

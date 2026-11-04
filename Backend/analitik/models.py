@@ -397,6 +397,8 @@ class RasterOseanografi(models.Model):
         ('ARUS', 'Kecepatan arus permukaan'),
         ('ARUS_DASAR', 'Kecepatan arus dasar'),
         ('SALINITAS', 'Salinitas permukaan laut'),
+        ('PH', 'pH permukaan laut'),
+        ('OKSIGEN', 'Oksigen terlarut permukaan laut'),
         ('TSS', 'Padatan tersuspensi (TSS)'),
         ('KEMIRINGAN', 'Kemiringan lahan'),
         ('KEMIRINGAN_DASAR', 'Kemiringan dasar laut'),
