@@ -32,7 +32,7 @@ def rata_bulan_akhir(sumber, variabel, folder):
     subprocess.run(['gdal_translate', '-q', '-of', 'GTiff', '-a_srs', 'EPSG:4326', f'NETCDF:"{sumber}":{variabel}', tif],
                    check=True)
     r = GDALRaster(tif)
-    pita = r.bands[-BULAN_RATA:]
+    pita = [r.bands[i] for i in range(max(0, len(r.bands) - BULAN_RATA), len(r.bands))]
     tumpuk = []
     for p in pita:
         d = p.data().reshape(r.height, r.width).astype('float64')
