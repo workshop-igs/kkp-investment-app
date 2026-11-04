@@ -328,9 +328,9 @@ def _bagian_wilayah(geom, luas_aoi_m2) -> Dict[str, Any]:
 
         konservasi = {b[0]: b for b in atur('MANFAAT_KONSERVASI_WPP')}.get(kode_wpp(geom))
         if konservasi:
-            ringkas += (f' Kawasan konservasi di WPP ini diperkirakan memberi manfaat bersih Rp'
-                        f'{konservasi[1]:,.0f} miliar per tahun dengan biaya pengelolaan Rp{konservasi[2]:,.0f} per ha per '
-                        f'tahun (Analisis Biaya-Manfaat Visi 30x45, KKP 2024).').replace(',', '.')
+            manfaat, biaya = (f'{v:,.0f}'.replace(',', '.') for v in konservasi[1:])
+            ringkas += (f' Kawasan konservasi di WPP ini diperkirakan memberi manfaat bersih Rp{manfaat} miliar per tahun '
+                        f'dengan biaya pengelolaan Rp{biaya} per ha per tahun (Analisis Biaya-Manfaat Visi 30x45, KKP 2024).')
 
     return {**_bagian(
         kunci='wilayah',
