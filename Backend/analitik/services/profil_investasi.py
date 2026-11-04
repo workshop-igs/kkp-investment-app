@@ -22,6 +22,7 @@ from analitik.services.kriteria import kbli_sub, uraian
 from analitik.services.laporan_spasial import daya_dukung, pulau_kecil
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.pengaturan import BAWAAN, atur
+from inti.geospasial import kode_wpp
 from inti.models import KabupatenKota, Provinsi, SektorInvestasi
 from inventarisasi.klasifikasi import KATA_SEKTOR, rincian_kegiatan, status_rincian
 from inventarisasi.models import (
@@ -49,7 +50,7 @@ BATAS_ZONA_PETA = 600
 BATAS_ZONA_PETA_SEKTOR = 120
 JUMLAH_RINCIAN = 4
 TEKS_PROFIL = ('RANTAI_PASOK', 'LINGKUNGAN_BISNIS', 'KEBUTUHAN_TEKNOLOGI', 'REKOMENDASI_KESESUAIAN', 'KEBIJAKAN_NASIONAL',
-               'MATRIKS_PERIZINAN')
+               'MATRIKS_PERIZINAN', 'RISIKO_JENIS')
 
 
 def _toleransi(cakupan):
@@ -301,6 +302,7 @@ def _lokasi(c, provinsi, sektor, subs):
             'oseanografi': {k: v['rata2'] for k, v in _oseanografi(lok.geometry, PARAMETER_OSEANOGRAFI_LOKASI).items()},
             'daya_dukung': daya_dukung(lok.wilayah) if sektor.kode == 'PARIWISATA_BAHARI' else None,
             'pulau_kecil': pulau_kecil(lok.geometry) if sektor.kode == 'PARIWISATA_BAHARI' else None,
+            'wpp': kode_wpp(lok.geometry),
         })
     return hasil
 
@@ -515,6 +517,7 @@ def profil_provinsi(provinsi, sektor=None):
         'ekosistem': _ekosistem(provinsi),
         'alki': ZonasiRuangLaut.objects.filter(provinsi=provinsi, jenis_zona='ALKI').exists(),
         'asumsi_finansial': atur('ASUMSI_MODEL_USAHA'),
+        'konservasi_wpp': atur('MANFAAT_KONSERVASI_WPP'),
         'teks': {kunci.lower(): atur(kunci) for kunci in TEKS_PROFIL},
         'sosial': {
             'kabupaten': [k for k in _kabupaten(provinsi) if k['pesisir']],
@@ -562,7 +565,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v11:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v12:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))

@@ -245,6 +245,10 @@ def teks_wpp(teks):
     return nama_wpp(*teks.split('|')) if teks else ''
 
 
+def kode_wpp(geom):
+    return _wpp_di(geom.point_on_surface).values_list('kode', flat=True).first()
+
+
 def wpp_geometri(geom):
     w = _wpp_di(geom.point_on_surface).values('kode', 'perairan', 'zona_pit').first()
     if not w:
