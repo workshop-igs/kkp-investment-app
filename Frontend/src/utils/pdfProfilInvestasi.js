@@ -1879,46 +1879,26 @@ const kodeKbli = (b) => [...new Set(b.sub_jenis.map((x) => x.kbli?.kode).filter(
 const izinKbli = (b) => (kodeKbli(b).length ? `KBLI ${kodeKbli(b).join(', ')}` : 'KBLI');
 const namaKbli = (s, kecil = false) => `${kecil ? s.nama.toLowerCase() : s.nama}${s.kbli ? ` (KBLI ${s.kbli.kode})` : ''}`;
 
-function izinUntuk(b) {
-  const s = b.sektor;
-  const subs = b.sub_jenis.map((x) => x.kode);
-  const tambak = subs.includes('BUDIDAYA_TAMBAK');
-  const darat = ['PENGOLAHAN_HASIL_LAUT', 'GARAM'].includes(s) || subs.some((x) => ['BUDIDAYA_PEMBENIHAN', 'WISATA_RESOR', 'BIOTEK_BIOPLASTIK', 'BIOTEK_PAKAN_ALAMI'].includes(x));
-  const ekspor = (s === 'PERIKANAN_TANGKAP' || tambak || s === 'PENGOLAHAN_HASIL_LAUT');
-  if (s === 'PERIKANAN_TANGKAP') {
-    return [`Pas Kecil, NIB, e-BKP (mikro); Pas Besar, NIB, Perizinan Berusaha Subsektor Penangkapan Ikan (${izinKbli(b)})`, '-', '-',
-      'Hanya kapal di bawah 10 GT*', 'PBG gudang atau cold storage, SLF*', 'Cara Penanganan Ikan yang Baik; HACCP', '-',
-      'Dokumen karantina ikan; Sertifikat mutu dan keamanan hasil perikanan (ekspor)', 'Administrasi OSS atau konsultan*'];
-  }
-  return [
-    s === 'PERIKANAN_BUDIDAYA' ? `NIB, Perizinan Berusaha Subsektor Pembudidayaan Ikan (${izinKbli(b)})` : `NIB dan perizinan berusaha sesuai ${izinKbli(b)}`,
-    tambak ? 'PKKPRL atau PKKPR' : darat ? 'PKKPR' : 'PKKPRL',
-    'SPPL, UKL-UPL, atau AMDAL*',
-    'Persetujuan pemanfaatan kawasan*',
-    'PBG, SLF*',
-    { PERIKANAN_BUDIDAYA: 'Cara Budi Daya Ikan yang Baik', PENGOLAHAN_HASIL_LAUT: 'HACCP' }[s] || '-',
-    tambak ? 'ALSE*' : '-',
-    ekspor ? 'Dokumen karantina ikan; Sertifikat mutu dan keamanan hasil perikanan (ekspor)' : '-',
-    'Administrasi OSS atau konsultan*',
-  ];
-}
-
 const KATEGORI_IZIN = ['Legalitas usaha', 'Tata ruang dan lokasi', 'Lingkungan', 'Kawasan konservasi', 'Bangunan dan infrastruktur',
   'Teknis produksi', 'Pemanfaatan sumber daya', 'Karantina dan perdagangan', 'Administrasi dan pendampingan'];
 
 function perizinan(dek, o) {
-  const y = dek.slide({
-    alis: 'Penutup',
-    judul: 'Matriks kebutuhan perizinan',
-    sub: 'Pengelompokan perizinan menurut fungsi utama dan tahapan kegiatan usaha untuk setiap komoditas atau jenis yang dikaji.',
-  });
   const bab = o.bab.slice(0, 7);
-  const izin = bab.map(izinUntuk);
+  const matriks = o.teks.matriks_perizinan;
+  const izin = bab.map((b) => (matriks[b.sektor] || matriks.UMUM).map((t) => t.replaceAll('{KBLI}', izinKbli(b))));
+  const baris = KATEGORI_IZIN.map((kat, r) => [kat, ...izin.map((daftar) => daftar[r])]);
+  const potongan = bab.length > 3 ? [baris.slice(0, 5), baris.slice(5)] : [baris];
   const lebarLabel = 0.16;
-  dek.tabel(TEPI, y, W - TEPI * 2, ['Kategori', ...bab.map((b) => namaRapi(b.nama, 26))],
-    KATEGORI_IZIN.map((kat, r) => [kat, ...izin.map((daftar) => daftar[r])]),
-    { bagian: [lebarLabel, ...bab.map(() => (1 - lebarLabel) / bab.length)], ukuran: bab.length > 4 ? 6.2 : 7 });
-  dek.sumber('* Kondisional, bergantung lokasi, skala usaha, dan fasilitas. Mengacu matriks perizinan KKP dalam laporan profil investasi perikanan NTB (2026); verifikasi terhadap regulasi dan OSS terbaru.');
+  potongan.forEach((isi, i) => {
+    const y = dek.slide({
+      alis: 'Penutup',
+      judul: potongan.length > 1 ? `Matriks kebutuhan perizinan (${i + 1} dari ${potongan.length})` : 'Matriks kebutuhan perizinan',
+      sub: 'Pengelompokan perizinan menurut fungsi utama dan tahapan kegiatan usaha untuk setiap komoditas atau jenis yang dikaji.',
+    });
+    dek.tabel(TEPI, y, W - TEPI * 2, ['Kategori', ...bab.map((b) => namaRapi(b.nama, 26))], isi,
+      { bagian: [lebarLabel, ...bab.map(() => (1 - lebarLabel) / bab.length)], ukuran: bab.length > 4 ? 6.2 : 7 });
+    dek.sumber('* Kondisional, bergantung lokasi, skala usaha, dan fasilitas. Mengacu matriks perizinan KKP dalam laporan profil investasi perikanan NTB (2026) dan regulasi sektor; verifikasi terhadap regulasi dan OSS terbaru.');
+  });
 }
 
 function kesimpulanAkhir(dek, o) {

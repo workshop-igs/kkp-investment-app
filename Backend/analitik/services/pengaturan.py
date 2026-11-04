@@ -143,6 +143,11 @@ DAFTAR = [
        'sendiri memakai daftar Jenis lain (umum).', teks=(1, 6, 60)),
     _d('KEBUTUHAN_TEKNOLOGI', 'profil_teks', 'Kebutuhan teknologi per jenis usaha',
        'Melengkapi kalimat "Kebutuhan utama: ..." pada tabel risiko dan mitigasi.', teks=(1, 1, 160)),
+    _d('MATRIKS_PERIZINAN', 'profil_teks', 'Matriks kebutuhan perizinan per jenis usaha',
+       'Isi halaman Matriks kebutuhan perizinan, 9 baris berurutan: legalitas usaha, tata ruang dan lokasi, lingkungan, '
+       'kawasan konservasi, bangunan dan infrastruktur, teknis produksi, pemanfaatan sumber daya, karantina dan '
+       'perdagangan, administrasi dan pendampingan. Tulis {KBLI} untuk kode KBLI sub-jenis; tanda * berarti kondisional.',
+       teks=(9, 9, 120)),
     _d('REKOMENDASI_KESESUAIAN', 'profil_teks', 'Rekomendasi menurut kelas kesesuaian',
        'Kalimat rekomendasi untuk lokasi sangat sesuai (S1) dan sesuai (S2) pada halaman lokasi prioritas.',
        teks=(1, 1, 140)),
@@ -470,7 +475,7 @@ def _teks(nilai, bawaan, meta, sektor):
 
     def daftar(v, jalur, isi):
         if not isinstance(v, list) or not minimal <= len(v) <= maksimal:
-            raise NilaiTidakSah(f'{jalur}: isi {minimal} sampai {maksimal} butir.')
+            raise NilaiTidakSah(f'{jalur}: isi {minimal} butir.' if minimal == maksimal else f'{jalur}: isi {minimal} sampai {maksimal} butir.')
         for i, x in enumerate(v, 1):
             isi(x, f'{jalur} > {i}')
 
