@@ -2,27 +2,15 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogIn, User, Lock, Eye, EyeOff, 
-  ArrowLeft, CheckCircle2, AlertCircle, Sparkles, 
-  Building2, ArrowRight,
+  ArrowLeft, CheckCircle2, AlertCircle, ArrowRight,
   Globe, Compass, Check
 } from 'lucide-react';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 
-const DEMO_ACCOUNTS = [
-  {
-    username: 'analis_kkp',
-    name: 'Budi Santoso, M.Si',
-    role: 'Analis Kelautan KKP',
-    instansi: 'Ditjen Pengelolaan Ruang Laut (DJPRL)',
-    icon: Building2,
-    badgeBg: 'bg-sky-50 text-sky-700 border-sky-200'
-  },
-];
-
-const LoginPage = () => {
+const MasukPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, demoLogin, loading } = useAuth();
+  const { login, loading } = useAutentikasi();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -51,23 +39,6 @@ const LoginPage = () => {
       }, 700);
     } catch (err) {
       setError(err.message || 'Gagal masuk. Periksa kembali username dan kata sandi Anda.');
-    }
-  };
-
-  const handleQuickDemo = async (demoUsername) => {
-    setError(null);
-    setSuccessMsg(null);
-    setUsername(demoUsername);
-    setPassword('password123');
-
-    try {
-      const res = await demoLogin(demoUsername);
-      setSuccessMsg(`Login berhasil sebagai ${res.user.full_name}! Mengalihkan...`);
-      setTimeout(() => {
-        navigate(tujuan(res.user), { replace: true });
-      }, 700);
-    } catch (err) {
-      setError(err.message || 'Demo login gagal.');
     }
   };
 
@@ -252,43 +223,6 @@ const LoginPage = () => {
             </form>
           </div>
 
-          {import.meta.env.DEV && (
-          <div className="mt-6 pt-5 border-t border-slate-100">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                Uji Coba Cepat (Akun Demo KKP):
-              </span>
-              <span className="text-[10px] text-slate-400">1-Click Login</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              {DEMO_ACCOUNTS.map((acc) => {
-                const IconComponent = acc.icon;
-                return (
-                  <button
-                    key={acc.username}
-                    type="button"
-                    onClick={() => handleQuickDemo(acc.username)}
-                    className="flex items-center gap-2.5 p-2.5 text-left rounded-xl bg-slate-50 hover:bg-sky-50/80 border border-slate-200 hover:border-sky-300 transition-all group shadow-2xs"
-                  >
-                    <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-sky-700 flex items-center justify-center flex-shrink-0 group-hover:bg-sky-600 group-hover:text-white transition-colors">
-                      <IconComponent className="w-3.5 h-3.5" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-xs font-bold text-slate-900 truncate leading-tight group-hover:text-sky-900">
-                        {acc.name}
-                      </div>
-                      <div className="text-[10px] text-slate-500 truncate">
-                        {acc.role}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          )}
 
         </div>
 
@@ -297,4 +231,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default MasukPage;

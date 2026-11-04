@@ -3,7 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Plus, Search, BarChart3, TrendingUp, Users, Trash2, Eye, AlertTriangle, X, CheckCircle2, Loader2, FileText } from 'lucide-react';
 import { formatRupiah, formatNumber, labelKbli, rupiahMiliar } from '../utils/pemformat';
 import { LABEL_TAHAPAN, SECTORS, TAHAPAN_PROYEK } from '../utils/konstanta';
-import { unduhPdfPipeline } from '../utils/pdfPipeline';
+import { unduhPdfProyekInvestasi } from '../utils/pdfProyekInvestasi';
 import { api } from '../api/klien';
 import { mulaiMemuat } from '../components/OverlayMemuat';
 
@@ -15,7 +15,7 @@ const GAYA_TAHAP = {
   OPERASI: 'bg-teal-500/10 border-teal-500/30 text-teal-600',
 };
 
-const PipelinePage = () => {
+const ProyekInvestasiPage = () => {
   const location = useLocation();
   const [projects, setProjects] = useState([]);
   const [filteredProjects, setFilteredProjects] = useState([]);
@@ -47,7 +47,7 @@ const PipelinePage = () => {
       if (statusFilter !== 'all') bagian.push(`tahap ${LABEL_TAHAPAN[statusFilter] || statusFilter}`);
       if (searchTerm.trim()) bagian.push(`pencarian "${searchTerm.trim()}"`);
 
-      await unduhPdfPipeline({
+      await unduhPdfProyekInvestasi({
         ringkas: data.summary,
         perStatus: data.proyek_per_status,
         perSektor: data.proyek_per_sektor,
@@ -103,7 +103,7 @@ const PipelinePage = () => {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Failed to load pipeline data:", err);
+        console.error('Gagal memuat data proyek investasi:', err);
         setLoading(false);
       });
   };
@@ -151,7 +151,7 @@ const PipelinePage = () => {
 
       setProjectToDelete(null);
     } catch (err) {
-      console.error("Delete project error:", err);
+      console.error('Gagal menghapus proyek:', err);
       setNotification({
         type: 'error',
         message: `Terjadi kesalahan: ${err.message || 'Gagal menghapus proyek'}`
@@ -422,4 +422,4 @@ const PipelinePage = () => {
   );
 };
 
-export default PipelinePage;
+export default ProyekInvestasiPage;
