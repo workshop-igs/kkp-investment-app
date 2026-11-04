@@ -19,7 +19,7 @@ from analitik.services.konstanta import (
     SUMBER_MANGROVE_GMW,
 )
 from analitik.services.oseanografi import statistik as statistik_oseanografi
-from inti.geospasial import alamat_geometri, wpp_geometri
+from inti.geospasial import alamat_geometri, kode_wpp, wpp_geometri
 from inti.models import KabupatenKota, Provinsi
 from inventarisasi.klasifikasi import jenis_unsur
 from inventarisasi.models import (
@@ -324,6 +324,13 @@ def _bagian_wilayah(geom, luas_aoi_m2) -> Dict[str, Any]:
     wpp = wpp_geometri(geom) if ringkas else ''
     if wpp:
         ringkas += f' Wilayah pengelolaan perikanan: {wpp}.'
+        from analitik.services.pengaturan import atur
+
+        konservasi = {b[0]: b for b in atur('MANFAAT_KONSERVASI_WPP')}.get(kode_wpp(geom))
+        if konservasi:
+            ringkas += (f' Kawasan konservasi di WPP ini diperkirakan memberi manfaat bersih Rp'
+                        f'{konservasi[1]:,.0f} miliar per tahun dengan biaya pengelolaan Rp{konservasi[2]:,.0f} per ha per '
+                        f'tahun (Analisis Biaya-Manfaat Visi 30x45, KKP 2024).').replace(',', '.')
 
     return {**_bagian(
         kunci='wilayah',

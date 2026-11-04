@@ -348,9 +348,9 @@ KRITERIA_JENIS = {
         },
         'WISATA_SELAM': {
             'nama': 'Pusat Rekreasi Bawah Laut (Diving & Snorkeling)', 'kbli': '93297', 'ranah': ['LAUT'],
-            'kriteria': {'kd490': [None, 0.15], 'karang': [1, None], 'arus': [None, 0.3],
+            'kriteria': {'kd490': [None, 0.15], 'karang': [1, None], 'arus': [None, 0.3], 'kedalaman': [3.0, 30.0],
                          'jarak_gerbang_wisata_km': [None, 100.0]},
-            'unggulan': {'kd490': [None, 0.08], 'karang': [1, None], 'arus': [None, 0.25],
+            'unggulan': {'kd490': [None, 0.08], 'karang': [1, None], 'arus': [None, 0.25], 'kedalaman': [5.0, 20.0],
                          'jarak_gerbang_wisata_km': [None, 60.0]},
         },
         'WISATA_KAPAL_PESIAR': {
@@ -668,6 +668,16 @@ MATRIKS_PERIZINAN = {
         'Otorisasi perdagangan karbon melalui SRN-PPI (Perpres 98/2021)*; dokumen CITES untuk biota*',
         'Administrasi OSS atau konsultan*'],
 }
+RISIKO_JENIS = {
+    'PARIWISATA_BAHARI': ['Kerusakan terumbu karang akibat aktivitas selam dan snorkeling',
+                          'Terapkan aturan tidak menyentuh karang; pakai pelampung tambat, bukan jangkar; pemimpin selam '
+                          'minimal bersertifikat dive master; kaji kapasitas situs selam bersama pemda.'],
+}
+MANFAAT_KONSERVASI_WPP = [
+    ['571', 151.0, 48627.0], ['572', 2566.0, 48723.0], ['573', 4150.0, 48915.0], ['711', 3434.0, 48531.0],
+    ['712', 1465.0, 48056.0], ['713', 5941.0, 48341.0], ['714', 6650.0, 49888.0], ['715', 4671.0, 50879.0],
+    ['716', 3836.0, 49205.0], ['717', 795.0, 50183.0], ['718', 1265.0, 50084.0],
+]
 REKOMENDASI_KESESUAIAN = {
     'S1': 'Dapat direkomendasikan untuk dikembangkan dengan skala industri.',
     'S2': 'Belum direkomendasikan untuk skala industri: ada faktor pembatas alami yang memerlukan biaya rekayasa '
@@ -681,7 +691,8 @@ KEBIJAKAN_NASIONAL = [
     ['Permen KP No. 28 Tahun 2021', 'Penyelenggaraan Penataan Ruang Laut', 'Tata cara persetujuan KKPRL dan rencana zonasi.'],
     ['PP No. 85 Tahun 2021', 'Jenis dan Tarif PNBP KKP', 'Tarif penerimaan negara bukan pajak sektor kelautan dan perikanan.'],
     ['Permen KP No. 10 Tahun 2021', 'Standar Kegiatan Usaha PBBR', 'Standar usaha dan produk sektor kelautan dan perikanan.'],
-    ['Permen KP No. 35 Tahun 2021', 'Tarif Nol Rupiah/Nol Persen PNBP KKP', 'Keringanan PNBP untuk kegiatan tertentu.'],
+    ['Visi KKP 30x45', 'Kawasan Konservasi Perairan 30x45',
+     '30% perairan laut Indonesia menjadi kawasan konservasi pada 2045; zona pemanfaatan terbuka untuk wisata bahari.'],
 ]
 MASA_BERLAKU_DATA = {
     'tata_ruang': 20, 'kkprl': 1, 'izin_tambang': 1, 'infrastruktur': 2, 'oseanografi': 3, 'aktivitas_tangkap': 1, 'kondisi_tetap': 0,

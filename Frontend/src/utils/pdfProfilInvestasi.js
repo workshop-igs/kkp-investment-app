@@ -1792,7 +1792,15 @@ function nilaiRisiko(o, b) {
     peluang: adat || bersyarat > b.lokasi.length / 2 ? 'Tinggi' : (j.rincian_matriks?.blok?.BERSYARAT ? 'Sedang' : 'Rendah'),
     mitigasi: 'Penataan ruang partisipatif; libatkan masyarakat dan pengguna ruang sejak awal; mekanisme penyelesaian konflik.',
   });
+  const khusus = o.teks.risiko_jenis[b.sektor];
+  if (khusus) hasil.push({ risiko: khusus[0], peluang: 'Sedang', mitigasi: khusus[1] });
   return hasil;
+}
+
+function konservasiWpp(o, b) {
+  const data = Object.fromEntries(o.konservasi_wpp.map((r) => [r[0], r]));
+  const wpp = [...new Set(b.lokasi.map((l) => l.wpp).filter((w) => data[w]))];
+  return wpp.map((w) => `WPP ${w}: manfaat bersih kawasan konservasi Rp${angka(data[w][1])} miliar per tahun, biaya pengelolaan Rp${angka(data[w][2])} per ha per tahun (CBA Visi 30x45).`).join(' ');
 }
 
 function barisPestel(o, b) {
@@ -1807,7 +1815,8 @@ function barisPestel(o, b) {
   return [
     ['Politik', `${angka(j.sesuai_ha)} ha zona sesuai menurut ${perdaSingkat(o.zona)}${r ? `; matriks: penuh di ${angka(r.blok.DIIZINKAN || 0)} blok, bersyarat di ${angka(r.blok.BERSYARAT || 0)}` : ''}.`,
       'Utamakan lokasi di zona yang mengizinkan penuh; lokasi bersyarat memerlukan kajian tambahan.'],
-    ['Ekonomi', [k && pertumbuhanTeks(k), k && hargaTeks(k), dasar && `NPV ${rp(dasar.npv)}, IRR ${angka(dasar.irr, 1)}%.`].filter(Boolean).join(' ') || 'Data pasar publik untuk jenis ini terbatas.',
+    ['Ekonomi', [k && pertumbuhanTeks(k), k && hargaTeks(k), dasar && `NPV ${rp(dasar.npv)}, IRR ${angka(dasar.irr, 1)}%.`,
+      b.sektor === 'KONSERVASI_PESISIR' && konservasiWpp(o, b)].filter(Boolean).join(' ') || 'Data pasar publik untuk jenis ini terbatas.',
       dasar ? (dasar.layak ? 'Model usaha layak pada kondisi dasar.' : 'Model usaha belum layak pada kondisi dasar; perlu efisiensi biaya atau peningkatan produktivitas.') : 'Tetapkan model usaha di Pengaturan Profil Investasi untuk menilai kelayakan finansial.'],
     ['Sosial', `${tpt?.nilai != null ? `Pengangguran terbuka ${angka(tpt.nilai, 2)}%; ` : ''}${angka(j.rasio_tk_per_miliar, 1)} tenaga kerja per Rp1 miliar investasi.`,
       b.lokasi.some((l) => l.peringatan.length) ? 'Ada lokasi dekat wilayah adat; libatkan masyarakat adat sejak awal.' : 'Prioritaskan tenaga kerja lokal dan pelatihan keahlian berprioritas tinggi.'],
