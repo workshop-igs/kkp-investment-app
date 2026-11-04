@@ -96,6 +96,8 @@ export function muatCitra(ext, lebar = LEBAR_PX, tinggi = TINGGI_PX) {
 export function gambarGeometri(ctx, geom, proyeksi, gaya) {
   if (!geom) return;
   const { type, coordinates } = geom;
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
   const cincin = (simpul) => {
     simpul.forEach((titik, i) => {
       const [x, y] = proyeksi(titik);
