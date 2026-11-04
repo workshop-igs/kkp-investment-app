@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 import tempfile
 
 import httpx
@@ -27,7 +28,10 @@ def unduh(url, tujuan):
 
 
 def rata_bulan_akhir(sumber, variabel, folder):
-    r = GDALRaster(f'NETCDF:"{sumber}":{variabel}')
+    tif = os.path.join(folder, f'{variabel}.tif')
+    subprocess.run(['gdal_translate', '-q', '-of', 'GTiff', '-a_srs', 'EPSG:4326', f'NETCDF:"{sumber}":{variabel}', tif],
+                   check=True)
+    r = GDALRaster(tif)
     pita = r.bands[-BULAN_RATA:]
     tumpuk = []
     for p in pita:
