@@ -141,23 +141,18 @@ function kanvasPeta({ cakupan, batas, citra, lapisan = [], titik = [], lebar = P
   }
   const proyeksi = ([lon, lat]) => [((lon - x0) / (x1 - x0)) * lebar, ((y1 - lat) / (y1 - y0)) * tinggi];
 
-  if (!citra) {
-    [].concat(batas || []).forEach((b) => {
-      gambarGeometri(ctx, b, proyeksi, { garis: '#64748b', isi: 'rgba(250, 247, 240, 0.95)', tebal: 1.6 });
-    });
-  }
+  [].concat(batas || []).forEach((b) => {
+    if (citra) {
+      gambarGeometri(ctx, b, proyeksi, { garis: 'rgba(255, 255, 255, 0.55)', isi: null, tebal: 6 });
+      gambarGeometri(ctx, b, proyeksi, { garis: '#facc15', isi: null, tebal: 2.4 });
+    } else gambarGeometri(ctx, b, proyeksi, { garis: '#64748b', isi: 'rgba(250, 247, 240, 0.95)', tebal: 1.6 });
+  });
   lapisan.forEach(({ fitur, warna, isi = 0.55, tebal = 1.2 }) => {
     fitur.forEach((f) => {
       const w = typeof warna === 'function' ? warna(f) : warna;
       gambarGeometri(ctx, f.geometry, proyeksi, { garis: rgba(w, 0.95), isi: isi ? rgba(w, isi) : null, tebal });
     });
   });
-  if (citra) {
-    [].concat(batas || []).forEach((b) => {
-      gambarGeometri(ctx, b, proyeksi, { garis: 'rgba(255, 255, 255, 0.55)', isi: null, tebal: 6 });
-      gambarGeometri(ctx, b, proyeksi, { garis: '#facc15', isi: null, tebal: 2.4 });
-    });
-  }
   titik.forEach(({ titik: t, warna, label }) => {
     const [x, y] = proyeksi(t);
     ctx.beginPath();
