@@ -148,9 +148,16 @@ DAFTAR = [
        'kawasan konservasi, bangunan dan infrastruktur, teknis produksi, pemanfaatan sumber daya, karantina dan '
        'perdagangan, administrasi dan pendampingan. Tulis {KBLI} untuk kode KBLI sub-jenis; tanda * berarti kondisional.',
        teks=(9, 9, 120)),
+    _d('RISIKO_JENIS', 'profil_teks', 'Risiko khusus per jenis usaha',
+       'Baris tambahan pada tabel risiko dan mitigasi: baris pertama risiko, baris kedua mitigasinya.',
+       teks=(2, 2, 200)),
     _d('REKOMENDASI_KESESUAIAN', 'profil_teks', 'Rekomendasi menurut kelas kesesuaian',
        'Kalimat rekomendasi untuk lokasi sangat sesuai (S1) dan sesuai (S2) pada halaman lokasi prioritas.',
        teks=(1, 1, 140)),
+    _d('MANFAAT_KONSERVASI_WPP', 'profil_kebijakan', 'Manfaat dan biaya kawasan konservasi per WPP',
+       'Manfaat bersih kawasan konservasi per tahun dan biaya pengelolaannya per hektare menurut Analisis Biaya-Manfaat '
+       'Visi Kawasan Konservasi 30x45 (KKP, 2024). Tampil di laporan analisis area dan Profil Investasi Konservasi.',
+       kolom=['WPP', 'Manfaat bersih (Rp miliar per tahun)', 'Biaya pengelolaan (Rp per ha per tahun)']),
     _d('KEBIJAKAN_NASIONAL', 'profil_kebijakan', 'Daftar kebijakan nasional',
        'Regulasi nasional yang dikutip di halaman kebijakan, paling banyak 8. Perda RTRW provinsi ditambahkan otomatis.',
        kolom=['Nomor', 'Judul', 'Peran'], teks=(1, 8, 120)),
