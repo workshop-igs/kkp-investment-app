@@ -56,6 +56,8 @@ const OSEANOGRAFI = [
   ['osea_kemiringan_dasar', 'KEMIRINGAN_DASAR', 'Kemiringan Dasar Laut', 'Kemiringan dasar laut dari batimetri SRTM15+.'],
   ['osea_arus', 'ARUS', 'Kecepatan Arus Permukaan', 'Rata-rata kecepatan arus permukaan setahun (HYCOM).'],
   ['osea_salinitas', 'SALINITAS', 'Salinitas Permukaan Laut', 'Rata-rata kadar garam air laut setahun (HYCOM).'],
+  ['osea_ph', 'PH', 'pH Permukaan Laut', 'Rata-rata pH air laut 2020–2024 (OceanSODA-ETHZ, NOAA).'],
+  ['osea_oksigen', 'OKSIGEN', 'Oksigen Terlarut', 'Rata-rata oksigen terlarut di permukaan laut (NOAA World Ocean Atlas 2023).'],
   ['osea_arus_dasar', 'ARUS_DASAR', 'Kecepatan Arus Dasar',
     'Kecepatan arus di dekat dasar laut (HYCOM); penting untuk kabel, pipa, dan bangunan laut.'],
   ['osea_gelombang_ekstrem', 'GELOMBANG_EKSTREM', 'Gelombang Ekstrem 50 Tahunan',
