@@ -28,6 +28,8 @@ JADWAL = [
 ]
 
 TARIK_MANUAL = [
+    ('KIMIA-LAUT', 'kondisi_tetap', 'pH dan oksigen terlarut permukaan laut, NOAA WOA23 dan OceanSODA-ETHZ',
+     'tarik_kimia_laut', True),
     ('KKP-MANGROVE', 'ekosistem', 'Sebaran dan kondisi mangrove, Portal Satu Data KKP', 'tarik_ekosistem_wfs', True),
     ('SIDAKO', 'ekosistem', 'Padang lamun dan terumbu karang, Sidako KKP', 'tarik_ekosistem_sidako', True),
     ('KKP-UNSUR-RUANG', 'adat', 'Unsur ruang laut dan wilayah kelola masyarakat hukum adat, Portal Satu Data KKP',

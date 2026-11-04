@@ -35,6 +35,8 @@ RENTANG_KONDISI = {
     'GHI': (0, 12),
     'BEDA_SUHU_1000M': (0, 35),
     'TANAH_LIAT': (0, 100),
+    'PH': (6, 9.5),
+    'OKSIGEN': (0, 15),
     'SHANNON': (0, 15),
     'ABRASI_PANTAI': (0, 500),
     'EKS_MANGROVE': (0, 1),

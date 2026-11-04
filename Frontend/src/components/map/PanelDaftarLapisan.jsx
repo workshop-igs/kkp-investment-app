@@ -113,6 +113,8 @@ const KATEGORI = [
       { id: 'osea_kemiringan_dasar', nama: 'Kemiringan Dasar Laut', warna: '#fc8d59', ikon: MoveDownRight },
       { id: 'osea_arus', nama: 'Kecepatan Arus Permukaan', warna: '#2171b5', ikon: Navigation2 },
       { id: 'osea_salinitas', nama: 'Salinitas Permukaan Laut', warna: '#41ab5d', ikon: FlaskConical, kata: 'kadar garam' },
+      { id: 'osea_ph', nama: 'pH Permukaan Laut', warna: '#c51b8a', ikon: FlaskConical, kata: 'keasaman ph' },
+      { id: 'osea_oksigen', nama: 'Oksigen Terlarut', warna: '#3182bd', ikon: Waves, kata: 'do dissolved oxygen' },
       { id: 'osea_arus_dasar', nama: 'Kecepatan Arus Dasar', warna: '#2171b5', ikon: Navigation },
       { id: 'osea_gelombang_ekstrem', nama: 'Gelombang Ekstrem 50 Tahunan', warna: '#d73027', ikon: AlertTriangle },
       { id: 'osea_pasut', nama: 'Tunggang Pasang Surut', warna: '#2c7fb8', ikon: Moon, kata: 'pasut' },
