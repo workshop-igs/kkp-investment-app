@@ -159,12 +159,16 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument('--provinsi', help='Kode BPS provinsi, dipisah koma')
+        parser.add_argument('--sektor', help='Kode sektor, dipisah koma; sektor lain tidak disentuh')
 
     def handle(self, *args, **opsi):
         provinsi = Provinsi.objects.order_by('kode_bps')
         if opsi['provinsi']:
             provinsi = provinsi.filter(kode_bps__in=opsi['provinsi'].split(','))
         self.sektor = list(SektorInvestasi.objects.filter(aktif=True).order_by('kode'))
+        self.terpilih = bool(opsi.get('sektor'))
+        if self.terpilih:
+            self.sektor = [s for s in self.sektor if s.kode in opsi['sektor'].split(',')]
         self.aturan = _aturan_per_sektor()
         with connection.cursor() as c:
             c.execute('DROP TABLE IF EXISTS darat_terbagi')
@@ -214,7 +218,7 @@ class Command(BaseCommand):
         kandidat = [zid for zid in zona if any(status[(zid, s.kode)] in BOLEH for s in self.sektor)]
         if not kandidat:
             with transaction.atomic():
-                LokasiPotensial.objects.filter(provinsi=prov).delete()
+                self._lama(prov).delete()
             return Counter()
 
         with connection.cursor() as c:
@@ -618,12 +622,17 @@ class Command(BaseCommand):
                 hasil.append(self._satu(prov, sektor, sub_kode, sub, ewkb, wilayah[k], luas, sel, len(w), lolos, zona,
                                         status, d))
         with transaction.atomic():
-            LokasiPotensial.objects.filter(provinsi=prov).delete()
+            self._lama(prov).delete()
             LokasiPotensial.objects.bulk_create(hasil)
-            LokasiPotensial.objects.bulk_create(
-                self._semua(c, prov, [h for h in hasil if h.sektor.kode not in SEKTOR_TERSENDIRI_DI_PETA])
-            )
+            if not self.terpilih:
+                LokasiPotensial.objects.bulk_create(
+                    self._semua(c, prov, [h for h in hasil if h.sektor.kode not in SEKTOR_TERSENDIRI_DI_PETA])
+                )
         return hasil
+
+    def _lama(self, prov):
+        lama = LokasiPotensial.objects.filter(provinsi=prov)
+        return lama.filter(sektor__in=self.sektor) if self.terpilih else lama
 
     def _satu(self, prov, sektor, sub_kode, sub, ewkb, ewkb_wilayah, luas, sel, sel_wilayah, lolos, zona, status, d):
         def rata_sel(kunci):
