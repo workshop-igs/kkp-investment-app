@@ -5,11 +5,11 @@ import {
   Building2, Phone, ArrowLeft, CheckCircle2,
   AlertCircle, Globe
 } from 'lucide-react';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 
-const RegisterPage = () => {
+const DaftarPage = () => {
   const navigate = useNavigate();
-  const { register, loading } = useAuth();
+  const { register, loading } = useAutentikasi();
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -393,4 +393,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage;
+export default DaftarPage;

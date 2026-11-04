@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { formatRupiah, formatNumber, formatRibuan, hanyaDigit } from '../../utils/pemformat';
 import { api, useSektorAktif } from '../../api/klien';
-import { useAuth } from '../../context/KonteksAuth';
+import { useAutentikasi } from '../../context/KonteksAutentikasi';
 import KartuScreening from '../laporan/KartuScreening';
 import { mulaiMemuat } from '../OverlayMemuat';
 
@@ -60,7 +60,7 @@ const LANGKAH = ['Identitas Proyek', 'Analisis Ruang', 'Analisis Finansial'];
 
 const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sektorAwal, subAwal, onLihatLokasi }) => {
   const navigate = useNavigate();
-  const { isAuthenticated, bolehPortofolio } = useAuth();
+  const { isAuthenticated, bolehPortofolio } = useAutentikasi();
   
   const [projectName, setProjectName] = useState("");
   const [investor, setInvestor] = useState("");
@@ -143,7 +143,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
     periksaRuang(sektor, subSektor);
   };
 
-  const handleSaveToPipeline = async () => {
+  const simpanKeProyek = async () => {
     if (!projectName.trim()) {
       alert("Nama proyek harus diisi sebelum menyimpan ke Proyek Investasi.");
       return;
@@ -172,7 +172,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
       alert("Proyek berhasil disimpan ke daftar Proyek Investasi pada tahap Perencanaan.");
       navigate('/pipeline');
     } catch (error) {
-      console.error("Save Pipeline Error:", error);
+      console.error('Gagal menyimpan ke Proyek Investasi:', error);
       alert("Terjadi kesalahan saat menyimpan proyek: " + error.message);
     } finally {
       setSaving(false);
@@ -703,7 +703,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
               
               {bolehPortofolio && (
               <button 
-                onClick={handleSaveToPipeline}
+                onClick={simpanKeProyek}
                 disabled={saving}
                 className="flex-1 py-3 bg-[#0056A5] hover:bg-sky-600 text-white rounded-lg font-bold transition-all shadow-md flex items-center justify-center gap-2"
               >

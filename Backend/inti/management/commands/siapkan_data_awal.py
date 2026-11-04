@@ -6,10 +6,10 @@ from penarikan_data.models import KonfigurasiAPI
 
 
 class Command(BaseCommand):
-    help = 'Seeds initial data for 34 Provinces, Sectors, and Data Sources'
+    help = 'Isi data awal: 34 provinsi, jenis investasi, dan sumber data.'
 
     def handle(self, *args, **options):
-        self.stdout.write('Seeding Sektor Investasi...')
+        self.stdout.write('Mengisi jenis investasi...')
         sektors = [
             ('PERIKANAN_TANGKAP', 'Perikanan Tangkap', 'Penangkapan ikan laut', 25.0, 1),
             ('PERIKANAN_BUDIDAYA', 'Perikanan Budidaya', 'Budidaya laut (KJA, rumput laut)', 30.0, 2),
@@ -27,7 +27,7 @@ class Command(BaseCommand):
 
         self.stdout.write(f'Ketentuan ruang bawaan: {isi_ketentuan_bawaan()} baris baru')
 
-        self.stdout.write('Seeding Data Sources...')
+        self.stdout.write('Mengisi sumber data...')
         sources = [
             ('BIG', 'Badan Informasi Geospasial', 'API', 'ACTIVE'),
             ('BPS', 'Badan Pusat Statistik', 'API', 'ACTIVE'),
@@ -41,7 +41,7 @@ class Command(BaseCommand):
 
             KonfigurasiAPI.objects.get_or_create(kode=kode, defaults={'nama': nama, 'status': 'MOCK'})
 
-        self.stdout.write('Seeding 34 Provinsi...')
+        self.stdout.write('Mengisi 34 provinsi...')
         provinsi_data = [
             ('11', 'ACEH'),
             ('12', 'SUMATERA UTARA'),
@@ -84,4 +84,4 @@ class Command(BaseCommand):
         for kode, nama in provinsi_data:
             Provinsi.objects.get_or_create(kode_bps=kode, defaults={'nama': nama, 'geometry': dummy_multipolygon})
 
-        self.stdout.write(self.style.SUCCESS('Successfully seeded initial data!'))
+        self.stdout.write(self.style.SUCCESS('Data awal selesai diisi.'))

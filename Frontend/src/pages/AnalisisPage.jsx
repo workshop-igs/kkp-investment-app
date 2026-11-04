@@ -59,7 +59,7 @@ const AnalisisPage = () => {
       setResult(data);
       return data;
     } catch (error) {
-      console.error("Analysis Error:", error);
+      console.error('Gagal menganalisis area:', error);
       const pesan = error.response?.data?.detail;
       alert(pesan || "Terjadi kesalahan saat memproses analisis.");
       return null;

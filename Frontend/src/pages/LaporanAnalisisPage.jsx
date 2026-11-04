@@ -15,7 +15,7 @@ import {
   Users,
 } from 'lucide-react';
 import { api } from '../api/klien';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 import PetaProyek from '../components/map/PetaProyek';
 import KartuLaporan, {
   AngkaBesar,
@@ -114,7 +114,7 @@ const WARNA_KELAS_RISIKO = {
 const LaporanAnalisisPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { bolehPortofolio } = useAuth();
+  const { bolehPortofolio } = useAutentikasi();
   const { result, geometry, namaProyek, investor, lokasiDetail } =
     location.state || {};
   const subJenis = result?.screening?.sub_jenis;
@@ -223,7 +223,7 @@ const LaporanAnalisisPage = () => {
     }
   };
 
-  const simpanKePipeline = async () => {
+  const simpanKeProyek = async () => {
     setMenyimpan(true);
     try {
       const { data: disimpan } = await api.post('/pipeline/proyek/', {
@@ -524,7 +524,7 @@ const LaporanAnalisisPage = () => {
               <Printer className="w-4 h-4" />
             </button>
             {bolehPortofolio && <button
-              onClick={simpanKePipeline}
+              onClick={simpanKeProyek}
               disabled={menyimpan}
               title="Simpan proyek ini ke daftar Proyek Investasi"
               className="inline-flex items-center gap-1.5 px-2 py-1.5 rounded text-[12px] font-semibold

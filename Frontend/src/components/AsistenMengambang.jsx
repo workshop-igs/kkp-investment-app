@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Bot, CornerDownRight, Loader2, Send, X } from 'lucide-react';
 import { api } from '../api/klien';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 
 const SARAN_HALAMAN = {
   '/peta': ['Bagaimana cara menggambar area proyek?', 'Bagaimana kesesuaian ruang diperiksa?'],
@@ -27,7 +27,7 @@ const AvatarAsisten = () => (
 );
 
 const AsistenMengambang = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAutentikasi();
   const { pathname } = useLocation();
   const [buka, setBuka] = useState(false);
   const [pesan, setPesan] = useState([]);

@@ -1,9 +1,9 @@
 import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Lock } from 'lucide-react';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 
 const RuteTerlindung = ({ children, portofolio = false }) => {
-  const { isAuthenticated, bolehPortofolio } = useAuth();
+  const { isAuthenticated, bolehPortofolio } = useAutentikasi();
   const location = useLocation();
 
   if (!isAuthenticated) {

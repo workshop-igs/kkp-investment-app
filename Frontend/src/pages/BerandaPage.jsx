@@ -8,7 +8,7 @@ import {
 import { api } from '../api/klien';
 import { LAYER_LOKAL } from '../components/map/katalogLapisan';
 import { usePencarian } from '../components/map/PanelPencarian';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 import { warnaJenisInvestasi } from '../utils/simbologiPeta';
 import { formatNumber } from '../utils/pemformat';
 import { SECTORS } from '../utils/konstanta';
@@ -521,8 +521,8 @@ const PusatInformasi = () => {
   );
 };
 
-const LandingPage = () => {
-  const { isAuthenticated } = useAuth();
+const BerandaPage = () => {
+  const { isAuthenticated } = useAutentikasi();
   const [ringkas, setRingkas] = useState(null);
 
   useEffect(() => {
@@ -787,4 +787,4 @@ const LandingPage = () => {
   );
 };
 
-export default LandingPage;
+export default BerandaPage;

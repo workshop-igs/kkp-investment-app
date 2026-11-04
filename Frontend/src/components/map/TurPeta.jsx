@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useAuth } from '../../context/KonteksAuth';
+import { useAutentikasi } from '../../context/KonteksAutentikasi';
 
 const LANGKAH = [
   {
@@ -118,7 +118,7 @@ const areaBebas = (batasBawah) => {
 };
 
 const TurPeta = ({ aktif, setAktif, peraga }) => {
-  const { user } = useAuth();
+  const { user } = useAutentikasi();
   const kunci = `kkp-tur-peta-v2:${user?.id ?? 'tamu'}`;
   const [daftar, setDaftar] = useState([]);
   const [i, setI] = useState(0);

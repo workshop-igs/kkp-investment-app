@@ -4,7 +4,7 @@ import {
   AlertTriangle, CheckCircle2, History, KeyRound, Loader2, RefreshCw, ShieldCheck, UserRound,
 } from 'lucide-react';
 import { api, ambilDaftar } from '../api/klien';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 import { WARNA_AKSI } from '../utils/konstanta';
 import { inisialNama, waktuPanjang } from '../utils/pemformat';
 
@@ -83,7 +83,7 @@ const Tombol = ({ memuat, children, ...sisa }) => (
 );
 
 const ProfilPage = () => {
-  const { user, perbaruiUser } = useAuth();
+  const { user, perbaruiUser } = useAutentikasi();
   const location = useLocation();
 
   const [provinsi, setProvinsi] = useState([]);

@@ -735,7 +735,7 @@ def auth_config(request):
         return Response(
             {
                 'detail': 'OAuth2 Application belum terdaftar. '
-                          'Jalankan: python manage.py setup_oauth_app',
+                          'Jalankan: python manage.py siapkan_aplikasi_oauth',
             },
             status=503,
         )

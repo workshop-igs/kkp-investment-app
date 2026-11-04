@@ -16,7 +16,7 @@ import { PitaStatusLapisan } from './PanelDaftarLapisan';
 import {
   BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, lapisanParameter, penanganCitra, urlCitraOseanografi,
 } from './katalogLapisan';
-import { useAuth } from '../../context/KonteksAuth';
+import { useAutentikasi } from '../../context/KonteksAutentikasi';
 
 import { api } from '../../api/klien';
 
@@ -245,7 +245,7 @@ const PetaInteraktif = ({
   const refUnggah = useRef(null);
   const [layerVisibility, setLayerVisibility] = useState({});
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAutentikasi();
   const [parameterArea, setParameterArea] = useState([]);
   useEffect(() => {
     if (!isAuthenticated) {

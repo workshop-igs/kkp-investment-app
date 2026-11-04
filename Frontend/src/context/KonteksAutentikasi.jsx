@@ -7,9 +7,9 @@ import {
   mintaToken,
 } from '../api/autentikasi';
 
-const KonteksAuth = createContext(null);
+const KonteksAutentikasi = createContext(null);
 
-export const PenyediaAuth = ({ children }) => {
+export const PenyediaAutentikasi = ({ children }) => {
   const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem(USER_KEY);
@@ -87,15 +87,11 @@ export const PenyediaAuth = ({ children }) => {
     }
   };
 
-  const demoLogin = async (username) => {
-    return login(username, 'password123');
-  };
-
   const logout = async () => {
     try {
       await api.post('/inti/auth/logout/');
     } catch (e) {
-      console.error('Logout error:', e);
+      console.error('Gagal keluar:', e);
     } finally {
       setUser(null);
       setToken(null);
@@ -104,7 +100,7 @@ export const PenyediaAuth = ({ children }) => {
   };
 
   return (
-    <KonteksAuth.Provider value={{
+    <KonteksAutentikasi.Provider value={{
       user,
       token,
       isAuthenticated: !!user,
@@ -112,21 +108,20 @@ export const PenyediaAuth = ({ children }) => {
       loading,
       login,
       register,
-      demoLogin,
       logout,
       perbaruiUser: setUser,
     }}>
       {children}
-    </KonteksAuth.Provider>
+    </KonteksAutentikasi.Provider>
   );
 };
 
-export const useAuth = () => {
-  const context = useContext(KonteksAuth);
+export const useAutentikasi = () => {
+  const context = useContext(KonteksAutentikasi);
   if (!context) {
-    throw new Error('useAuth must be used within an PenyediaAuth');
+    throw new Error('useAutentikasi must be used within an PenyediaAutentikasi');
   }
   return context;
 };
 
-export default KonteksAuth;
+export default KonteksAutentikasi;

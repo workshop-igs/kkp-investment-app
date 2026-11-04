@@ -4,10 +4,10 @@ import {
   LayoutDashboard, Users, Briefcase,
   Map, LogOut, Menu, ShieldCheck, ArrowLeft, ScrollText, SlidersHorizontal, Layers, FileText, DatabaseZap
 } from 'lucide-react';
-import { useAuth } from '../context/KonteksAuth';
+import { useAutentikasi } from '../context/KonteksAutentikasi';
 
 const TataLetakAdmin = () => {
-  const { user, logout } = useAuth();
+  const { user, logout } = useAutentikasi();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

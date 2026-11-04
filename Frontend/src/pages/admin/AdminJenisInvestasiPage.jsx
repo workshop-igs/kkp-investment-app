@@ -297,7 +297,7 @@ const HapusJenis = ({ sektor, onTutup, onSelesai }) => {
 };
 
 
-const AdminSectorsPage = () => {
+const AdminJenisInvestasiPage = () => {
   const [sectors, setSectors] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState(null);
@@ -536,4 +536,4 @@ const AdminSectorsPage = () => {
   );
 };
 
-export default AdminSectorsPage;
+export default AdminJenisInvestasiPage;

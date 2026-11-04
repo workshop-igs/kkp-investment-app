@@ -1,27 +1,27 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import HeaderPeta from './components/layout/HeaderPeta';
-import { PenyediaAuth } from './context/KonteksAuth';
+import { PenyediaAutentikasi } from './context/KonteksAutentikasi';
 import BatasGalat from './components/BatasGalat';
 import RuteTerlindung from './components/RuteTerlindung';
 import OverlayMemuat from './components/OverlayMemuat';
 import AsistenMengambang from './components/AsistenMengambang';
 
-import LandingPage from './pages/LandingPage';
+import BerandaPage from './pages/BerandaPage';
 import AnalisisPage from './pages/AnalisisPage';
 import ProfilInvestasiPage from './pages/ProfilInvestasiPage';
-import PipelinePage from './pages/PipelinePage';
+import ProyekInvestasiPage from './pages/ProyekInvestasiPage';
 import DetailProyekPage from './pages/DetailProyekPage';
 import DashboardPage from './pages/DashboardPage';
 import LaporanAnalisisPage from './pages/LaporanAnalisisPage';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
+import MasukPage from './pages/MasukPage';
+import DaftarPage from './pages/DaftarPage';
 import ProfilPage from './pages/ProfilPage';
 
 import TataLetakAdmin from './layouts/TataLetakAdmin';
-import AdminDashboardPage from './pages/admin/AdminDashboardPage';
-import AdminUsersPage from './pages/admin/AdminUsersPage';
-import AdminPipelinePage from './pages/admin/AdminPipelinePage';
-import AdminSectorsPage from './pages/admin/AdminSectorsPage';
+import AdminPanelPage from './pages/admin/AdminPanelPage';
+import AdminPenggunaPage from './pages/admin/AdminPenggunaPage';
+import AdminProyekInvestasiPage from './pages/admin/AdminProyekInvestasiPage';
+import AdminJenisInvestasiPage from './pages/admin/AdminJenisInvestasiPage';
 import AdminLogAktivitasPage from './pages/admin/AdminLogAktivitasPage';
 import AdminPengaturanAnalisisPage from './pages/admin/AdminPengaturanAnalisisPage';
 import AdminParameterTambahanPage from './pages/admin/AdminParameterTambahanPage';
@@ -37,10 +37,10 @@ const AppLayout = () => {
       <BatasGalat judul="Halaman admin gagal ditampilkan">
       <Routes>
         <Route path="/admin" element={<RuteTerlindung><TataLetakAdmin /></RuteTerlindung>}>
-          <Route index element={<AdminDashboardPage />} />
-          <Route path="users" element={<AdminUsersPage />} />
-          <Route path="pipeline" element={<AdminPipelinePage />} />
-          <Route path="sectors" element={<AdminSectorsPage />} />
+          <Route index element={<AdminPanelPage />} />
+          <Route path="users" element={<AdminPenggunaPage />} />
+          <Route path="pipeline" element={<AdminProyekInvestasiPage />} />
+          <Route path="sectors" element={<AdminJenisInvestasiPage />} />
           <Route path="log-aktivitas" element={<AdminLogAktivitasPage />} />
           <Route path="pengaturan-analisis" element={<AdminPengaturanAnalisisPage />} />
           <Route path="parameter-tambahan" element={<AdminParameterTambahanPage />} />
@@ -63,16 +63,16 @@ const AppLayout = () => {
       >
         <BatasGalat key={location.pathname}>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<BerandaPage />} />
           <Route path="/peta" element={<AnalisisPage />} />
           <Route path="/profil-investasi" element={<ProfilInvestasiPage />} />
           <Route path="/dashboard" element={<RuteTerlindung portofolio><DashboardPage /></RuteTerlindung>} />
-          <Route path="/pipeline" element={<RuteTerlindung portofolio><PipelinePage /></RuteTerlindung>} />
+          <Route path="/pipeline" element={<RuteTerlindung portofolio><ProyekInvestasiPage /></RuteTerlindung>} />
           <Route path="/pipeline/:id" element={<RuteTerlindung portofolio><DetailProyekPage /></RuteTerlindung>} />
           <Route path="/analysis-report" element={<RuteTerlindung><LaporanAnalisisPage /></RuteTerlindung>} />
           <Route path="/profil" element={<RuteTerlindung><ProfilPage /></RuteTerlindung>} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<MasukPage />} />
+          <Route path="/register" element={<DaftarPage />} />
         </Routes>
         </BatasGalat>
       </main>
@@ -83,11 +83,11 @@ const AppLayout = () => {
 function App() {
   return (
     <Router>
-      <PenyediaAuth>
+      <PenyediaAutentikasi>
         <AppLayout />
         <OverlayMemuat />
         <AsistenMengambang />
-      </PenyediaAuth>
+      </PenyediaAutentikasi>
     </Router>
   );
 }

@@ -18,7 +18,7 @@ const bagianRealisasi = (rencana, realisasi) => {
   return ((Number(realisasi) || 0) / r) * 100;
 };
 
-export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, proyek, cakupan }) {
+export function buatPdfProyekInvestasi({ ringkas, perStatus, perSektor, perProvinsi, proyek, cakupan }) {
   const s = ringkas || {};
   const k = new Kanvas(
     'Laporan Proyek Investasi Ruang Laut',
@@ -155,11 +155,11 @@ export function buatPdfPipeline({ ringkas, perStatus, perSektor, perProvinsi, pr
   return k.selesaikan();
 }
 
-export async function unduhPdfPipeline(opsi) {
+export async function unduhPdfProyekInvestasi(opsi) {
   await siapkanAsetPdf();
-  const doc = buatPdfPipeline(opsi);
+  const doc = buatPdfProyekInvestasi(opsi);
   const tgl = new Date().toISOString().slice(0, 10);
   doc.save(`Laporan-Proyek-Investasi-${tgl}.pdf`);
 }
 
-export default unduhPdfPipeline;
+export default unduhPdfProyekInvestasi;
