@@ -282,10 +282,17 @@ KRITERIA_JENIS = {
         },
         'BUDIDAYA_LAUT': {
             'nama': 'Budidaya Ikan Laut KJA (Karamba Jaring Apung)', 'kbli': '03211', 'ranah': ['LAUT'],
-            'kriteria': {'arus': [None, 0.5], 'kedalaman': [5.0, 40.0], 'salinitas': [27.0, 35.0], 'tss': [None, 35.0],
+            'kriteria': {'arus': [0.15, 0.5], 'kedalaman': [5.0, 40.0], 'salinitas': [30.0, 34.0], 'tss': [None, 80.0],
                          'gelombang': [None, 1.0]},
-            'unggulan': {'arus': [None, 0.3], 'kedalaman': [7.0, 30.0], 'salinitas': [30.0, 34.0], 'tss': [None, 25.0],
+            'unggulan': {'arus': [0.23, 0.25], 'kedalaman': [7.0, 40.0], 'salinitas': [30.0, 34.0], 'tss': [None, 25.0],
                          'gelombang': [None, 0.6]},
+        },
+        'BUDIDAYA_LEPAS_PANTAI': {
+            'nama': 'Budidaya Laut Lepas Pantai (Offshore)', 'kbli': '03211', 'ranah': ['LAUT'],
+            'kriteria': {'suhu_rata': [25.0, 32.0], 'salinitas': [32.0, 36.0], 'arus': [0.13, 0.77],
+                         'kedalaman': [28.0, None], 'jarak_pantai_km': [2.0, None], 'gelombang': [None, 3.0]},
+            'unggulan': {'suhu_rata': [25.0, 32.0], 'salinitas': [32.0, 36.0], 'arus': [0.13, 0.77],
+                         'kedalaman': [50.0, None], 'jarak_pantai_km': [2.0, None], 'gelombang': [None, 3.0]},
         },
         'BUDIDAYA_KEKERANGAN': {
             'nama': 'Budidaya Kekerangan dan Moluska', 'kbli': '03211', 'ranah': ['LAUT'],
