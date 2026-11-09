@@ -693,7 +693,7 @@ KEBIJAKAN_NASIONAL = [
     ['PP No. 21 Tahun 2021', 'Penyelenggaraan Penataan Ruang', 'Dasar Kesesuaian Kegiatan Pemanfaatan Ruang Laut (KKPRL).'],
     ['Permen KP No. 28 Tahun 2021', 'Penyelenggaraan Penataan Ruang Laut', 'Tata cara persetujuan KKPRL dan rencana zonasi.'],
     ['PP No. 85 Tahun 2021', 'Jenis dan Tarif PNBP KKP', 'Tarif penerimaan negara bukan pajak sektor kelautan dan perikanan.'],
-    ['Permen KP No. 10 Tahun 2021', 'Standar Kegiatan Usaha PBBR', 'Standar usaha dan produk sektor kelautan dan perikanan.'],
+    ['Permen KP No. 15 Tahun 2026', 'Standar Kegiatan Usaha PBBR', 'Standar usaha dan produk/jasa sektor kelautan dan perikanan, turunan PP 28/2025.'],
     ['Visi KKP 30x45', 'Kawasan Konservasi Perairan 30x45',
      '30% perairan laut Indonesia menjadi kawasan konservasi pada 2045; zona pemanfaatan terbuka untuk wisata bahari.'],
 ]
