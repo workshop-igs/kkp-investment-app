@@ -284,11 +284,11 @@ KRITERIA_JENIS = {
         },
         'BUDIDAYA_LAUT': {
             'nama': 'Budidaya Ikan Laut KJA (Karamba Jaring Apung)', 'kbli': '03211', 'ranah': ['LAUT'],
-            'kriteria': {'arus': [0.15, 0.5], 'kedalaman': [5.0, 40.0], 'salinitas': [30.0, 34.0], 'tss': [None, 80.0],
-                         'gelombang': [None, 1.0], 'ph': [6.0, 9.0], 'suhu_rata': [25.0, 32.0],
+            'kriteria': {'arus': [0.15, 0.5], 'kedalaman': [5.0, 40.0], 'salinitas': [28.0, 34.0], 'tss': [None, 80.0],
+                         'gelombang': [None, 1.0], 'ph': [7.5, 8.5], 'oksigen': [5.0, None], 'suhu_rata': [25.0, 32.0],
                          'jarak_pantai_km': [None, 3.0]},
-            'unggulan': {'arus': [0.23, 0.25], 'kedalaman': [7.0, 40.0], 'salinitas': [30.0, 34.0], 'tss': [None, 25.0],
-                         'gelombang': [None, 0.6], 'ph': [6.0, 9.0], 'suhu_rata': [25.0, 32.0]},
+            'unggulan': {'arus': [0.15, 0.5], 'kedalaman': [7.0, 40.0], 'salinitas': [28.0, 34.0], 'tss': [None, 25.0],
+                         'gelombang': [None, 0.6], 'ph': [7.5, 8.5], 'suhu_rata': [25.0, 32.0]},
         },
         'BUDIDAYA_LEPAS_PANTAI': {
             'nama': 'Budidaya Laut Lepas Pantai (Offshore)', 'kbli': '03211', 'ranah': ['LAUT'],
@@ -435,8 +435,8 @@ KRITERIA_JENIS = {
         },
         'PLTB_OFFSHORE': {
             'nama': 'Pembangkit Listrik Tenaga Bayu Lepas Pantai (Offshore Wind)', 'kbli': '35120', 'ranah': ['LAUT'],
-            'kriteria': {'angin_100m': [6.5, None], 'kedalaman': [None, 45.0], 'jarak_gardu_km': [None, 20.0]},
-            'unggulan': {'angin_100m': [7.0, None], 'kedalaman': [None, 45.0], 'jarak_gardu_km': [None, 10.0]},
+            'kriteria': {'angin_100m': [7.0, None], 'kedalaman': [None, 50.0], 'jarak_gardu_km': [None, 20.0]},
+            'unggulan': {'angin_100m': [7.0, None], 'kedalaman': [None, 50.0], 'jarak_gardu_km': [None, 10.0]},
         },
     },
     'GARAM': {
