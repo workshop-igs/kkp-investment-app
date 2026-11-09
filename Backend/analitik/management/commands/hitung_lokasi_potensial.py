@@ -11,7 +11,7 @@ from django.core.management.base import BaseCommand
 from django.db import connection, transaction
 from django.db.models import Q
 
-from analitik.models import LokasiPotensial, NilaiWilayahParameter, ParameterTambahan
+from analitik.models import LokasiPotensial, NilaiWilayahParameter, ParameterTambahan, RuangSesuai
 from analitik.services import pengecualian
 from analitik.services.konstanta import (
     GMW_TAHUN_AKHIR,
@@ -219,6 +219,7 @@ class Command(BaseCommand):
         if not kandidat:
             with transaction.atomic():
                 self._lama(prov).delete()
+                self._ruang_lama(prov).delete()
             return Counter()
 
         with connection.cursor() as c:
@@ -595,14 +596,41 @@ class Command(BaseCommand):
                 hasil.append(isi)
         return hasil
 
+    @staticmethod
+    def _sekitar(w, sel, ij):
+        maks = (atur('RADIUS_AREA_INDIKATIF_KM') / (UKURAN_SEL_LOKASI_DERAJAT * KM_PER_DERAJAT)) ** 2
+        pusat = [ij[i] for i in sel]
+        return [i for i in w if min((ij[i][0] - a) ** 2 + (ij[i][1] - b) ** 2 for a, b in pusat) <= maks]
+
+    def _ruang(self, c, prov, ruang, d):
+        kunci = list(ruang)
+        if not kunci:
+            return []
+        c.execute(INTI, [[k for k, key in enumerate(kunci) for _ in ruang[key]], [i for key in kunci for i in ruang[key]]])
+        return [
+            RuangSesuai(sektor=kunci[k][0], provinsi=prov, sub_kode=kunci[k][1], kelas=kunci[k][2],
+                        geometry=GEOSGeometry(memoryview(ewkb)), luas_ha=luas,
+                        zona=sorted({z for i in ruang[kunci[k]] for z in d['zona'][i]}))
+            for k, ewkb, luas in c.fetchall()
+        ]
+
+    def _ruang_lama(self, prov):
+        lama = RuangSesuai.objects.filter(provinsi=prov)
+        return lama.filter(sektor__in=self.sektor) if self.terpilih else lama
+
     def _lokasi(self, c, prov, zona, status, d):
         hasil = []
+        ruang = defaultdict(list)
         for sektor in self.sektor:
             calon = []
             for sub_kode, sub in atur('KRITERIA_JENIS').get(sektor.kode, {}).items():
                 lolos = self._nilai_sel(sektor, sub, zona, status, d)
+                layak = self._nilai_sel(sektor, {**sub, 'unggulan': {}}, zona, status, d)
+                for i in {*lolos, *layak}:
+                    ruang[(sektor, sub_kode, 'TINGGI' if i in lolos else 'SEDANG')].append(i)
                 for w in self._wilayah(lolos, d['ij']):
                     sel = self._inti(w, lolos, d)
+                    w = self._sekitar(w, sel, d['ij'])
                     calon.append((
                         self._mutu(sel, lolos),
                         sum(d['ij'][i][0] for i in sel) / len(sel) * UKURAN_SEL_LOKASI_DERAJAT,
@@ -621,8 +649,11 @@ class Command(BaseCommand):
                 sel, w, sub_kode, sub, lolos = inti[k]
                 hasil.append(self._satu(prov, sektor, sub_kode, sub, ewkb, wilayah[k], luas, sel, len(w), lolos, zona,
                                         status, d))
+        ruang_baru = self._ruang(c, prov, ruang, d)
         with transaction.atomic():
             self._lama(prov).delete()
+            self._ruang_lama(prov).delete()
+            RuangSesuai.objects.bulk_create(ruang_baru)
             LokasiPotensial.objects.bulk_create(hasil)
             if not self.terpilih:
                 LokasiPotensial.objects.bulk_create(
