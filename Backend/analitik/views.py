@@ -1,6 +1,7 @@
 import hashlib
 import json
 import logging
+import math
 
 from django.contrib.gis.db.models import Extent
 from django.contrib.gis.geos import GEOSGeometry
@@ -279,11 +280,19 @@ class RunAnalysisView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        capex_idr = float(data.get('capex_idr'))
-        annual_revenue_idr = float(data.get('annual_revenue_idr'))
-        annual_opex_idr = float(data.get('annual_opex_idr'))
-        wacc_pct = float(data.get('wacc_pct'))
-        lifetime_yr = int(data.get('lifetime_yr'))
+        try:
+            capex_idr = float(data.get('capex_idr'))
+            annual_revenue_idr = float(data.get('annual_revenue_idr'))
+            annual_opex_idr = float(data.get('annual_opex_idr'))
+            wacc_pct = float(data.get('wacc_pct'))
+            lifetime_yr = int(data.get('lifetime_yr'))
+            revenue_growth_pct = float(data.get('revenue_growth_pct', 0.0))
+            opex_growth_pct = float(data.get('opex_growth_pct', 0.0))
+        except (TypeError, ValueError):
+            return Response({'detail': 'Isian finansial harus berupa angka.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all(map(math.isfinite, (capex_idr, annual_revenue_idr, annual_opex_idr, wacc_pct, revenue_growth_pct,
+                                       opex_growth_pct))):
+            return Response({'detail': 'Isian finansial harus berupa angka.'}, status=status.HTTP_400_BAD_REQUEST)
 
         if capex_idr <= 0:
             return Response({'detail': 'CapEx harus lebih dari 0.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -295,9 +304,6 @@ class RunAnalysisView(APIView):
             return Response({'detail': 'Discount rate harus antara 0.01% dan 100%.'}, status=status.HTTP_400_BAD_REQUEST)
         if lifetime_yr < 1 or lifetime_yr > 100:
             return Response({'detail': 'Umur proyek harus antara 1 dan 100 tahun.'}, status=status.HTTP_400_BAD_REQUEST)
-
-        revenue_growth_pct = float(data.get('revenue_growth_pct', 0.0))
-        opex_growth_pct = float(data.get('opex_growth_pct', 0.0))
 
         fin = jalankan_analisis_finansial(
             area_ha=area_ha,

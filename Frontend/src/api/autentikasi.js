@@ -43,7 +43,7 @@ export const hapusToken = () => {
 const pesanGalat = (error) => {
   const data = error.response?.data;
   if (!data) {
-    return 'Tidak dapat menghubungi server. Pastikan backend berjalan di port 8000.';
+    return 'Tidak dapat menghubungi server. Periksa koneksi internet lalu coba lagi.';
   }
   if (data.error === 'invalid_grant') {
     return 'Username/email atau kata sandi tidak valid.';

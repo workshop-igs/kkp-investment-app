@@ -3,14 +3,17 @@ import json
 import os
 from pathlib import Path
 
+from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 load_dotenv(BASE_DIR / '.env')
 
-SECRET_KEY = os.getenv('DJANGO_SECRET_KEY', 'django-insecure-dev-only-change-in-production')
-DEBUG = os.getenv('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = os.getenv('DJANGO_DEBUG', 'False').lower() in ('true', '1', 'yes')
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY') or ('django-insecure-dev-only-change-in-production' if DEBUG else '')
+if not SECRET_KEY:
+    raise ImproperlyConfigured('DJANGO_SECRET_KEY wajib diisi di .env untuk produksi (DJANGO_DEBUG=False).')
 ALLOWED_HOSTS = os.getenv('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 try:
@@ -145,6 +148,8 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+DATA_UPLOAD_MAX_MEMORY_SIZE = 50 * 1024 * 1024
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if DEBUG:
@@ -238,6 +243,7 @@ DEFAULT_SRID = 4326
 DATA_DIR = BASE_DIR / 'data'
 EXPORT_DIR = BASE_DIR / 'exports'
 
+(BASE_DIR / 'logs').mkdir(exist_ok=True)
 TINGKAT_LOG = os.getenv('DJANGO_LOG_LEVEL', 'DEBUG' if DEBUG else 'INFO')
 
 LOGGING = {
