@@ -1,7 +1,7 @@
 from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.permissions import BasePermission
 
-LEVEL = {'DASAR': 'Pengguna Dasar', 'PENUH': 'Pengguna Penuh', 'ADMIN': 'Administrator'}
+LEVEL = {'DASAR': 'Pengguna Dasar', 'PENUH': 'Tim KKP', 'ADMIN': 'Administrator'}
 
 
 def level(user):
