@@ -242,11 +242,16 @@ class AdminSektorViewSet(viewsets.ModelViewSet):
         })
 
     def perform_destroy(self, instance):
+        gabungan = LokasiPotensial.objects.filter(sektor=None, jenis__contains=[instance.kode])
+        provinsi = sorted(set(gabungan.values_list('provinsi__kode_bps', flat=True)))
         with transaction.atomic():
             proyek = ProyekInvestasi.objects.filter(sektor=instance).update(sub_sektor='')
             _bersihkan_pengaturan(instance)
+            gabungan.delete()
             instance.delete()
         cache.clear()
+        if provinsi:
+            jadwalkan_hitung_ulang(lokasi=provinsi)
         catat(self.request, f"Menghapus jenis investasi '{instance.nama}' beserta datanya", f'Jenis {instance.kode}',
               [f'{proyek} proyek kini tanpa jenis investasi'] if proyek else ())
 

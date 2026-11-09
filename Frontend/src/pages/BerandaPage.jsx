@@ -245,7 +245,7 @@ const ContohJenis = () => (
     <p className="text-sm font-semibold text-kkp-900">Jenis investasi</p>
     <div className="mt-3 grid grid-cols-3 gap-2">
       {CONTOH_JENIS.map(([kode, label], i) => {
-        const Ikon = IKON_JENIS[kode];
+        const Ikon = IKON_JENIS[kode] || Layers;
         return (
           <span
             key={kode}
