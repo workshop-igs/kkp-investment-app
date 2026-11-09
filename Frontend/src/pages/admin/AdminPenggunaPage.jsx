@@ -12,7 +12,7 @@ const ADMIN_KOSONG = {
 
 const LEVEL_AKSES = [
   ['DASAR', 'Pengguna Dasar', 'Beranda, Peta Spasial, dan Profil Investasi.'],
-  ['PENUH', 'Pengguna Penuh', 'Ditambah Dashboard Nasional dan Proyek Investasi.'],
+  ['PENUH', 'Tim KKP', 'Ditambah Dashboard Nasional dan Proyek Investasi.'],
   ['ADMIN', 'Administrator', 'Semua halaman, termasuk halaman administrator.'],
 ];
 
