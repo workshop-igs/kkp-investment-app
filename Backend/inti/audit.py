@@ -9,7 +9,6 @@ JEDA_TANDA_AKTIF_DETIK = 60
 METODE_DICATAT = frozenset({'POST', 'PUT', 'PATCH', 'DELETE'})
 
 JALUR_KHUSUS = (
-    ('/auth/login/', 'MASUK', 'Masuk ke sistem'),
     ('/auth/logout/', 'KELUAR', 'Keluar dari sistem'),
     ('/auth/register/', 'DAFTAR', 'Pendaftaran akun baru'),
     ('/analitik/analisis/', 'ANALISIS', 'Menjalankan analisis kelayakan'),
@@ -98,10 +97,9 @@ def simpan_berjejak(serializer, **tambahan):
 
 
 def _alamat_ip(request):
-    teruskan = request.META.get('HTTP_X_FORWARDED_FOR', '')
-    if teruskan:
-        return teruskan.split(',')[0].strip()[:45] or None
-    return request.META.get('REMOTE_ADDR') or None
+    from kkp_investasi.validator_oauth import alamat_klien
+
+    return alamat_klien(request.META)[:45] or None
 
 
 def _sasaran(jalur):

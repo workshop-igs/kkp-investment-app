@@ -118,6 +118,8 @@ class PetaBBoxMixin:
         if not bbox:
             return self.BBOX_INDONESIA, self.BBOX_INDONESIA[2] - self.BBOX_INDONESIA[0], 1.0
         minx, miny, maxx, maxy = (float(v) for v in bbox.split(','))
+        if not all(map(math.isfinite, (minx, miny, maxx, maxy))):
+            raise ValueError(bbox)
         kotak = kotak_berkisi(minx, miny, maxx, maxy)
         luas = (maxx - minx) * (maxy - miny)
         rasio = (kotak[2] - kotak[0]) * (kotak[3] - kotak[1]) / luas if luas > 0 else 1.0
@@ -169,6 +171,8 @@ class PetaBBoxMixin:
         qs = self.get_queryset()
 
         provinsi = request.query_params.get('provinsi')
+        if provinsi and not provinsi.isdigit():
+            return Response({'detail': 'Parameter provinsi harus berupa id angka.'}, status=400)
         if provinsi:
             qs = qs.filter(provinsi_id=provinsi)
 
@@ -294,6 +298,8 @@ class PetaBBoxMixin:
     def cakupan(self, request):
         qs = self.peta_queryset_tambahan(self.get_queryset(), request)
         provinsi = request.query_params.get('provinsi')
+        if provinsi and not provinsi.isdigit():
+            return Response({'detail': 'Parameter provinsi harus berupa id angka.'}, status=400)
         if provinsi:
             qs = qs.filter(provinsi_id=provinsi)
         kotak = qs.aggregate(batas=Extent('geometry'))['batas']

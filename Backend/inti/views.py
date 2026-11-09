@@ -593,56 +593,6 @@ def _serialize_user(user):
     }
 
 
-@api_view(['POST'])
-@permission_classes([permissions.AllowAny])
-def login_api(request):
-    from django.contrib.auth import authenticate, login
-    from django.contrib.auth.models import User
-
-    data = request.data or {}
-    identifier = (data.get('username') or data.get('email') or '').strip()
-    password = (data.get('password') or '').strip()
-
-    if not identifier or not password:
-        return Response(
-            {'detail': 'Username/email dan kata sandi wajib diisi.'},
-            status=400
-        )
-
-    user = None
-    if '@' in identifier:
-        user_obj = User.objects.filter(email__iexact=identifier).first()
-        if user_obj:
-            user = authenticate(request, username=user_obj.username, password=password)
-    else:
-        user = authenticate(request, username=identifier, password=password)
-
-    if user is None:
-        return Response(
-            {'detail': 'Username atau kata sandi tidak valid. Silakan periksa kembali.'},
-            status=401
-        )
-
-    if not user.is_active:
-        return Response(
-            {'detail': 'Akun Anda sedang dinonaktifkan oleh administrator.'},
-            status=403
-        )
-
-    if hasattr(request, 'session'):
-        login(request, user)
-    elif hasattr(request, '_request') and hasattr(request._request, 'session'):
-        login(request._request, user)
-
-    user_data = _serialize_user(user)
-
-    return Response({
-        'success': True,
-        'message': f'Selamat datang kembali, {user_data["full_name"]}!',
-        'user': user_data
-    })
-
-
 INSTANSI_BAWAAN = 'Kementerian Kelautan dan Perikanan'
 
 
@@ -659,7 +609,7 @@ def register_api(request):
     data = request.data or {}
     username = (data.get('username') or '').strip().lower()
     email = (data.get('email') or '').strip().lower()
-    password = (data.get('password') or '').strip()
+    password = data.get('password') or ''
     full_name = (data.get('full_name') or '').strip()
     instansi = (data.get('instansi') or '').strip()
     telepon = (data.get('telepon') or '').strip()
