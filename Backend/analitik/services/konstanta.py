@@ -219,6 +219,7 @@ RADIUS_ADAT_DEKAT_M = 1000
 PORSI_DARAT_MINIMAL = 0.5
 UKURAN_SEL_LOKASI_DERAJAT = 0.00225
 SEL_PER_SISI_INTI_LOKASI = 4
+RADIUS_AREA_INDIKATIF_KM = 2.0
 JARAK_ANTAR_LOKASI_KM = 25
 MAKS_LOKASI_NASIONAL = 30
 MAKS_LOKASI_PER_PROVINSI = 5
@@ -275,15 +276,17 @@ KRITERIA_JENIS = {
         },
         'BUDIDAYA_RUMPUT_LAUT': {
             'nama': 'Budidaya Rumput Laut (Marikultur)', 'kbli': '03213', 'ranah': ['LAUT'],
-            'kriteria': {'kedalaman': [2.0, 10.0], 'arus': [None, 0.54], 'salinitas': [29.0, 35.0],
-                         'suhu_rata': [27.0, 32.0], 'kd490': [None, 1.7]},
-            'unggulan': {'kedalaman': [3.0, 5.0], 'arus': [None, 0.31], 'salinitas': [31.0, 35.0],
-                         'suhu_rata': [27.0, 30.0], 'kd490': [None, 0.57]},
+            'kriteria': {'kedalaman': [3.0, 10.0], 'arus': [None, 0.4], 'salinitas': [29.0, 35.0],
+                         'suhu_rata': [27.0, 32.0], 'kd490': [None, 1.7], 'gelombang': [None, 1.0],
+                         'jarak_pantai_km': [None, 2.0], 'jarak_muara_km': [3.0, None]},
+            'unggulan': {'kedalaman': [3.0, 5.0], 'arus': [None, 0.4], 'salinitas': [31.0, 35.0],
+                         'suhu_rata': [27.0, 30.0], 'kd490': [None, 0.57], 'gelombang': [None, 0.6]},
         },
         'BUDIDAYA_LAUT': {
             'nama': 'Budidaya Ikan Laut KJA (Karamba Jaring Apung)', 'kbli': '03211', 'ranah': ['LAUT'],
             'kriteria': {'arus': [0.15, 0.5], 'kedalaman': [5.0, 40.0], 'salinitas': [30.0, 34.0], 'tss': [None, 80.0],
-                         'gelombang': [None, 1.0], 'ph': [6.0, 9.0], 'suhu_rata': [25.0, 32.0]},
+                         'gelombang': [None, 1.0], 'ph': [6.0, 9.0], 'suhu_rata': [25.0, 32.0],
+                         'jarak_pantai_km': [None, 3.0]},
             'unggulan': {'arus': [0.23, 0.25], 'kedalaman': [7.0, 40.0], 'salinitas': [30.0, 34.0], 'tss': [None, 25.0],
                          'gelombang': [None, 0.6], 'ph': [6.0, 9.0], 'suhu_rata': [25.0, 32.0]},
         },
@@ -299,7 +302,7 @@ KRITERIA_JENIS = {
         'BUDIDAYA_KEKERANGAN': {
             'nama': 'Budidaya Kekerangan dan Moluska', 'kbli': '03211', 'ranah': ['LAUT'],
             'kriteria': {'kedalaman': [1.0, 15.0], 'salinitas': [15.0, 34.0], 'klorofil': [0.5, None], 'arus': [None, 0.5],
-                         'gelombang': [None, 1.0]},
+                         'gelombang': [None, 1.0], 'jarak_pantai_km': [None, 3.0]},
             'unggulan': {'kedalaman': [2.0, 10.0], 'salinitas': [20.0, 33.0], 'klorofil': [1.0, None], 'arus': [None, 0.3],
                          'gelombang': [None, 0.6]},
         },

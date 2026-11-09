@@ -962,13 +962,13 @@ function ringkasan(dek, o, rencana) {
   o.bab.forEach((b, n) => {
     if (n % perKolom === 0) yy = yAwal;
     const xk = TEPI + 5 + Math.floor(n / perKolom) * (lebarKolom + 5);
-    const j = o.jenis[b.sektor];
+    const j = o.jenis[b.kode];
     const k = komoditasBab(o, b);
     const f = finansialUtama(b);
     const isi = [
       k && `${angka(k.produksi_ton)} ton (${k.tahun}), peringkat ${k.peringkat_nasional} nasional`,
       `${b.lokasi.length} lokasi prioritas`,
-      `${angka(j.tinggi_ha)} ha zona S1`,
+      `${angka(j.tinggi_ha)} ha ruang S1`,
       f && `NPV ${rp(f.hasil.skenario.find((s) => s.kode === f.hasil.dasar).npv)}`,
     ].filter(Boolean).join('; ');
     dek.doc.setFillColor(...rgb(aksenBab(b)));
@@ -987,11 +987,11 @@ function ringkasan(dek, o, rencana) {
     const h = finansialUtama(b).hasil;
     return h.skenario.find((s) => s.kode === h.dasar).layak;
   });
-  const berS1 = o.bab.filter((b) => o.jenis[b.sektor].tinggi_ha > 0).length;
+  const berS1 = o.bab.filter((b) => o.jenis[b.kode].tinggi_ha > 0).length;
   [
     ['Kelayakan ekonomi', model.length ? `${layak.length} dari ${model.length} model usaha layak finansial` : 'Model usaha belum ditetapkan administrator',
       nilaiUnggulan ? `Nilai produksi unggulan ${rp(nilaiUnggulan * 1e6)}` : null, C.biru],
-    ['Daya dukung lingkungan', `Zona kelas tinggi (S1) tersedia untuk ${berS1} dari ${o.bab.length} komoditas atau jenis`, `${lokasi.length} lokasi prioritas lolos Perda dan kriteria fisik`, C.tinggi],
+    ['Daya dukung lingkungan', `Ruang kelas tinggi (S1) tersedia untuk ${berS1} dari ${o.bab.length} komoditas atau jenis`, `${lokasi.length} lokasi prioritas lolos Perda dan kriteria fisik`, C.tinggi],
     ['Daya dukung sosial', tpt?.nilai != null ? `Pengangguran terbuka ${angka(tpt.nilai, 2)}% (${tpt.tahun})` : 'Data ketenagakerjaan belum tersedia',
       `${angka(o.wilayah.nelayan)} nelayan di ${o.wilayah.jumlah_kabkota_pesisir} kabupaten/kota pesisir`, C.toska],
   ].forEach(([judul, baris1, baris2, warna]) => {
@@ -1214,7 +1214,7 @@ function komoditasUnggulan(dek, o) {
       label: namaRapi(j.nama, 30), nilai: j.tinggi_ha, teks: `${angka(j.tinggi_ha)} ha`, sorot: dipakai.has(j.kode),
     })), '#1B6A8A');
   }
-  dek.sumber(`Sumber: ${SUMBER_BPS()}. Unggulan (disorot) = 50% nilai produksi + 50% luas zona sesuai. Udang dipisah menjadi udang laut (tangkap) dan udang vaname (budidaya tambak).`);
+  dek.sumber(`Sumber: ${SUMBER_BPS()}. Unggulan (disorot) = 50% nilai produksi + 50% luas ruang sesuai. Udang dipisah menjadi udang laut (tangkap) dan udang vaname (budidaya tambak).`);
 }
 
 function metode(dek, o) {
@@ -1265,7 +1265,7 @@ function metode(dek, o) {
     'Gerbang Perda: zona RTRW Provinsi dan matriks KKPRL menentukan rincian kegiatan diperbolehkan, bersyarat, atau tidak.',
     'Pengecualian: KKPRL terbit, wilayah masyarakat hukum adat, alur pelayaran dan ALKI, jarak aman kabel dan pipa, ekosistem sensitif, serta bangunan eksisting.',
     'Kecocokan fisik per sub-jenis: setiap layer dibandingkan dengan batas layak dan batas unggulan sub-jenis.',
-    'Kelas kesesuaian: zona berkelas tinggi menjadi sangat sesuai (S1), berkelas sedang menjadi sesuai (S2); lokasi prioritas diambil dari Peta Sebaran.',
+    'Kelas kesesuaian: perairan atau lahan per sel 250 m yang memenuhi syarat sub-jenis, skor tinggi menjadi sangat sesuai (S1), sedang menjadi sesuai (S2); lokasi prioritas diambil dari Peta Sebaran.',
     'Kelayakan finansial: model usaha sub-jenis dihitung untuk kondisi riil, S1, dan S2, lengkap dengan proyeksi dan sensitivitas.',
   ], { aksen, ukuran: 7.2 });
   dek.sumber('Sumber: kriteria kelayakan usaha mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026); alur kesesuaian ruang adalah mesin analisis aplikasi.');
@@ -1289,7 +1289,7 @@ function ketentuanRinci(dek, j, x, y, lebar, maksBaris = 2) {
 }
 
 function kajian(dek, o, b, i) {
-  const j = o.jenis[b.sektor];
+  const j = o.jenis[b.kode];
   const k = komoditasBab(o, b);
   const aksen = aksenBab(b);
   const y = dek.slide({
@@ -1314,7 +1314,7 @@ function kajian(dek, o, b, i) {
     const yr = y + 79;
     let yy = dek.kartu(TEPI, yr, kiri, BAWAH - yr, { judul: 'Ruang laut dan ketentuan Perda', ikon: 'zona', aksen });
     dek.gaya(7.4, C.navy, true);
-    dek.doc.text(`${angka(j.sesuai_ha)} ha zona sesuai | ${angka(j.tinggi_ha)} ha kelas tinggi (S1)`, TEPI + 5, yy);
+    dek.doc.text(`${angka(j.sesuai_ha)} ha ruang sesuai | ${angka(j.tinggi_ha)} ha kelas tinggi (S1)`, TEPI + 5, yy);
     ketentuanRinci(dek, j, TEPI + 5, yy + 5, kiri - 10, 1);
 
     const x = TEPI + kiri + 5;
@@ -1335,9 +1335,9 @@ function kajian(dek, o, b, i) {
     return;
   }
   [
-    [angka(j.sesuai_ha), 'ha zona sesuai tata ruang'],
-    [angka(j.tinggi_ha), 'ha zona kelas tinggi (S1)'],
-    [angka(j.sedang_ha), 'ha zona kelas sedang (S2)'],
+    [angka(j.sesuai_ha), 'ha ruang sesuai'],
+    [angka(j.tinggi_ha), 'ha ruang kelas tinggi (S1)'],
+    [angka(j.sedang_ha), 'ha ruang kelas sedang (S2)'],
     [angka(b.lokasi.length), 'lokasi prioritas'],
   ].forEach(([n, l], c) => dek.angkaKartu(TEPI + (c % 2) * (lebarKartu + 4), y + Math.floor(c / 2) * 26, lebarKartu, 23, n, l, aksen));
   let yy = dek.kartu(TEPI, y + 53, kiri, 24, { judul: 'Deskripsi', ikon: 'kajian', aksen });
@@ -1374,7 +1374,7 @@ function kajian(dek, o, b, i) {
 }
 
 function lokasiSesuai(dek, o, b, i, citra) {
-  const j = o.jenis[b.sektor];
+  const j = o.jenis[b.kode];
   const aksen = aksenBab(b);
   const y = dek.slide({
     alis: alisBab(i, b, 2, 'Lokasi dan daya dukung lingkungan'),
@@ -1494,7 +1494,7 @@ function lokasiDetail(dek, o, b, i, citraLokasi) {
       citra: citraLokasi[l.id],
       ...PETA_LOKASI,
       lapisan: [
-        { fitur: o.jenis[b.sektor].peta, warna: (fz) => warnaKelasKelayakan(fz.kelas), isi: 0.4, tebal: 1 },
+        { fitur: o.jenis[b.kode].peta, warna: (fz) => warnaKelasKelayakan(fz.kelas), isi: 0.4, tebal: 1 },
         { fitur: [{ geometry: l.batas }], warna: '#FACC15', isi: 0.3, tebal: 5 },
       ],
       titik: [{ titik: l.titik, warna: aksen, label: n + 1 }],
@@ -1709,7 +1709,7 @@ function finansial(dek, o, b, i, perJenis) {
 }
 
 function sosial(dek, o, b, i) {
-  const j = o.jenis[b.sektor];
+  const j = o.jenis[b.kode];
   const aksen = aksenBab(b);
   const y = dek.slide({
     alis: alisBab(i, b, 5, 'Sosial dan tenaga kerja'),
@@ -1763,7 +1763,7 @@ function nilaiRisiko(o, b) {
   const k = komoditasBab(o, b);
   const s1 = b.lokasi.filter((l) => kelasS(l.kelas) === 'S1').length;
   const s2 = b.lokasi.filter((l) => kelasS(l.kelas) === 'S2').length;
-  const j = o.jenis[b.sektor];
+  const j = o.jenis[b.kode];
   const hasil = [{
     risiko: 'Produktivitas tidak mencapai target di lokasi S2',
     peluang: !b.lokasi.length || s2 > s1 ? 'Tinggi' : s2 ? 'Sedang' : 'Rendah',
@@ -1804,7 +1804,7 @@ function konservasiWpp(o, b) {
 }
 
 function barisPestel(o, b) {
-  const j = o.jenis[b.sektor];
+  const j = o.jenis[b.kode];
   const k = komoditasBab(o, b);
   const f = finansialUtama(b);
   const dasar = f && f.hasil.skenario.find((s) => s.kode === f.hasil.dasar);
@@ -1813,7 +1813,7 @@ function barisPestel(o, b) {
   const s1 = b.lokasi.filter((l) => kelasS(l.kelas) === 'S1').length;
   const kurang = PENDUKUNG.filter(([, kat]) => !kat.some((x) => o.infrastruktur?.[x])).map(([label]) => label.toLowerCase());
   return [
-    ['Politik', `${angka(j.sesuai_ha)} ha zona sesuai menurut ${perdaSingkat(o.zona)}${r ? `; matriks: penuh di ${angka(r.blok.DIIZINKAN || 0)} blok, bersyarat di ${angka(r.blok.BERSYARAT || 0)}` : ''}.`,
+    ['Politik', `${angka(j.sesuai_ha)} ha ruang sesuai menurut ${perdaSingkat(o.zona)}${r ? `; matriks: penuh di ${angka(r.blok.DIIZINKAN || 0)} blok, bersyarat di ${angka(r.blok.BERSYARAT || 0)}` : ''}.`,
       'Utamakan lokasi di zona yang mengizinkan penuh; lokasi bersyarat memerlukan kajian tambahan.'],
     ['Ekonomi', [k && pertumbuhanTeks(k), k && hargaTeks(k), dasar && `NPV ${rp(dasar.npv)}, IRR ${angka(dasar.irr, 1)}%.`,
       b.sektor === 'KONSERVASI_PESISIR' && konservasiWpp(o, b)].filter(Boolean).join(' ') || 'Data pasar publik untuk jenis ini terbatas.',
@@ -1822,7 +1822,7 @@ function barisPestel(o, b) {
       b.lokasi.some((l) => l.peringatan.length) ? 'Ada lokasi dekat wilayah adat; libatkan masyarakat adat sejak awal.' : 'Prioritaskan tenaga kerja lokal dan pelatihan keahlian berprioritas tinggi.'],
     ['Teknologi', `Kebutuhan utama: ${o.teks.kebutuhan_teknologi[b.sektor] || o.teks.kebutuhan_teknologi.UMUM}.`,
       kurang.length ? `Fasilitas belum tercatat (${kurang.slice(0, 3).join(', ')}) menjadi peluang investasi pendukung.` : 'Fasilitas pendukung utama sudah tercatat di provinsi.'],
-    ['Lingkungan', `${angka(j.tinggi_ha)} ha zona S1 dan ${angka(j.sedang_ha)} ha zona S2; ${b.lokasi.length ? `${s1} dari ${b.lokasi.length} lokasi prioritas berkelas S1` : 'belum ada lokasi prioritas pada Peta Sebaran'}.`,
+    ['Lingkungan', `${angka(j.tinggi_ha)} ha ruang S1 dan ${angka(j.sedang_ha)} ha ruang S2; ${b.lokasi.length ? `${s1} dari ${b.lokasi.length} lokasi prioritas berkelas S1` : 'belum ada lokasi prioritas pada Peta Sebaran'}.`,
       'Lokasi S2 memiliki faktor pembatas alami; tidak boleh menutup ekosistem sensitif (mangrove, lamun, terumbu karang).'],
     ['Legal', `NIB dan perizinan berusaha sesuai ${izinKbli(b)}, PKKPRL atau PKKPR, dokumen lingkungan (SPPL, UKL-UPL, atau AMDAL), dan sertifikasi mutu.`,
       'Proses perizinan melalui OSS; persetujuan kawasan konservasi diperlukan bila berada di dalamnya.'],

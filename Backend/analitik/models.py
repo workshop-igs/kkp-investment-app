@@ -383,6 +383,24 @@ class LokasiPotensial(models.Model):
         return f'{self.sektor_id or "SEMUA"} / {self.provinsi_id}: {self.luas_ha:.1f} ha ({self.persen_sesuai:.0f}%)'
 
 
+class RuangSesuai(models.Model):
+    sektor = models.ForeignKey(SektorInvestasi, on_delete=models.CASCADE)
+    provinsi = models.ForeignKey(Provinsi, on_delete=models.CASCADE)
+    sub_kode = models.CharField(max_length=40)
+    kelas = models.CharField(max_length=15, choices=SkorKelayakanZona.KELAS_CHOICES)
+    geometry = models.MultiPolygonField(srid=4326, help_text='Gabungan sel 250 m yang memenuhi kriteria sub-jenis')
+    luas_ha = models.FloatField()
+    zona = models.JSONField(default=list, help_text='Id zona yang memuat sel-sel ini')
+
+    class Meta:
+        db_table = 'analitik_ruang_sesuai'
+        verbose_name_plural = 'Ruang Sesuai'
+        indexes = [models.Index(fields=['provinsi', 'sektor'], name='ruang_sesuai_prov_idx')]
+
+    def __str__(self):
+        return f'{self.provinsi_id} / {self.sub_kode} {self.kelas}: {self.luas_ha:.0f} ha'
+
+
 class RasterOseanografi(models.Model):
     PARAMETER_CHOICES = [
         ('KEDALAMAN', 'Kedalaman laut'),
