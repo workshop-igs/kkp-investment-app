@@ -542,6 +542,8 @@ JUMLAH_UNGGULAN = 4
 JUMLAH_JENIS_UNGGULAN = 3
 JUMLAH_KEAHLIAN = 7
 RANTAI_PASOK = {
+    'UMUM': ['Penyedia sarana dan bahan baku', 'Pelaku usaha inti', 'Pengolah atau penyedia jasa lanjutan',
+             'Distributor dan logistik', 'Pasar lokal dan ekspor'],
     'PERIKANAN_TANGKAP': ['Penyedia BBM, es, dan umpan', 'Nelayan', 'TPI dan pengepul', 'Pengolah dan cold storage',
                           'Pedagang besar dan eksportir', 'Pasar lokal dan ekspor'],
     'PERIKANAN_BUDIDAYA': ['Penyedia benih dan pakan', 'Pembudidaya', 'Pengepul desa', 'Pengumpul besar dan pabrik',

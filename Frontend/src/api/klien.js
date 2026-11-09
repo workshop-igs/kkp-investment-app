@@ -3,6 +3,7 @@ import axios from 'axios';
 import { API_V1_URL } from '../api/alamat';
 import { getAccessToken, hapusToken, segarkanToken } from './autentikasi';
 import { SECTORS } from '../utils/konstanta';
+import { WARNA_JENIS_INVESTASI } from '../utils/simbologiPeta';
 
 export const api = axios.create({
   baseURL: API_V1_URL,
@@ -74,6 +75,21 @@ export const jalankanAnalisisKelayakan = async (geometry, sektor, subSektor, par
 };
 
 export const ambilDaftar = (data) => (Array.isArray(data) ? data : data?.results ?? []);
+
+export const muatJenisInvestasi = async () => {
+  try {
+    const { data } = await axios.get(`${API_V1_URL}/inti/sektor/`, { timeout: 5000 });
+    const aktif = ambilDaftar(data);
+    if (!aktif.length) return;
+    const lama = Object.fromEntries(SECTORS.map((s) => [s.id, s]));
+    SECTORS.splice(0, SECTORS.length, ...aktif.map((s) => lama[s.kode] || { id: s.kode, label: s.nama }));
+    aktif.forEach((s) => {
+      if (!WARNA_JENIS_INVESTASI[s.kode] && s.warna) WARNA_JENIS_INVESTASI[s.kode] = s.warna;
+    });
+  } catch {
+    return;
+  }
+};
 
 export const useSektorAktif = () => {
   const [daftar, setDaftar] = useState(SECTORS);
