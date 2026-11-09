@@ -1,9 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { SECTORS } from '../../utils/konstanta';
 
-const OPSI_SEKTOR = SECTORS.map((s) => [s.id, s.label]);
-
-const PemilihSektor = ({ nilai, onPilih, label = 'Skor dihitung untuk sektor', opsi = OPSI_SEKTOR, semua }) => (
+const PemilihSektor = ({ nilai, onPilih, label = 'Skor dihitung untuk sektor', opsi = SECTORS.map((s) => [s.id, s.label]), semua }) => (
   <div className="px-4 pb-2.5 -mt-1">
     <label className="block text-[10px] font-semibold text-slate-500 mb-1 uppercase tracking-wide">
       {label}

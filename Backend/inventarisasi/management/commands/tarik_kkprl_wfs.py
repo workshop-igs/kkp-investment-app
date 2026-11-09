@@ -12,6 +12,7 @@ WFS = 'https://portaldata.kkp.go.id/gis/wms'
 LAYER = 'demo:KKPRL_AR'
 TANDA = 'KKP-WFS'
 UKURAN_HALAMAN = 500
+BATAS_SUSUT = 0.5
 
 PETA_STATUS = {
     'AKTIF': 'AKTIF',
@@ -233,6 +234,10 @@ class Command(BaseCommand):
 
         if not unik:
             raise CommandError('Portal tidak mengembalikan izin KKPRL. Data izin lama dipertahankan.')
+        lama = KKPRL.objects.filter(sumber_data=TANDA).count()
+        if len(unik) < lama * BATAS_SUSUT:
+            raise CommandError(f'Portal hanya mengembalikan {len(unik)} izin, padahal tersimpan {lama}; kemungkinan '
+                               f'tarikan terpotong. Data izin lama dipertahankan.')
         with transaction.atomic():
             KKPRL.objects.filter(sumber_data=TANDA).delete()
             KKPRL.objects.bulk_create(unik, batch_size=200, ignore_conflicts=True)

@@ -230,7 +230,7 @@ const Bawaan = ({ nilai, persen }) => (typeof nilai === 'number'
 
 const kelasTeks = `${kelasInput} mt-1 resize-y font-normal`;
 
-const EditorTeks = ({ nilai, onUbah, meta, label }) => {
+const EditorTeks = ({ nilai, onUbah, meta, label, bawaan, jenis = [] }) => {
   const [minimal, maksimal, panjang] = meta.teks;
   const urutan = Object.keys(label);
   if (Array.isArray(nilai)) {
@@ -275,29 +275,44 @@ const EditorTeks = ({ nilai, onUbah, meta, label }) => {
       </div>
     );
   }
+  const perJenis = Object.keys(nilai).some((k) => k === 'UMUM' || jenis.some((j) => j.kode === k));
+  const kunci = perJenis ? [...new Set([...Object.keys(nilai), ...jenis.map((j) => j.kode)])] : Object.keys(nilai);
+  const daftar = Array.isArray(Object.values(nilai)[0]);
+  const simpan = (k, isi) => {
+    const kosong = daftar ? !isi.length : !isi;
+    if (kosong && !(bawaan && k in bawaan)) {
+      const { [k]: _, ...sisa } = nilai;
+      onUbah(sisa);
+    } else onUbah({ ...nilai, [k]: isi });
+  };
   return (
     <div className="grid gap-3 sm:grid-cols-2">
-      {Object.entries(nilai).sort(([a], [b]) => urutan.indexOf(a) - urutan.indexOf(b)).map(([k, v]) => (
-        <label key={k} className="block text-xs font-semibold text-slate-600">
-          {label[k] || k}
-          {Array.isArray(v) ? (
-            <textarea rows={Math.max(3, v.length)} value={v.join('\n')}
-              onChange={(e) => onUbah({ ...nilai, [k]: e.target.value.split('\n') })}
-              onBlur={(e) => onUbah({ ...nilai, [k]: e.target.value.split('\n').map((x) => x.trim()).filter(Boolean) })}
-              className={kelasTeks} />
-          ) : (
-            <textarea rows={2} value={v} maxLength={panjang} onChange={(e) => onUbah({ ...nilai, [k]: e.target.value })}
-              onBlur={(e) => onUbah({ ...nilai, [k]: e.target.value.trim() })} className={kelasTeks} />
-          )}
-        </label>
-      ))}
+      {kunci.sort((a, b) => urutan.indexOf(a) - urutan.indexOf(b)).map((k) => {
+        const v = nilai[k] ?? (daftar ? [] : '');
+        const petunjuk = k in nilai ? undefined : 'Kosongkan untuk memakai teks umum';
+        return (
+          <label key={k} className="block text-xs font-semibold text-slate-600">
+            {label[k] || k}
+            {daftar ? (
+              <textarea rows={Math.max(3, v.length)} value={v.join('\n')} placeholder={petunjuk}
+                onChange={(e) => onUbah({ ...nilai, [k]: e.target.value.split('\n') })}
+                onBlur={(e) => simpan(k, e.target.value.split('\n').map((x) => x.trim()).filter(Boolean))}
+                className={kelasTeks} />
+            ) : (
+              <textarea rows={2} value={v} maxLength={panjang} placeholder={petunjuk}
+                onChange={(e) => onUbah({ ...nilai, [k]: e.target.value })}
+                onBlur={(e) => simpan(k, e.target.value.trim())} className={kelasTeks} />
+            )}
+          </label>
+        );
+      })}
     </div>
   );
 };
 
-const Editor = ({ nilai, bawaan, onUbah, meta, label }) => {
+const Editor = ({ nilai, bawaan, onUbah, meta, label, jenis }) => {
   const sebut = (k) => label[k] || k.replace(/_/g, ' ');
-  if (meta.teks) return <EditorTeks nilai={nilai} onUbah={onUbah} meta={meta} label={label} />;
+  if (meta.teks) return <EditorTeks nilai={nilai} onUbah={onUbah} meta={meta} label={label} bawaan={bawaan} jenis={jenis} />;
   if (typeof nilai === 'boolean') {
     return (
       <label className="inline-flex items-center gap-2 text-sm">
@@ -890,7 +905,7 @@ const KartuPengaturan = ({ item, data, tampil, onTersimpan, onMuatUlang }) => {
           {item.keterangan && <p className="mb-3 max-w-3xl text-sm text-slate-600">{item.keterangan}</p>}
           {EditorKhusus
             ? <EditorKhusus nilai={nilai} onUbah={setNilai} data={data} onMuatUlang={onMuatUlang} />
-            : <Editor nilai={nilai} bawaan={item.bawaan} onUbah={setNilai} meta={item} label={data.label} />}
+            : <Editor nilai={nilai} bawaan={item.bawaan} onUbah={setNilai} meta={item} label={data.label} jenis={data.sektor} />}
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="text-xs text-slate-500">
               {item.diubah && `Diubah ${item.diubah_oleh || 'administrator'} pada ${waktu(item.diubah_pada)}. `}

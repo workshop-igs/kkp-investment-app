@@ -274,8 +274,9 @@ class DesaKelurahanViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
 
 
 class SektorInvestasiViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = SektorInvestasi.objects.filter(aktif=True)
+    queryset = SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama')
     serializer_class = SektorInvestasiSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class SumberDataViewSet(viewsets.ReadOnlyModelViewSet):

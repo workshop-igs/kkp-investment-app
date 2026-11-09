@@ -302,7 +302,7 @@ const IKON_KELOMPOK = {
   'Unsur Ruang Laut': Waypoints,
 };
 
-const ENTRI_TETAP = [
+const entriTetap = () => [
   ...[
     ['Peta Spasial', 'Peta interaktif seluruh layer data ruang laut', '/peta', 'peta spasial'],
     ['Analisis wilayah', 'Gambar atau unggah area untuk dianalisis', '/peta?mulai=gambar', 'analisis kelayakan gambar poligon unggah shp kml geojson'],
@@ -357,7 +357,7 @@ const PusatInformasi = () => {
     if (q.length < MIN_HURUF) return [];
     const kunci = q.toLowerCase().split(/\s+/);
     const hitung = {};
-    const tetap = ENTRI_TETAP.filter((e) => {
+    const tetap = entriTetap().filter((e) => {
       const teks = `${e.nama} ${e.kunci || ''}`.toLowerCase();
       if (!kunci.every((k) => teks.includes(k))) return false;
       hitung[e.kelompok] = (hitung[e.kelompok] || 0) + 1;

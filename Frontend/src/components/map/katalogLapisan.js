@@ -353,7 +353,9 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       param: 'sektor',
       label: 'Tampilkan jenis investasi',
       semua: 'Semua jenis investasi',
-      opsi: [...SECTORS.map((s) => [s.id, s.label]), ['LAINNYA', 'Kegiatan lain']],
+      get opsi() {
+        return [...SECTORS.map((s) => [s.id, s.label]), ['LAINNYA', 'Kegiatan lain']];
+      },
     },
     gaya: (f) => {
       const warna = warnaJenisInvestasi(f?.properties?.sektor);
