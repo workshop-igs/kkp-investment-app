@@ -449,6 +449,8 @@ def _model_usaha(nilai):
         for k in ('satuan_usaha', 'satuan_produk'):
             if not isinstance(isi[k], str) or not isi[k].strip() or len(isi[k]) > 40:
                 raise NilaiTidakSah(f'{jalur}: satuan wajib diisi, paling panjang 40 huruf.')
+        if 'sumber' in isi and (not isinstance(isi['sumber'], str) or len(isi['sumber']) > 300):
+            raise NilaiTidakSah(f'{jalur}: sumber angka berupa teks, paling panjang 300 huruf.')
         _angka(isi['harga_per_satuan'], f'{jalur} > harga', meta, boleh_kosong=True)
         for bagian in ('volume_per_tahun', 'investasi', 'operasional_per_tahun'):
             if not isinstance(isi[bagian], dict) or set(isi[bagian]) != set(contoh[bagian]):
@@ -463,7 +465,7 @@ def _model_usaha(nilai):
     for sub, isi in nilai.items():
         jenis, jalur = dikenal[sub]
         contoh = konstanta.model_usaha_kosong(jenis, sub)
-        satu(isi, contoh, jalur, ('nama_kelas', 'kelas'))
+        satu(isi, contoh, jalur, ('nama_kelas', 'kelas', 'sumber'))
         if 'nama_kelas' in isi:
             nama(isi['nama_kelas'], jalur)
         kelas = isi.get('kelas', [])
@@ -471,7 +473,7 @@ def _model_usaha(nilai):
             raise NilaiTidakSah(f'{jalur}: paling banyak {KELAS_MODEL_USAHA_MAKS} kelas usaha tambahan.')
         for n, k in enumerate(kelas, 1):
             nama(k.get('nama') if isinstance(k, dict) else None, f'{jalur} > kelas {n}')
-            satu(k, contoh, f'{jalur} > kelas {n}', ('nama',))
+            satu(k, contoh, f'{jalur} > kelas {n}', ('nama', 'sumber'))
 
 
 def _teks(nilai, bawaan, meta, sektor):
