@@ -57,10 +57,9 @@ const angka = (v, d = 0) =>
     ? '-'
     : Number(v).toLocaleString('id-ID', { minimumFractionDigits: d, maximumFractionDigits: d });
 
-const namaRapi = (t, maks = 60) => {
+const namaRapi = (t) => {
   const s = String(t || '-');
-  const rapi = s === s.toUpperCase() ? s.toLowerCase().replace(/(^|[\s(/-])\p{L}/gu, (h) => h.toUpperCase()) : s;
-  return rapi.length > maks ? `${rapi.slice(0, maks - 1)}…` : rapi;
+  return s === s.toUpperCase() ? s.toLowerCase().replace(/(^|[\s(/-])\p{L}/gu, (h) => h.toUpperCase()) : s;
 };
 
 const rupiah = (juta) => (juta == null ? '-' : rupiahRingkas(juta * 1e6));
@@ -323,6 +322,22 @@ export class Dek {
     return y + baris.length * ukuran * MM_PER_PT * jarak;
   }
 
+  butir(x, y, lebar, awalan, daftar, { maks, sisa = true, ...opsi }) {
+    this.gaya(opsi.ukuran, opsi.warna, opsi.tebal);
+    const susun = (k) => `${awalan}${daftar.slice(0, k).join('; ')}${sisa && k < daftar.length ? `; dan ${daftar.length - k} lainnya` : ''}`;
+    let k = daftar.length;
+    while (k > 1 && this.doc.splitTextToSize(bersih(susun(k)), lebar).length > maks) k -= 1;
+    return this.teks(x, y, lebar, susun(k), opsi);
+  }
+
+  satuBaris(x, y, lebar, isi, { ukuran = 7, warna = C.teks, tebal = false, align = 'left' } = {}) {
+    this.gaya(ukuran, warna, tebal);
+    const teks = bersih(isi);
+    const panjang = this.doc.getTextWidth(teks);
+    if (panjang > lebar) this.doc.setFontSize(Math.max(ukuran * 0.72, (ukuran * lebar) / panjang));
+    this.doc.text(teks, x, y, { align });
+  }
+
   lencana(cx, cy, r, ikon, aksen, cincin = false) {
     const d = this.doc;
     if (cincin) {
@@ -500,10 +515,10 @@ export class Dek {
     const jarak = daftar.length > 1 ? Math.min(8.6, (batas - 3.8 - y) / (daftar.length - 1)) : 8.6;
     const maks = Math.max(1, ...daftar.map((b) => b.nilai));
     daftar.forEach((b) => {
-      this.gaya(6.8, b.sorot ? gelap(rgb(aksen)) : C.teks, !!b.sorot);
-      d.text(bersih(b.label), x, y);
       this.gaya(6.6, b.sorot ? gelap(rgb(aksen)) : C.abu, !!b.sorot);
       d.text(bersih(b.teks), x + lebar, y, { align: 'right' });
+      const lebarAngka = d.getTextWidth(bersih(b.teks));
+      this.satuBaris(x, y, lebar - lebarAngka - 3, b.label, { ukuran: 6.8, warna: b.sorot ? gelap(rgb(aksen)) : C.teks, tebal: !!b.sorot });
       d.setFillColor(...C.jalur);
       d.roundedRect(x, y + 1.6, lebar, 2.2, 1.1, 1.1, 'F');
       d.setFillColor(...(b.sorot ? rgb(aksen) : campur(rgb(aksen), 0.45)));
@@ -602,11 +617,11 @@ const rp = (v) => (v == null ? '-' : `Rp ${rupiahRingkas(v)}`);
 const tahunProduksi = (o) => o.komoditas.find((k) => k.unggulan)?.tahun;
 
 const sebutZona = (daftar) => {
-  const rapi = daftar.map((z) => namaRapi(z, 40).replace(/^Sub Zona /i, 'Sub-Zona '));
+  const rapi = daftar.map((z) => namaRapi(z).replace(/^Sub Zona /i, 'Sub-Zona '));
   if (rapi.length <= 2) return rapi.join(' & ');
   return `${rapi.slice(0, 2).join(', ')}, dan ${rapi.length - 2} sub-zona lain`;
 };
-const rincianTeks = (r) => `${namaRapi(r.kegiatan, 70)} (pada ${sebutZona(r.sub_zona)})`;
+const rincianTeks = (r) => `${namaRapi(r.kegiatan)} (pada ${sebutZona(r.sub_zona)})`;
 
 function donutKanvas(item, ukuran = 640) {
   const isi = item.filter((i) => i.nilai > 0);
@@ -970,12 +985,11 @@ function ringkasan(dek, o, rencana) {
       `${b.lokasi.length} lokasi prioritas`,
       `${angka(j.tinggi_ha)} ha ruang S1`,
       f && `NPV ${rp(f.hasil.skenario.find((s) => s.kode === f.hasil.dasar).npv)}`,
-    ].filter(Boolean).join('; ');
+    ].filter(Boolean);
     dek.doc.setFillColor(...rgb(aksenBab(b)));
     dek.doc.roundedRect(xk, yy - 2.8, 1.3, 6.4, 0.65, 0.65, 'F');
-    dek.gaya(7, C.navy, true);
-    dek.doc.text(bersih(namaRapi(b.nama, 44)), xk + 3.6, yy);
-    yy = dek.teks(xk + 3.6, yy + 3.4, lebarKolom - 4, isi, { ukuran: 6.1, warna: C.abu, maks: barisIsi }) + 1.6;
+    dek.satuBaris(xk + 3.6, yy, lebarKolom - 4, namaRapi(b.nama), { ukuran: 7, warna: C.navy, tebal: true });
+    yy = dek.butir(xk + 3.6, yy + 3.4, lebarKolom - 4, '', isi, { ukuran: 6.1, warna: C.abu, maks: barisIsi, sisa: false }) + 1.6;
   });
 
   const x = TEPI + kiri + 5;
@@ -1017,10 +1031,9 @@ function ringkasan(dek, o, rencana) {
       const yb = yy + n * tinggiBaris;
       dek.doc.setFillColor(...rgb(warna));
       dek.doc.circle(xc + 1, yb - 1, 0.9, 'F');
-      dek.gaya(6, C.teks);
-      dek.doc.text(bersih(namaRapi(nama, c ? 24 : 20)), xc + 3.2, yb);
       dek.gaya(5.8, C.abu);
       dek.doc.text(String(hal), xc + lebarIsi, yb, { align: 'right' });
+      dek.satuBaris(xc + 3.2, yb, lebarIsi - 3.2 - dek.doc.getTextWidth(String(hal)) - 2, namaRapi(nama), { ukuran: 6 });
     });
   });
   dek.sumber('Sumber: infrastruktur Satu Data KKP dan OpenStreetMap; ekosistem Sidako KKP dan Global Mangrove Watch; produksi BPS; ketenagakerjaan BPS; rincian di halaman berikutnya.');
@@ -1102,12 +1115,12 @@ function zonaRuang(dek, o, citra) {
     const warna = warnaZona(b.sub_zona);
     dek.doc.setFillColor(...rgb(warna));
     dek.doc.roundedRect(x + 5, yy - 2.6, 3, 3, 0.8, 0.8, 'F');
-    dek.gaya(6.8, C.teks);
-    dek.doc.text(bersih(namaRapi(KATEGORI_ZONA[b.sub_zona]?.label || b.label, 34)), x + 9.6, yy);
     dek.gaya(6.6, C.navy, true);
     dek.doc.text(`${angka(b.persen, 1)}%`, x + lebar - 5, yy, { align: 'right' });
     dek.gaya(6, C.abu);
     dek.doc.text(`${angka(b.luas_ha)} ha`, x + lebar - 15, yy, { align: 'right' });
+    const lebarLuas = dek.doc.getTextWidth(`${angka(b.luas_ha)} ha`);
+    dek.satuBaris(x + 9.6, yy, lebar - 26.6 - lebarLuas, namaRapi(KATEGORI_ZONA[b.sub_zona]?.label || b.label), { ukuran: 6.8 });
     dek.doc.setFillColor(...C.jalur);
     dek.doc.roundedRect(x + 9.6, yy + 1.3, lebar - 14.6, 1.5, 0.75, 0.75, 'F');
     dek.doc.setFillColor(...rgb(warna));
@@ -1201,17 +1214,17 @@ function komoditasUnggulan(dek, o) {
     const sub = [...new Map(o.bab.flatMap((b) => b.sub_jenis.map((s) => [s.kode, s]))).values()];
     sub.forEach((s) => {
       const n = unik(o.bab.flatMap((b) => b.lokasi)).filter((l) => l.sub_sektor_kode === s.kode).length;
-      dek.gaya(6.9, C.navy, true);
-      dek.doc.text(bersih(namaRapi(s.nama, 32)), x + 5, yy);
+      const kanan = `${s.kbli ? `KBLI ${s.kbli.kode} · ` : ''}${n} lokasi`;
       dek.gaya(6.2, C.abu);
-      dek.doc.text(`${s.kbli ? `KBLI ${s.kbli.kode} · ` : ''}${n} lokasi`, x + lebar - 5, yy, { align: 'right' });
+      dek.doc.text(kanan, x + lebar - 5, yy, { align: 'right' });
+      dek.satuBaris(x + 5, yy, lebar - 13 - dek.doc.getTextWidth(kanan), namaRapi(s.nama), { ukuran: 6.9, warna: C.navy, tebal: true });
       yy += 6;
     });
   } else {
     yy = dek.kartu(x, yb, lebar, BAWAH - yb, { judul: 'Jenis investasi lain', ikon: 'zona', aksen: '#1B6A8A' });
     const dipakai = new Set(o.bab.map((b) => b.kode));
     dek.batang(x + 5, yy, lebar - 10, o.jenis_lain.slice(0, 5).map((j) => ({
-      label: namaRapi(j.nama, 30), nilai: j.tinggi_ha, teks: `${angka(j.tinggi_ha)} ha`, sorot: dipakai.has(j.kode),
+      label: namaRapi(j.nama), nilai: j.tinggi_ha, teks: `${angka(j.tinggi_ha)} ha`, sorot: dipakai.has(j.kode),
     })), '#1B6A8A');
   }
   dek.sumber(`Sumber: ${SUMBER_BPS()}. Unggulan (disorot) = 50% nilai produksi + 50% luas ruang sesuai. Udang dipisah menjadi udang laut (tangkap) dan udang vaname (budidaya tambak).`);
@@ -1271,20 +1284,26 @@ function metode(dek, o) {
   dek.sumber('Sumber: kriteria kelayakan usaha mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026); alur kesesuaian ruang adalah mesin analisis aplikasi.');
 }
 
-const alisBab = (i, b, n, nama) => `Bab ${i + 1}  |  ${namaRapi(b.nama, 40)}  |  ${i + 1}.${n} ${nama}`;
+const alisBab = (i, b, n, nama) => `Bab ${i + 1}  |  ${namaRapi(b.nama)}  |  ${i + 1}.${n} ${nama}`;
 
-function ketentuanRinci(dek, j, x, y, lebar, maksBaris = 2) {
+function ketentuanRinci(dek, j, x, y, lebar, ringkas = false) {
   let yy = y;
   const r = j.rincian_matriks;
   if (!r) return yy;
   dek.gaya(7, C.navy, true);
   dek.doc.text('Rincian kegiatan menurut matriks Perda', x, yy);
-  yy = dek.teks(x, yy + 3.4, lebar, `${r.sumber}: diizinkan penuh di ${angka(r.blok.DIIZINKAN || 0)} blok zona, bersyarat di ${angka(r.blok.BERSYARAT || 0)}, dilarang di ${angka(r.blok.TIDAK_DIIZINKAN || 0)}.`, { ukuran: 6.2, warna: C.abu, maks: 2 });
-  [['Diperbolehkan penuh', r.DIIZINKAN, C.tinggi], ['Diperbolehkan bersyarat', r.BERSYARAT, C.sedang], ['Tidak diperbolehkan', r.TIDAK_DIIZINKAN, [185, 28, 28]]]
-    .filter(([, daftar]) => daftar?.length)
-    .forEach(([label, daftar, warna]) => {
-      yy = dek.teks(x, yy + 0.8, lebar, `${label}: ${daftar.slice(0, 2).map(rincianTeks).join('; ')}`, { ukuran: 6, warna: gelap(warna, 0.78), maks: maksBaris });
-    });
+  yy = dek.teks(x, yy + 3.4, lebar, `${r.sumber}: diizinkan penuh di ${angka(r.blok.DIIZINKAN || 0)} blok zona, bersyarat di ${angka(r.blok.BERSYARAT || 0)}, dilarang di ${angka(r.blok.TIDAK_DIIZINKAN || 0)}.`, { ukuran: 6.2, warna: C.abu });
+  const kategori = [['Diperbolehkan penuh', r.DIIZINKAN, C.tinggi], ['Diperbolehkan bersyarat', r.BERSYARAT, C.sedang], ['Tidak diperbolehkan', r.TIDAK_DIIZINKAN, [185, 28, 28]]]
+    .filter(([, daftar]) => daftar?.length);
+  kategori.forEach(([label, daftar, warna], i) => {
+    const maks = Math.max(1, Math.min(4, Math.floor((BAWAH - 3 - yy) / (6 * MM_PER_PT * 1.4 + 0.8) / (kategori.length - i))));
+    const isi = ringkas ? [...new Set(daftar.map((d) => namaRapi(d.kegiatan)))] : daftar.map(rincianTeks);
+    dek.gaya(6);
+    const muat = dek.doc.splitTextToSize(bersih(`${label}: ${isi[0]}`), lebar).length <= maks;
+    yy = ringkas && !muat
+      ? dek.teks(x, yy + 0.8, lebar, `${label}: ${isi.length} kegiatan`, { ukuran: 6, warna: gelap(warna, 0.78) })
+      : dek.butir(x, yy + 0.8, lebar, `${label}: `, isi, { ukuran: 6, warna: gelap(warna, 0.78), maks });
+  });
   return yy + 1.5;
 }
 
@@ -1315,7 +1334,7 @@ function kajian(dek, o, b, i) {
     let yy = dek.kartu(TEPI, yr, kiri, BAWAH - yr, { judul: 'Ruang laut dan ketentuan Perda', ikon: 'zona', aksen });
     dek.gaya(7.4, C.navy, true);
     dek.doc.text(`${angka(j.sesuai_ha)} ha ruang sesuai | ${angka(j.tinggi_ha)} ha kelas tinggi (S1)`, TEPI + 5, yy);
-    ketentuanRinci(dek, j, TEPI + 5, yy + 5, kiri - 10, 1);
+    ketentuanRinci(dek, j, TEPI + 5, yy + 5, kiri - 10, true);
 
     const x = TEPI + kiri + 5;
     const lebar = W - TEPI - x;
@@ -1369,7 +1388,7 @@ function kajian(dek, o, b, i) {
     dek.doc.text('Diizinkan bersyarat pada', x + 5, yy);
     yy = dek.deretPil(x + 5, yy + 5.4, lebar - 10, j.sub_zona_bersyarat, campur(C.sedang, 0.16), gelap(C.sedang, 0.75)) + 2;
   }
-  ketentuanRinci(dek, j, x + 5, yy + 2, lebar - 10, 2);
+  ketentuanRinci(dek, j, x + 5, yy + 2, lebar - 10);
   dek.sumber('Sumber: analisis kesesuaian ruang laut aplikasi; ketentuan pemanfaatan ruang per sub-zona; rincian kegiatan dari matriks KKPRL Perda RTRW Provinsi.');
 }
 
@@ -1411,16 +1430,28 @@ function lokasiSesuai(dek, o, b, i, citra) {
   }
   const d = dek.doc;
   const rapat = b.lokasi.length > 4;
-  b.lokasi.forEach((l, n) => {
+  const susun = (l, n, y0, cetak, rekomendasi, skala = 1) => {
     const kelas = kelasS(l.kelas);
-    d.setFillColor(...rgb(aksen));
-    d.circle(x + 7, yy - 0.2, 2.6, 'F');
-    dek.gaya(6.8, C.putih, true);
-    d.text(String(n + 1), x + 7, yy + 0.8, { align: 'center' });
-    dek.teks(x + 11.6, yy, lebar - 26, namaRapi(l.nama, 36), { ukuran: 7.2, warna: C.navy, tebal: true, maks: 1 });
-    dek.pilKelas(x + lebar - 5, yy, kelas);
-    dek.teks(x + 11.6, yy + 3.4, lebar - 16.6, `${l.kabupaten || '-'}  |  LP ${angka(l.luas_ha, 1)} ha${l.luas_wilayah_ha ? ` dari area potensial ${angka(l.luas_wilayah_ha)} ha` : ''}${b.sub_jenis.length > 1 && l.sub_sektor ? `  |  ${namaRapi(l.sub_sektor, 28)}` : ''}`, { ukuran: 6.2, warna: C.abu, maks: 1 });
-    let yb = yy + 3.4;
+    if (cetak) {
+      d.setFillColor(...rgb(aksen));
+      d.circle(x + 7, y0 - 0.2, 2.6, 'F');
+      dek.gaya(6.8, C.putih, true);
+      d.text(String(n + 1), x + 7, y0 + 0.8, { align: 'center' });
+      dek.pilKelas(x + lebar - 5, y0, kelas);
+    }
+    let yb = y0;
+    const tulis = (isi, langkahAsli, lebarTeks, { ukuran, ...opsi }) => {
+      const langkah = langkahAsli * skala;
+      opsi.ukuran = ukuran * skala;
+      if (cetak) {
+        yb = dek.teks(x + 11.6, yb, lebarTeks, isi, { ...opsi, jarak: langkah / (opsi.ukuran * MM_PER_PT) });
+      } else {
+        dek.gaya(opsi.ukuran, opsi.warna, opsi.tebal);
+        yb += d.splitTextToSize(bersih(isi), lebarTeks).length * langkah;
+      }
+    };
+    tulis(namaRapi(l.nama), 3.4, lebar - 26, { ukuran: 7.2, warna: C.navy, tebal: true });
+    tulis(`${l.kabupaten || '-'}  |  LP ${angka(l.luas_ha, 1)} ha${l.luas_wilayah_ha ? ` dari area potensial ${angka(l.luas_wilayah_ha)} ha` : ''}${b.sub_jenis.length > 1 && l.sub_sektor ? `  |  ${namaRapi(l.sub_sektor)}` : ''}`, 2.9, lebar - 16.6, { ukuran: 6.2, warna: C.abu });
     const laut = l.oseanografi || {};
     const teksLaut = [
       laut.KEDALAMAN != null && `kedalaman ${angka(laut.KEDALAMAN)} m`,
@@ -1428,44 +1459,41 @@ function lokasiSesuai(dek, o, b, i, citra) {
       laut.GELOMBANG != null && `gelombang ${angka(laut.GELOMBANG, 1)} m`,
       laut.KLOROFIL != null && `klorofil ${angka(laut.KLOROFIL, 2)} mg/m³`,
     ].filter(Boolean).join('  |  ');
-    if (teksLaut) {
-      yb += 2.9;
-      dek.gaya(5.9, WARNA_LAUT);
-      d.text(d.splitTextToSize(bersih(teksLaut), lebar - 18)[0], x + 11.6, yb);
-    }
+    if (teksLaut) tulis(teksLaut, 2.9, lebar - 18, { ukuran: 5.9, warna: WARNA_LAUT });
     if (l.daya_dukung) {
       const dd = l.daya_dukung;
-      yb += 2.9;
-      dek.gaya(5.9, C.navy, true);
-      d.text(d.splitTextToSize(bersih([
+      tulis([
         `daya dukung ±${angka(dd.kuota_uji)} tamu/hari (kuota uji)`,
         dd.luas_karang_ha >= 0.01 && `karang ${angka(dd.luas_karang_ha, 1)} ha`,
         dd.panjang_pantai_m >= 1 && `pantai ${angka(dd.panjang_pantai_m)} m`,
-      ].filter(Boolean).join('  ·  ')), lebar - 18)[0], x + 11.6, yb);
+      ].filter(Boolean).join('  ·  '), 2.9, lebar - 18, { ukuran: 5.9, warna: C.navy, tebal: true });
     }
     if (l.pulau_kecil) {
       const pk = l.pulau_kecil;
-      yb += 2.9;
-      dek.gaya(5.9, C.navy);
-      d.text(d.splitTextToSize(bersih(`pulau kecil ${angka(pk.luas_ha, 1)} ha  ·  dimanfaatkan ≤${angka(pk.maks_dimanfaatkan_ha, 1)} ha  ·  terbangun ≤${angka(pk.maks_terbangun_ha, 1)} ha`), lebar - 18)[0], x + 11.6, yb);
+      tulis(`pulau kecil ${angka(pk.luas_ha, 1)} ha  ·  dimanfaatkan ≤${angka(pk.maks_dimanfaatkan_ha, 1)} ha  ·  terbangun ≤${angka(pk.maks_terbangun_ha, 1)} ha`, 2.9, lebar - 18, { ukuran: 5.9, warna: C.navy });
     }
-    if (kelas) {
-      yb += 2.9;
-      dek.gaya(5.9, gelap(WARNA_S[kelas], 0.75));
-      d.text(d.splitTextToSize(bersih(o.teks.rekomendasi_kesesuaian[kelas]), lebar - 18)[0], x + 11.6, yb);
-    }
-    if (!rapat && (l.pembatas[0] || l.peringatan[0])) {
-      yb += 2.9;
-      dek.gaya(5.9, [185, 28, 28]);
-      d.text(d.splitTextToSize(bersih(`! ${l.peringatan[0] || l.pembatas[0]}`), lebar - 18)[0], x + 11.6, yb);
-    }
-    yy = yb + (rapat ? 4.6 : 5.4);
+    if (kelas && rekomendasi) tulis(o.teks.rekomendasi_kesesuaian[kelas], 2.9, lebar - 18, { ukuran: 5.9, warna: gelap(WARNA_S[kelas], 0.75) });
+    if (!rapat && (l.pembatas[0] || l.peringatan[0])) tulis(`! ${l.peringatan[0] || l.pembatas[0]}`, 2.9, lebar - 18, { ukuran: 5.9, warna: [185, 28, 28] });
+    return yb + (rapat ? 1.7 : 2.5) * skala;
+  };
+  const tinggi = (rekomendasi, skala = 1) => b.lokasi.reduce((y0, l, n) => susun(l, n, y0, false, rekomendasi, skala), yy) - yy;
+  const ruang = BAWAH - 3 - yy;
+  const perLokasi = tinggi(true) <= ruang;
+  const catatan = perLokasi ? 0 : 3.4 * new Set(b.lokasi.map((l) => kelasS(l.kelas)).filter(Boolean)).size;
+  const skala = perLokasi ? 1 : Math.max(0.8, Math.min(1, (ruang - catatan) / tinggi(false)));
+  b.lokasi.forEach((l, n) => {
+    yy = susun(l, n, yy, true, perLokasi, skala);
     if (n < b.lokasi.length - 1) {
       d.setDrawColor(...C.garis);
       d.setLineWidth(0.15);
       d.line(x + 5, yy - 3.2, x + lebar - 5, yy - 3.2);
     }
   });
+  if (!perLokasi) {
+    [...new Set(b.lokasi.map((l) => kelasS(l.kelas)).filter(Boolean))].forEach((kelas) => {
+      yy = dek.teks(x + 5, yy - 1.4, lebar - 10, `${kelas}: ${o.teks.rekomendasi_kesesuaian[kelas]}`, { ukuran: 5.9, warna: gelap(WARNA_S[kelas], 0.75) }) + 1.4;
+    });
+  }
   dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi (lolos matriks Perda, pengecualian, dan batas unggulan sub-jenis); kelas S1/S2 dari kelas kesesuaian zona; oseanografi NOAA;${b.lokasi.some((l) => l.daya_dukung) ? ' daya dukung fisik area potensial dikurangi margin;' : ''} ${ATRIBUSI_CITRA}. Hasil indikatif, bukan pengganti Persetujuan KKPRL.`);
 }
 
@@ -1500,19 +1528,16 @@ function lokasiDetail(dek, o, b, i, citraLokasi) {
       titik: [{ titik: l.titik, warna: aksen, label: n + 1 }],
     }), x + 2, yk + 2, lebar - 4, tinggiPeta);
     let yy = yk + tinggiPeta + 6;
-    dek.gaya(7, C.navy, true);
-    dek.doc.text(bersih(`${n + 1}. ${namaRapi(l.nama, 34)}`), x + 4, yy);
     dek.pilKelas(x + lebar - 4, yy, kelas);
-    dek.gaya(5.9, C.abu);
-    dek.doc.text(bersih(`${l.kabupaten || '-'} | LP ${angka(l.luas_ha, 1)} ha | area ${angka(l.luas_wilayah_ha)} ha`), x + 4, yy + 3.2);
-    yy += 3.2;
+    yy = dek.teks(x + 4, yy, lebar - 20, `${n + 1}. ${namaRapi(l.nama)}`, { ukuran: 7, warna: C.navy, tebal: true, jarak: 3.2 / (7 * MM_PER_PT) });
+    yy = dek.teks(x + 4, yy, lebar - 8, `${l.kabupaten || '-'} | LP ${angka(l.luas_ha, 1)} ha | area ${angka(l.luas_wilayah_ha)} ha`, { ukuran: 5.9, warna: C.abu, jarak: 2.8 / (5.9 * MM_PER_PT) }) - 2.8;
     const vol = f?.hasil?.skenario.find((s) => s.kode === (kelas === 'S2' ? 's2' : 's1'));
     if (vol) {
       yy += 2.8;
       dek.gaya(5.9, C.teks);
       dek.doc.text(bersih(`Produktivitas ${kelas || 'S1'}: ${angka(vol.volume)} ${f.hasil.satuan_produk}/tahun per ${f.hasil.satuan_usaha}`), x + 4, yy);
     }
-    if (kelas) dek.teks(x + 4, yy + 2.8, lebar - 8, o.teks.rekomendasi_kesesuaian[kelas], { ukuran: 5.8, warna: gelap(WARNA_S[kelas], 0.75), maks: 2 });
+    if (kelas) dek.teks(x + 4, yy + 2.8, lebar - 8, o.teks.rekomendasi_kesesuaian[kelas], { ukuran: 5.8, warna: gelap(WARNA_S[kelas], 0.75) });
   });
   dek.sumber(`Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi; produktivitas dari model usaha administrator; ${ATRIBUSI_CITRA}.`);
 }
@@ -1540,7 +1565,7 @@ function rantaiPasar(dek, o, b, i) {
   });
   const d = dek.doc;
   const inf = o.infrastruktur || {};
-  const inti = o.teks.rantai_pasok[b.sektor] || o.teks.rantai_pasok.PENGOLAHAN_HASIL_LAUT;
+  const inti = o.teks.rantai_pasok[b.sektor] || o.teks.rantai_pasok.UMUM;
   const pendukung = PENDUKUNG.map(([label, kat]) => ({ label, n: kat.reduce((s, k) => s + (inf[k] || 0), 0) }));
   const BIRU = [37, 99, 235];
   const ORANYE = [234, 88, 12];
@@ -1675,7 +1700,7 @@ function finansial(dek, o, b, i, perJenis) {
   const yt = y + tinggiAtas + 4;
   const ringkasLokasi = (daftar) => (daftar.length > 2 ? `${daftar.slice(0, 2).join(', ')}, dan ${daftar.length - 2} lainnya` : daftar.join(', ') || '-');
   const lp = (kode) => [...new Set(b.lokasi.filter((l) => kelasS(l.kelas) === kode.toUpperCase())
-    .map((l) => `${namaRapi(l.nama, 26)} (${l.kabupaten || '-'})`))];
+    .map((l) => `${namaRapi(l.nama)} (${l.kabupaten || '-'})`))];
   const yAkhir = dek.tabel(TEPI, yt, W - TEPI * 2,
     ['Kondisi', `Volume/tahun (${h.satuan_produk})`, 'Pendapatan/tahun', 'NPV', 'IRR', 'BCR', 'Masa kembali', 'Biaya KKPRL', 'Lokasi prioritas'],
     h.skenario.map((s) => [s.label, angka(s.volume), rp(s.pendapatan), rp(s.npv), irrTeks(s.irr), angka(s.bcr, 2),
@@ -1746,8 +1771,7 @@ function sosial(dek, o, b, i) {
   const d = dek.doc;
   j.keahlian.forEach((kh) => {
     if (yy > BAWAH - 6) return;
-    dek.gaya(7.2, C.navy, true);
-    d.text(d.splitTextToSize(bersih(kh.posisi), lebar - 30)[0], x + 5, yy);
+    dek.satuBaris(x + 5, yy, lebar - 30, kh.posisi, { ukuran: 7.2, warna: C.navy, tebal: true });
     const warna = kh.prioritas === 'TINGGI' ? [220, 38, 38] : kh.prioritas === 'SEDANG' ? C.sedang : C.abu;
     const label = LABEL_KELAS[kh.prioritas] || kh.prioritas || '-';
     dek.gaya(5.6, gelap(warna, 0.8), true);
@@ -1870,12 +1894,12 @@ function csr(dek, o) {
     TEPI + 4, yy - 2, kiri - 8, (kiri - 8) * (760 / 1500));
   dek.legenda(TEPI + 5, BAWAH - 4, kiri - 10, seri.map((s) => ({ label: s.label, warna: s.warna })), { keAtas: true });
   const x = TEPI + kiri + 5;
-  dek.tabel(x, y, W - TEPI - x, ['Komoditas atau jenis', 'Satuan usaha', `Total ${o.asumsi_finansial.umur_tahun} tahun`],
+  const yTabel = dek.tabel(x, y, W - TEPI - x, ['Komoditas atau jenis', 'Satuan usaha', `Total ${o.asumsi_finansial.umur_tahun} tahun`],
     ada.map((b) => {
       const h = finansialUtama(b).hasil;
       return [b.nama, h.satuan_usaha, rp(h.csr.reduce((n, c) => n + c.nilai, 0))];
     }), { bagian: [0.4, 0.3, 0.3], rataKanan: [2], ukuran: 6.4 });
-  dek.teks(x, y + 12 + ada.length * 6.4, W - TEPI - x, `Potensi CSR tahun ke-n = ${angka(o.asumsi_finansial.csr_persen, 1)}% x pendapatan bersih tahun ke-(n-1); tahun pertama belum ada karena belum ada pendapatan tahun sebelumnya. Nilai dihitung per satuan usaha model dan berlipat sesuai skala investasi.`, { ukuran: 6.4, warna: C.abu });
+  dek.teks(x, yTabel + 3, W - TEPI - x, `Potensi CSR tahun ke-n = ${angka(o.asumsi_finansial.csr_persen, 1)}% x pendapatan bersih tahun ke-(n-1); tahun pertama belum ada karena belum ada pendapatan tahun sebelumnya. Nilai dihitung per satuan usaha model dan berlipat sesuai skala investasi.`, { ukuran: 6.4, warna: C.abu });
   dek.sumber('Sumber: model usaha Pengaturan Profil Investasi aplikasi; asumsi CSR mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026).');
 }
 
@@ -1899,7 +1923,7 @@ function perizinan(dek, o) {
       judul: potongan.length > 1 ? `Matriks kebutuhan perizinan (${i + 1} dari ${potongan.length})` : 'Matriks kebutuhan perizinan',
       sub: 'Pengelompokan perizinan menurut fungsi utama dan tahapan kegiatan usaha untuk setiap komoditas atau jenis yang dikaji.',
     });
-    dek.tabel(TEPI, y, W - TEPI * 2, ['Kategori', ...bab.map((b) => namaRapi(b.nama, 26))], isi,
+    dek.tabel(TEPI, y, W - TEPI * 2, ['Kategori', ...bab.map((b) => namaRapi(b.nama))], isi,
       { bagian: [lebarLabel, ...bab.map(() => (1 - lebarLabel) / bab.length)], ukuran: bab.length > 4 ? 6.2 : 7 });
     dek.sumber('* Kondisional, bergantung lokasi, skala usaha, dan fasilitas. Mengacu matriks perizinan KKP dalam laporan profil investasi perikanan NTB (2026) dan regulasi sektor; verifikasi terhadap regulasi dan OSS terbaru.');
   });
