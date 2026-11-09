@@ -13,7 +13,7 @@ from .models import (
 
 
 class PotensiInvestasiSerializer(GeoFeatureModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
     sektor_nama = serializers.CharField(source='sektor.nama', read_only=True)
 
     class Meta:
@@ -23,7 +23,7 @@ class PotensiInvestasiSerializer(GeoFeatureModelSerializer):
 
 
 class ZonasiRuangLautSerializer(GeoFeatureModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
 
     class Meta:
         model = ZonasiRuangLaut
@@ -32,7 +32,7 @@ class ZonasiRuangLautSerializer(GeoFeatureModelSerializer):
 
 
 class KKPRLSerializer(GeoFeatureModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
 
     class Meta:
         model = KKPRL
@@ -48,7 +48,7 @@ class ProgramKKPSerializer(GeoFeatureModelSerializer):
 
 
 class SumberDayaAlamSerializer(GeoFeatureModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
 
     class Meta:
         model = SumberDayaAlam
@@ -57,7 +57,7 @@ class SumberDayaAlamSerializer(GeoFeatureModelSerializer):
 
 
 class UnsurRuangLautSerializer(GeoFeatureModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
 
     class Meta:
         model = UnsurRuangLaut
@@ -66,7 +66,7 @@ class UnsurRuangLautSerializer(GeoFeatureModelSerializer):
 
 
 class InfrastrukturPendukungSerializer(GeoFeatureModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
 
     class Meta:
         model = InfrastrukturPendukung
