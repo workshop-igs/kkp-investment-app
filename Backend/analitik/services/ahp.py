@@ -120,7 +120,8 @@ def _bobot_dari_basis_data(sektor_kode: str | None):
         return None
 
 
-def skor_finansial(npv: float, irr: float, payback: float, roi: float, investasi_miliar: float) -> Tuple[float, Dict]:
+def skor_finansial(npv: float, irr: float, payback: float, roi: float, investasi_miliar: float,
+                   payback_tercapai: bool | None = None) -> Tuple[float, Dict]:
     if npv > 0:
         npv_score = min(1.0, npv / (investasi_miliar * 1e9 * atur('FAKTOR_NORMALISASI_NPV')))
     else:
@@ -128,7 +129,9 @@ def skor_finansial(npv: float, irr: float, payback: float, roi: float, investasi
 
     irr_score = min(1.0, max(0.0, irr / atur('BATAS_ATAS_IRR_PERSEN')))
 
-    if payback <= atur('PAYBACK_THRESHOLDS')['excellent']:
+    if payback_tercapai is False:
+        payback_score = 0.0
+    elif payback <= atur('PAYBACK_THRESHOLDS')['excellent']:
         payback_score = 1.0
     elif payback <= atur('PAYBACK_THRESHOLDS')['good']:
         payback_score = 0.8
@@ -460,7 +463,7 @@ def jalankan_analisis_ahp(
 ) -> Dict:
     weights, cr = ambil_bobot_sektor(sektor_kode)
 
-    skor_fin, detail_fin = skor_finansial(npv, irr, payback, roi, investasi_miliar)
+    skor_fin, detail_fin = skor_finansial(npv, irr, payback, roi, investasi_miliar, payback_tercapai)
     skor_risk, detail_risk = skor_risiko_investasi(
         risiko_pasar, risiko_operasional, risiko_regulasi, risiko_lingkungan, risiko_sosial
     )

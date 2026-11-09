@@ -471,9 +471,10 @@ def _bagian_kkprl(geom, luas_aoi_m2) -> Dict[str, Any]:
         }
         ringkas = (
             f'{len(baris)} izin KKPRL aktif beririsan dengan area ini, menutup '
-            f'{teks_persen} dari luas area analisis. Tumpang tindih tidak otomatis '
-            f'menggugurkan permohonan, tetapi memerlukan penilaian keserasian '
-            f'kegiatan dan kemungkinan persetujuan pemegang izin.'
+            f'{teks_persen} dari luas area analisis. Investasi baru tidak boleh '
+            f'tumpang tindih dengan KKPRL yang sudah terbit: irisan kecil di tepi '
+            f'perlu verifikasi batas, irisan yang lebih besar menggugurkan area pada '
+            f'pemeriksaan kesesuaian ruang.'
         )
         if persen > 100.5:
             ringkas += (
@@ -723,8 +724,8 @@ def bagian_oseanografi(geom) -> Dict[str, Any]:
                      if suhu.get('rata2') is not None else None),
             ringkas=ringkas,
             catatan_kosong=(
-                'Data oseanografi belum tersedia untuk area ini. Jalankan manage.py tarik_oseanografi '
-                'untuk menarik suhu permukaan, anomali suhu, klorofil-a, dan gelombang dari NOAA.'
+                'Data oseanografi belum tersedia untuk area ini. Administrator dapat memperbaruinya di '
+                'halaman Pembaruan Data.'
             ),
         ),
         'kolom': ['Parameter', 'Rata-rata', 'Rentang', 'Keterangan'],
