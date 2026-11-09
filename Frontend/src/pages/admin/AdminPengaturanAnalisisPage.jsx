@@ -700,6 +700,11 @@ const FormModel = ({ m, ubah }) => {
       <GrupAngka judul="Investasi awal (Rp)" isi={m.investasi} petunjuk="kosong" onUbah={isian('investasi')} />
       <GrupAngka judul="Biaya operasional per tahun (Rp)" isi={m.operasional_per_tahun} petunjuk="kosong"
         onUbah={isian('operasional_per_tahun')} />
+      <label className="block text-[11px] text-slate-500">
+        Sumber angka
+        <input value={m.sumber || ''} maxLength={300} placeholder="mis. Juknis KKP 2023; harga produsen BPS 2025"
+          onChange={(e) => ubah({ sumber: e.target.value })} className={kelasInput} />
+      </label>
     </>
   );
 };

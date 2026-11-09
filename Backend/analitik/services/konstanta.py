@@ -444,7 +444,7 @@ KRITERIA_JENIS = {
             'nama': 'Tambak Garam Modern Berbasis Geomembran', 'kbli': '08930', 'ranah': ['DARAT'],
             'kriteria': {'bulan_kering_berturut': [2.5, None], 'curah_hujan': [None, 2500.0], 'tanah_liat': [25.0, None],
                          'kemiringan_lahan': [None, 2.0], 'salinitas': [30.0, None]},
-            'unggulan': {'bulan_kering_berturut': [3.5, None], 'curah_hujan': [None, 1750.0], 'tanah_liat': [30.0, None],
+            'unggulan': {'bulan_kering_berturut': [4.0, None], 'curah_hujan': [None, 1750.0], 'tanah_liat': [30.0, None],
                          'kemiringan_lahan': [None, 2.0], 'salinitas': [32.0, None]},
         },
         'GARAM_PEMURNIAN': {

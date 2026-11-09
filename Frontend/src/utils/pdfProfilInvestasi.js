@@ -1705,7 +1705,7 @@ function finansial(dek, o, b, i, perJenis) {
         rataKanan: adaKelas ? [1, 2, 3] : [1, 2, 3, 4], ukuran: 6.2, aksen });
   }
   const lain = b.finansial.filter((x2) => x2 !== f);
-  dek.sumber(`Baris disorot = layak (NPV > 0, IRR > ${angka(h.asumsi.diskonto_persen, 1)}%, BCR > 1, masa kembali paling lama ${angka(h.asumsi.batas_pbp_tahun)} tahun). Model usaha: Pengaturan Profil Investasi aplikasi${lain.length ? `; sub-jenis lain ${lain.map((x2) => `${x2.nama.toLowerCase()} (${x2.hasil ? 'ada model' : 'belum ada model'})`).join(', ')}` : ''}.`);
+  dek.sumber(`Baris disorot = layak (NPV > 0, IRR > ${angka(h.asumsi.diskonto_persen, 1)}%, BCR > 1, masa kembali paling lama ${angka(h.asumsi.batas_pbp_tahun)} tahun). Model usaha: ${f.sumber || 'Pengaturan Profil Investasi aplikasi'}${lain.length ? `; sub-jenis lain ${lain.map((x2) => `${x2.nama.toLowerCase()} (${x2.hasil ? 'ada model' : 'belum ada model'})`).join(', ')}` : ''}.`);
 }
 
 function sosial(dek, o, b, i) {

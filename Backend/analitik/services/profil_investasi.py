@@ -326,6 +326,7 @@ def _finansial(subs, nama_sub, harga_kg=None):
             'kode': sub,
             'nama': nama_sub.get(sub, sub),
             'hasil': m and hitung(m),
+            'sumber': (m or {}).get('sumber') or '',
             'kelas': [{'nama': m.get('nama_kelas') or 'Kelas acuan', 'hasil': hitung(m)}]
             + [{'nama': k['nama'], 'hasil': hitung(k)} for k in m.get('kelas', [])] if m and m.get('kelas') else [],
         })
