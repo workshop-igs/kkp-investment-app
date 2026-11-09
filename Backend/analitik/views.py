@@ -117,7 +117,7 @@ class BahayaBencanaView(APIView):
 
 
 class AnalisisSerializer(serializers.ModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
     sektor_nama = serializers.CharField(source='sektor.nama', read_only=True)
 
     class Meta:
@@ -126,19 +126,12 @@ class AnalisisSerializer(serializers.ModelSerializer):
 
 
 class PetaRisikoSerializer(GeoFeatureModelSerializer):
-    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True)
+    provinsi_nama = serializers.CharField(source='provinsi.nama', read_only=True, default=None)
 
     class Meta:
         model = PetaRisiko
         geo_field = 'geometry'
         fields = '__all__'
-
-
-class ZonaRisikoBencanaSerializer(GeoFeatureModelSerializer):
-    class Meta:
-        model = ZonaRisikoBencana
-        geo_field = 'geometry'
-        fields = ['id', 'jenis', 'varian', 'kelas', 'luas_ha', 'sumber']
 
 
 class AnalisisKelayakanViewSet(viewsets.ReadOnlyModelViewSet):
@@ -148,10 +141,8 @@ class AnalisisKelayakanViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AnalisisSerializer
 
 
-class ZonaRisikoBencanaViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
+class ZonaRisikoBencanaViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
     queryset = ZonaRisikoBencana.objects.all()
-    serializer_class = ZonaRisikoBencanaSerializer
-    filterset_fields = ['jenis', 'varian', 'kelas']
 
     SKALA = [
         (30.0, 0.01, 300),
