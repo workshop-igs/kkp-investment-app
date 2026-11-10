@@ -227,6 +227,7 @@ RADIUS_KARANG_KM = 1.0
 KARANG_TERPETAKAN_KM = 50.0
 KRITERIA_PELENGKAP = ('jarak_listrik_km', 'jarak_jalan_nasional_km', 'tanah_liat', 'shannon')
 KRITERIA_TANPA_SKOR = ('aktivitas_tangkap',)
+KARANG_OBJEK_USAHA = ('KONSERVASI_KARANG', 'WISATA_SELAM')
 INFORMASI_JENIS = {'PERIKANAN_TANGKAP': {'aktivitas_tangkap': 'informasi; perahu kecil tidak terlihat'}}
 SKOR_MINIMAL_LOKASI_UNGGULAN = 30
 BOBOT_RUANG_BERSYARAT = 0.75
@@ -296,7 +297,7 @@ KRITERIA_JENIS = {
                          'kedalaman': [28.0, None], 'jarak_pantai_km': [2.0, None], 'gelombang': [None, 3.0],
                          'oksigen': [6.0, 7.0]},
             'unggulan': {'suhu_rata': [25.0, 32.0], 'salinitas': [32.0, 36.0], 'arus': [0.13, 0.77],
-                         'kedalaman': [50.0, None], 'jarak_pantai_km': [2.0, None], 'gelombang': [None, 3.0],
+                         'kedalaman': [50.0, 200.0], 'jarak_pantai_km': [2.0, None], 'gelombang': [None, 3.0],
                          'oksigen': [6.0, 7.0]},
         },
         'BUDIDAYA_KEKERANGAN': {

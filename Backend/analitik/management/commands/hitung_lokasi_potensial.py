@@ -503,7 +503,7 @@ class Command(BaseCommand):
             return None
         return 100 * sum(mutu) / len(mutu) if mutu else 0.0
 
-    def _nilai_sel(self, sektor, sub, zona, status, d):
+    def _nilai_sel(self, sektor, sub_kode, sub, zona, status, d):
         berlaku = [t for t in d['tambahan'] if not t[2] or sektor.kode in t[2]]
         gerbang = [f for _, peran, _, f in berlaku if peran == 'GERBANG']
         dinilai = [f for _, peran, _, f in berlaku if peran == 'DINILAI']
@@ -512,7 +512,7 @@ class Command(BaseCommand):
         ekosistem_terlarang = pengecualian.ekosistem_terlarang(sektor.kode)
         kriteria = list(syarat_unggulan(sub).items())
         layak = tuple(sub['kriteria'].get(k) for k, _ in kriteria)
-        harus = tuple(wajib(k, d['tersedia']) for k, _ in kriteria)
+        harus = tuple(wajib(k, d['tersedia'], sub_kode) for k, _ in kriteria)
         minimal = math.ceil(atur('PROPORSI_MINIMAL_KRITERIA_TERUKUR') * sum(k not in KRITERIA_TANPA_SKOR for k, _ in kriteria))
         bobot, skor_minimal = atur('BOBOT_RUANG_BERSYARAT'), atur('SKOR_MINIMAL_LOKASI_UNGGULAN')
         peruntukan = set(SEKTOR_SUB_ZONA_COCOK.get(sektor.kode, ()))
@@ -624,8 +624,8 @@ class Command(BaseCommand):
         for sektor in self.sektor:
             calon = []
             for sub_kode, sub in atur('KRITERIA_JENIS').get(sektor.kode, {}).items():
-                lolos = self._nilai_sel(sektor, sub, zona, status, d)
-                layak = self._nilai_sel(sektor, {**sub, 'unggulan': {}}, zona, status, d)
+                lolos = self._nilai_sel(sektor, sub_kode, sub, zona, status, d)
+                layak = self._nilai_sel(sektor, sub_kode, {**sub, 'unggulan': {}}, zona, status, d)
                 for i in {*lolos, *layak}:
                     ruang[(sektor, sub_kode, 'TINGGI' if i in lolos else 'SEDANG')].append(i)
                 for w in self._wilayah(lolos, d['ij']):
