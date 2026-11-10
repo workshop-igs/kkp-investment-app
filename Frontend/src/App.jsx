@@ -16,6 +16,8 @@ import LaporanAnalisisPage from './pages/LaporanAnalisisPage';
 import MasukPage from './pages/MasukPage';
 import DaftarPage from './pages/DaftarPage';
 import ProfilPage from './pages/ProfilPage';
+import UnduhDataPage from './pages/UnduhDataPage';
+import LayananPetaPage from './pages/LayananPetaPage';
 
 import TataLetakAdmin from './layouts/TataLetakAdmin';
 import AdminPanelPage from './pages/admin/AdminPanelPage';
@@ -66,6 +68,11 @@ const AppLayout = () => {
           <Route path="/" element={<BerandaPage />} />
           <Route path="/peta" element={<AnalisisPage />} />
           <Route path="/profil-investasi" element={<ProfilInvestasiPage />} />
+          <Route path="/unduh-data" element={<UnduhDataPage />} />
+          <Route path="/rest/services" element={<LayananPetaPage />} />
+          <Route path="/rest/services/:kode/MapServer" element={<LayananPetaPage />} />
+          <Route path="/rest/services/:kode/MapServer/:nomor" element={<LayananPetaPage />} />
+          <Route path="/rest/services/:kode/MapServer/:nomor/:aksi" element={<LayananPetaPage />} />
           <Route path="/dashboard" element={<RuteTerlindung portofolio><DashboardPage /></RuteTerlindung>} />
           <Route path="/pipeline" element={<RuteTerlindung portofolio><ProyekInvestasiPage /></RuteTerlindung>} />
           <Route path="/pipeline/:id" element={<RuteTerlindung portofolio><DetailProyekPage /></RuteTerlindung>} />
