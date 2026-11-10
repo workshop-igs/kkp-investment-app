@@ -228,6 +228,7 @@ KARANG_TERPETAKAN_KM = 50.0
 KRITERIA_PELENGKAP = ('jarak_listrik_km', 'jarak_jalan_nasional_km', 'tanah_liat', 'shannon')
 KRITERIA_TANPA_SKOR = ('aktivitas_tangkap',)
 KARANG_OBJEK_USAHA = ('KONSERVASI_KARANG', 'WISATA_SELAM')
+TERSAMBUNG_PANTAI = ('INFRA_PELABUHAN_PERIKANAN', 'JASA_GALANGAN', 'JASA_TERMINAL', 'WISATA_MARINA', 'WISATA_KAPAL_PESIAR')
 INFORMASI_JENIS = {'PERIKANAN_TANGKAP': {'aktivitas_tangkap': 'informasi; perahu kecil tidak terlihat'}}
 SKOR_MINIMAL_LOKASI_UNGGULAN = 30
 BOBOT_RUANG_BERSYARAT = 0.75
@@ -239,11 +240,11 @@ BATAS_JARAK_PANTAI_DERAJAT = 0.06
 KRITERIA_JENIS = {
     'PERIKANAN_TANGKAP': {
         'TANGKAP_ARMADA_INDUSTRI': {
-            'nama': 'Armada Kapal Tangkap Skala Industri', 'kbli': '03110', 'ranah': ['LAUT'],
-            'kriteria': {'kedalaman': [30.0, None], 'klorofil': [0.15, None], 'gelombang': [None, 2.5],
-                         'jarak_pelabuhan_perikanan_besar_km': [None, 100.0], 'aktivitas_tangkap': [None, 300.0]},
-            'unggulan': {'kedalaman': [50.0, None], 'klorofil': [0.2, None], 'gelombang': [None, 2.0],
-                         'jarak_pelabuhan_perikanan_besar_km': [None, 50.0], 'aktivitas_tangkap': [None, 100.0]},
+            'nama': 'Pangkalan Armada Kapal Tangkap Skala Industri', 'kbli': '03110', 'ranah': ['LAUT'],
+            'kriteria': {'jarak_pelabuhan_perikanan_besar_km': [None, 10.0], 'jarak_pantai_km': [None, 2.0],
+                         'kedalaman': [4.0, None], 'gelombang': [None, 1.5]},
+            'unggulan': {'jarak_pelabuhan_perikanan_besar_km': [None, 5.0], 'jarak_pantai_km': [None, 1.0],
+                         'kedalaman': [6.0, None], 'gelombang': [None, 1.0]},
         },
         'TANGKAP_PELAGIS': {
             'nama': 'Perikanan Pelagis Besar', 'kbli': '03110', 'ranah': ['LAUT'],
@@ -346,39 +347,48 @@ KRITERIA_JENIS = {
         'WISATA_RESOR': {
             'nama': 'Resor dan Akomodasi Pesisir/Pulau Kecil', 'kbli': '55209', 'ranah': ['DARAT'],
             'kriteria': {'jarak_dari_pantai_km': [0.1, 2.0], 'kemiringan_lahan': [None, 15.0],
-                         'jarak_gerbang_wisata_km': [None, 100.0]},
+                         'jarak_gerbang_wisata_km': [None, 60.0], 'jarak_akses_km': [None, 10.0],
+                         'jarak_karang_km': [None, 10.0], 'laju_abrasi': [None, 1.5], 'jarak_terminal_khusus_km': [2.0, None]},
             'unggulan': {'jarak_dari_pantai_km': [0.1, 1.0], 'kemiringan_lahan': [None, 8.0],
-                         'jarak_gerbang_wisata_km': [None, 60.0]},
+                         'jarak_gerbang_wisata_km': [None, 60.0], 'jarak_akses_km': [None, 5.0],
+                         'jarak_karang_km': [None, 5.0], 'laju_abrasi': [None, 1.0], 'jarak_terminal_khusus_km': [5.0, None],
+                         'jarak_mangrove_km': [0.5, None]},
         },
         'WISATA_SELAM': {
             'nama': 'Pusat Rekreasi Bawah Laut (Diving & Snorkeling)', 'kbli': '93297', 'ranah': ['LAUT'],
             'kriteria': {'kd490': [None, 0.15], 'karang': [1, None], 'arus': [None, 0.3], 'kedalaman': [3.0, 30.0],
-                         'jarak_gerbang_wisata_km': [None, 100.0]},
+                         'jarak_gerbang_wisata_km': [None, 100.0], 'jarak_akses_km': [None, 30.0]},
             'unggulan': {'kd490': [None, 0.08], 'karang': [1, None], 'arus': [None, 0.25], 'kedalaman': [5.0, 20.0],
-                         'jarak_gerbang_wisata_km': [None, 60.0]},
+                         'jarak_gerbang_wisata_km': [None, 60.0], 'jarak_akses_km': [None, 20.0]},
         },
         'WISATA_KAPAL_PESIAR': {
-            'nama': 'Pariwisata Kapal Pesiar (Liveaboard / Yacht Charter)', 'kbli': '50113', 'ranah': ['LAUT'],
-            'kriteria': {'karang': [1, None], 'kd490': [None, 0.15], 'gelombang': [None, 1.5], 'kedalaman': [5.0, None],
-                         'jarak_gerbang_wisata_km': [None, 150.0]},
-            'unggulan': {'karang': [1, None], 'kd490': [None, 0.1], 'gelombang': [None, 1.0], 'kedalaman': [10.0, None],
-                         'jarak_gerbang_wisata_km': [None, 100.0]},
+            'nama': 'Pangkalan Kapal Pesiar (Liveaboard / Yacht Charter)', 'kbli': '50113', 'ranah': ['LAUT'],
+            'kriteria': {'jarak_pantai_km': [None, 1.0], 'gelombang': [None, 1.5], 'kedalaman': [5.0, None],
+                         'jarak_pelabuhan_lain_km': [None, 5.0], 'jarak_bandara_km': [None, 60.0], 'luas_pulau_km2': [10.0, None],
+                         'jarak_karang_km': [None, 50.0]},
+            'unggulan': {'jarak_pantai_km': [None, 0.5], 'gelombang': [None, 1.0], 'kedalaman': [10.0, None],
+                         'jarak_pelabuhan_lain_km': [None, 5.0], 'jarak_bandara_km': [None, 60.0], 'luas_pulau_km2': [10.0, None],
+                         'jarak_karang_km': [None, 50.0]},
         },
         'WISATA_MARINA': {
             'nama': 'Taman Rekreasi Bahari & Marina', 'kbli': '93297', 'ranah': ['LAUT'],
             'kriteria': {'jarak_pantai_km': [None, 1.0], 'gelombang': [None, 1.0], 'kedalaman': [2.0, 20.0],
-                         'tunggang_pasut': [None, 3.0], 'jarak_gerbang_wisata_km': [None, 60.0]},
+                         'tunggang_pasut': [None, 3.0], 'jarak_gerbang_wisata_km': [None, 60.0], 'luas_pulau_km2': [10.0, None],
+                         'jarak_akses_km': [None, 5.0], 'jarak_bandara_km': [None, 60.0], 'jarak_karang_km': [None, 50.0]},
             'unggulan': {'jarak_pantai_km': [None, 0.5], 'gelombang': [None, 0.6], 'kedalaman': [3.0, 10.0],
-                         'tunggang_pasut': [None, 2.0], 'jarak_gerbang_wisata_km': [None, 30.0]},
+                         'tunggang_pasut': [None, 2.0], 'jarak_gerbang_wisata_km': [None, 30.0], 'luas_pulau_km2': [10.0, None],
+                         'jarak_akses_km': [None, 5.0], 'jarak_bandara_km': [None, 60.0], 'jarak_karang_km': [None, 50.0]},
         },
     },
     'JASA_MARITIM': {
         'JASA_GALANGAN': {
             'nama': 'Galangan Kapal (Shipyard)', 'kbli': '30111', 'ranah': ['LAUT'],
-            'kriteria': {'jarak_pantai_km': [None, 1.0], 'kedalaman': [4.0, None], 'gelombang': [None, 1.5],
-                         'tunggang_pasut': [None, 3.5], 'jarak_alur_km': [None, 100.0], 'jarak_jalan_nasional_km': [None, 3.0]},
-            'unggulan': {'jarak_pantai_km': [None, 0.5], 'kedalaman': [6.0, None], 'gelombang': [None, 1.0],
-                         'tunggang_pasut': [None, 3.0], 'jarak_alur_km': [None, 50.0], 'jarak_jalan_nasional_km': [None, 1.0]},
+            'kriteria': {'jarak_pantai_km': [None, 0.25], 'kedalaman': [4.0, None], 'gelombang': [None, 1.5],
+                         'tunggang_pasut': [None, 3.5], 'jarak_alur_km': [None, 100.0], 'jarak_jalan_nasional_km': [None, 3.0],
+                         'jarak_pelabuhan_eksisting_km': [0.5, None]},
+            'unggulan': {'jarak_pantai_km': [None, 0.25], 'kedalaman': [6.0, None], 'gelombang': [None, 1.0],
+                         'tunggang_pasut': [None, 3.0], 'jarak_alur_km': [None, 50.0], 'jarak_jalan_nasional_km': [None, 1.0],
+                         'jarak_pelabuhan_eksisting_km': [1.0, 5.0]},
         },
         'JASA_BUNKER': {
             'nama': 'Bunker Bahan Bakar Kapal (Bunkering Services)', 'kbli': '46710', 'ranah': ['LAUT'],
@@ -389,19 +399,25 @@ KRITERIA_JENIS = {
         },
         'JASA_TERMINAL': {
             'nama': 'Terminal Khusus & Logistik Pelabuhan', 'kbli': '52221', 'ranah': ['LAUT'],
-            'kriteria': {'kedalaman': [5.0, None], 'jarak_pantai_km': [None, 1.0], 'gelombang': [None, 1.5],
-                         'tunggang_pasut': [None, 3.5], 'jarak_alur_km': [None, 100.0], 'jarak_muara_km': [5.0, None]},
+            'kriteria': {'kedalaman': [5.0, None], 'jarak_pantai_km': [None, 0.6], 'gelombang': [None, 1.5],
+                         'tunggang_pasut': [None, 3.5], 'jarak_alur_km': [None, 100.0], 'jarak_muara_km': [5.0, None],
+                         'jarak_pelabuhan_lain_km': [3.0, None], 'jarak_pelabuhan_perikanan_km': [3.0, None],
+                         'jarak_terminal_khusus_km': [0.5, None]},
             'unggulan': {'kedalaman': [10.0, None], 'jarak_pantai_km': [None, 0.5], 'gelombang': [None, 1.0],
-                         'tunggang_pasut': [None, 3.0], 'jarak_alur_km': [None, 50.0], 'jarak_muara_km': [10.0, None]},
+                         'tunggang_pasut': [None, 3.0], 'jarak_alur_km': [None, 50.0], 'jarak_muara_km': [10.0, None],
+                         'jarak_pelabuhan_lain_km': [5.0, None], 'jarak_pelabuhan_perikanan_km': [5.0, None],
+                         'jarak_terminal_khusus_km': [1.0, None]},
         },
     },
     'INFRASTRUKTUR_LAUT': {
         'INFRA_PELABUHAN_PERIKANAN': {
             'nama': 'Infrastruktur Pelabuhan Perikanan', 'kbli': '42913', 'ranah': ['LAUT'],
-            'kriteria': {'jarak_pantai_km': [None, 1.0], 'kedalaman': [3.0, None], 'gelombang': [None, 1.5],
-                         'tunggang_pasut': [None, 3.5], 'klorofil': [0.3, None]},
-            'unggulan': {'jarak_pantai_km': [None, 0.5], 'kedalaman': [5.0, None], 'gelombang': [None, 1.0],
-                         'tunggang_pasut': [None, 3.0], 'klorofil': [0.5, None]},
+            'kriteria': {'jarak_pantai_km': [None, 0.2], 'kedalaman': [3.0, None], 'gelombang': [None, 1.5],
+                         'tunggang_pasut': [None, 3.5], 'klorofil': [0.3, None], 'jarak_pelabuhan_perikanan_km': [5.0, None],
+                         'jarak_pelabuhan_lain_km': [2.0, None]},
+            'unggulan': {'jarak_pantai_km': [None, 0.2], 'kedalaman': [5.0, None], 'gelombang': [None, 1.0],
+                         'tunggang_pasut': [None, 3.0], 'klorofil': [0.5, None], 'jarak_pelabuhan_perikanan_km': [10.0, None],
+                         'jarak_pelabuhan_lain_km': [3.0, None]},
         },
         'INFRA_PELINDUNG_PANTAI': {
             'nama': 'Bangunan Pelindung Pantai', 'kbli': '42915', 'ranah': ['LAUT'],
