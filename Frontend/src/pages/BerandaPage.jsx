@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  AlertTriangle, Anchor, ArrowRight, ArrowUpRight, Briefcase, Check, Clock3, Construction, Download, Factory, FileCheck2, FileStack,
+  AlertTriangle, Anchor, ArrowRight, ArrowUpRight, Briefcase, Check, Clock3, Construction, Copy, Download, Factory, FileCheck2, FileStack,
   FileText, FlaskConical, Fish, Gem, Landmark, Layers, LayoutGrid, Loader2, Map, MapPin, Palmtree, Search, Shell,
   SquareDashedMousePointer, Sprout, Upload, Waves, Waypoints, Zap,
 } from 'lucide-react';
@@ -521,6 +521,79 @@ const PusatInformasi = () => {
   );
 };
 
+const DATA_TERBUKA = [
+  {
+    ikon: Download,
+    judul: 'Unduh Data',
+    isi: 'Unduh layer per provinsi dalam GeoJSON, Shapefile, KML, atau GeoTIFF.',
+    ke: '/unduh-data',
+    aksi: 'Buka Unduh Data',
+  },
+  {
+    ikon: LayoutGrid,
+    judul: 'Direktori Layanan Peta',
+    isi: 'Keterangan, legenda, pratinjau, dan Query untuk setiap layer.',
+    ke: '/rest/services',
+    aksi: 'Jelajahi direktori',
+  },
+];
+
+const DataTerbuka = () => {
+  const alamat = `${window.location.origin}/ows`;
+  const [tersalin, setTersalin] = useState(false);
+  const salin = () => navigator.clipboard?.writeText(alamat).then(() => setTersalin(true)).catch(() => {});
+
+  return (
+    <section className="px-4 pb-20 sm:px-6 lg:px-8 lg:pb-24">
+      <div className="mx-auto grid max-w-7xl items-center gap-10 lg:grid-cols-12 lg:gap-12">
+        <div className="lg:col-span-5">
+          <Label nada="hijau">Data terbuka</Label>
+          <h2 className="mt-6 text-balance text-4xl font-extrabold leading-[1.06] tracking-[-0.03em] text-kkp-900 sm:text-5xl">
+            Unduh data atau sambungkan ke aplikasi GIS.
+          </h2>
+          <p className="mt-5 max-w-md leading-relaxed text-slate-600">
+            Data rujukan ruang laut dapat diambil tanpa masuk akun. Data proyek dan data pribadi tidak ikut diterbitkan.
+          </p>
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:col-span-7">
+          {DATA_TERBUKA.map(({ ikon: Ikon, judul, isi, ke, aksi }) => (
+            <Link
+              key={ke}
+              to={ke}
+              className={`group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 transition-colors hover:border-kkp-900 ${FOKUS}`}
+            >
+              <Ikon className={`h-10 w-10 text-kkp-900 ${GERAK_IKON}`} strokeWidth={1.4} fill={TOSKA_MUDA} aria-hidden="true" />
+              <h3 className="mt-6 text-xl font-bold tracking-[-0.01em] text-kkp-900">{judul}</h3>
+              <p className="mt-2 flex-1 leading-relaxed text-slate-600">{isi}</p>
+              <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-bold text-kkp-700 group-hover:underline">
+                {aksi} <ArrowRight className={`h-4 w-4 ${GERAK_PANAH}`} />
+              </span>
+            </Link>
+          ))}
+
+          <div className="rounded-2xl border border-slate-200 bg-[#F6F8FB] p-6 sm:col-span-2">
+            <Layers className="h-10 w-10 text-kkp-900" strokeWidth={1.4} fill={TOSKA_MUDA} aria-hidden="true" />
+            <h3 className="mt-6 text-xl font-bold tracking-[-0.01em] text-kkp-900">Layanan peta WMS, WFS, dan WCS</h3>
+            <p className="mt-2 leading-relaxed text-slate-600">Tempel alamat ini sebagai koneksi baru di QGIS atau ArcGIS.</p>
+            <div className="mt-4 flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-2 pl-4">
+              <code className="min-w-0 flex-1 truncate font-mono text-sm text-kkp-900">{alamat}</code>
+              <button
+                type="button"
+                onClick={salin}
+                className={`inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-kkp-900 px-3 py-2 text-sm font-semibold text-white transition-colors hover:bg-kkp-800 ${FOKUS}`}
+              >
+                {tersalin ? <Check className="h-4 w-4" aria-hidden="true" /> : <Copy className="h-4 w-4" aria-hidden="true" />}
+                {tersalin ? 'Tersalin' : 'Salin'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const BerandaPage = () => {
   const { isAuthenticated } = useAutentikasi();
   const [ringkas, setRingkas] = useState(null);
@@ -746,6 +819,8 @@ const BerandaPage = () => {
           {ringkas && peluang.length === 0 && <p className="text-sm text-slate-500">Lokasi potensial belum dihitung.</p>}
         </div>
       </section>
+
+      <DataTerbuka />
 
       <PusatInformasi />
 
