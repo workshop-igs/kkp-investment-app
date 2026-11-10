@@ -236,3 +236,17 @@ export function azimut(lat1, lng1, lat2, lng2) {
     Math.sin(lat1 * RAD) * Math.cos(lat2 * RAD) * Math.cos(dLng);
   return (Math.atan2(y, x) / RAD + 360) % 360;
 }
+
+export const kotakGeometri = (geometri) => {
+  const kotak = [180, 90, -180, -90];
+  const jelajah = (k) => {
+    if (typeof k[0] !== 'number') return k.forEach(jelajah);
+    kotak[0] = Math.min(kotak[0], k[0]);
+    kotak[1] = Math.min(kotak[1], k[1]);
+    kotak[2] = Math.max(kotak[2], k[0]);
+    kotak[3] = Math.max(kotak[3], k[1]);
+    return undefined;
+  };
+  jelajah(geometri.coordinates);
+  return kotak.map((v) => Number(v.toFixed(4)));
+};

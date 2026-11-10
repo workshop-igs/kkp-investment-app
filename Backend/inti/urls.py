@@ -2,6 +2,7 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .asisten import daftar_alat, obrolan, pakai_alat
+from .layanan_peta import daftar_layanan, info_lapisan, info_layanan, query_lapisan
 from .pencarian import cari_kbli, cari_lokasi
 from .views import (
     DesaKelurahanViewSet,
@@ -53,6 +54,10 @@ urlpatterns = [
     path('cari/', cari_lokasi, name='cari-lokasi'),
     path('kbli/', cari_kbli, name='cari-kbli'),
     path('wpp/', wpp_peta, name='wpp-peta'),
+    path('layanan/', daftar_layanan, name='layanan-peta'),
+    path('layanan/<str:kode>/', info_layanan, name='layanan-peta-info'),
+    path('layanan/<str:kode>/<int:nomor>/', info_lapisan, name='layanan-peta-lapisan'),
+    path('layanan/<str:kode>/<int:nomor>/query/', query_lapisan, name='layanan-peta-query'),
     path('asisten/alat/', daftar_alat, name='asisten-alat'),
     path('asisten/alat/<str:nama>/', pakai_alat, name='asisten-pakai-alat'),
     path('asisten/obrolan/', obrolan, name='asisten-obrolan'),

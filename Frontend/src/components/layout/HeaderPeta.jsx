@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   Menu, ChevronDown, LogIn, UserPlus, LogOut, ShieldCheck, UserRound, KeyRound, X,
-  Home, LayoutDashboard, BriefcaseBusiness, Map as IkonPeta, FileText,
+  Home, LayoutDashboard, BriefcaseBusiness, Map as IkonPeta, FileText, Download,
 } from 'lucide-react';
 import { useAutentikasi } from '../../context/KonteksAutentikasi';
 import { inisialNama } from '../../utils/pemformat';
@@ -10,8 +10,9 @@ import { inisialNama } from '../../utils/pemformat';
 const BERANDA = { label: 'Beranda', link: '/', ikon: Home };
 const PETA = { label: 'Peta Spasial', link: '/peta', ikon: IkonPeta };
 const PROFIL = { label: 'Profil Investasi', link: '/profil-investasi', ikon: FileText };
+const UNDUH = { label: 'Unduh Data', link: '/unduh-data', ikon: Download };
 
-const MENU_TAMU = [BERANDA, PETA, PROFIL];
+const MENU_TAMU = [BERANDA, PETA, PROFIL, UNDUH];
 
 const MENU_PORTOFOLIO = [
   BERANDA,
@@ -19,6 +20,7 @@ const MENU_PORTOFOLIO = [
   { label: 'Proyek Investasi', link: '/pipeline', ikon: BriefcaseBusiness },
   PETA,
   PROFIL,
+  UNDUH,
 ];
 
 const ADMIN_MENU = {
