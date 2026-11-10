@@ -40,6 +40,15 @@ PARAMETER = {
     'jarak_muara_km': ('Jarak dari muara sungai besar', 'km', ('MUARA_SUNGAI',)),
     'jarak_muara_pelabuhan_km': ('Jarak dari muara sungai/pelabuhan utama', 'km', ('MUARA_SUNGAI', 'PELABUHAN_UMUM')),
     'jarak_bandara_lab_km': ('Jarak ke bandara/fasilitas riset (±2 jam)', 'km', ('BANDARA', 'KAMPUS_RISET')),
+    'jarak_pelabuhan_lain_km': ('Jarak ke pelabuhan umum/penyeberangan', 'km', ('PELABUHAN_UMUM', 'PELABUHAN_PENYEBERANGAN')),
+    'jarak_terminal_khusus_km': ('Jarak ke terminal khusus', 'km', ('TERMINAL_KHUSUS',)),
+    'jarak_pelabuhan_eksisting_km': ('Jarak ke pelabuhan/terminal eksisting', 'km',
+                                     ('PELABUHAN_PERIKANAN', 'PELABUHAN_UMUM', 'PELABUHAN_PENYEBERANGAN', 'TERMINAL_KHUSUS')),
+    'jarak_akses_km': ('Jarak ke jalan nasional atau pelabuhan', 'km', ('JALAN_NASIONAL', 'PELABUHAN_UMUM', 'PELABUHAN_PENYEBERANGAN')),
+    'jarak_bandara_km': ('Jarak ke bandara', 'km', ('BANDARA',)),
+    'jarak_karang_km': ('Jarak ke terumbu karang', 'km', 'TERUMBU_KARANG'),
+    'jarak_mangrove_km': ('Jarak ke mangrove', 'km', 'MANGROVE'),
+    'luas_pulau_km2': ('Luas pulau terdekat', 'km²', None),
     'arus': ('Kecepatan arus permukaan', 'm/s', 'ARUS'),
     'salinitas': ('Salinitas air laut', 'ppt', 'SALINITAS'),
     'ph': ('pH air laut', '', 'PH'),
@@ -119,9 +128,10 @@ def sumber_tersedia():
     with connection.cursor() as c:
         c.execute(f'SELECT DISTINCT kategori FROM {INFRA} i')
         hasil = {r[0] for r in c.fetchall()}
-        c.execute("SELECT EXISTS (SELECT 1 FROM inventarisasi_sumber_daya_alam WHERE jenis = 'TERUMBU_KARANG')")
-        if c.fetchone()[0]:
-            hasil.add('TERUMBU_KARANG')
+        for jenis in ('TERUMBU_KARANG', 'MANGROVE'):
+            c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_sumber_daya_alam WHERE jenis = %s)', [jenis])
+            if c.fetchone()[0]:
+                hasil.add(jenis)
     hasil |= set(raster_tersedia()) | {'ALUR', 'ZONA'}
     cache.set('kriteria:sumber', hasil, 600)
     return hasil
@@ -166,6 +176,23 @@ def jarak_area(c, ewkt, tersedia):
         if isinstance(sumber, tuple) and any(k in km for k in sumber):
             data[kunci] = min(km[k] for k in sumber if k in km)
     data['jarak_alur_km'] = jarak_alur(c, ewkt)
+    for kunci, (saring, batas) in JARAK_EKOSISTEM.items():
+        if PARAMETER[kunci][2] in tersedia:
+            c.execute(
+                f'SELECT MIN(ST_Distance(geometry, a.g)) FROM inventarisasi_sumber_daya_alam, (SELECT ST_GeomFromEWKT(%s) AS g) a '
+                f'WHERE {saring} AND ST_DWithin(geometry, a.g, %s)',
+                [ewkt, batas / KM_PER_DERAJAT],
+            )
+            jarak = c.fetchone()[0]
+            data[kunci] = batas if jarak is None else min(jarak * KM_PER_DERAJAT, batas)
+    c.execute(
+        'SELECT ST_Area(d.g::geography) / 1e6 FROM (SELECT ST_GeomFromEWKT(%s) AS g) a, LATERAL ('
+        '    SELECT (ST_Dump(p.geometry)).geom AS g FROM inti_provinsi p WHERE p.geometry && ST_Expand(a.g, %s)) d '
+        'ORDER BY ST_Distance(d.g, a.g) LIMIT 1',
+        [ewkt, BATAS_JARAK_ZONA_DERAJAT],
+    )
+    luas = c.fetchone()
+    data['luas_pulau_km2'] = luas[0] if luas else None
     for kunci, sub_zona in JARAK_ZONA.items():
         c.execute(
             'SELECT MIN(ST_Distance(z.geometry, a.g)) FROM inventarisasi_zonasi_ruang_laut z, '
@@ -187,6 +214,7 @@ def data_ada(kunci, tersedia):
 
 
 KARANG = "jenis = 'TERUMBU_KARANG' AND sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-KARANG')"
+JARAK_EKOSISTEM = {'jarak_karang_km': (KARANG, 100.0), 'jarak_mangrove_km': ("jenis = 'MANGROVE'", 5.0)}
 
 
 def karang_dari_jarak(km):

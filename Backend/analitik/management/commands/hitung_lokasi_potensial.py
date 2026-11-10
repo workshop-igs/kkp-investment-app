@@ -22,12 +22,14 @@ from analitik.services.konstanta import (
     KRITERIA_TANPA_SKOR,
     SEKTOR_SUB_ZONA_COCOK,
     SEKTOR_TERSENDIRI_DI_PETA,
+    TERSAMBUNG_PANTAI,
     UKURAN_SEL_LOKASI_DERAJAT,
 )
 from analitik.services.kriteria import (
     BATAS_JARAK_ZONA_DERAJAT,
     BENCANA,
     INFRA,
+    JARAK_EKOSISTEM,
     JARAK_ZONA,
     KARANG,
     PARAMETER,
@@ -113,6 +115,13 @@ SELECT p.i, ST_AsEWKB(ST_Multi(p.g)), ST_Area(p.g::geography) / 10000, a.id,
 FROM p JOIN a ON a.g && p.g AND ST_Intersects(a.g, p.g)
 """
 
+SAMBUNG_PANTAI = """
+SELECT ST_AsEWKB(ST_Multi(ST_CollectionExtract(ST_Union(s.g, ST_Buffer(ST_ShortestLine(
+    s.g, (SELECT t.g FROM darat_terbagi t ORDER BY t.g <-> s.g LIMIT 1)), %s)), 3)))
+FROM (SELECT %s::geometry AS g) s
+"""
+LEBAR_SAMBUNGAN_DERAJAT = 0.0001
+
 TERDEKAT = """
 SELECT s.id, (SELECT ST_Distance(t.g, s.{kolom}) FROM {tabel} t {saring} ORDER BY t.g <-> s.{kolom} LIMIT 1)
 FROM sel s WHERE s.id = ANY(%s)
@@ -173,9 +182,9 @@ class Command(BaseCommand):
         with connection.cursor() as c:
             c.execute('DROP TABLE IF EXISTS darat_terbagi')
             c.execute(
-                'CREATE TEMP TABLE darat_terbagi AS '
-                'SELECT ST_Subdivide(ST_MakeValid(ST_SimplifyPreserveTopology(ST_MakeValid(geometry), 0.0005)), 128, 1e-7) AS g '
-                'FROM inti_provinsi WHERE geometry IS NOT NULL'
+                'CREATE TEMP TABLE darat_terbagi AS SELECT ST_Area(p.g::geography) / 1e6 AS luas, ST_Subdivide(p.g, 128, 1e-7) AS g '
+                'FROM (SELECT (ST_Dump(ST_MakeValid(ST_SimplifyPreserveTopology(ST_MakeValid(geometry), 0.0005)))).geom AS g '
+                '      FROM inti_provinsi WHERE geometry IS NOT NULL) p WHERE ST_Dimension(p.g) = 2'
             )
             c.execute('CREATE INDEX ON darat_terbagi USING gist (g)')
             if 'jarak_dari_pantai_km' in self._kunci_dipakai():
@@ -306,6 +315,27 @@ class Command(BaseCommand):
             d['karang'] = [None] * (banyak + 1)
             for i, jarak in c.fetchall():
                 d['karang'][i] = karang_dari_jarak(None if jarak is None else jarak * KM_PER_DERAJAT)
+
+        for kunci, (saring, batas) in JARAK_EKOSISTEM.items():
+            if kunci not in dipakai or PARAMETER[kunci][2] not in d['tersedia']:
+                continue
+            c.execute('DROP TABLE IF EXISTS ekosistem_terbagi')
+            c.execute(
+                f'CREATE TEMP TABLE ekosistem_terbagi AS SELECT ST_Subdivide(ST_MakeValid(geometry), 128) AS g '
+                f'FROM inventarisasi_sumber_daya_alam WHERE {saring} AND geometry && ST_Expand(%s::geometry, %s)',
+                [cakupan, batas / KM_PER_DERAJAT],
+            )
+            c.execute('CREATE INDEX ON ekosistem_terbagi USING gist (g)')
+            c.execute(TERDEKAT.format(kolom='kotak', tabel='ekosistem_terbagi', saring=''), [calon])
+            d[kunci] = [None] * (banyak + 1)
+            for i, jarak in c.fetchall():
+                d[kunci][i] = batas if jarak is None else min(jarak * KM_PER_DERAJAT, batas)
+        if 'luas_pulau_km2' in dipakai:
+            c.execute('SELECT s.id, (SELECT t.luas FROM darat_terbagi t ORDER BY t.g <-> s.kotak LIMIT 1) '
+                      'FROM sel s WHERE s.id = ANY(%s)', [calon])
+            d['luas_pulau_km2'] = [None] * (banyak + 1)
+            for i, luas in c.fetchall():
+                d['luas_pulau_km2'][i] = luas
 
         km = {}
         for kategori in sorted({k for kunci in dipakai if isinstance(PARAMETER[kunci][2], tuple)
@@ -642,6 +672,10 @@ class Command(BaseCommand):
                 continue
             c.execute(INTI, [[k for k, t in enumerate(inti) for _ in t[0]], [i for t in inti for i in t[0]]])
             bentuk = c.fetchall()
+            for n, (k, ewkb, luas) in enumerate(bentuk):
+                if inti[k][2] in TERSAMBUNG_PANTAI:
+                    c.execute(SAMBUNG_PANTAI, [LEBAR_SAMBUNGAN_DERAJAT, ewkb])
+                    bentuk[n] = (k, c.fetchone()[0], luas)
             c.execute(WILAYAH, [UKURAN_SEL_LOKASI_DERAJAT / 2, [k for k, t in enumerate(inti) for _ in t[1]],
                                 [i for t in inti for i in t[1]]])
             wilayah = dict(c.fetchall())
