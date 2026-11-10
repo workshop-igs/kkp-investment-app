@@ -3,7 +3,13 @@ import math
 from django.core.cache import cache
 from django.db import connection
 
-from analitik.services.konstanta import INFORMASI_JENIS, KM_PER_DERAJAT, KRITERIA_PELENGKAP, KRITERIA_TANPA_SKOR
+from analitik.services.konstanta import (
+    INFORMASI_JENIS,
+    KARANG_OBJEK_USAHA,
+    KM_PER_DERAJAT,
+    KRITERIA_PELENGKAP,
+    KRITERIA_TANPA_SKOR,
+)
 from analitik.services.oseanografi import raster_tersedia
 from analitik.services.pengaturan import atur
 from inti.kbli import ringkas
@@ -187,8 +193,10 @@ def karang_dari_jarak(km):
     return None if km is None or km > atur('KARANG_TERPETAKAN_KM') else int(km <= atur('RADIUS_KARANG_KM'))
 
 
-def wajib(kunci, tersedia):
-    return data_ada(kunci, tersedia) and kunci != 'karang' and kunci not in KRITERIA_PELENGKAP
+def wajib(kunci, tersedia, sub_kode=None):
+    if kunci == 'karang':
+        return sub_kode in KARANG_OBJEK_USAHA
+    return data_ada(kunci, tersedia) and kunci not in KRITERIA_PELENGKAP
 
 
 def cek(kunci, nilai, ambang):
@@ -271,12 +279,12 @@ def syarat_unggulan(sub):
     return {**sub['kriteria'], **sub.get('unggulan', {})}
 
 
-def _baris(kunci, ambang, data, tersedia):
+def _baris(kunci, ambang, data, tersedia, sub_kode=None):
     v = data.get(kunci)
     return {
         'kunci': kunci, 'label': PARAMETER[kunci][0], 'nilai': None if v is None else round(float(v), 3),
         'nilai_teks': teks_nilai(kunci, v), 'ambang': list(ambang), 'ambang_teks': teks_ambang(kunci, ambang),
-        'lulus': cek(kunci, v, ambang), 'data_ada': data_ada(kunci, tersedia), 'wajib': wajib(kunci, tersedia),
+        'lulus': cek(kunci, v, ambang), 'data_ada': data_ada(kunci, tersedia), 'wajib': wajib(kunci, tersedia, sub_kode),
         'pelengkap': kunci in KRITERIA_PELENGKAP,
     }
 
@@ -287,9 +295,9 @@ def baris_informasi(sub, nilai, informasi):
             for k, ket in (informasi or {}).items() if k not in syarat_unggulan(sub) and nilai(k) is not None]
 
 
-def nilai_sub(sub, data, tersedia, bersyarat=False, informasi=None):
-    kriteria = [_baris(k, a, data, tersedia) for k, a in sub['kriteria'].items()]
-    unggulan = [_baris(k, a, data, tersedia) for k, a in syarat_unggulan(sub).items()]
+def nilai_sub(sub, data, tersedia, bersyarat=False, informasi=None, kode=None):
+    kriteria = [_baris(k, a, data, tersedia, kode) for k, a in sub['kriteria'].items()]
+    unggulan = [_baris(k, a, data, tersedia, kode) for k, a in syarat_unggulan(sub).items()]
     dihitung = [k for k in kriteria if k['kunci'] not in KRITERIA_TANPA_SKOR]
     umum = []
     if kena_bencana(data):
@@ -323,7 +331,7 @@ def penilaian(sektor_kode, data, tersedia=None, bersyarat=False, sub_kode=None):
     hasil = []
     for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items():
         if (not sub_kode or kode == sub_kode) and data['ranah'] in sub['ranah']:
-            hasil.append({'kode': kode, **nilai_sub(sub, data, tersedia, bersyarat, INFORMASI_JENIS.get(sektor_kode))})
+            hasil.append({'kode': kode, **nilai_sub(sub, data, tersedia, bersyarat, INFORMASI_JENIS.get(sektor_kode), kode)})
     return sorted(hasil, key=lambda h: (not h['cocok'], len(h['gagal']), -h['terukur']))
 
 
