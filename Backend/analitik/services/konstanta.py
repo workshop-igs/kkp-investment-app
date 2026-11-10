@@ -228,7 +228,8 @@ KARANG_TERPETAKAN_KM = 50.0
 KRITERIA_PELENGKAP = ('jarak_listrik_km', 'jarak_jalan_nasional_km', 'tanah_liat', 'shannon')
 KRITERIA_TANPA_SKOR = ('aktivitas_tangkap',)
 KARANG_OBJEK_USAHA = ('KONSERVASI_KARANG', 'WISATA_SELAM')
-TERSAMBUNG_PANTAI = ('INFRA_PELABUHAN_PERIKANAN', 'JASA_GALANGAN', 'JASA_TERMINAL', 'WISATA_MARINA', 'WISATA_KAPAL_PESIAR')
+TERSAMBUNG_PANTAI = ('INFRA_PELABUHAN_PERIKANAN', 'JASA_GALANGAN', 'JASA_TERMINAL', 'WISATA_MARINA', 'WISATA_KAPAL_PESIAR',
+                     'INFRA_REKLAMASI', 'INFRA_PELINDUNG_PANTAI')
 INFORMASI_JENIS = {'PERIKANAN_TANGKAP': {'aktivitas_tangkap': 'informasi; perahu kecil tidak terlihat'}}
 SKOR_MINIMAL_LOKASI_UNGGULAN = 30
 BOBOT_RUANG_BERSYARAT = 0.75
@@ -273,8 +274,10 @@ KRITERIA_JENIS = {
     'PERIKANAN_BUDIDAYA': {
         'BUDIDAYA_TAMBAK': {
             'nama': 'Budidaya Tambak Udang (Payau)', 'kbli': '03231', 'ranah': ['DARAT'],
-            'kriteria': {'kemiringan_lahan': [None, 3.0], 'jarak_dari_pantai_km': [0.1, 5.0], 'tanah_liat': [20.0, None]},
-            'unggulan': {'kemiringan_lahan': [None, 2.0], 'jarak_dari_pantai_km': [0.1, 3.0], 'tanah_liat': [30.0, None]},
+            'kriteria': {'kemiringan_lahan': [None, 3.0], 'jarak_dari_pantai_km': [0.1, 5.0], 'tanah_liat': [20.0, None],
+                         'jarak_akses_km': [None, 10.0]},
+            'unggulan': {'kemiringan_lahan': [None, 2.0], 'jarak_dari_pantai_km': [0.1, 3.0], 'tanah_liat': [30.0, None],
+                         'jarak_akses_km': [None, 5.0], 'jarak_mangrove_km': [0.2, None]},
         },
         'BUDIDAYA_RUMPUT_LAUT': {
             'nama': 'Budidaya Rumput Laut (Marikultur)', 'kbli': '03213', 'ranah': ['LAUT'],
@@ -304,16 +307,20 @@ KRITERIA_JENIS = {
         'BUDIDAYA_KEKERANGAN': {
             'nama': 'Budidaya Kekerangan dan Moluska', 'kbli': '03211', 'ranah': ['LAUT'],
             'kriteria': {'kedalaman': [1.0, 15.0], 'salinitas': [15.0, 34.0], 'klorofil': [0.5, None], 'arus': [None, 0.5],
-                         'gelombang': [None, 1.0], 'jarak_pantai_km': [None, 3.0]},
+                         'gelombang': [None, 1.0], 'jarak_pantai_km': [None, 3.0], 'jarak_pelabuhan_lain_km': [2.0, None],
+                         'jarak_terminal_khusus_km': [2.0, None]},
             'unggulan': {'kedalaman': [2.0, 10.0], 'salinitas': [20.0, 33.0], 'klorofil': [1.0, None], 'arus': [None, 0.3],
-                         'gelombang': [None, 0.6]},
+                         'gelombang': [None, 0.6], 'jarak_pelabuhan_lain_km': [2.0, None],
+                         'jarak_terminal_khusus_km': [2.0, None]},
         },
         'BUDIDAYA_PEMBENIHAN': {
             'nama': 'Pembenihan (Hatchery) dan Pendederan', 'kbli': '03211', 'ranah': ['DARAT'],
             'kriteria': {'jarak_dari_pantai_km': [0.1, 1.0], 'kemiringan_lahan': [None, 8.0], 'salinitas': [28.0, None],
-                         'jarak_muara_km': [3.0, None], 'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0]},
+                         'jarak_muara_km': [3.0, None], 'jarak_listrik_km': [None, 3.0],
+                         'jarak_jalan_nasional_km': [None, 3.0], 'jarak_akses_km': [None, 10.0]},
             'unggulan': {'jarak_dari_pantai_km': [0.1, 0.5], 'kemiringan_lahan': [None, 5.0], 'salinitas': [30.0, None],
-                         'jarak_muara_km': [5.0, None], 'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0]},
+                         'jarak_muara_km': [5.0, None], 'jarak_listrik_km': [None, 1.0],
+                         'jarak_jalan_nasional_km': [None, 1.0], 'jarak_akses_km': [None, 5.0]},
         },
     },
     'PENGOLAHAN_HASIL_LAUT': {
@@ -321,26 +328,28 @@ KRITERIA_JENIS = {
             'nama': 'Fasilitas Rantai Dingin (Cold Chain)', 'kbli': '52102', 'ranah': ['DARAT'],
             'kriteria': {'jarak_pelabuhan_perikanan_km': [None, 20.0], 'jarak_listrik_km': [None, 3.0],
                          'jarak_jalan_nasional_km': [None, 3.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
-                         'produksi_ikan_kabupaten_ton': [5000.0, None]},
+                         'produksi_ikan_kabupaten_ton': [5000.0, None], 'jarak_akses_km': [None, 5.0]},
             'unggulan': {'jarak_pelabuhan_perikanan_km': [None, 5.0], 'jarak_listrik_km': [None, 1.0],
                          'jarak_jalan_nasional_km': [None, 1.0], 'jarak_pelabuhan_ekspor_km': [None, 50.0],
-                         'produksi_ikan_kabupaten_ton': [20000.0, None]},
+                         'produksi_ikan_kabupaten_ton': [20000.0, None], 'jarak_akses_km': [None, 2.0]},
         },
         'OLAH_PENGALENGAN': {
             'nama': 'Pengalengan Ikan', 'kbli': '10217', 'ranah': ['DARAT'],
             'kriteria': {'jarak_pelabuhan_perikanan_km': [None, 30.0], 'jarak_listrik_km': [None, 3.0],
                          'jarak_jalan_nasional_km': [None, 3.0], 'jarak_pelabuhan_ekspor_km': [None, 60.0],
-                         'produksi_ikan_kabupaten_ton': [20000.0, None]},
+                         'produksi_ikan_kabupaten_ton': [20000.0, None], 'jarak_akses_km': [None, 5.0]},
             'unggulan': {'jarak_pelabuhan_perikanan_km': [None, 10.0], 'jarak_listrik_km': [None, 1.0],
                          'jarak_jalan_nasional_km': [None, 1.0], 'jarak_pelabuhan_ekspor_km': [None, 30.0],
-                         'produksi_ikan_kabupaten_ton': [50000.0, None]},
+                         'produksi_ikan_kabupaten_ton': [50000.0, None], 'jarak_akses_km': [None, 2.0]},
         },
         'OLAH_RUMPUT_LAUT': {
             'nama': 'Pengolahan Rumput Laut Setengah Jadi', 'kbli': '10298', 'ranah': ['DARAT'],
             'kriteria': {'jarak_zona_budidaya_km': [None, 30.0], 'jarak_listrik_km': [None, 3.0],
-                         'jarak_jalan_nasional_km': [None, 3.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0]},
+                         'jarak_jalan_nasional_km': [None, 3.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
+                         'jarak_akses_km': [None, 5.0]},
             'unggulan': {'jarak_zona_budidaya_km': [None, 10.0], 'jarak_listrik_km': [None, 1.0],
-                         'jarak_jalan_nasional_km': [None, 1.0], 'jarak_pelabuhan_ekspor_km': [None, 50.0]},
+                         'jarak_jalan_nasional_km': [None, 1.0], 'jarak_pelabuhan_ekspor_km': [None, 50.0],
+                         'jarak_akses_km': [None, 2.0]},
         },
     },
     'PARIWISATA_BAHARI': {
@@ -392,10 +401,10 @@ KRITERIA_JENIS = {
         },
         'JASA_BUNKER': {
             'nama': 'Bunker Bahan Bakar Kapal (Bunkering Services)', 'kbli': '46710', 'ranah': ['LAUT'],
-            'kriteria': {'jarak_alur_km': [None, 50.0], 'kedalaman': [10.0, None], 'gelombang': [None, 1.5],
-                         'jarak_pelabuhan_ekspor_km': [None, 50.0]},
-            'unggulan': {'jarak_alur_km': [None, 20.0], 'kedalaman': [15.0, None], 'gelombang': [None, 1.0],
-                         'jarak_pelabuhan_ekspor_km': [None, 25.0]},
+            'kriteria': {'jarak_alur_km': [None, 50.0], 'kedalaman': [10.0, 50.0], 'gelombang': [None, 1.5],
+                         'jarak_pelabuhan_lain_km': [None, 10.0]},
+            'unggulan': {'jarak_alur_km': [None, 20.0], 'kedalaman': [15.0, 50.0], 'gelombang': [None, 1.0],
+                         'jarak_pelabuhan_lain_km': [None, 5.0]},
         },
         'JASA_TERMINAL': {
             'nama': 'Terminal Khusus & Logistik Pelabuhan', 'kbli': '52221', 'ranah': ['LAUT'],
@@ -421,15 +430,19 @@ KRITERIA_JENIS = {
         },
         'INFRA_PELINDUNG_PANTAI': {
             'nama': 'Bangunan Pelindung Pantai', 'kbli': '42915', 'ranah': ['LAUT'],
-            'kriteria': {'laju_abrasi': [0.3, None], 'jarak_pantai_km': [None, 0.5], 'kedalaman': [None, 10.0]},
-            'unggulan': {'laju_abrasi': [1.0, None], 'jarak_pantai_km': [None, 0.25], 'kedalaman': [None, 5.0]},
+            'kriteria': {'laju_abrasi': [0.3, None], 'jarak_pantai_km': [None, 0.5], 'kedalaman': [None, 10.0],
+                         'jarak_akses_km': [None, 5.0]},
+            'unggulan': {'laju_abrasi': [1.0, None], 'jarak_pantai_km': [None, 0.25], 'kedalaman': [None, 5.0],
+                         'jarak_akses_km': [None, 2.0], 'jarak_mangrove_km': [0.2, None]},
         },
         'INFRA_REKLAMASI': {
             'nama': 'Reklamasi & Polder Terpadu', 'kbli': '42919', 'ranah': ['LAUT'],
-            'kriteria': {'kedalaman': [None, 10.0], 'jarak_pantai_km': [None, 2.0], 'pga': [None, 0.35],
-                         'gelombang_ekstrem': [None, 4.0], 'kemiringan_dasar_laut': [None, 5.0]},
-            'unggulan': {'kedalaman': [None, 5.0], 'jarak_pantai_km': [None, 1.0], 'pga': [None, 0.25],
-                         'gelombang_ekstrem': [None, 2.5], 'kemiringan_dasar_laut': [None, 2.0]},
+            'kriteria': {'kedalaman': [None, 10.0], 'jarak_pantai_km': [None, 0.25], 'pga': [None, 0.35],
+                         'gelombang_ekstrem': [None, 4.0], 'kemiringan_dasar_laut': [None, 5.0],
+                         'jarak_akses_km': [None, 5.0]},
+            'unggulan': {'kedalaman': [None, 5.0], 'jarak_pantai_km': [None, 0.25], 'pga': [None, 0.25],
+                         'gelombang_ekstrem': [None, 2.5], 'kemiringan_dasar_laut': [None, 2.0],
+                         'jarak_akses_km': [None, 5.0], 'jarak_mangrove_km': [0.2, None]},
         },
         'INFRA_KABEL_PIPA': {
             'nama': 'Kabel & Pipa Bawah Laut', 'kbli': '42919', 'ranah': ['LAUT'],
@@ -467,41 +480,47 @@ KRITERIA_JENIS = {
         'GARAM_PEMURNIAN': {
             'nama': 'Pabrik Pemurnian Garam (Washing Plant / Refinery)', 'kbli': '10773', 'ranah': ['DARAT'],
             'kriteria': {'jarak_zona_garam_km': [None, 30.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
-                         'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0], 'kemiringan_lahan': [None, 8.0]},
+                         'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0],
+                         'kemiringan_lahan': [None, 8.0], 'jarak_akses_km': [None, 5.0]},
             'unggulan': {'jarak_zona_garam_km': [None, 10.0], 'jarak_pelabuhan_ekspor_km': [None, 50.0],
-                         'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0], 'kemiringan_lahan': [None, 5.0]},
+                         'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0],
+                         'kemiringan_lahan': [None, 5.0], 'jarak_akses_km': [None, 2.0]},
         },
         'GARAM_FORTIFIKASI': {
             'nama': 'Garam Fortifikasi & Pangan', 'kbli': '10772', 'ranah': ['DARAT'],
             'kriteria': {'jarak_zona_garam_km': [None, 60.0], 'jarak_pelabuhan_ekspor_km': [None, 60.0],
-                         'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0], 'kemiringan_lahan': [None, 8.0]},
+                         'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0],
+                         'kemiringan_lahan': [None, 8.0], 'jarak_akses_km': [None, 5.0]},
             'unggulan': {'jarak_zona_garam_km': [None, 30.0], 'jarak_pelabuhan_ekspor_km': [None, 25.0],
-                         'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0], 'kemiringan_lahan': [None, 5.0]},
+                         'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0],
+                         'kemiringan_lahan': [None, 5.0], 'jarak_akses_km': [None, 2.0]},
         },
     },
     'BIOTEKNOLOGI_KELAUTAN': {
         'BIOTEK_BIOPLASTIK': {
             'nama': 'Bioplastik Ramah Lingkungan', 'kbli': '20131', 'ranah': ['DARAT'],
             'kriteria': {'jarak_zona_budidaya_km': [None, 30.0], 'jarak_pelabuhan_ekspor_km': [None, 100.0],
-                         'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0], 'kemiringan_lahan': [None, 8.0]},
+                         'jarak_listrik_km': [None, 3.0], 'jarak_jalan_nasional_km': [None, 3.0],
+                         'kemiringan_lahan': [None, 8.0], 'jarak_akses_km': [None, 5.0]},
             'unggulan': {'jarak_zona_budidaya_km': [None, 15.0], 'jarak_pelabuhan_ekspor_km': [None, 50.0],
-                         'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0], 'kemiringan_lahan': [None, 5.0]},
+                         'jarak_listrik_km': [None, 1.0], 'jarak_jalan_nasional_km': [None, 1.0],
+                         'kemiringan_lahan': [None, 5.0], 'jarak_akses_km': [None, 2.0]},
         },
         'BIOTEK_PAKAN_ALAMI': {
             'nama': 'Pakan Alami & Fitoplankton', 'kbli': '03213', 'ranah': ['DARAT'],
             'kriteria': {'jarak_dari_pantai_km': [0.1, 2.0], 'ghi': [4.5, None], 'salinitas': [28.0, None],
-                         'jarak_muara_km': [3.0, None], 'kemiringan_lahan': [None, 8.0]},
+                         'jarak_muara_km': [3.0, None], 'kemiringan_lahan': [None, 8.0], 'jarak_akses_km': [None, 10.0]},
             'unggulan': {'jarak_dari_pantai_km': [0.1, 1.0], 'ghi': [5.0, None], 'salinitas': [30.0, None],
-                         'jarak_muara_km': [5.0, None], 'kemiringan_lahan': [None, 5.0]},
+                         'jarak_muara_km': [5.0, None], 'kemiringan_lahan': [None, 5.0], 'jarak_akses_km': [None, 5.0]},
         },
     },
     'KONSERVASI_PESISIR': {
         'KONSERVASI_MANGROVE': {
             'nama': 'Restorasi Mangrove untuk Kredit Karbon Biru (Blue Carbon)', 'kbli': '02401', 'ranah': ['LAUT', 'DARAT'],
             'kriteria': {'eks_mangrove_mudflat': [1, None], 'intertidal': [1, None], 'luas_hamparan_ha': [100.0, None],
-                         'laju_abrasi': [None, 1.5]},
+                         'laju_abrasi': [None, 1.5], 'jarak_lamun_km': [0.1, None], 'jarak_pantai_km': [None, 1.0]},
             'unggulan': {'eks_mangrove_mudflat': [1, None], 'intertidal': [1, None], 'luas_hamparan_ha': [250.0, None],
-                         'laju_abrasi': [None, 1.0]},
+                         'laju_abrasi': [None, 1.0], 'jarak_lamun_km': [0.1, None], 'jarak_pantai_km': [None, 0.5]},
         },
         'KONSERVASI_KARANG': {
             'nama': 'Restorasi Terumbu Karang Berbasis Pariwisata/Eko-Sains', 'kbli': '91426', 'ranah': ['LAUT'],

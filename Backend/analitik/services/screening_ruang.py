@@ -208,6 +208,7 @@ def karakter_area(c, geom):
         )
         jarak = c.fetchone()[0]
         data['jarak_dari_pantai_km'] = (jarak if jarak is not None else BATAS_JARAK_PANTAI_DERAJAT) * KM_PER_DERAJAT
+        data['jarak_pantai_km'] = 0.0
     data.update(jarak_area(c, geom.ewkt, tersedia))
     return data
 

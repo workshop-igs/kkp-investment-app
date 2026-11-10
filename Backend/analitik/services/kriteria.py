@@ -48,6 +48,7 @@ PARAMETER = {
     'jarak_bandara_km': ('Jarak ke bandara', 'km', ('BANDARA',)),
     'jarak_karang_km': ('Jarak ke terumbu karang', 'km', 'TERUMBU_KARANG'),
     'jarak_mangrove_km': ('Jarak ke mangrove', 'km', 'MANGROVE'),
+    'jarak_lamun_km': ('Jarak ke padang lamun', 'km', 'LAMUN'),
     'luas_pulau_km2': ('Luas pulau terdekat', 'km²', None),
     'arus': ('Kecepatan arus permukaan', 'm/s', 'ARUS'),
     'salinitas': ('Salinitas air laut', 'ppt', 'SALINITAS'),
@@ -128,7 +129,7 @@ def sumber_tersedia():
     with connection.cursor() as c:
         c.execute(f'SELECT DISTINCT kategori FROM {INFRA} i')
         hasil = {r[0] for r in c.fetchall()}
-        for jenis in ('TERUMBU_KARANG', 'MANGROVE'):
+        for jenis in ('TERUMBU_KARANG', 'MANGROVE', 'LAMUN'):
             c.execute('SELECT EXISTS (SELECT 1 FROM inventarisasi_sumber_daya_alam WHERE jenis = %s)', [jenis])
             if c.fetchone()[0]:
                 hasil.add(jenis)
@@ -214,7 +215,8 @@ def data_ada(kunci, tersedia):
 
 
 KARANG = "jenis = 'TERUMBU_KARANG' AND sumber_data IN ('KKP-EKOSISTEM', 'SIDAKO-KARANG')"
-JARAK_EKOSISTEM = {'jarak_karang_km': (KARANG, 100.0), 'jarak_mangrove_km': ("jenis = 'MANGROVE'", 5.0)}
+JARAK_EKOSISTEM = {'jarak_karang_km': (KARANG, 100.0), 'jarak_mangrove_km': ("jenis = 'MANGROVE'", 5.0),
+                   'jarak_lamun_km': ("jenis = 'LAMUN'", 5.0)}
 
 
 def karang_dari_jarak(km):
