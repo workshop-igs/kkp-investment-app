@@ -12,6 +12,9 @@ dist/
 
 # Environment variables
 .env
+
+# Mapfile MapServer (berisi kata sandi akun baca-saja)
+peta/
 .env.local
 .env.*.local
 

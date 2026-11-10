@@ -12,6 +12,7 @@ source venv_django/bin/activate
 pip install -q -r requirements.lock.txt
 python manage.py migrate --noinput
 python manage.py collectstatic --noinput
+python manage.py buat_mapfile
 cd ../Frontend
 npm ci --silent
 npm run build
