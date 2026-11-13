@@ -109,6 +109,7 @@ const AdminPenggunaPage = () => {
   const [sandiDiatur, setSandiDiatur] = useState(null);
   const [isianSandi, setIsianSandi] = useState({ sandi_baru: '', sandi_ulang: '' });
   const [mengaturSandi, setMengaturSandi] = useState(false);
+  const [sandiSementara, setSandiSementara] = useState(false);
   const [galatSandi, setGalatSandi] = useState(null);
   const [error, setError] = useState(null);
   const [formAdmin, setFormAdmin] = useState(false);
@@ -184,10 +185,11 @@ const AdminPenggunaPage = () => {
     setMengaturSandi(true);
     setGalatSandi(null);
     try {
-      const { data } = await api.post(`/inti/admin/users/${sandiDiatur.id}/atur-sandi/`, isianSandi);
-      setBerhasil(`Kata sandi ${namaTampil(sandiDiatur)} (@${sandiDiatur.username}) telah diatur ulang`
+      const { data } = await api.post(`/inti/admin/users/${sandiDiatur.id}/atur-sandi/`, sandiSementara ? isianSandi : {});
+      setBerhasil(`${namaTampil(sandiDiatur)} (@${sandiDiatur.username}) wajib membuat kata sandi baru saat masuk berikutnya`
         + `${data.sesi_diakhiri ? `; ${data.sesi_diakhiri} sesi aktif diakhiri` : ''}.`);
       setSandiDiatur(null);
+      fetchUsers();
     } catch (err) {
       setGalatSandi(pesanGalat(err, 'Kata sandi gagal diatur ulang. Periksa koneksi lalu coba lagi.'));
     } finally {
@@ -416,6 +418,11 @@ const AdminPenggunaPage = () => {
                         <UserX className="w-4 h-4" /> Nonaktif
                       </span>
                     )}
+                    {u.profil?.wajib_ganti_sandi && (
+                      <span className="mt-1 flex items-center justify-center gap-1 text-[11px] font-semibold text-amber-700">
+                        <KeyRound className="w-3 h-3" /> Wajib ganti sandi
+                      </span>
+                    )}
                   </td>
 
                   <td className="px-4 py-4">
@@ -439,11 +446,12 @@ const AdminPenggunaPage = () => {
                       {u.id !== saya?.id && (saya?.is_superuser || (!u.is_staff && !u.is_superuser)) && (
                         <button
                           onClick={() => {
-                            setSandiDiatur(u); setIsianSandi({ sandi_baru: '', sandi_ulang: '' }); setGalatSandi(null); setBerhasil(null);
+                            setSandiDiatur(u); setIsianSandi({ sandi_baru: '', sandi_ulang: '' }); setSandiSementara(false);
+                            setGalatSandi(null); setBerhasil(null);
                           }}
                           className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold whitespace-nowrap rounded-lg transition-colors text-slate-700 bg-slate-100 hover:bg-slate-200"
                         >
-                          <KeyRound className="w-3.5 h-3.5" /> Atur sandi
+                          <KeyRound className="w-3.5 h-3.5" /> Reset sandi
                         </button>
                       )}
                       <button
@@ -578,30 +586,48 @@ const AdminPenggunaPage = () => {
       )}
 
       {sandiDiatur && (
-        <Dialog judul="Atur Ulang Kata Sandi" onTutup={() => !mengaturSandi && setSandiDiatur(null)}>
+        <Dialog judul="Reset Kata Sandi" onTutup={() => !mengaturSandi && setSandiDiatur(null)}>
           <form onSubmit={aturSandi} className="p-6 space-y-4">
             <p className="text-sm text-slate-700">
-              Kata sandi baru untuk <b>{namaTampil(sandiDiatur)}</b> (@{sandiDiatur.username}).
+              <b>{namaTampil(sandiDiatur)}</b> (@{sandiDiatur.username}) akan keluar dari semua perangkat dan wajib
+              membuat kata sandi baru saat masuk berikutnya. Anda tidak akan mengetahui kata sandi barunya.
             </p>
-            {[['Kata sandi baru', 'sandi_baru'], ['Ulangi kata sandi baru', 'sandi_ulang']].map(([label, medan]) => (
-              <label key={medan} className="block">
-                <span className="block text-xs font-semibold text-slate-700 mb-1.5">{label}</span>
-                <input
-                  type="password"
-                  name={medan}
-                  value={isianSandi[medan]}
-                  onChange={(e) => setIsianSandi((s) => ({ ...s, [medan]: e.target.value }))}
-                  autoComplete="new-password"
-                  required
-                  className={KELAS_ISIAN}
-                />
-              </label>
-            ))}
-            <p className="text-xs text-slate-500">
-              Minimal 8 karakter, tidak seluruhnya angka, dan tidak mirip nama pengguna. Pengguna ini akan keluar dari
-              semua perangkat. Sampaikan kata sandi secara langsung kepada pemiliknya, lalu minta ia menggantinya di
-              halaman Profil setelah masuk.
-            </p>
+            <label className="flex items-start gap-2 text-sm text-slate-700 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={sandiSementara}
+                onChange={(e) => setSandiSementara(e.target.checked)}
+                className="mt-0.5 w-4 h-4 accent-kkp-700"
+              />
+              <span>
+                Pengguna lupa kata sandinya
+                <span className="block text-xs text-slate-500">
+                  Beri kata sandi sementara agar ia dapat masuk. Kata sandi itu wajib langsung diganti.
+                </span>
+              </span>
+            </label>
+            {sandiSementara && (
+              <>
+                {[['Kata sandi sementara', 'sandi_baru'], ['Ulangi kata sandi sementara', 'sandi_ulang']].map(([label, medan]) => (
+                  <label key={medan} className="block">
+                    <span className="block text-xs font-semibold text-slate-700 mb-1.5">{label}</span>
+                    <input
+                      type="password"
+                      name={medan}
+                      value={isianSandi[medan]}
+                      onChange={(e) => setIsianSandi((s) => ({ ...s, [medan]: e.target.value }))}
+                      autoComplete="new-password"
+                      required
+                      className={KELAS_ISIAN}
+                    />
+                  </label>
+                ))}
+                <p className="text-xs text-slate-500">
+                  Minimal 8 karakter, tidak seluruhnya angka, dan tidak mirip nama pengguna. Sampaikan langsung kepada
+                  pemiliknya.
+                </p>
+              </>
+            )}
             {galatSandi && (
               <div role="alert" className="p-3 bg-rose-50 text-rose-800 rounded-lg border border-rose-200 text-xs">
                 {galatSandi}
@@ -622,7 +648,7 @@ const AdminPenggunaPage = () => {
                 className="inline-flex items-center gap-2 px-4 py-2 bg-kkp-700 hover:bg-kkp-800 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
               >
                 {mengaturSandi && <Loader2 className="w-4 h-4 animate-spin" />}
-                Simpan Kata Sandi
+                Wajibkan Ganti Sandi
               </button>
             </div>
           </form>

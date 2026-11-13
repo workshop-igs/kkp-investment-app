@@ -19,8 +19,8 @@ SUB_ZONA_BERKETENTUAN = [(k, v) for k, v in ZonasiRuangLaut.SUB_ZONA_CHOICES if 
 class AdminProfilPenggunaSerializer(serializers.ModelSerializer):
     class Meta:  # type: ignore
         model = ProfilPengguna
-        fields = ['instansi', 'telepon', 'provinsi', 'terakhir_aktif']
-        read_only_fields = ['terakhir_aktif']
+        fields = ['instansi', 'telepon', 'provinsi', 'terakhir_aktif', 'wajib_ganti_sandi']
+        read_only_fields = ['terakhir_aktif', 'wajib_ganti_sandi']
 
 
 class AdminUserSerializer(serializers.ModelSerializer):
