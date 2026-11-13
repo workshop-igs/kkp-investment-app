@@ -20,4 +20,8 @@ app.conf.beat_schedule = {
         'task': 'analitik.tasks.isi_cache_profil',
         'schedule': crontab(minute=0, hour=4),
     },
+    'hapus-log-kedaluwarsa': {
+        'task': 'inti.tasks.hapus_log_kedaluwarsa',
+        'schedule': crontab(minute=30, hour=3),
+    },
 }

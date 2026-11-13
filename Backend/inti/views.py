@@ -12,6 +12,7 @@ from rest_framework.throttling import ScopedRateThrottle
 
 from penarikan_data.bps import kode_bps
 
+from .audit import catat
 from .geospasial import KUNCI_CACHE_WPP, nama_kabupaten
 from .izin import LEVEL, AksesPortofolio, level
 from .models import (
@@ -624,6 +625,8 @@ def register_api(request):
         return Response({'detail': 'Alamat email yang valid wajib diisi.'}, status=400)
     if not password:
         return Response({'detail': 'Kata sandi wajib diisi.'}, status=400)
+    if data.get('setuju_privasi') is not True:
+        return Response({'detail': 'Pendaftaran memerlukan persetujuan pemrosesan data pribadi.'}, status=400)
 
     calon = User(username=username, email=email, first_name=(full_name.split(' ', 1)[0] if full_name else ''))
     try:
@@ -658,6 +661,8 @@ def register_api(request):
     profil.telepon = telepon
     profil.provinsi = prov_obj
     profil.save()
+    catat(request, 'Pendaftaran akun baru', f'Akun @{username}',
+          ['Menyetujui pemberitahuan pelindungan data pribadi (UU 27/2022)'])
 
     if hasattr(request, 'session'):
         login(request, user)

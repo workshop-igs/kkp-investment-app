@@ -65,7 +65,7 @@ const DaftarPage = () => {
       return;
     }
     if (!formData.agree_terms) {
-      setError('Anda harus menyetujui syarat & ketentuan penggunaan platform.');
+      setError('Pendaftaran memerlukan persetujuan pemrosesan data pribadi.');
       return;
     }
 
@@ -76,7 +76,8 @@ const DaftarPage = () => {
         email: formData.email.toLowerCase(),
         password: formData.password,
         instansi: formData.instansi,
-        telepon: formData.telepon
+        telepon: formData.telepon,
+        setuju_privasi: formData.agree_terms
       });
 
       setSuccessMsg(`Pendaftaran berhasil! Selamat datang, ${res.user.full_name}. Mengalihkan...`);
@@ -346,11 +347,23 @@ const DaftarPage = () => {
                   <CheckCircle2 className="w-3.5 h-3.5 text-white absolute pointer-events-none opacity-0 peer-checked:opacity-100 transition-opacity" />
                 </div>
                 <span className="text-sm text-slate-600 group-hover:text-slate-800 transition-colors">
-                  Saya menyatakan bahwa data yang diisi adalah benar, dan menyetujui seluruh 
-                  <a href="#" className="font-bold text-sky-600 hover:underline mx-1">Syarat & Ketentuan</a> 
-                  serta kebijakan perlindungan data geospasial Kementerian Kelautan dan Perikanan RI.
+                  Saya menyatakan bahwa data yang diisi adalah benar, dan menyetujui pemrosesan data pribadi saya
+                  sesuai pemberitahuan pelindungan data pribadi di bawah ini.
                 </span>
               </label>
+              <details className="mt-3 ml-8 text-xs text-slate-600">
+                <summary className="cursor-pointer font-bold text-sky-600 hover:underline">
+                  Pemberitahuan pelindungan data pribadi
+                </summary>
+                <ul className="mt-2 space-y-1.5 list-disc pl-4 leading-relaxed">
+                  <li>Pengendali data: Kementerian Kelautan dan Perikanan, sesuai UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.</li>
+                  <li>Data yang dikumpulkan: nama, username, email, telepon, dan instansi, serta alamat IP dan jenis peramban saat Anda masuk atau mengubah data.</li>
+                  <li>Tujuan: membuat dan mengamankan akun, mengatur hak akses, dan mencatat jejak perubahan data di platform.</li>
+                  <li>Masa simpan: data akun disimpan selama akun ada; catatan aktivitas dihapus otomatis setelah masa simpannya berakhir.</li>
+                  <li>Data akun tidak dibagikan kepada pihak lain dan tidak ikut diterbitkan di layanan data terbuka.</li>
+                  <li>Anda dapat melihat dan memperbarui data di halaman Profil, serta meminta salinan data, penghapusan akun, atau penghentian pemrosesan kepada administrator platform.</li>
+                </ul>
+              </details>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
