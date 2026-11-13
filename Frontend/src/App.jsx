@@ -18,6 +18,7 @@ import DaftarPage from './pages/DaftarPage';
 import ProfilPage from './pages/ProfilPage';
 import UnduhDataPage from './pages/UnduhDataPage';
 import LayananPetaPage from './pages/LayananPetaPage';
+import KebijakanPrivasiPage from './pages/KebijakanPrivasiPage';
 
 import TataLetakAdmin from './layouts/TataLetakAdmin';
 import AdminPanelPage from './pages/admin/AdminPanelPage';
@@ -69,6 +70,7 @@ const AppLayout = () => {
           <Route path="/peta" element={<AnalisisPage />} />
           <Route path="/profil-investasi" element={<ProfilInvestasiPage />} />
           <Route path="/unduh-data" element={<UnduhDataPage />} />
+          <Route path="/kebijakan-privasi" element={<KebijakanPrivasiPage />} />
           <Route path="/rest/services" element={<LayananPetaPage />} />
           <Route path="/rest/services/:kode/MapServer" element={<LayananPetaPage />} />
           <Route path="/rest/services/:kode/MapServer/:nomor" element={<LayananPetaPage />} />

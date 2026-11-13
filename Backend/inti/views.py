@@ -2,6 +2,7 @@ import logging
 import re
 from datetime import datetime
 
+from django.conf import settings
 from django.contrib.gis.db.models.functions import AsGeoJSON, PointOnSurface
 from django.db.models.functions import Coalesce
 from django.http import HttpResponse
@@ -701,6 +702,7 @@ def auth_config(request):
         'token_endpoint': '/o/token/',
         'grant_type': 'password',
         'scope': 'read write',
+        'privasi': {'kontak': settings.KONTAK_PRIVASI, 'simpan_log_hari': settings.LOG_AKTIVITAS_SIMPAN_HARI},
     })
 
 

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   AlertTriangle, CheckCircle2, History, KeyRound, Loader2, RefreshCw, ShieldCheck, UserRound,
 } from 'lucide-react';
@@ -226,8 +226,11 @@ const ProfilPage = () => {
 
               <p className="mt-4 flex gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-[11px] leading-relaxed text-slate-500">
                 <ShieldCheck className="w-4 h-4 shrink-0 text-kkp-700" />
-                Peran, surel, dan nama pengguna ditetapkan oleh administrator. Hubungi administrator sistem bila
-                perlu diubah.
+                <span>
+                  Peran, surel, dan nama pengguna ditetapkan oleh administrator. Hubungi administrator sistem bila
+                  perlu diubah. Hak Anda atas data pribadi dijelaskan di{' '}
+                  <Link to="/kebijakan-privasi" className="font-semibold text-kkp-700 hover:underline">Kebijakan Privasi</Link>.
+                </span>
               </p>
             </div>
           </aside>

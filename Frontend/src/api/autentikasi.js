@@ -13,7 +13,7 @@ const SCOPE = 'read write';
 
 let konfigCache = null;
 
-const getOAuthConfig = async () => {
+export const getOAuthConfig = async () => {
   if (konfigCache) return konfigCache;
   const { data } = await axios.get(`${API_V1_URL}/inti/auth/config/`);
   konfigCache = data;

@@ -265,6 +265,9 @@ const AsistenMengambang = () => {
                     {memuat ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                   </button>
                 </div>
+                <p className="mt-1.5 px-1 text-[10px] leading-snug text-slate-400">
+                  Jangan menuliskan data pribadi. Jawaban disusun AI dan dapat keliru.
+                </p>
               </form>
           </>
         </section>

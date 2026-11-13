@@ -842,7 +842,7 @@ const BerandaPage = () => {
           <nav aria-label="Tautan kaki" className="lg:col-span-3">
             <p className="text-sm font-semibold text-white/60">Menu</p>
             <ul className="mt-3 space-y-2 text-sm">
-              {[['Beranda', '/'], ['Peta Spasial', '/peta'], ['Profil Investasi', '/profil-investasi']].map(([label, ke]) => (
+              {[['Beranda', '/'], ['Peta Spasial', '/peta'], ['Profil Investasi', '/profil-investasi'], ['Kebijakan Privasi', '/kebijakan-privasi']].map(([label, ke]) => (
                 <li key={ke}><Link to={ke} className="text-white/85 hover:text-white">{label}</Link></li>
               ))}
             </ul>
