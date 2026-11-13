@@ -92,7 +92,7 @@ export const RingkasanProvinsi = ({ p }) => {
       >
         <Baris icon={FileCheck} label="KKPRL aktif" nilai={formatNumber(rl.kkprl_jumlah, 0)} satuan="izin" />
         <Baris icon={Ruler} label="Luas KKPRL" nilai={formatNumber(rl.kkprl_luas_ha, 0)} satuan="Ha" />
-        <Baris icon={Map} label="Zona rencana" nilai={formatNumber(rl.zona_jumlah, 0)} />
+        <Baris icon={Map} label="Zona rencana" nilai={formatNumber(rl.zona_jumlah, 0)} satuan="zona" />
         <Baris icon={Waves} label="Luas zona rencana" nilai={formatNumber(rl.zona_luas_ha, 0)} satuan="Ha" />
       </Bagian>
 
@@ -106,8 +106,8 @@ export const RingkasanProvinsi = ({ p }) => {
 
       <Bagian judul="Infrastruktur Pendukung">
         <Baris icon={Anchor} label="Pelabuhan" nilai={formatNumber(infra.pelabuhan, 0)} satuan="titik" />
-        <Baris icon={Factory} label="Kawasan industri" nilai={formatNumber(infra.kawasan_industri, 0)} />
-        <Baris icon={Zap} label="Jaringan & pembangkit listrik" nilai={formatNumber(infra.tenaga_listrik, 0)} />
+        <Baris icon={Factory} label="Kawasan industri" nilai={formatNumber(infra.kawasan_industri, 0)} satuan="kawasan" />
+        <Baris icon={Zap} label="Jaringan & pembangkit listrik" nilai={formatNumber(infra.tenaga_listrik, 0)} satuan="objek" />
       </Bagian>
 
       {tk.tpt_persen != null && (
