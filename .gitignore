@@ -1,53 +1,32 @@
-# Dependencies
+# Pustaka dan hasil build
 node_modules/
 __pycache__/
 *.pyc
-
-# Virtual environments
 venv_django/
 .venv/
-
-# Build output
 dist/
+staticfiles/
 
-# Environment variables
+# Setelan lingkungan (berisi rahasia)
 .env
-
-# Mapfile MapServer (berisi kata sandi akun baca-saja)
-peta/
 .env.local
 .env.*.local
 
-# Editor directories and files
-.vscode/*
-!.vscode/settings.json
-!.vscode/extensions.json
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Mapfile MapServer (berisi kata sandi akun baca-saja)
+peta/
 
-# OS generated files
+# Editor dan sistem operasi
+.vscode/
+.idea/
 .DS_Store
 Thumbs.db
 
-# Large data files
+# Data, log, dan cadangan lokal
 *.gpkg
-
-# Logs
+*.sqlite3
+datadump.json
+media/
 logs/
 *.log
 npm-debug.log*
-
-# Django
-*.sqlite3
-staticfiles/
-media/
-
-# Database dumps
-datadump.json
-
-# Cadangan lokal
 cadangan/

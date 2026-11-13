@@ -47,7 +47,7 @@ def _ambil(lapisan, bbox, percobaan=3):
                     'outputFormat': 'application/json',
                     'srsName': 'EPSG:4326',
                     'maxFeatures': 30000,
-                    'BBOX': '%f,%f,%f,%f,EPSG:4326' % bbox,
+                    'BBOX': '{:f},{:f},{:f},{:f},EPSG:4326'.format(*bbox),
                 },
                 timeout=180.0,
             )

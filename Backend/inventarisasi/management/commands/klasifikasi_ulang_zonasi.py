@@ -28,14 +28,14 @@ class Command(BaseCommand):
             jenis_baru = jenis_kawasan(acuan) if o.jenis_zona == 'ZU' else o.jenis_zona
             sub_baru = sub_zona(acuan, jenis_baru)
             if jenis_baru != o.jenis_zona or sub_baru != o.sub_zona:
-                rekap['%s -> %s' % (o.sub_zona, sub_baru)] += 1
+                rekap[f'{o.sub_zona} -> {sub_baru}'] += 1
                 o.jenis_zona = jenis_baru
                 o.sub_zona = sub_baru
                 berubah.append(o)
 
-        self.stdout.write('Diperiksa: %d | berubah: %d' % (qs.count(), len(berubah)))
+        self.stdout.write(f'Diperiksa: {qs.count()} | berubah: {len(berubah)}')
         for pindah, n in rekap.most_common(15):
-            self.stdout.write('   %-42s %d' % (pindah, n))
+            self.stdout.write(f'   {pindah!s:<42} {n}')
 
         if options['uji_coba']:
             self.stdout.write(self.style.WARNING('Uji coba — tidak ada yang disimpan.'))

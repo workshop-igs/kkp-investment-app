@@ -6,7 +6,6 @@ from django.db import connection, transaction
 from analitik.models import RasterRisikoBencana, ZonaRisikoBencana
 
 ATURAN_KELAS = '0.0001-0.334:1-1, 0.334-0.667:2-2, 0.667-1:3-3'
-NOMOR_KE_KELAS = {1: 'RENDAH', 2: 'SEDANG', 3: 'TINGGI'}
 
 LUAS_MINIMUM_HA = 0.0
 

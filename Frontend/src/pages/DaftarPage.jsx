@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   UserPlus, User, Mail, Lock, Eye, EyeOff, 
   Building2, Phone, ArrowLeft, CheckCircle2,
-  AlertCircle, Globe
+  AlertCircle,
 } from 'lucide-react';
 import { useAutentikasi } from '../context/KonteksAutentikasi';
 

@@ -65,7 +65,7 @@ def peringkat_variabel(katalog: List[Dict[str, Any]], spec: Dict[str, Any]) -> L
     return [var_id for *_, var_id in kandidat]
 
 
-class BPSTidakTersedia(Exception):
+class BPSTidakTersedia(Exception):  # noqa: N818
     pass
 
 

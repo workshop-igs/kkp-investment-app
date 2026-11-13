@@ -3,7 +3,6 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { 
   LogIn, User, Lock, Eye, EyeOff, 
   ArrowLeft, CheckCircle2, AlertCircle, ArrowRight,
-  Globe, Compass, Check
 } from 'lucide-react';
 import { useAutentikasi } from '../context/KonteksAutentikasi';
 

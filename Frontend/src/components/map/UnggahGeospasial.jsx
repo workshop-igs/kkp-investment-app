@@ -3,8 +3,8 @@ import shp from 'shpjs';
 import { kml } from '@tmcw/togeojson';
 import { DOMParser } from '@xmldom/xmldom';
 
-export const LUAS_MIN_HA = 0.01;
-export const LUAS_MAKS_HA = 50000;
+const LUAS_MIN_HA = 0.01;
+const LUAS_MAKS_HA = 50000;
 const INDONESIA = { barat: 90, timur: 145, selatan: -15, utara: 10 };
 const JARI_BUMI = 6378137;
 

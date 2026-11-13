@@ -113,7 +113,7 @@ class Command(BaseCommand):
             kode_lapisan__in=[x[0].split(':')[-1] for x in pasangan],
         ).delete()[0]
         if terhapus:
-            self.stdout.write('Data tarikan sebelumnya dihapus: %d baris.' % terhapus)
+            self.stdout.write(f'Data tarikan sebelumnya dihapus: {terhapus} baris.')
         if options['hapus']:
             self.stdout.write(self.style.SUCCESS('Selesai — data tarikan dibuang.'))
             return
@@ -143,7 +143,7 @@ class Command(BaseCommand):
             fitur, galat = ambil_fitur(layer, wfs)
             if fitur is None:
                 gagal.append((layer, str(galat)[:70]))
-                self.stdout.write(self.style.WARNING('  ! %-46s gagal' % layer))
+                self.stdout.write(self.style.WARNING(f'  ! {layer!s:<46} gagal'))
                 continue
 
             petunjuk = ''
@@ -195,15 +195,14 @@ class Command(BaseCommand):
                             [[u.id for u in antre]],
                         )
             total += len(antre)
-            self.stdout.write('  %-46s %5d fitur%s' % (
-                layer, len(antre), ' (%d dilewati)' % dilewati if dilewati else ''))
+            self.stdout.write(f'  {layer!s:<46} {len(antre):5d} fitur' + (f' ({dilewati} dilewati)' if dilewati else ''))
 
         self.stdout.write('')
-        self.stdout.write(self.style.SUCCESS('Tersimpan: %d unsur' % total))
+        self.stdout.write(self.style.SUCCESS(f'Tersimpan: {total} unsur'))
         for tipe, n in rekap.most_common():
-            self.stdout.write('   %-18s %d' % (tipe, n))
+            self.stdout.write(f'   {tipe!s:<18} {n}')
         for layer, pesan in gagal:
-            self.stdout.write(self.style.WARNING('Gagal: %s — %s' % (layer, pesan)))
+            self.stdout.write(self.style.WARNING(f'Gagal: {layer} — {pesan}'))
         self.stdout.write('Sumber: Portal Satu Data KKP (WFS) dan Sidako KKP (wilayah kelola MHA 2024).')
         if gagal:
             raise CommandError(f'{len(gagal)} lapisan gagal ditarik; seluruh data lama dipertahankan.')

@@ -65,12 +65,6 @@ def raster_tersedia():
     return hasil
 
 
-def daya_gelombang(tinggi, periode_puncak):
-    if tinggi is None or periode_puncak is None:
-        return None
-    return 0.49 * tinggi ** 2 * 0.9 * periode_puncak
-
-
 def nilai_titik(kode, x, y):
     hasil = np.full(len(x), np.nan)
     if not len(x):

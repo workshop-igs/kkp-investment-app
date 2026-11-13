@@ -113,7 +113,7 @@ class Command(BaseCommand):
                     LIMIT 1
                 ) d
                 """,
-                [provinsi_id] + kategori,
+                [provinsi_id, *kategori],
             )
             hasil = {}
             for zona_id, kat, jarak in c.fetchall():

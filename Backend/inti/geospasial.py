@@ -164,7 +164,7 @@ def hitung_luas_geodesik_ha(geometry):
 
     except Exception as e:
         logger.error(f'Gagal menghitung luas geodesic: {e}', exc_info=True)
-        raise ValueError(f'Gagal menghitung luas area dari geometry: {e}')
+        raise ValueError(f'Gagal menghitung luas area dari geometry: {e}') from e
 
 
 def nama_kabupaten(nama, jenis):

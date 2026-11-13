@@ -93,7 +93,7 @@ async function gambarElemen(ctx, el, wadah, alfa, cacheSvg) {
   for (const [c] of anak) await gambarElemen(ctx, c, wadah, a, cacheSvg);
 }
 
-export async function potretPeta(map) {
+async function potretPeta(map) {
   const elemen = map.getContainer();
   const wadah = elemen.getBoundingClientRect();
   const kanvas = document.createElement('canvas');

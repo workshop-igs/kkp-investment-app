@@ -22,18 +22,17 @@ class Command(BaseCommand):
             for tabel in daftar:
                 label = TABEL.get(tabel, tabel)
                 cur.execute(
-                    'UPDATE %s SET luas_ha = COALESCE(ST_Area(geometry::geography), 0) / 10000.0 '
-                    'WHERE geometry IS NOT NULL' % tabel
+                    f'UPDATE {tabel} SET luas_ha = COALESCE(ST_Area(geometry::geography), 0) / 10000.0 '
+                    'WHERE geometry IS NOT NULL'
                 )
                 diubah = cur.rowcount
                 cur.execute(
                     'SELECT COUNT(*), MIN(luas_ha), MAX(luas_ha), AVG(luas_ha) '
-                    'FROM %s WHERE luas_ha > 0' % tabel
+                    f'FROM {tabel} WHERE luas_ha > 0'
                 )
                 n, kecil, besar, rata = cur.fetchone()
-                self.stdout.write(self.style.SUCCESS('%s: %d baris diperbarui' % (label, diubah)))
+                self.stdout.write(self.style.SUCCESS(f'{label}: {diubah} baris diperbarui'))
                 if n:
                     self.stdout.write(
-                        '   berluas > 0: %d | terkecil %.2f ha | terbesar %.0f ha | rata-rata %.0f ha'
-                        % (n, kecil, besar, rata)
+                        f'   berluas > 0: {n} | terkecil {kecil:.2f} ha | terbesar {besar:.0f} ha | rata-rata {rata:.0f} ha'
                     )
