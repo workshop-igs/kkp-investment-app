@@ -290,7 +290,7 @@ const LayananPetaPage = () => {
   else if (kode && nomor !== undefined) isi = <InfoLapisan kode={kode} nomor={nomor} />;
   else if (kode) isi = <InfoLayanan kode={kode} />;
   return (
-    <div className="h-full pt-[72px] overflow-y-auto bg-white custom-scrollbar">
+    <div className="h-full pt-[72px] overflow-y-auto bg-white custom-scrollbar" tabIndex={0}>
       <div className="max-w-5xl mx-auto p-5 lg:p-8 space-y-4">{isi}</div>
     </div>
   );

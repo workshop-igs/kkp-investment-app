@@ -230,7 +230,7 @@ const TurPeta = ({ aktif, setAktif, peraga }) => {
             ))}
           </ol>
         )}
-        <div className="flex gap-1 mt-4" aria-label={`Langkah tur ${i + 1} dari ${daftar.length}`}>
+        <div className="flex gap-1 mt-4" role="group" aria-label={`Langkah tur ${i + 1} dari ${daftar.length}`}>
           {daftar.map((l, n) => (
             <span key={l.judul} className={`h-1.5 rounded-full transition-all ${n === i ? 'w-5 bg-sky-600' : 'w-1.5 bg-slate-300'}`} />
           ))}

@@ -18,7 +18,7 @@ const KebijakanPrivasiPage = () => {
   const kontak = privasi.kontak || 'administrator platform di Direktorat Jenderal Penataan Ruang Laut';
 
   return (
-    <div className="h-full pt-[72px] overflow-y-auto bg-white custom-scrollbar">
+    <div className="h-full pt-[72px] overflow-y-auto bg-white custom-scrollbar" tabIndex={0}>
       <article className="max-w-3xl mx-auto p-5 lg:p-8 space-y-7">
         <header>
           <p className="text-[11px] font-semibold uppercase tracking-wider text-kkp-700">Pelindungan Data Pribadi</p>
