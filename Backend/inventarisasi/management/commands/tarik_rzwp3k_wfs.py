@@ -72,7 +72,7 @@ LAPISAN = [
 
 ]
 
-LAPISAN += ['demo:PKKPRL_50K_%s' % x for x in PROVINSI_PKKPRL]
+LAPISAN += [f'demo:PKKPRL_50K_{x}' for x in PROVINSI_PKKPRL]
 
 KOLOM = {
     'kawasan': ('KAWASAN', 'Nama_Kawasan', 'KWS', 'KAW'),
@@ -137,8 +137,7 @@ class Command(BaseCommand):
         terhapus = ZonasiRuangLaut.objects.filter(sumber_data__in=tanda_disentuh).delete()[0]
         if terhapus:
             self.stdout.write(
-                'Data tarikan sebelumnya dihapus: %d baris (%s).'
-                % (terhapus, ', '.join(sorted(tanda_disentuh)))
+                f'Data tarikan sebelumnya dihapus: {terhapus} baris ({", ".join(sorted(tanda_disentuh))}).'
             )
         if options['hapus']:
             self.stdout.write(self.style.SUCCESS('Selesai — data tarikan dibuang.'))
@@ -175,7 +174,7 @@ class Command(BaseCommand):
             fitur, galat = ambil_fitur(layer)
             if fitur is None:
                 gagal.append((layer, str(galat)[:70]))
-                self.stdout.write(self.style.WARNING('  ! %-52s gagal' % layer))
+                self.stdout.write(self.style.WARNING(f'  ! {layer!s:<52} gagal'))
                 continue
 
             antre, dilewati = [], 0
@@ -215,15 +214,14 @@ class Command(BaseCommand):
                 ZonasiRuangLaut.objects.bulk_create(antre, batch_size=200)
             total_simpan += len(antre)
             total_lewat += dilewati
-            self.stdout.write('  %-56s %5d fitur%s' % (
-                layer, len(antre), ' (%d dilewati)' % dilewati if dilewati else ''))
+            self.stdout.write(f'  {layer!s:<56} {len(antre):5d} fitur' + (f' ({dilewati} dilewati)' if dilewati else ''))
 
         self.stdout.write('')
-        self.stdout.write(self.style.SUCCESS('Tersimpan: %d zona dari %d lapisan' % (total_simpan, len(daftar))))
+        self.stdout.write(self.style.SUCCESS(f'Tersimpan: {total_simpan} zona dari {len(daftar)} lapisan'))
         if total_lewat:
-            self.stdout.write(self.style.WARNING('Dilewati: %d' % total_lewat))
+            self.stdout.write(self.style.WARNING(f'Dilewati: {total_lewat}'))
             for alasan, n in sebab_lewat.most_common():
-                self.stdout.write('   %-26s %d' % (alasan, n))
+                self.stdout.write(f'   {alasan!s:<26} {n}')
         for layer, pesan in gagal:
-            self.stdout.write(self.style.WARNING('Gagal: %s — %s' % (layer, pesan)))
+            self.stdout.write(self.style.WARNING(f'Gagal: {layer} — {pesan}'))
         self.stdout.write('Sumber: Portal Satu Data KKP (WFS).')

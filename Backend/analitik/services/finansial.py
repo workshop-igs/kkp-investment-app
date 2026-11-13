@@ -7,7 +7,6 @@ from .pengaturan import atur
 
 logger = logging.getLogger('analitik')
 
-FALLBACK_USD_IDR = 16_350.0
 FRANKFURTER_URL = 'https://api.frankfurter.app/latest'
 
 

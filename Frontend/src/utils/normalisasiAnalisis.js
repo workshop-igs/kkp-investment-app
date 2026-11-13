@@ -30,7 +30,7 @@ export const namaAspek = (kunci) => {
   return ASPEK_AHP[k]?.nama || (k ? k.charAt(0).toUpperCase() + k.slice(1) : '-');
 };
 
-export const WARNA_STATUS = {
+const WARNA_STATUS = {
   hijau: '#15803D',
   kuning: '#B45309',
   merah: '#B91C1C',

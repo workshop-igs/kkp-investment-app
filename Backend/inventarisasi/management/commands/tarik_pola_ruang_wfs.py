@@ -47,7 +47,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         terhapus = ZonasiRuangLaut.objects.filter(sumber_data=TANDA).delete()[0]
         if terhapus:
-            self.stdout.write('Data tarikan sebelumnya dihapus: %d baris.' % terhapus)
+            self.stdout.write(f'Data tarikan sebelumnya dihapus: {terhapus} baris.')
 
         if options['hapus']:
             self.stdout.write(self.style.SUCCESS('Selesai — data tarikan dibuang.'))
@@ -58,7 +58,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR('Tabel Provinsi kosong.'))
             return
 
-        self.stdout.write('Menarik %s …' % LAYER)
+        self.stdout.write(f'Menarik {LAYER} …')
         r = httpx.get(
             WFS,
             params={
@@ -73,7 +73,7 @@ class Command(BaseCommand):
         )
         r.raise_for_status()
         fitur = r.json().get('features', [])
-        self.stdout.write('  %d fitur diterima (%.1f MB)' % (len(fitur), len(r.content) / 1048576))
+        self.stdout.write(f'  {len(fitur)} fitur diterima ({len(r.content) / 1048576:.1f} MB)')
 
         provinsi_list = list(Provinsi.objects.exclude(geometry=None))
 
@@ -108,7 +108,7 @@ class Command(BaseCommand):
                     sub_zona=PETA_ZONA.get(zona.lower(), 'LAINNYA'),
                     nomor_regulasi=bersih(p.get('Dasar_Hukum'))[:255],
                     geometry=geom,
-                    keterangan=('%s | %s' % (kawasan, bersih(p.get('Keterangan'))))[:500],
+                    keterangan=('{} | {}'.format(kawasan, bersih(p.get('Keterangan'))))[:500],
                     sumber_data=TANDA,
                     tingkat_acuan='KAW',
                 )
@@ -119,9 +119,9 @@ class Command(BaseCommand):
 
         total = ZonasiRuangLaut.objects.filter(sumber_data=TANDA).count()
         self.stdout.write('')
-        self.stdout.write(self.style.SUCCESS('Tersimpan: %d zona ruang laut' % total))
+        self.stdout.write(self.style.SUCCESS(f'Tersimpan: {total} zona ruang laut'))
         if dilewati:
-            self.stdout.write(self.style.WARNING('Dilewati: %d' % dilewati))
+            self.stdout.write(self.style.WARNING(f'Dilewati: {dilewati}'))
 
         from django.db.models import Count
 
@@ -132,6 +132,6 @@ class Command(BaseCommand):
             .order_by('-n')
         )
         for x in rincian:
-            self.stdout.write('   %-6s %d' % (x['jenis_zona'], x['n']))
+            self.stdout.write(f'   {x["jenis_zona"]!s:<6} {x["n"]}')
         self.stdout.write('')
         self.stdout.write('Sumber: Portal Satu Data KKP (WFS).')

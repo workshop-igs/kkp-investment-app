@@ -142,7 +142,7 @@ class Command(BaseCommand):
         mulai, disimpan, dilewati = 0, 0, 0
         antre = []
 
-        self.stdout.write('Menarik %s dari %s …' % (LAYER, WFS))
+        self.stdout.write(f'Menarik {LAYER} dari {WFS} …')
 
         with httpx.Client(follow_redirects=True) as klien:
             while True:
@@ -219,7 +219,7 @@ class Command(BaseCommand):
                     disimpan += 1
 
                 mulai += len(fitur)
-                self.stdout.write('  … %d fitur diproses' % (disimpan + dilewati))
+                self.stdout.write(f'  … {disimpan + dilewati} fitur diproses')
 
                 if len(fitur) < jumlah:
                     break
@@ -244,8 +244,8 @@ class Command(BaseCommand):
 
         total = KKPRL.objects.filter(sumber_data=TANDA).count()
         self.stdout.write('')
-        self.stdout.write(self.style.SUCCESS('Tersimpan: %d izin KKPRL' % total))
+        self.stdout.write(self.style.SUCCESS(f'Tersimpan: {total} izin KKPRL'))
         if dilewati:
-            self.stdout.write(self.style.WARNING('Dilewati (tanpa geometri/duplikat): %d' % dilewati))
+            self.stdout.write(self.style.WARNING(f'Dilewati (tanpa geometri/duplikat): {dilewati}'))
         self.stdout.write('')
         self.stdout.write('Sumber: Portal Satu Data KKP (WFS). Jalankan ulang untuk menyegarkan.')

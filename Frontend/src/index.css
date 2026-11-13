@@ -275,7 +275,6 @@ body {
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
 }
 
-/* Kartu progres hitung ulang (admin) */
 @keyframes hitung-tak-tentu {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(250%); }

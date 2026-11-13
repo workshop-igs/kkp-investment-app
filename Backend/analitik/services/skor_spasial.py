@@ -619,8 +619,7 @@ def ambil_skor_spasial(geometry: Dict[str, Any], sektor_kode: str, screening: Di
             if akses['rincian']:
                 terdekat = min(akses['rincian'], key=lambda x: x['jarak_km'])
                 catatan.append(
-                    'Infrastruktur terdekat: %s (%s) berjarak %.1f km.'
-                    % (terdekat['nama'], terdekat['kategori'], terdekat['jarak_km'])
+                    'Infrastruktur terdekat: {} ({}) berjarak {:.1f} km.'.format(terdekat['nama'], terdekat['kategori'], terdekat['jarak_km'])
                 )
     except Exception as e:
         logger.warning(f'[SPATIAL] Gagal menghitung jarak infrastruktur: {e}')

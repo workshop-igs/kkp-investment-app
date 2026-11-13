@@ -238,13 +238,6 @@ if not DEBUG:
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
 
-SRGI_2013_SRID = 9779
-
-DEFAULT_SRID = 4326
-
-DATA_DIR = BASE_DIR / 'data'
-EXPORT_DIR = BASE_DIR / 'exports'
-
 (BASE_DIR / 'logs').mkdir(exist_ok=True)
 TINGKAT_LOG = os.getenv('DJANGO_LOG_LEVEL', 'DEBUG' if DEBUG else 'INFO')
 

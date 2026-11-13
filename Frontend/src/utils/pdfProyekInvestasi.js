@@ -18,7 +18,7 @@ const bagianRealisasi = (rencana, realisasi) => {
   return ((Number(realisasi) || 0) / r) * 100;
 };
 
-export function buatPdfProyekInvestasi({ ringkas, perStatus, perSektor, perProvinsi, proyek, cakupan }) {
+function buatPdfProyekInvestasi({ ringkas, perStatus, perSektor, perProvinsi, proyek, cakupan }) {
   const s = ringkas || {};
   const k = new Kanvas(
     'Laporan Proyek Investasi Ruang Laut',

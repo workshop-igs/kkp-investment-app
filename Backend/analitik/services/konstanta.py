@@ -106,20 +106,6 @@ MATRIKS_PERBANDINGAN_BAWAAN = [
     [0.2, 0.25, 1/3, 0.5, 1.0],
 ]
 
-VALIDATION_LIMITS = {
-    'min_capex': 1,
-    'min_revenue': 1,
-    'min_opex': 0,
-    'min_wacc': 0.01,
-    'max_wacc': 100.0,
-    'min_years': 1,
-    'max_years': 100,
-    'min_polygon_area_ha': 0.001,
-    'max_polygon_area_ha': 1_000_000,
-}
-
-DEFAULT_LOCAL_SUPPLY_RATIO = 0.30
-
 SPATIAL_DEFAULT_RISK = {
     'pasar': 0.40,
     'operasional': 0.40,
@@ -774,7 +760,6 @@ AMBANG_CAKUPAN_ACUAN = 0.99
 AMBANG_IRISAN_KKPRL_M2 = 1.0
 RADIUS_LOKASI_ALTERNATIF_KM = 100.0
 JUMLAH_LOKASI_ALTERNATIF = 5
-BATAS_PERIKSA_LOKASI = 8
 
 REGULASI_PENALTY = {
     'zona_tidak_cocok': 0.20,
@@ -912,8 +897,6 @@ BATAS_PESISIR_M = 1000
 
 GMW_TAHUN_AWAL = 1996
 GMW_TAHUN_AKHIR = 2020
-
-GMW_TREN_MASUK_SKOR = False
 
 GMW_AMBANG_TREN_PERSEN = 5.0
 

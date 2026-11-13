@@ -15,7 +15,7 @@ import { KATEGORI_ZONA, warnaJenisInvestasi, warnaKelasKelayakan, warnaZona } fr
 export const W = 297;
 export const H = 167.0625;
 export const TEPI = 14;
-export const ATAS = 31;
+const ATAS = 31;
 export const BAWAH = H - 15;
 const MM_PER_PT = 0.3528;
 const SUDUT = 2.6;
@@ -606,13 +606,11 @@ const hargaTeks = (k) => {
 
 const kelasS = (kelas) => ({ TINGGI: 'S1', SEDANG: 'S2' }[kelas] || null);
 const WARNA_S = { S1: C.tinggi, S2: C.sedang };
-const LABEL_S = { S1: 'Sangat sesuai (S1)', S2: 'Sesuai (S2)' };
 const unik = (daftar) => [...new Map(daftar.map((x) => [x.id, x])).values()];
 const lokasiSemua = (o) => unik(o.bab.flatMap((b) => b.lokasi));
 const finansialUtama = (b) => b.finansial.find((f) => f.hasil) || null;
 const komoditasBab = (o, b) => (b.komoditas ? o.komoditas.find((x) => x.kode === b.kode) : null);
 const tangkap = (b) => b.sektor === 'PERIKANAN_TANGKAP';
-const rpPenuh = (v) => (v == null ? '-' : formatRupiah(v));
 const rp = (v) => (v == null ? '-' : `Rp ${rupiahRingkas(v)}`);
 const tahunProduksi = (o) => o.komoditas.find((k) => k.unggulan)?.tahun;
 
@@ -1950,7 +1948,7 @@ function kesimpulanAkhir(dek, o) {
   dek.sumber('Kelayakan ruang: Layak bila ada lokasi prioritas berkelas S1; Bersyarat bila hanya S2. Kelayakan finansial dari kondisi dasar model usaha.');
 }
 
-export function buatProfil(o, citra = {}) {
+function buatProfil(o, citra = {}) {
   const jenis = o.jenis_dipilih;
   const perJenis = Boolean(jenis);
   const dek = new DekProfil(`Profil Investasi ${jenis ? `${jenis.nama} ` : ''}Provinsi ${o.wilayah.nama}`);
