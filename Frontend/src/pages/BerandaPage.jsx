@@ -40,20 +40,20 @@ const TANTANGAN = [
   {
     ikon: Layers,
     lencana: '?',
-    judul: 'Data tersebar di banyak sumber',
-    isi: 'Tata ruang, izin KKPRL, risiko bencana, dan kondisi perairan tersimpan di sistem yang berbeda-beda.',
+    judul: 'Data Terfragmentasi',
+    isi: 'Informasi tata ruang, izin KKPRL, risiko bencana, hingga kondisi perairan tersimpan di silo sistem yang terpisah.',
   },
   {
     ikon: FileStack,
     lencana: '!',
-    judul: 'Aturan ruang yang berlapis',
-    isi: 'Satu lokasi dapat diatur RTRW provinsi, rencana zonasi kawasan, dan RTRWN sekaligus.',
+    judul: 'Regulasi Berlapis',
+    isi: 'Satu titik koordinat terikat pada tumpang tindih RTRW provinsi, zonasi kawasan, hingga RTRWN secara bersamaan.',
   },
   {
     ikon: Map,
     lencana: <Clock3 className="h-5 w-5" />,
-    judul: 'Analisis manual yang lambat',
-    isi: 'Menumpangkan peta dan menghitung kelayakan satu per satu bisa memakan waktu berhari-hari.',
+    judul: 'Proses Manual yang Lambat',
+    isi: 'Overlay peta dan verifikasi kelayakan secara manual memakan waktu berminggu-minggu, menghambat keputusan investasi.',
   },
 ];
 
@@ -61,22 +61,22 @@ const FITUR = [
   {
     ikon: Map,
     judul: 'Peta spasial terpadu',
-    isi: 'Tata ruang, KKPRL, infrastruktur, risiko bencana, dan oseanografi dalam satu peta.',
+    isi: 'Integrasi data tata ruang, KKPRL, infrastruktur, risiko bencana, dan parameter oseanografi dalam satu tampilan.',
   },
   {
     ikon: SquareDashedMousePointer,
     judul: 'Analisis wilayah otomatis',
-    isi: 'Gambar atau unggah area, lalu baca kesesuaian ruang dan kelayakan finansialnya.',
+    isi: 'Tarik atau unggah poligon area untuk langsung mengevaluasi kesesuaian tata ruang dan kelayakan proyek.',
   },
   {
     ikon: FileText,
     judul: 'Profil investasi provinsi',
-    isi: 'PDF per provinsi dan per jenis investasi, disusun dari data publik.',
+    isi: 'Unduh laporan komprehensif per provinsi dan sektor investasi berbasis data publik terverifikasi.',
   },
   {
     ikon: Briefcase,
     judul: 'Pemantauan proyek investasi',
-    isi: 'Pantau proyek investasi dari tahap perencanaan sampai beroperasi.',
+    isi: 'Lacak progres realisasi proyek investasi secara transparan dari tahap perencanaan hingga operasional.',
   },
 ];
 
@@ -195,7 +195,7 @@ const KartuCekLokasi = () => (
       <SquareDashedMousePointer className={`h-5 w-5 text-kkp-700 ${GERAK_KECIL}`} aria-hidden="true" />
       Cek kelayakan lokasi
     </span>
-    <span className="mt-1 text-xs leading-snug text-slate-500">Gambar atau unggah area rencana investasi, lalu aplikasi memeriksa:</span>
+    <span className="mt-1 text-xs leading-snug text-slate-500">Gambar atau unggah poligon area untuk memvalidasi:</span>
     <ul className="mt-3 space-y-2">
       {PEMERIKSAAN.map((teks) => (
         <li key={teks} className="flex items-start gap-2 text-[13px] leading-snug text-slate-700">
@@ -549,7 +549,7 @@ const DataTerbuka = () => {
         <div className="lg:col-span-5">
           <Label nada="hijau">Data terbuka</Label>
           <h2 className="mt-6 text-balance text-4xl font-extrabold leading-[1.06] tracking-[-0.03em] text-kkp-900 sm:text-5xl">
-            Unduh data atau sambungkan ke aplikasi GIS.
+            Unduh data atau sambungkan ke aplikasi GIS
           </h2>
           <p className="mt-5 max-w-md leading-relaxed text-slate-600">
             Data rujukan ruang laut dapat diambil tanpa masuk akun. Data proyek dan data pribadi tidak ikut diterbitkan.
@@ -667,21 +667,21 @@ const BerandaPage = () => {
                   <KartuDataPeta />
                 </div>
                 <KartuKecil to="/pipeline" judul="Pantau proyek" isi="Dari perencanaan sampai beroperasi" ikon={Briefcase} />
-                <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Suhu dan gelombang" ikon={Waves} tanpaIsi />
+                <KartuKecil to="/peta?lapisan=osea_suhu" judul="Oseanografi" isi="Metrik kelautan" ikon={Waves} tanpaIsi />
                 <Link
                   to="/peta?lapisan=potensi"
                   className={`group col-span-2 block rounded-2xl bg-kkp-900 p-5 text-white transition-colors hover:bg-kkp-800 ${FOKUS}`}
                 >
                   <span className="flex items-start justify-between gap-3">
                     <span className="bg-kkp-toska px-2 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.2em] text-kkp-900">
-                      Peluang investasi
+                      Potensi Investasi
                     </span>
                     <ArrowUpRight className={`h-5 w-5 text-kkp-toska ${GERAK} group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:scale-110`} aria-hidden="true" />
                   </span>
                   <span className="mt-5 block text-5xl font-extrabold tracking-[-0.03em] text-[#BFE9F4] tabular-nums sm:text-6xl">
                     {angka(ringkas?.lokasi_potensial)}
                   </span>
-                  <span className="mt-3 block text-sm text-white/80">Lokasi potensial untuk minimal satu jenis investasi: lolos matriks Perda dan pengecualian (wilayah adat, alur pelayaran, ekosistem sensitif, jarak aman kabel/pipa, KKPRL, bangunan) serta memenuhi semua batas unggulan sub-sektornya dengan skor mutu tinggi</span>
+                  <span className="mt-3 block text-sm text-white/80">Zona potensial yang telah tervalidasi kesesuaian tata ruang, bebas tumpang tindih perizinan, dan siap dikembangkan.</span>
                 </Link>
                 <KartuKecil to="/peta?mulai=gambar" judul="Analisis Wilayah" isi="Gambar atau unggah area" ikon={SquareDashedMousePointer} />
                 <KartuKecil to="/profil-investasi" judul="Profil Investasi" isi="PDF per provinsi" ikon={FileText} />
@@ -693,7 +693,7 @@ const BerandaPage = () => {
         <section className="mx-auto max-w-7xl px-4 pb-24 pt-8 text-center sm:px-6 lg:px-8 lg:pb-28">
           <Label nada="hijau">Tantangan</Label>
           <h2 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-extrabold leading-[1.08] tracking-[-0.03em] text-kkp-900 sm:text-5xl">
-            Mengapa menilai ruang laut untuk investasi tidak pernah sederhana.
+            Mengapa menilai ruang laut untuk investasi tidak pernah sederhana
           </h2>
           <ul className="mt-16 grid gap-12 md:grid-cols-3 md:gap-8">
             {TANTANGAN.map(({ ikon, lencana, judul, isi }) => (
@@ -746,7 +746,7 @@ const BerandaPage = () => {
           <div className="lg:col-span-4">
             <Label>Cara kerja</Label>
             <h2 className="mt-6 text-balance text-4xl font-extrabold leading-[1.06] tracking-[-0.03em] text-kkp-900 sm:text-5xl">
-              Dari satu area di peta menjadi laporan kelayakan.
+              Dari satu area di peta menjadi laporan kelayakan
             </h2>
             <div className="mt-10">
               <TombolUtama to={isAuthenticated ? '/peta' : '/login'}>
@@ -777,19 +777,25 @@ const BerandaPage = () => {
 
       <section id="peluang" className="scroll-mt-24 px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
         <div className="mx-auto max-w-7xl text-center">
-          <Label>Peluang investasi</Label>
+          <Label>Potensi Investasi</Label>
           <h2 className="mx-auto mt-6 max-w-4xl text-balance text-4xl font-extrabold leading-[1.08] tracking-[-0.03em] text-kkp-900 sm:text-5xl">
-            Lokasi potensial untuk setiap jenis investasi.
+            Lokasi potensial untuk setiap jenis investasi
           </h2>
           <p className="mx-auto mt-5 max-w-2xl leading-relaxed text-slate-600">
-            Ruang laut dan darat pesisir dinilai per sel 250 m untuk tiap jenis investasi: peruntukan tata ruang dan
-            matriks Perda, karakter lokasi, risiko bencana, dan kriteria per jenis dari data publik. Yang dihitung hanya
-            lokasi di luar alur pelayaran, ekosistem sensitif, jarak aman kabel/pipa, KKPRL terbit, dan
-            bangunan, dengan satu titik terbaik per radius 10 km. Hasilnya indikatif, bukan pengganti Persetujuan KKPRL.
-            Pilih satu jenis untuk membuka profil investasinya per provinsi.
+            Setiap wilayah laut dan darat pesisir dianalisis menggunakan grid resolusi 250 meter. Sistem menyaring
+            kawasan yang sesuai dengan tata ruang, bebas dari risiko bencana, serta aman dari alur pelayaran dan
+            ekosistem sensitif.
           </p>
-          <Link to="/peta?lapisan=potensi" className="mt-5 inline-block text-sm font-bold text-kkp-700 underline-offset-4 hover:underline">
+          <p className="mx-auto mt-3 max-w-2xl leading-relaxed text-slate-600">
+            Hasil analisis ini bersifat indikatif untuk memandu perencanaan awal. Pilih jenis investasi untuk melihat
+            profil lengkap dan sebarannya di peta.
+          </p>
+          <Link
+            to="/peta?lapisan=potensi"
+            className={`mt-6 inline-flex items-center gap-2 rounded-xl bg-kkp-700 px-5 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-kkp-800 ${GERAK}`}
+          >
             Lihat sebarannya di peta
+            <ArrowUpRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </div>
 
