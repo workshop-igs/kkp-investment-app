@@ -156,9 +156,9 @@ const UnduhDataPage = () => {
           </section>
         ))}
 
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-500">
           Pengguna QGIS atau ArcGIS dapat memakai alamat layanan <code>{window.location.origin}{OWS}</code> secara langsung (WMS, WFS, WCS),
-          atau menjelajahi <Link to="/rest/services" className="text-kkp-700 hover:underline">Direktori Layanan Peta</Link> untuk keterangan, Query, dan unduhan per layer.
+          atau menjelajahi <Link to="/rest/services" className="text-kkp-700 underline hover:text-kkp-900">Direktori Layanan Peta</Link> untuk keterangan, Query, dan unduhan per layer.
         </p>
       </div>
     </div>
