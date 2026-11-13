@@ -140,19 +140,21 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         if (sasaran.is_staff or sasaran.is_superuser) and not request.user.is_superuser:
             raise PermissionDenied('Kata sandi akun Administrator hanya dapat diatur ulang oleh Super Admin.')
         baru = request.data.get('sandi_baru') or ''
-        if baru != (request.data.get('sandi_ulang') or ''):
-            raise ValidationError({'detail': 'Konfirmasi kata sandi tidak sama.'})
-        try:
-            validate_password(baru, user=sasaran)
-        except DjangoValidationError as e:
-            raise ValidationError({'detail': ' '.join(e.messages)}) from e
-        sasaran.set_password(baru)
-        sasaran.save(update_fields=['password'])
+        if baru:
+            if baru != (request.data.get('sandi_ulang') or ''):
+                raise ValidationError({'detail': 'Konfirmasi kata sandi tidak sama.'})
+            try:
+                validate_password(baru, user=sasaran)
+            except DjangoValidationError as e:
+                raise ValidationError({'detail': ' '.join(e.messages)}) from e
+            sasaran.set_password(baru)
+            sasaran.save(update_fields=['password'])
+        ProfilPengguna.objects.update_or_create(user=sasaran, defaults={'wajib_ganti_sandi': True})
         cache.delete_many([f'gagal-masuk:akun:{k.lower()}' for k in (sasaran.username, sasaran.email) if k])
         diakhiri = akhiri_sesi(sasaran)
-        catat(request, f"Mengatur ulang kata sandi akun '{_nama_akun(sasaran)}'", f'Akun @{sasaran.username}',
-              [f'Sesi aktif diakhiri: {diakhiri}'])
-        return Response({'detail': 'Kata sandi berhasil diatur ulang.', 'sesi_diakhiri': diakhiri})
+        catat(request, f"Mewajibkan akun '{_nama_akun(sasaran)}' membuat kata sandi baru", f'Akun @{sasaran.username}',
+              ['Kata sandi sementara diberikan' if baru else 'Tanpa kata sandi sementara', f'Sesi aktif diakhiri: {diakhiri}'])
+        return Response({'detail': 'Pengguna wajib membuat kata sandi baru saat masuk berikutnya.', 'sesi_diakhiri': diakhiri})
 
     def destroy(self, request, *args, **kwargs):
         sasaran = self.get_object()

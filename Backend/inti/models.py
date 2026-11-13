@@ -166,6 +166,9 @@ class ProfilPengguna(models.Model):
     akses_portofolio = models.BooleanField(
         default=False, help_text='Boleh membuka Dashboard Nasional dan Proyek Investasi'
     )
+    wajib_ganti_sandi = models.BooleanField(
+        default=False, help_text='Pengguna harus membuat kata sandi baru sebelum memakai aplikasi'
+    )
     terakhir_aktif = models.DateTimeField(
         null=True, blank=True, db_index=True, help_text='Permintaan terakhir dari akun ini (diperbarui paling sering per menit)'
     )

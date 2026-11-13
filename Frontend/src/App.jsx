@@ -5,6 +5,7 @@ import BatasGalat from './components/BatasGalat';
 import RuteTerlindung from './components/RuteTerlindung';
 import OverlayMemuat from './components/OverlayMemuat';
 import AsistenMengambang from './components/AsistenMengambang';
+import GantiSandiWajib from './components/GantiSandiWajib';
 
 import BerandaPage from './pages/BerandaPage';
 import AnalisisPage from './pages/AnalisisPage';
@@ -96,6 +97,7 @@ function App() {
         <AppLayout />
         <OverlayMemuat />
         <AsistenMengambang />
+        <GantiSandiWajib />
       </PenyediaAutentikasi>
     </Router>
   );

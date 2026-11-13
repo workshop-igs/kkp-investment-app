@@ -593,6 +593,7 @@ def _serialize_user(user):
         'provinsi_id': profil.provinsi_id if profil.provinsi else None,
         'provinsi_nama': profil.provinsi.nama if profil.provinsi else '',
         'terdaftar_pada': user.date_joined.isoformat() if user.date_joined else None,
+        'wajib_ganti_sandi': profil.wajib_ganti_sandi,
     }
 
 
@@ -800,6 +801,8 @@ def ganti_sandi_api(request):
     from django.contrib.auth.password_validation import validate_password
     from django.core.exceptions import ValidationError as DjangoValidationError
 
+    from .models import ProfilPengguna
+
     data = request.data if isinstance(request.data, dict) else {}
     lama = data.get('sandi_lama') or ''
     baru = data.get('sandi_baru') or ''
@@ -836,6 +839,7 @@ def ganti_sandi_api(request):
     user.set_password(baru)
     user.save(update_fields=['password'])
     update_session_auth_hash(request, user)
+    ProfilPengguna.objects.filter(user=user).update(wajib_ganti_sandi=False)
 
     return Response({
         'detail': 'Kata sandi berhasil diganti.',
