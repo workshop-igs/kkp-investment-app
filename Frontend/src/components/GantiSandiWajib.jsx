@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { KeyRound, Loader2, LogOut } from 'lucide-react';
+import { Eye, EyeOff, KeyRound, Loader2, LogOut } from 'lucide-react';
 import { api } from '../api/klien';
 import { useAutentikasi } from '../context/KonteksAutentikasi';
 
@@ -16,6 +16,7 @@ const GantiSandiWajib = () => {
   const [isian, setIsian] = useState(KOSONG);
   const [galat, setGalat] = useState(null);
   const [menyimpan, setMenyimpan] = useState(false);
+  const [terlihat, setTerlihat] = useState({});
 
   if (!user?.wajib_ganti_sandi) return null;
 
@@ -50,19 +51,30 @@ const GantiSandiWajib = () => {
           </div>
         </div>
         {MEDAN.map(([medan, label, isiOtomatis, catatan]) => (
-          <label key={medan} className="block">
-            <span className="mb-1.5 block text-xs font-semibold text-slate-700">{label}</span>
-            <input
-              type="password"
-              name={medan}
-              value={isian[medan]}
-              onChange={(e) => setIsian((s) => ({ ...s, [medan]: e.target.value }))}
-              autoComplete={isiOtomatis}
-              required
-              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-kkp-700 focus:outline-none focus:ring-2 focus:ring-kkp-700/20"
-            />
+          <div key={medan}>
+            <label htmlFor={`wajib-${medan}`} className="mb-1.5 block text-xs font-semibold text-slate-700">{label}</label>
+            <div className="relative">
+              <input
+                id={`wajib-${medan}`}
+                type={terlihat[medan] ? 'text' : 'password'}
+                name={medan}
+                value={isian[medan]}
+                onChange={(e) => setIsian((s) => ({ ...s, [medan]: e.target.value }))}
+                autoComplete={isiOtomatis}
+                required
+                className="w-full rounded-lg border border-slate-300 bg-white py-2 pl-3 pr-10 text-sm focus:border-kkp-700 focus:outline-none focus:ring-2 focus:ring-kkp-700/20"
+              />
+              <button
+                type="button"
+                onClick={() => setTerlihat((s) => ({ ...s, [medan]: !s[medan] }))}
+                aria-label={terlihat[medan] ? `Sembunyikan ${label.toLowerCase()}` : `Tampilkan ${label.toLowerCase()}`}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {terlihat[medan] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
             {catatan && <span className="mt-1 block text-[11px] text-slate-500">{catatan}</span>}
-          </label>
+          </div>
         ))}
         {galat && (
           <div role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">{galat}</div>

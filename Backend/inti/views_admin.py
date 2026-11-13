@@ -84,6 +84,7 @@ class AdminUserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.select_related('profil').all().order_by('-date_joined')
     serializer_class = AdminUserSerializer
     permission_classes = [IsAdminUser]
+    pagination_class = None
 
     def create(self, request, *args, **kwargs):
         serializer = TambahAkunSerializer(data=request.data)

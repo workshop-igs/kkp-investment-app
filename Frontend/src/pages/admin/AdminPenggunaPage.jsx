@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { api, ambilDaftar } from '../../api/klien';
 import { useAutentikasi } from '../../context/KonteksAutentikasi';
 import {
-  UserCheck, UserX, Pencil, Trash2, X, UserPlus, ShieldCheck, Loader2, CheckCircle2, AlertTriangle, KeyRound,
+  UserCheck, UserX, Pencil, Trash2, X, UserPlus, ShieldCheck, Loader2, CheckCircle2, AlertTriangle, KeyRound, Search,
 } from 'lucide-react';
 
 const ADMIN_KOSONG = {
@@ -97,6 +97,7 @@ const AdminPenggunaPage = () => {
   const [galatAkses, setGalatAkses] = useState(null);
   const [levelBaru, setLevelBaru] = useState('DASAR');
   const [users, setUsers] = useState([]);
+  const [cari, setCari] = useState('');
   const [loading, setLoading] = useState(true);
   const [provinsi, setProvinsi] = useState([]);
   const [diedit, setDiedit] = useState(null);
@@ -263,6 +264,12 @@ const AdminPenggunaPage = () => {
     </label>
   );
 
+  const kata = cari.trim().toLowerCase();
+  const tersaring = kata
+    ? users.filter((u) => [namaTampil(u), u.username, u.email, u.profil?.instansi, u.role_display]
+      .some((v) => v?.toLowerCase().includes(kata)))
+    : users;
+
   if (loading && users.length === 0) return <div className="p-8 text-slate-500 animate-pulse">Memuat data pengguna...</div>;
 
   return (
@@ -360,6 +367,22 @@ const AdminPenggunaPage = () => {
       )}
 
       <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 px-4 py-3 border-b border-slate-200">
+          <label className="relative flex-1 max-w-md">
+            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="search"
+              value={cari}
+              onChange={(e) => setCari(e.target.value)}
+              placeholder="Cari nama, username, email, instansi, atau peran"
+              aria-label="Cari pengguna"
+              className={`${KELAS_ISIAN} pl-9`}
+            />
+          </label>
+          <span className="text-xs text-slate-500">
+            {kata ? `${tersaring.length} dari ${users.length} pengguna` : `${users.length} pengguna`}
+          </span>
+        </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
@@ -374,7 +397,7 @@ const AdminPenggunaPage = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {users.map(u => (
+              {tersaring.map(u => (
                 <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                   <td className="px-4 py-4">
                     <div className="font-bold text-slate-900 whitespace-nowrap">{namaTampil(u)}</div>
@@ -467,10 +490,10 @@ const AdminPenggunaPage = () => {
                   </td>
                 </tr>
               ))}
-              {users.length === 0 && (
+              {tersaring.length === 0 && (
                 <tr>
                   <td colSpan="7" className="px-6 py-12 text-center text-slate-500">
-                    Tidak ada pengguna ditemukan.
+                    {kata ? `Tidak ada pengguna yang cocok dengan "${cari.trim()}".` : 'Tidak ada pengguna ditemukan.'}
                   </td>
                 </tr>
               )}
