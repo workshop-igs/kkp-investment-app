@@ -127,6 +127,33 @@ class AdminUserViewSet(viewsets.ModelViewSet):
               [f'Level: {LEVEL[lama]} → {LEVEL[baru]}'])
         return Response(AdminUserSerializer(User.objects.select_related('profil').get(pk=sasaran.pk)).data)
 
+    @action(detail=True, methods=['post'], url_path='atur-sandi')
+    def atur_sandi(self, request, pk=None):
+        from django.contrib.auth.password_validation import validate_password
+        from django.core.exceptions import ValidationError as DjangoValidationError
+
+        from .views import akhiri_sesi
+
+        sasaran = self.get_object()
+        if sasaran.pk == request.user.pk:
+            raise ValidationError({'detail': 'Ganti kata sandi Anda sendiri melalui halaman Profil.'})
+        if (sasaran.is_staff or sasaran.is_superuser) and not request.user.is_superuser:
+            raise PermissionDenied('Kata sandi akun Administrator hanya dapat diatur ulang oleh Super Admin.')
+        baru = request.data.get('sandi_baru') or ''
+        if baru != (request.data.get('sandi_ulang') or ''):
+            raise ValidationError({'detail': 'Konfirmasi kata sandi tidak sama.'})
+        try:
+            validate_password(baru, user=sasaran)
+        except DjangoValidationError as e:
+            raise ValidationError({'detail': ' '.join(e.messages)}) from e
+        sasaran.set_password(baru)
+        sasaran.save(update_fields=['password'])
+        cache.delete_many([f'gagal-masuk:akun:{k.lower()}' for k in (sasaran.username, sasaran.email) if k])
+        diakhiri = akhiri_sesi(sasaran)
+        catat(request, f"Mengatur ulang kata sandi akun '{_nama_akun(sasaran)}'", f'Akun @{sasaran.username}',
+              [f'Sesi aktif diakhiri: {diakhiri}'])
+        return Response({'detail': 'Kata sandi berhasil diatur ulang.', 'sesi_diakhiri': diakhiri})
+
     def destroy(self, request, *args, **kwargs):
         sasaran = self.get_object()
         if sasaran.pk == request.user.pk:

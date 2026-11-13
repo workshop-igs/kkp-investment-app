@@ -837,29 +837,30 @@ def ganti_sandi_api(request):
     user.save(update_fields=['password'])
     update_session_auth_hash(request, user)
 
+    return Response({
+        'detail': 'Kata sandi berhasil diganti.',
+        'sesi_lain_diakhiri': akhiri_sesi(user, getattr(getattr(request, 'auth', None), 'pk', None)),
+    })
+
+
+def akhiri_sesi(user, kecuali=None):
     diakhiri = 0
     try:
         from oauth2_provider.models import get_access_token_model, get_refresh_token_model
 
-        sekarang = getattr(request, 'auth', None)
-        id_sekarang = getattr(sekarang, 'pk', None)
         for refresh in get_refresh_token_model().objects.filter(user=user, revoked__isnull=True):
-            if id_sekarang and refresh.access_token_id == id_sekarang:
+            if kecuali and refresh.access_token_id == kecuali:
                 continue
             refresh.revoke()
             diakhiri += 1
         sisa = get_access_token_model().objects.filter(user=user)
-        if id_sekarang:
-            sisa = sisa.exclude(pk=id_sekarang)
+        if kecuali:
+            sisa = sisa.exclude(pk=kecuali)
         diakhiri += sisa.count()
         sisa.delete()
     except Exception as e:
-        logger.warning('[Auth] Gagal mengakhiri sesi lain sesudah ganti sandi: %s', e)
-
-    return Response({
-        'detail': 'Kata sandi berhasil diganti.',
-        'sesi_lain_diakhiri': diakhiri,
-    })
+        logger.warning('[Auth] Gagal mengakhiri sesi sesudah ganti sandi: %s', e)
+    return diakhiri
 
 
 AKSI_RIWAYAT = ('MASUK', 'KELUAR', 'DAFTAR', 'UBAH', 'HAPUS', 'ANALISIS', 'DITOLAK')
