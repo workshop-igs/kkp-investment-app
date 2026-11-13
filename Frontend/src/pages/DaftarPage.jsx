@@ -348,22 +348,16 @@ const DaftarPage = () => {
                 </div>
                 <span className="text-sm text-slate-600 group-hover:text-slate-800 transition-colors">
                   Saya menyatakan bahwa data yang diisi adalah benar, dan menyetujui pemrosesan data pribadi saya
-                  sesuai pemberitahuan pelindungan data pribadi di bawah ini.
+                  sesuai Kebijakan Privasi.
                 </span>
               </label>
-              <details className="mt-3 ml-8 text-xs text-slate-600">
-                <summary className="cursor-pointer font-bold text-sky-600 hover:underline">
-                  Pemberitahuan pelindungan data pribadi
-                </summary>
-                <ul className="mt-2 space-y-1.5 list-disc pl-4 leading-relaxed">
-                  <li>Pengendali data: Kementerian Kelautan dan Perikanan, sesuai UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi.</li>
-                  <li>Data yang dikumpulkan: nama, username, email, telepon, dan instansi, serta alamat IP dan jenis peramban saat Anda masuk atau mengubah data.</li>
-                  <li>Tujuan: membuat dan mengamankan akun, mengatur hak akses, dan mencatat jejak perubahan data di platform.</li>
-                  <li>Masa simpan: data akun disimpan selama akun ada; catatan aktivitas dihapus otomatis setelah masa simpannya berakhir.</li>
-                  <li>Data akun tidak dibagikan kepada pihak lain dan tidak ikut diterbitkan di layanan data terbuka.</li>
-                  <li>Anda dapat melihat dan memperbarui data di halaman Profil, serta meminta salinan data, penghapusan akun, atau penghentian pemrosesan kepada administrator platform.</li>
-                </ul>
-              </details>
+              <p className="mt-3 ml-8 text-xs leading-relaxed text-slate-500">
+                <strong className="text-slate-700">Pemberitahuan privasi.</strong> Kementerian Kelautan dan Perikanan
+                memproses nama, username, email, telepon, dan instansi Anda, serta alamat IP saat Anda masuk atau mengubah
+                data, untuk membuat dan mengamankan akun, mengatur hak akses, dan mencatat jejak perubahan, sesuai UU
+                No. 27 Tahun 2022. Data tidak dibagikan kepada pihak lain. Masa simpan dan hak Anda dijelaskan di{' '}
+                <Link to="/kebijakan-privasi" target="_blank" className="font-bold text-sky-600 hover:underline">Kebijakan Privasi</Link>.
+              </p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
