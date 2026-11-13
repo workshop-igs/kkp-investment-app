@@ -155,7 +155,7 @@ const DaftarPage = () => {
             </div>
             <div className="hidden sm:block text-sm text-right">
               <span className="text-slate-500">Sudah punya akun?</span><br/>
-              <Link to="/login" className="font-bold text-sky-600 hover:text-sky-700 underline decoration-2 underline-offset-4">Masuk di sini</Link>
+              <Link to="/login" className="font-bold text-sky-700 hover:text-sky-800 underline decoration-2 underline-offset-4">Masuk di sini</Link>
             </div>
           </div>
 
@@ -296,6 +296,7 @@ const DaftarPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
+                      aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                       className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -325,6 +326,7 @@ const DaftarPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      aria-label={showConfirmPassword ? 'Sembunyikan konfirmasi kata sandi' : 'Tampilkan konfirmasi kata sandi'}
                       className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

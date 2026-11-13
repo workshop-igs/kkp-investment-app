@@ -46,10 +46,11 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
     let timer = null;
     let pembatal = null;
 
+    const namaTitik = (p) => p?.nama || p?.NAMA || p?.name || p?.judul || 'Titik data';
     const buatPenanda = (latlng, p) => {
       if (!opsi.current.ikon) return L.circleMarker(latlng, opsi.current.gayaTitik || GAYA_TITIK);
       if (!pinAktif && opsi.current.warnaTitik) {
-        const titik = L.marker(latlng, { icon: ikonJauh(p, ukuranNoktah), riseOnHover: true });
+        const titik = L.marker(latlng, { icon: ikonJauh(p, ukuranNoktah), riseOnHover: true, title: namaTitik(p) });
         noktah.add(titik);
         return titik;
       }
@@ -68,6 +69,7 @@ const LapisanVektorBBox = ({ url, style, onEachFeature, gayaTitik, ikon, warnaIk
       const penanda = L.marker(latlng, {
         icon: buatIkon(ikonDari(p), warnaDari(p), skalaPin),
         riseOnHover: true,
+        title: namaTitik(p),
       });
       pin.add(penanda);
       return penanda;

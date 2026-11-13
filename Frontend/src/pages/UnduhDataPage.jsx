@@ -99,7 +99,7 @@ const UnduhDataPage = () => {
   const kelompok = [['Data vektor', tersaring.filter((l) => !l.raster)], ['Data raster', tersaring.filter((l) => l.raster)]];
 
   return (
-    <div className="h-full pt-[72px] overflow-y-auto bg-white custom-scrollbar">
+    <div className="h-full pt-[72px] overflow-y-auto bg-white custom-scrollbar" tabIndex={0}>
       <div className="max-w-4xl mx-auto p-5 lg:p-8 space-y-6">
         <div>
           <h1 className="text-2xl font-extrabold tracking-tight text-kkp-900">Unduh Data</h1>
@@ -148,7 +148,7 @@ const UnduhDataPage = () => {
         {kelompok.map(([judul, isi]) => isi.length > 0 && (
           <section key={judul}>
             <h2 className="flex items-center gap-2 text-sm font-bold text-kkp-900">
-              <Layers className="w-4 h-4" /> {judul} <span className="font-normal text-slate-400">({isi.length})</span>
+              <Layers className="w-4 h-4" /> {judul} <span className="font-normal text-slate-500">({isi.length})</span>
             </h2>
             <ul className="mt-1 divide-y divide-slate-100">
               {isi.map((l) => <BarisLapisan key={l.nama} lapisan={l} kotak={terpilih?.kotak} wilayah={wilayah} />)}

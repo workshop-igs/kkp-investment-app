@@ -166,7 +166,7 @@ const MasukPage = () => {
                   <label className="block text-xs font-semibold text-slate-700">
                     Kata Sandi (Password)
                   </label>
-                  <a href="#" onClick={(e) => { e.preventDefault(); alert('Untuk reset kata sandi, silakan hubungi administrator sistem KKP.'); }} className="text-[11px] font-semibold text-sky-600 hover:text-sky-700">
+                  <a href="#" onClick={(e) => { e.preventDefault(); alert('Untuk reset kata sandi, silakan hubungi administrator sistem KKP.'); }} className="text-[11px] font-semibold text-sky-700 hover:text-sky-800">
                     Lupa kata sandi?
                   </a>
                 </div>
@@ -183,6 +183,7 @@ const MasukPage = () => {
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
+                    aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
                     className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 transition-colors"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
