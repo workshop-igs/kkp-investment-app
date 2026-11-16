@@ -103,10 +103,10 @@ DAFTAR = [
     _d('JUMLAH_LOKASI_ALTERNATIF', 'analisis_area', 'Jumlah lokasi pengganti yang ditawarkan',
        'Banyaknya lokasi pengganti yang ditampilkan bila area tidak sesuai.', 'lokasi', (), (1, 20), bulat=True),
     _d('MODEL_USAHA', 'profil_keuangan', 'Model usaha per sub-jenis',
-       'Dipakai halaman analisis finansial Profil Investasi. Kosongkan harga untuk memakai harga produsen BPS provinsi; '
+       'Dipakai halaman analisis finansial Profil Investasi. Pada bab komoditas, harga produsen BPS provinsi selalu dipakai; harga di sini berlaku bila harga BPS tidak tersedia; '
        'sub-jenis tanpa volume, investasi, atau harga ditulis belum memiliki model usaha.'),
     _d('ASUMSI_MODEL_USAHA', 'profil_keuangan', 'Asumsi keuangan Profil Investasi',
-       'Berlaku untuk semua model usaha. CSR dihitung dari pendapatan bersih tahun sebelumnya.', batas=(0, 100)),
+       'Berlaku untuk semua model usaha. CSR dihitung dari laba setelah penyusutan modal tahun sebelumnya, hanya untuk model usaha yang layak (NPV positif).', batas=(0, 100)),
     _d('JUMLAH_LOKASI_PRIORITAS', 'profil_susunan', 'Lokasi prioritas per bab',
        'Banyaknya lokasi Peta Sebaran terbaik yang ditampilkan di tiap bab Profil Investasi.', 'lokasi', (), (1, 6),
        bulat=True),
@@ -326,7 +326,7 @@ LABEL_BAGIAN = {
     'lokasi_risiko': 'Lokasi dan risiko',
     'umur_tahun': 'Umur proyek (tahun)', 'diskonto_persen': 'Tingkat diskonto atau MARR (%)',
     'kenaikan_harga_persen': 'Kenaikan harga per tahun (%)', 'kenaikan_biaya_persen': 'Kenaikan biaya per tahun (%)',
-    'csr_persen': 'CSR (% pendapatan bersih)', 'batas_pbp_tahun': 'Batas masa pengembalian modal (tahun)',
+    'csr_persen': 'CSR (% laba setelah penyusutan)', 'batas_pbp_tahun': 'Batas masa pengembalian modal (tahun)',
     'UMUM': 'Jenis lain (umum)', 'S1': 'Sangat sesuai (S1)', 'S2': 'Sesuai (S2)',
     'SELAM': 'Selam', 'SNORKELING': 'Snorkeling', 'PANTAI': 'Rekreasi pantai',
 }
