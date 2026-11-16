@@ -1282,6 +1282,7 @@ function metode(dek, o) {
   dek.sumber('Sumber: kriteria kelayakan usaha mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026); alur kesesuaian ruang adalah mesin analisis aplikasi.');
 }
 
+const DARAT_SAJA = 'Sub-jenis ini berada di darat pesisir. Pemanfaatan ruangnya mengikuti pola ruang RTRW darat dan diurus melalui PKKPR, bukan PKKPRL, sehingga matriks kegiatan ruang laut tidak dicantumkan.';
 const alisBab = (i, b, n, nama) => `Bab ${i + 1}  |  ${namaRapi(b.nama)}  |  ${i + 1}.${n} ${nama}`;
 
 function ketentuanRinci(dek, j, x, y, lebar, ringkas = false) {
@@ -1332,6 +1333,9 @@ function kajian(dek, o, b, i) {
     let yy = dek.kartu(TEPI, yr, kiri, BAWAH - yr, { judul: 'Ruang laut dan ketentuan Perda', ikon: 'zona', aksen });
     dek.gaya(7.4, C.navy, true);
     dek.doc.text(`${angka(j.sesuai_ha)} ha ruang sesuai | ${angka(j.tinggi_ha)} ha kelas tinggi (S1)`, TEPI + 5, yy);
+    if (j.darat_saja) {
+      dek.teks(TEPI + 5, yy + 5, kiri - 10, DARAT_SAJA, { ukuran: 7 });
+    }
     ketentuanRinci(dek, j, TEPI + 5, yy + 5, kiri - 10, true);
 
     const x = TEPI + kiri + 5;
@@ -1387,7 +1391,7 @@ function kajian(dek, o, b, i) {
     yy = dek.deretPil(x + 5, yy + 5.4, lebar - 10, j.sub_zona_bersyarat, campur(C.sedang, 0.16), gelap(C.sedang, 0.75)) + 2;
   }
   if (j.darat_saja) {
-    yy = dek.teks(x + 5, yy + 2, lebar - 10, 'Sub-jenis ini berada di darat pesisir. Pemanfaatan ruangnya mengikuti pola ruang RTRW darat dan diurus melalui PKKPR, bukan PKKPRL, sehingga matriks kegiatan ruang laut tidak dicantumkan.', { ukuran: 7 });
+    yy = dek.teks(x + 5, yy + 2, lebar - 10, DARAT_SAJA, { ukuran: 7 });
   }
   ketentuanRinci(dek, j, x + 5, yy + 2, lebar - 10);
   dek.sumber('Sumber: analisis kesesuaian ruang laut aplikasi; ketentuan pemanfaatan ruang per sub-zona; rincian kegiatan dari matriks KKPRL Perda RTRW Provinsi.');
@@ -1461,7 +1465,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
       laut.SUHU != null && `suhu ${angka(laut.SUHU, 1)} °C`,
       laut.GELOMBANG != null && `gelombang ${angka(laut.GELOMBANG, 1)} m`,
       laut.KLOROFIL != null && `klorofil ${angka(laut.KLOROFIL, 2)} mg/m³`,
-    ].filter(Boolean).join('  ·  ');
+    ].filter(Boolean).join('; ');
     if (teksLaut) tulis(teksLaut, 2.9, lebar - 18, { ukuran: 5.9, warna: WARNA_LAUT });
     if (l.daya_dukung) {
       const dd = l.daya_dukung;
