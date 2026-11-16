@@ -90,11 +90,15 @@ def daftar_lapisan():
                'sql': "SELECT id, jenis, nama, luas_ha, kondisi, tahun_data, sumber_data, COALESCE(geometry_tampilan, geometry) "
                       f"AS geometry FROM inventarisasi_sumber_daya_alam WHERE jenis = '{k}'"}
               for k, v in EKOSISTEM.items()]
+    sektor = list(SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama').values_list('id', 'kode', 'nama'))
     hasil += [{'layanan': 'PotensiInvestasi', 'nama': f'skor_kelayakan_{kode.lower()}', 'jenis': 'POLYGON',
                'judul': f'Skor kelayakan dan kelas risiko zona: {nama}', 'skala': 2000000, 'gaya': WARNA_KELAS,
                'sql': SKOR_ZONA.format(sektor=pk)}
-              for pk, kode, nama in SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama')
-              .values_list('id', 'kode', 'nama')]
+              for pk, kode, nama in sektor]
+    hasil += [{'layanan': 'PotensiInvestasi', 'nama': f'titik_potensial_{kode.lower()}', 'jenis': 'POINT',
+               'judul': f'Titik lokasi potensial: {nama}', 'skala': None,
+               'sql': f'SELECT {ATRIBUT_LOKASI}, ST_PointOnSurface(l.geometry) AS geometry {DARI_LOKASI} AND l.sektor_id = {pk}'}
+              for pk, kode, nama in sektor]
     with connection.cursor() as c:
         for lay, awalan, tabel, kolom, isi in PER_KATEGORI:
             c.execute(f'SELECT DISTINCT {kolom}, ST_Dimension(geometry) FROM {tabel} '
