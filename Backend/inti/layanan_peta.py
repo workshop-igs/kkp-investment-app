@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 
 from analitik.models import RasterOseanografi
+from inti.models import SektorInvestasi
 
 LAYANAN = {
     'BatasWilayah': ('Batas Wilayah', 'Batas provinsi, kabupaten/kota, dan Wilayah Pengelolaan Perikanan (WPP-NRI)'),
@@ -13,10 +14,32 @@ LAYANAN = {
     'Ekosistem': ('Ekosistem Pesisir', 'Mangrove, terumbu karang, dan padang lamun'),
     'Infrastruktur': ('Infrastruktur', 'Pelabuhan, terminal khusus, jalan nasional, jaringan listrik, dan kawasan industri'),
     'RisikoBencana': ('Risiko Bencana', 'Zona risiko bencana pesisir dari BNPB InaRISK'),
-    'PotensiInvestasi': ('Potensi Investasi', 'Peta Sebaran Wilayah Potensial Investasi dan ruang sesuai per sub-jenis'),
+    'PotensiInvestasi': ('Potensi Investasi', 'Hasil analisis aplikasi: Peta Sebaran Wilayah Potensial Investasi, area '
+                         'indikatif, ruang sesuai per sub-jenis, serta skor kelayakan dan kelas risiko tiap zona untuk '
+                         'setiap jenis investasi'),
     'Oseanografi': ('Oseanografi dan Kondisi Fisik', 'Raster kedalaman, gelombang, arus, suhu, klorofil, dan kondisi fisik lain'),
 }
 JENIS_GEOMETRI = {0: 'POINT', 1: 'LINE', 2: 'POLYGON'}
+ATRIBUT_LOKASI = (
+    "l.id, s.nama AS jenis_investasi, l.rincian->>'sub_sektor' AS sub_jenis, l.rincian->>'sub_sektor_kode' AS kode_sub_jenis, "
+    "p.nama AS provinsi, l.rincian->>'nama' AS zona, l.rincian->>'sub_zona' AS sub_zona, "
+    "l.rincian->>'status_tata_ruang' AS status_tata_ruang, round((l.persen_sesuai * 100)::numeric, 1) AS persen_sel_sesuai, "
+    "(l.rincian->>'terukur')::int AS kriteria_terpenuhi, (l.rincian->>'total')::int AS kriteria_dinilai, l.luas_ha, "
+    "(l.rincian->>'luas_wilayah_ha')::float AS luas_area_indikatif_ha, l.dihitung_pada"
+)
+DARI_LOKASI = ('FROM analitik_lokasi_potensial l JOIN inti_sektor_investasi s ON s.id = l.sektor_id '
+               'JOIN inti_provinsi p ON p.id = l.provinsi_id WHERE l.tampil')
+SKOR_ZONA = (
+    "SELECT k.id, s.nama AS jenis_investasi, z.nama_zona, z.sub_zona, z.ranah, p.nama AS provinsi, "
+    "round((k.skor_total * 100)::numeric, 1) AS skor_kelayakan, k.kelas AS kelas_kelayakan, k.kelas_risiko, "
+    "NULLIF(k.status_tr, '') AS status_tata_ruang, k.sesuai_karakter, round((k.skor_lokasi * 100)::numeric, 1) AS skor_lokasi, "
+    "round((k.skor_risiko * 100)::numeric, 1) AS skor_risiko_terbalik, k.jumlah_kkprl, k.wilayah_adat, k.dihitung_pada, z.geometry "
+    'FROM analitik_skor_kelayakan_zona k JOIN inventarisasi_zonasi_ruang_laut z ON z.id = k.zona_id '
+    'JOIN inti_sektor_investasi s ON s.id = k.sektor_id LEFT JOIN inti_provinsi p ON p.id = z.provinsi_id '
+    'WHERE k.sektor_id = {sektor}'
+)
+WARNA_KELAS = {'kolom': 'kelas_kelayakan', 'kelas': [('TINGGI', '26 150 65'), ('SEDANG', '166 217 106'),
+                                                     ('RENDAH', '253 174 97'), ('SANGAT_RENDAH', '215 48 39')]}
 VEKTOR = [
     ('BatasWilayah', 'batas_provinsi', 'Batas provinsi', 'SELECT id, kode_bps, nama, geometry FROM inti_provinsi', None),
     ('BatasWilayah', 'batas_kabupaten_kota', 'Batas kabupaten/kota',
@@ -35,10 +58,9 @@ VEKTOR = [
     ('RisikoBencana', 'zona_risiko_bencana', 'Zona risiko bencana pesisir (BNPB InaRISK)',
      'SELECT id, jenis, varian, kelas, luas_ha, sumber, geometry FROM analitik_zona_risiko_bencana', 2000000),
     ('PotensiInvestasi', 'lokasi_potensial', 'Peta Sebaran Wilayah Potensial Investasi',
-     "SELECT l.id, s.nama AS jenis_investasi, l.rincian->>'sub_sektor' AS sub_jenis, "
-     "l.rincian->>'sub_sektor_kode' AS kode_sub_jenis, p.nama AS provinsi, l.luas_ha, l.dihitung_pada, l.geometry "
-     'FROM analitik_lokasi_potensial l JOIN inti_sektor_investasi s ON s.id = l.sektor_id '
-     'JOIN inti_provinsi p ON p.id = l.provinsi_id WHERE l.tampil', None),
+     f'SELECT {ATRIBUT_LOKASI}, l.geometry {DARI_LOKASI}', None),
+    ('PotensiInvestasi', 'area_potensial', 'Area indikatif wilayah potensial investasi',
+     f'SELECT {ATRIBUT_LOKASI}, l.wilayah AS geometry {DARI_LOKASI} AND l.wilayah IS NOT NULL', None),
     ('PotensiInvestasi', 'ruang_sesuai', 'Ruang sesuai per sub-jenis investasi (sel 250 m)',
      'SELECT r.id, s.nama AS jenis_investasi, r.sub_kode AS kode_sub_jenis, r.kelas, p.nama AS provinsi, r.luas_ha, r.geometry '
      'FROM analitik_ruang_sesuai r JOIN inti_sektor_investasi s ON s.id = r.sektor_id '
@@ -54,7 +76,7 @@ PER_KATEGORI = [
 TABEL = ['inti_provinsi', 'inti_kabupaten_kota', 'inti_wpp', 'inti_sektor_investasi', 'inventarisasi_zonasi_ruang_laut',
          'inventarisasi_kkprl', 'inventarisasi_izin_tambang', 'inventarisasi_sumber_daya_alam',
          'inventarisasi_infrastruktur_pendukung', 'inventarisasi_unsur_ruang_laut', 'analitik_zona_risiko_bencana',
-         'analitik_lokasi_potensial', 'analitik_ruang_sesuai', 'analitik_raster_oseanografi']
+         'analitik_lokasi_potensial', 'analitik_ruang_sesuai', 'analitik_raster_oseanografi', 'analitik_skor_kelayakan_zona']
 BATAS_QUERY = 1000
 CAKUPAN_INDONESIA = [94, -12, 142, 7]
 
@@ -68,6 +90,11 @@ def daftar_lapisan():
                'sql': "SELECT id, jenis, nama, luas_ha, kondisi, tahun_data, sumber_data, COALESCE(geometry_tampilan, geometry) "
                       f"AS geometry FROM inventarisasi_sumber_daya_alam WHERE jenis = '{k}'"}
               for k, v in EKOSISTEM.items()]
+    hasil += [{'layanan': 'PotensiInvestasi', 'nama': f'skor_kelayakan_{kode.lower()}', 'jenis': 'POLYGON',
+               'judul': f'Skor kelayakan dan kelas risiko zona: {nama}', 'skala': 2000000, 'gaya': WARNA_KELAS,
+               'sql': SKOR_ZONA.format(sektor=pk)}
+              for pk, kode, nama in SektorInvestasi.objects.filter(aktif=True).order_by('urutan', 'nama')
+              .values_list('id', 'kode', 'nama')]
     with connection.cursor() as c:
         for lay, awalan, tabel, kolom, isi in PER_KATEGORI:
             c.execute(f'SELECT DISTINCT {kolom}, ST_Dimension(geometry) FROM {tabel} '
