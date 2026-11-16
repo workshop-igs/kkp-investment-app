@@ -155,11 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
-    CORS_ALLOWED_ORIGINS = [
-        'https://investasi-ruanglaut.kkp.go.id',
-        'http://localhost:5173',
-        'http://127.0.0.1:5173',
-    ]
+    CORS_ALLOWED_ORIGINS = [a for a in os.getenv('DJANGO_CORS_ORIGINS', '').split(',') if a]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

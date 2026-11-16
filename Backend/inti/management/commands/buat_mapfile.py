@@ -90,8 +90,9 @@ class Command(BaseCommand):
                '  OUTPUTFORMAT NAME "GTiff" DRIVER "GDAL/GTiff" MIMETYPE "image/tiff" IMAGEMODE FLOAT32 EXTENSION "tif" END\n'
                '  WEB\n    METADATA\n      "ows_title" "Platform Manajemen Investasi Ruang Laut - KKP"\n'
                '      "ows_abstract" "Data rujukan ruang laut: tata ruang, perizinan, batas wilayah, infrastruktur, ekosistem, '
-               'oseanografi, risiko bencana, dan Peta Sebaran Wilayah Potensial Investasi"\n'
-               f'      "ows_onlineresource" {teks(alamat + "?")}\n      "ows_srs" "EPSG:4326 EPSG:3857"\n'
+               'oseanografi, risiko bencana, dan hasil analisis potensi investasi per jenis"\n'
+               + (f'      "ows_onlineresource" {teks(alamat + "?")}\n' if alamat else '')
+               + '      "ows_srs" "EPSG:4326 EPSG:3857"\n'
                '      "ows_enable_request" "*"\n      "ows_encoding" "UTF-8"\n      "wfs_maxfeatures" "10000"\n'
                '      "wfs_getfeature_formatlist" "geojson,shapezip,kml"\n      "wms_feature_info_mime_type" "application/vnd.ogc.gml"\n'
                '    END\n  END\n'
