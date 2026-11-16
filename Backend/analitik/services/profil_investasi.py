@@ -554,7 +554,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v14:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v15:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))

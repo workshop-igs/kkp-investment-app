@@ -103,7 +103,7 @@ DAFTAR = [
     _d('JUMLAH_LOKASI_ALTERNATIF', 'analisis_area', 'Jumlah lokasi pengganti yang ditawarkan',
        'Banyaknya lokasi pengganti yang ditampilkan bila area tidak sesuai.', 'lokasi', (), (1, 20), bulat=True),
     _d('MODEL_USAHA', 'profil_keuangan', 'Model usaha per sub-jenis',
-       'Dipakai halaman analisis finansial Profil Investasi. Pada bab komoditas, harga produsen BPS provinsi selalu dipakai; harga di sini berlaku bila harga BPS tidak tersedia; '
+       'Dipakai halaman analisis finansial Profil Investasi. Harga yang diisi di sini selalu dipakai; bila dikosongkan, bab komoditas memakai harga produsen BPS provinsi (produk bersatuan kg); '
        'sub-jenis tanpa volume, investasi, atau harga ditulis belum memiliki model usaha.'),
     _d('ASUMSI_MODEL_USAHA', 'profil_keuangan', 'Asumsi keuangan Profil Investasi',
        'Berlaku untuk semua model usaha. CSR dihitung dari laba setelah penyusutan modal tahun sebelumnya, hanya untuk model usaha yang layak (NPV positif).', batas=(0, 100)),
