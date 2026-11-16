@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from django.conf import settings
+from django.core.cache import cache
 from django.core.management.base import BaseCommand
 
 from inti.layanan_peta import TABEL, daftar_lapisan
@@ -73,6 +74,7 @@ class Command(BaseCommand):
             return
         db = settings.DATABASES['default']
         koneksi = f'host={db["HOST"]} port={db["PORT"]} dbname={db["NAME"]} user={pengguna} password={sandi}'
+        cache.delete('layanan_peta:lapisan')
         semua = daftar_lapisan()
         lapisan = [lp for lp in semua if lp['jenis'] != 'RASTER']
         rasters = [lp for lp in semua if lp['jenis'] == 'RASTER']
