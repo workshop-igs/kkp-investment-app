@@ -56,13 +56,12 @@ VEKTOR = [
      'FROM inventarisasi_izin_tambang', 2000000),
     ('RisikoBencana', 'zona_risiko_bencana', 'Zona risiko bencana pesisir (BNPB InaRISK)',
      'SELECT id, jenis, varian, kelas, luas_ha, sumber, geometry FROM analitik_zona_risiko_bencana', 2000000),
-    ('PotensiInvestasi', 'area_potensial', 'Area indikatif wilayah potensial investasi',
-     f'SELECT {ATRIBUT_LOKASI}, l.wilayah AS geometry {DARI_LOKASI} AND l.wilayah IS NOT NULL', None),
-    ('PotensiInvestasi', 'ruang_sesuai', 'Ruang sesuai per sub-jenis investasi (sel 250 m)',
-     'SELECT r.id, s.nama AS jenis_investasi, r.sub_kode AS kode_sub_jenis, r.kelas, p.nama AS provinsi, r.luas_ha, r.geometry '
-     'FROM analitik_ruang_sesuai r JOIN inti_sektor_investasi s ON s.id = r.sektor_id '
-     'JOIN inti_provinsi p ON p.id = r.provinsi_id', 2000000),
 ]
+RUANG_SESUAI = (
+    'SELECT r.id, s.nama AS jenis_investasi, r.sub_kode AS kode_sub_jenis, r.kelas, p.nama AS provinsi, r.luas_ha, r.geometry '
+    'FROM analitik_ruang_sesuai r JOIN inti_sektor_investasi s ON s.id = r.sektor_id '
+    'JOIN inti_provinsi p ON p.id = r.provinsi_id WHERE r.sektor_id = {sektor}'
+)
 EKOSISTEM = {'MANGROVE': 'Mangrove', 'TERUMBU_KARANG': 'Terumbu karang', 'LAMUN': 'Padang lamun'}
 PER_KATEGORI = [
     ('Infrastruktur', 'infrastruktur', 'inventarisasi_infrastruktur_pendukung', 'kategori',
@@ -95,6 +94,14 @@ def daftar_lapisan():
     hasil += [{'layanan': 'PotensiInvestasi', 'nama': f'titik_potensial_{kode.lower()}', 'jenis': 'POINT',
                'judul': f'Titik lokasi potensial: {nama}', 'skala': None,
                'sql': f'SELECT {ATRIBUT_LOKASI}, ST_PointOnSurface(l.geometry) AS geometry {DARI_LOKASI} AND l.sektor_id = {pk}'}
+              for pk, kode, nama in sektor]
+    hasil += [{'layanan': 'PotensiInvestasi', 'nama': f'area_potensial_{kode.lower()}', 'jenis': 'POLYGON',
+               'judul': f'Area indikatif lokasi potensial: {nama}', 'skala': None,
+               'sql': f'SELECT {ATRIBUT_LOKASI}, l.wilayah AS geometry {DARI_LOKASI} AND l.sektor_id = {pk} AND l.wilayah IS NOT NULL'}
+              for pk, kode, nama in sektor]
+    hasil += [{'layanan': 'PotensiInvestasi', 'nama': f'ruang_sesuai_{kode.lower()}', 'jenis': 'POLYGON',
+               'judul': f'Ruang sesuai per sub-jenis (sel 250 m): {nama}', 'skala': 2000000,
+               'sql': RUANG_SESUAI.format(sektor=pk)}
               for pk, kode, nama in sektor]
     with connection.cursor() as c:
         for lay, awalan, tabel, kolom, isi in PER_KATEGORI:
