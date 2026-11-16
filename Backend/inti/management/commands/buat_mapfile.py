@@ -29,7 +29,16 @@ def vektor(lp, koneksi, warna):
             f'    CONNECTION {teks(koneksi)}\n    DATA {teks(data)}\n'
             f'    PROJECTION "init=epsg:4326" END\n    TEMPLATE "kosong"\n'
             + (f'    MAXSCALEDENOM {lp["skala"]}\n' if lp['skala'] else '')
-            + metadata(lp['judul']) + f'    CLASS NAME {teks(lp["judul"])} {gaya} END\n  END\n')
+            + metadata(lp['judul']) + kelas(lp, gaya) + '  END\n')
+
+
+def kelas(lp, gaya):
+    if not lp.get('gaya'):
+        return f'    CLASS NAME {teks(lp["judul"])} {gaya} END\n'
+    return f'    CLASSITEM "{lp["gaya"]["kolom"]}"\n' + ''.join(
+        f'    CLASS NAME {teks(nilai.replace("_", " ").capitalize())} EXPRESSION "{nilai}" '
+        f'STYLE COLOR {w} OPACITY 55 END STYLE OUTLINECOLOR {w} WIDTH 0.6 END END\n'
+        for nilai, w in lp['gaya']['kelas'])
 
 
 def raster(r, koneksi):
