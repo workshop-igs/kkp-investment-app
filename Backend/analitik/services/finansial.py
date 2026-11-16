@@ -254,7 +254,7 @@ def _metrik_model(volume, harga, opex, capex, a):
 
 def hitung_model_usaha(model, harga_bawaan=None, asumsi=None):
     a = asumsi or atur('ASUMSI_MODEL_USAHA')
-    harga = harga_bawaan or model.get('harga_per_satuan')
+    harga = model.get('harga_per_satuan') or harga_bawaan
     from .konstanta import KOMPONEN_INVESTASI, KOMPONEN_OPERASIONAL
 
     def urut(isian, kunci):
@@ -294,7 +294,7 @@ def hitung_model_usaha(model, harga_bawaan=None, asumsi=None):
         'satuan_usaha': model['satuan_usaha'],
         'satuan_produk': model['satuan_produk'],
         'harga': round(harga, 2),
-        'harga_dari_bps': bool(harga_bawaan),
+        'harga_dari_bps': not model.get('harga_per_satuan'),
         'investasi': investasi,
         'investasi_total': round(capex),
         'operasional': operasional,
