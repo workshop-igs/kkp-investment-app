@@ -84,6 +84,7 @@ def hitung_ulang():
                 cache.clear()
             StatusHitungUlang.objects.filter(pk=1, versi=versi).update(perlu_lokasi=None, perlu_skor=False)
         jadwalkan_isi_cache_profil()
+        call_command('buat_mapfile')
     except Exception as e:
         logger.exception('[HITUNG ULANG] gagal')
         connection.close()
