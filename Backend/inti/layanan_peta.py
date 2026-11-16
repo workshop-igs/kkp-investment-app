@@ -14,9 +14,8 @@ LAYANAN = {
     'Ekosistem': ('Ekosistem Pesisir', 'Mangrove, terumbu karang, dan padang lamun'),
     'Infrastruktur': ('Infrastruktur', 'Pelabuhan, terminal khusus, jalan nasional, jaringan listrik, dan kawasan industri'),
     'RisikoBencana': ('Risiko Bencana', 'Zona risiko bencana pesisir dari BNPB InaRISK'),
-    'PotensiInvestasi': ('Potensi Investasi', 'Hasil analisis aplikasi: Peta Sebaran Wilayah Potensial Investasi, area '
-                         'indikatif, ruang sesuai per sub-jenis, serta skor kelayakan dan kelas risiko tiap zona untuk '
-                         'setiap jenis investasi'),
+    'PotensiInvestasi': ('Potensi Investasi', 'Hasil analisis aplikasi per jenis investasi: titik lokasi potensial, area '
+                         'indikatif, ruang sesuai per sub-jenis, serta skor kelayakan dan kelas risiko tiap zona'),
     'Oseanografi': ('Oseanografi dan Kondisi Fisik', 'Raster kedalaman, gelombang, arus, suhu, klorofil, dan kondisi fisik lain'),
 }
 JENIS_GEOMETRI = {0: 'POINT', 1: 'LINE', 2: 'POLYGON'}
@@ -57,8 +56,6 @@ VEKTOR = [
      'FROM inventarisasi_izin_tambang', 2000000),
     ('RisikoBencana', 'zona_risiko_bencana', 'Zona risiko bencana pesisir (BNPB InaRISK)',
      'SELECT id, jenis, varian, kelas, luas_ha, sumber, geometry FROM analitik_zona_risiko_bencana', 2000000),
-    ('PotensiInvestasi', 'lokasi_potensial', 'Peta Sebaran Wilayah Potensial Investasi',
-     f'SELECT {ATRIBUT_LOKASI}, l.geometry {DARI_LOKASI}', None),
     ('PotensiInvestasi', 'area_potensial', 'Area indikatif wilayah potensial investasi',
      f'SELECT {ATRIBUT_LOKASI}, l.wilayah AS geometry {DARI_LOKASI} AND l.wilayah IS NOT NULL', None),
     ('PotensiInvestasi', 'ruang_sesuai', 'Ruang sesuai per sub-jenis investasi (sel 250 m)',
