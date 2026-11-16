@@ -1386,6 +1386,9 @@ function kajian(dek, o, b, i) {
     dek.doc.text('Diizinkan bersyarat pada', x + 5, yy);
     yy = dek.deretPil(x + 5, yy + 5.4, lebar - 10, j.sub_zona_bersyarat, campur(C.sedang, 0.16), gelap(C.sedang, 0.75)) + 2;
   }
+  if (j.darat_saja) {
+    yy = dek.teks(x + 5, yy + 2, lebar - 10, 'Sub-jenis ini berada di darat pesisir. Pemanfaatan ruangnya mengikuti pola ruang RTRW darat dan diurus melalui PKKPR, bukan PKKPRL, sehingga matriks kegiatan ruang laut tidak dicantumkan.', { ukuran: 7 });
+  }
   ketentuanRinci(dek, j, x + 5, yy + 2, lebar - 10);
   dek.sumber('Sumber: analisis kesesuaian ruang laut aplikasi; ketentuan pemanfaatan ruang per sub-zona; rincian kegiatan dari matriks KKPRL Perda RTRW Provinsi.');
 }
@@ -1393,11 +1396,13 @@ function kajian(dek, o, b, i) {
 function lokasiSesuai(dek, o, b, i, citra) {
   const j = o.jenis[b.kode];
   const aksen = aksenBab(b);
+  const bersama = o.bab.filter((x) => x !== b && x.komoditas && x.sub_jenis.some((s) => b.sub_jenis.some((t) => t.kode === s.kode)))
+    .map((x) => x.nama);
   const y = dek.slide({
     alis: alisBab(i, b, 2, 'Lokasi dan daya dukung lingkungan'),
     judul: `Lokasi paling sesuai ${b.nama.toLowerCase()}`,
-    sub: `Peta kelas kesesuaian ${j.nama.toLowerCase()} dan lokasi prioritas sub-jenis ${b.sub_jenis.map((s) => s.nama.toLowerCase()).join(', ')} dari Peta Sebaran Wilayah Potensial Investasi.`,
-    subBaris: 2,
+    sub: `Peta kelas kesesuaian ${j.nama.toLowerCase()} dan lokasi prioritas sub-jenis ${b.sub_jenis.map((s) => s.nama.toLowerCase()).join(', ')} dari Peta Sebaran Wilayah Potensial Investasi.${bersama.length ? ` Lokasi ini sama dengan bab ${bersama.join(', ')} karena memakai sub-jenis yang sama; aplikasi belum membedakan daerah penangkapan per spesies.` : ''}`,
+    subBaris: bersama.length ? 3 : 2,
     aksen,
     bab: true,
   });
@@ -1456,7 +1461,7 @@ function lokasiSesuai(dek, o, b, i, citra) {
       laut.SUHU != null && `suhu ${angka(laut.SUHU, 1)} °C`,
       laut.GELOMBANG != null && `gelombang ${angka(laut.GELOMBANG, 1)} m`,
       laut.KLOROFIL != null && `klorofil ${angka(laut.KLOROFIL, 2)} mg/m³`,
-    ].filter(Boolean).join('  |  ');
+    ].filter(Boolean).join('  ·  ');
     if (teksLaut) tulis(teksLaut, 2.9, lebar - 18, { ukuran: 5.9, warna: WARNA_LAUT });
     if (l.daya_dukung) {
       const dd = l.daya_dukung;
@@ -1640,6 +1645,15 @@ function rantaiPasar(dek, o, b, i) {
 
 const irrTeks = (irr) => (irr <= -99 ? 'tidak terhitung' : `${angka(irr, 1)}%`);
 const WARNA_KOMPONEN = ['#0056A5', '#40BFDB', '#8CC63F', '#F59E0B', '#94A3B8'];
+const BAHAN = 'Benih, bibit, atau bahan baku';
+const ENERGI = 'Pakan, BBM, atau energi';
+const LABEL_KOMPONEN = {
+  PERIKANAN_TANGKAP: { [BAHAN]: 'Umpan dan bahan baku', [ENERGI]: 'BBM, es, dan energi' },
+  JASA_MARITIM: { [BAHAN]: 'Stok BBM dan bahan baku', [ENERGI]: 'BBM dan energi kapal' },
+  KONSERVASI_PESISIR: { [BAHAN]: 'Bibit dan bahan restorasi', [ENERGI]: 'BBM dan energi' },
+};
+const labelKomponen = (b, label) => (b.sektor === 'PERIKANAN_BUDIDAYA' ? label
+  : (LABEL_KOMPONEN[b.sektor] || { [BAHAN]: 'Bahan baku', [ENERGI]: 'BBM atau energi' })[label] || label);
 const WARNA_PROYEKSI = { pendapatan: '#0056A5', pengeluaran: '#EA580C', bersih: '#16A34A', kumulatif: '#7C3AED' };
 
 function finansial(dek, o, b, i, perJenis) {
@@ -1672,7 +1686,7 @@ function finansial(dek, o, b, i, perJenis) {
   [[h.investasi, `Investasi awal ${rp(h.investasi_total)}`], [h.operasional, `Operasional per tahun ${rp(h.operasional_total)}`]].forEach(([komponen, judul], n) => {
     const x = TEPI + 5 + n * ((kiri - 10) / 2);
     const item = Object.entries(komponen).sort((a1, a2) => a2[1] - a1[1])
-      .map(([label, nilai], c) => ({ label, nilai, warna: WARNA_KOMPONEN[c % WARNA_KOMPONEN.length] }));
+      .map(([label, nilai], c) => ({ label: labelKomponen(b, label), nilai, warna: WARNA_KOMPONEN[c % WARNA_KOMPONEN.length] }));
     dek.gaya(6.4, C.navy, true);
     dek.doc.text(bersih(judul), x, yy);
     dek.gambar(donutKanvas(item), x, yy + 2, ukuranDonut, ukuranDonut);
@@ -1882,7 +1896,7 @@ function csr(dek, o) {
   const y = dek.slide({
     alis: 'Penutup',
     judul: 'Proyeksi potensi dana CSR',
-    sub: `Asumsi ${angka(o.asumsi_finansial.csr_persen, 1)}% dari pendapatan bersih tahun sebelumnya, per satuan usaha model.`,
+    sub: `Asumsi ${angka(o.asumsi_finansial.csr_persen, 1)}% dari laba setelah penyusutan modal tahun sebelumnya, per satuan usaha model; model usaha yang tidak layak tidak menghasilkan CSR.`,
   });
   const [bagi, satuan] = skalaRupiah(ada.flatMap((b) => finansialUtama(b).hasil.csr.map((c) => c.nilai)));
   const seri = ada.map((b) => ({ label: b.nama, warna: aksenBab(b), nilai: finansialUtama(b).hasil.csr.map((c) => c.nilai / bagi) }));
@@ -1897,7 +1911,7 @@ function csr(dek, o) {
       const h = finansialUtama(b).hasil;
       return [b.nama, h.satuan_usaha, rp(h.csr.reduce((n, c) => n + c.nilai, 0))];
     }), { bagian: [0.4, 0.3, 0.3], rataKanan: [2], ukuran: 6.4 });
-  dek.teks(x, yTabel + 3, W - TEPI - x, `Potensi CSR tahun ke-n = ${angka(o.asumsi_finansial.csr_persen, 1)}% x pendapatan bersih tahun ke-(n-1); tahun pertama belum ada karena belum ada pendapatan tahun sebelumnya. Nilai dihitung per satuan usaha model dan berlipat sesuai skala investasi.`, { ukuran: 6.4, warna: C.abu });
+  dek.teks(x, yTabel + 3, W - TEPI - x, `Potensi CSR tahun ke-n = ${angka(o.asumsi_finansial.csr_persen, 1)}% x (pendapatan - biaya operasional - penyusutan modal) tahun ke-(n-1); tahun pertama belum ada karena belum ada laba tahun sebelumnya. Model usaha dengan NPV negatif tidak menghasilkan CSR. Nilai dihitung per satuan usaha model dan berlipat sesuai skala investasi.`, { ukuran: 6.4, warna: C.abu });
   dek.sumber('Sumber: model usaha Pengaturan Profil Investasi aplikasi; asumsi CSR mengacu laporan profil investasi perikanan NTB (KKP dan WCS, 2026).');
 }
 

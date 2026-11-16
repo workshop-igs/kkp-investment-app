@@ -254,7 +254,7 @@ def _metrik_model(volume, harga, opex, capex, a):
 
 def hitung_model_usaha(model, harga_bawaan=None, asumsi=None):
     a = asumsi or atur('ASUMSI_MODEL_USAHA')
-    harga = model.get('harga_per_satuan') or harga_bawaan
+    harga = harga_bawaan or model.get('harga_per_satuan')
     from .konstanta import KOMPONEN_INVESTASI, KOMPONEN_OPERASIONAL
 
     def urut(isian, kunci):
@@ -277,8 +277,10 @@ def hitung_model_usaha(model, harga_bawaan=None, asumsi=None):
         kumulatif += p - b
         proyeksi.append({'tahun': t, 'pendapatan': round(p), 'pengeluaran': round(b), 'bersih': round(p - b),
                          'kumulatif': round(kumulatif)})
-    csr = [{'tahun': t + 1, 'nilai': round(max(0.0, proyeksi[t - 1]['bersih']) * a['csr_persen'] / 100) if t else 0}
-           for t in range(umur)]
+    layak_csr = next(s for s in skenario if s['kode'] == dasar)['npv'] > 0
+    penyusutan = capex / umur
+    csr = [{'tahun': t + 1, 'nilai': round(max(0.0, proyeksi[t - 1]['bersih'] - penyusutan) * a['csr_persen'] / 100)
+            if t and layak_csr else 0} for t in range(umur)]
     langkah = max((abs(x) for x in atur('SENSITIVITAS_FINANSIAL')), default=0.1) or 0.1
     persen = round(langkah * 100)
     v = volume[dasar]
@@ -292,7 +294,7 @@ def hitung_model_usaha(model, harga_bawaan=None, asumsi=None):
         'satuan_usaha': model['satuan_usaha'],
         'satuan_produk': model['satuan_produk'],
         'harga': round(harga, 2),
-        'harga_dari_bps': not model.get('harga_per_satuan'),
+        'harga_dari_bps': bool(harga_bawaan),
         'investasi': investasi,
         'investasi_total': round(capex),
         'operasional': operasional,

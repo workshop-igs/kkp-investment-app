@@ -15,7 +15,7 @@ from analitik.services.konstanta import (
     PRIORITAS_SUMBER_ZONASI,
     SEKTOR_SUB_ZONA_COCOK,
 )
-from analitik.services.kriteria import kbli_sub, uraian
+from analitik.services.kriteria import kbli_sub, ranah_jenis, uraian
 from analitik.services.laporan_spasial import daya_dukung, pulau_kecil
 from analitik.services.oseanografi import statistik as statistik_oseanografi
 from analitik.services.pengaturan import BAWAAN, atur
@@ -337,16 +337,18 @@ def _rinci_jenis(c, provinsi, sektor, tol, subs):
     from ketenagakerjaan.proyeksi import _matriks
 
     status = _status_sub_zona(provinsi, sektor)
+    darat_saja = bool(subs) and all(ranah_jenis(sektor.kode, s) == {'DARAT'} for s in subs)
     return {
         'kode': sektor.kode,
         'nama': sektor.nama,
         'deskripsi': sektor.deskripsi,
         'rasio_tk_per_miliar': sektor.rasio_tk_per_miliar,
         **ruang_sesuai(c, provinsi, [(sektor.kode, s) for s in subs], tol),
-        'sub_zona_diizinkan': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'DIIZINKAN'),
-        'sub_zona_bersyarat': sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'BERSYARAT'),
+        'darat_saja': darat_saja,
+        'sub_zona_diizinkan': [] if darat_saja else sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'DIIZINKAN'),
+        'sub_zona_bersyarat': [] if darat_saja else sorted(LABEL_SUB_ZONA.get(s, s) for s, v in status.items() if v == 'BERSYARAT'),
         'karakter': uraian(sektor.kode),
-        'rincian_matriks': _rincian_matriks(provinsi, sektor),
+        'rincian_matriks': None if darat_saja else _rincian_matriks(provinsi, sektor),
         'keahlian': _matriks(sektor.kode)[:atur('JUMLAH_KEAHLIAN')],
     }
 
@@ -552,7 +554,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v13:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v14:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))
