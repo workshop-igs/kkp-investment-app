@@ -750,22 +750,19 @@ function sampulKanvas(o, citra) {
   k.width = Math.round(W * s);
   k.height = Math.round(H * s);
   const ctx = k.getContext('2d');
-  const g = ctx.createLinearGradient(0, 0, k.width, k.height);
-  g.addColorStop(0, '#001a33');
-  g.addColorStop(0.6, '#00376b');
-  g.addColorStop(1, '#0b4f7a');
-  ctx.fillStyle = g;
+  ctx.fillStyle = '#011a31';
   ctx.fillRect(0, 0, k.width, k.height);
   const lebarPeta = Math.round(k.width * SAMPUL.bagian);
   const peta = o.wilayah.cakupan && kanvasPeta({
     cakupan: o.wilayah.cakupan, batas: o.wilayah.batas, citra, lebar: lebarPeta, tinggi: k.height, bingkai: false,
   });
   if (peta) ctx.drawImage(peta, k.width - lebarPeta, 0);
-  const tutup = ctx.createLinearGradient(k.width - lebarPeta, 0, k.width - lebarPeta * 0.4, 0);
-  tutup.addColorStop(0, 'rgba(0,26,51,1)');
-  tutup.addColorStop(1, 'rgba(0,26,51,0)');
+  const tutup = ctx.createLinearGradient(0, 0, k.width, 0);
+  tutup.addColorStop(0, 'rgba(0,38,77,1)');
+  tutup.addColorStop(0.5, 'rgba(1,32,62,0.94)');
+  tutup.addColorStop(0.72, 'rgba(1,26,49,0)');
   ctx.fillStyle = tutup;
-  ctx.fillRect(k.width - lebarPeta - 2, 0, lebarPeta * 0.6, k.height);
+  ctx.fillRect(0, 0, k.width, k.height);
   const bawah = ctx.createLinearGradient(0, k.height * 0.6, 0, k.height);
   bawah.addColorStop(0, 'rgba(0,26,51,0)');
   bawah.addColorStop(1, 'rgba(0,26,51,0.88)');
