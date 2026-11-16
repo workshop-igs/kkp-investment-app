@@ -11,6 +11,7 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.gis.geos import GEOSGeometry, MultiPolygon
 from django.core.cache import cache
+from django.core.management import call_command
 from django.db import connection, transaction
 from django.db.models import Count, Q
 from django.db.models.deletion import Collector
@@ -247,10 +248,12 @@ class AdminSektorViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         s = serializer.save()
         catat(self.request, f"Menambahkan jenis investasi '{s.nama}'", f'Jenis {s.kode}')
+        call_command('buat_mapfile')
 
     def perform_update(self, serializer):
         s, rincian = simpan_berjejak(serializer)
         catat(self.request, f"Mengubah jenis investasi '{s.nama}'", f'Jenis {s.kode}', rincian)
+        call_command('buat_mapfile')
 
     @action(detail=True, methods=['get'])
     def dampak(self, request, pk=None):
@@ -284,6 +287,7 @@ class AdminSektorViewSet(viewsets.ModelViewSet):
             jadwalkan_hitung_ulang(lokasi=provinsi)
         catat(self.request, f"Menghapus jenis investasi '{instance.nama}' beserta datanya", f'Jenis {instance.kode}',
               [f'{proyek} proyek kini tanpa jenis investasi'] if proyek else ())
+        call_command('buat_mapfile')
 
     @action(detail=True, methods=['get', 'put'])
     def ketentuan(self, request, pk=None):
