@@ -534,7 +534,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                   </div>
                   <p className="mt-1.5 text-[11px] text-slate-400 leading-snug">
                     Bila diisi, angka ini yang dipakai sebagai serapan tenaga kerja. Bila
-                    dikosongkan, dihitung dari rasio per sektor terhadap nilai investasi.
+                    dikosongkan, angka serapan tidak dicantumkan di laporan.
                   </p>
                 </div>
                 </div>

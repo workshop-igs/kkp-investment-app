@@ -358,7 +358,7 @@ const DaftarPage = () => {
                 memproses nama, username, email, telepon, dan instansi Anda, serta alamat IP saat Anda masuk atau mengubah
                 data, untuk membuat dan mengamankan akun, mengatur hak akses, dan mencatat jejak perubahan, sesuai UU
                 No. 27 Tahun 2022. Data tidak dibagikan kepada pihak lain. Masa simpan dan hak Anda dijelaskan di{' '}
-                <Link to="/kebijakan-privasi" target="_blank" className="font-bold text-sky-600 hover:underline">Kebijakan Privasi</Link>.
+                <Link to="/kebijakan-privasi" target="_blank" className="font-bold text-sky-700 hover:underline">Kebijakan Privasi</Link>.
               </p>
             </div>
 
