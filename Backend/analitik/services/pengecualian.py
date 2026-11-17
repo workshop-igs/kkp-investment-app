@@ -174,7 +174,8 @@ def nilai_area(irisan, sektor_kode, luas_aoi):
         luas, jenis = irisan[UNSUR][alur_terlarang(sektor_kode)]
         buffer = atur('BUFFER_UNSUR_TERLARANG_M')
         tambah(UNSUR, luas, ', '.join(f'{NAMA_UNSUR.get(j, j)} (jarak aman {buffer[j]:.0f} m)' for j in jenis))
-    tambah(BANGUNAN, irisan[BANGUNAN], 'bangunan atau struktur eksisting', atur('AMBANG_TERBANGUN_PERSEN'))
+    tambah(BANGUNAN, irisan[BANGUNAN], 'bangunan atau struktur eksisting (OpenStreetMap dan Google Open Buildings, CC BY 4.0)',
+           atur('AMBANG_TERBANGUN_PERSEN'))
     return hasil
 
 
