@@ -20,8 +20,8 @@ const angka = (v) => Number(v).toLocaleString('id-ID');
 
 const Tautan = ({ href, children, ...sisa }) => (
   href.startsWith('/') && !href.startsWith(OWS)
-    ? <Link to={href} className="text-kkp-700 hover:underline">{children}</Link>
-    : <a href={href} className="text-kkp-700 hover:underline" {...sisa}>{children}</a>
+    ? <Link to={href} className="text-kkp-700 underline">{children}</Link>
+    : <a href={href} className="text-kkp-700 underline" {...sisa}>{children}</a>
 );
 
 const Baris = ({ label, children }) => (
