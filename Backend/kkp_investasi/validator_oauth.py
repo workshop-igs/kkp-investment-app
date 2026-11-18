@@ -66,6 +66,10 @@ class EmailOrUsernameOAuth2Validator(OAuth2Validator):
                 logger.info('[OAuth2] Email tidak terdaftar: %s', identifier)
                 return False
             nama_pengguna = pengguna.get_username()
+        else:
+            pengguna = User.objects.filter(username__iexact=identifier).first()
+            if pengguna is not None:
+                nama_pengguna = pengguna.get_username()
 
         user = authenticate(username=nama_pengguna, password=password)
 
