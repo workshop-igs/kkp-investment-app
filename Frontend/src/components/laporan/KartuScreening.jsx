@@ -520,11 +520,11 @@ const RincianPerda = ({ perda }) => {
   );
 };
 
-const ZonaKetentuan = ({ z, sektor, sama, terbuka }) => {
+const ZonaKetentuan = ({ z, sektor, sama }) => {
   const statusJenis = LABEL_KEGIATAN.find(([kode]) => z.kegiatan[kode].includes(sektor));
   const adaKegiatan = LABEL_KEGIATAN.some(([kode]) => z.kegiatan[kode].length);
   return (
-    <details className="group" open={terbuka}>
+    <details className="group">
       <summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-2.5 hover:bg-slate-50 [&::-webkit-details-marker]:hidden">
         <ChevronRight className="h-4 w-4 shrink-0 text-slate-400 transition-transform group-open:rotate-90" />
         <div className="min-w-0 flex-1">
@@ -612,7 +612,7 @@ const KetentuanArea = ({ s }) => {
         {s.informasi_ruang.map((z, i) => {
           const k = z.perda && `${z.perda.sumber}|${z.perda.nama_zona}`;
           const sama = k && pertama.get(k) !== z ? pertama.get(k) : null;
-          return <ZonaKetentuan key={`${z.nama}-${z.sub_zona_label}-${i}`} z={z} sektor={s.sektor_nama} sama={sama} terbuka={i === 0} />;
+          return <ZonaKetentuan key={`${z.nama}-${z.sub_zona_label}-${i}`} z={z} sektor={s.sektor_nama} sama={sama} />;
         })}
       </div>
     </section>
