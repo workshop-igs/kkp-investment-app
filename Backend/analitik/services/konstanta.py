@@ -549,6 +549,7 @@ ASUMSI_MODEL_USAHA = {
     'umur_tahun': 10, 'diskonto_persen': 12.0, 'kenaikan_harga_persen': 0.0, 'kenaikan_biaya_persen': 0.0,
     'csr_persen': 2.5, 'batas_pbp_tahun': 10,
 }
+PORSI_PEMANFAATAN_LUAS = 0.3
 DAYA_DUKUNG_WISATA = [
     ('SELAM', 2, 2000, 8, 2),
     ('SNORKELING', 1, 250, 6, 3),

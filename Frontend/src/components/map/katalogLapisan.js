@@ -12,6 +12,9 @@ import {
 } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
 import { API_V1_URL } from '../../api/alamat';
+import { getAccessToken } from '../../api/autentikasi';
+import { api } from '../../api/klien';
+import { rupiahRingkas } from '../../utils/pemformat';
 import { lambangSvg } from './ikonPeta';
 
 const TOMBOL_ANALISIS = `<button type="button" data-analisis-lokasi class="mt-2 w-full rounded-lg bg-[#0056A5] px-3 py-1.5 text-[11px] font-semibold text-white hover:bg-[#004a8f]">
@@ -322,6 +325,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
           <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Semua batas unggulan terpenuhi${p.total ? ` (${p.terukur} dari ${p.total} kriteria terukur)` : ''}</p>
           <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">${p.luas_wilayah_ha > p.luas_ha ? `Area indikatif &plusmn;${aman(Number(p.luas_wilayah_ha).toLocaleString('id-ID'))} ha; Analisis lokasi ini menilai inti terbaik &plusmn;${aman(luas)} ha di dalamnya` : `Area indikatif &plusmn;${aman(luas)} ha`}</p>
         </div>
+        <div data-nilai-investasi></div>
         ${gerbang.length
           ? `<div class="mt-2 rounded-lg bg-emerald-50 px-2.5 py-1.5">
               <p class="text-[10.5px] font-semibold text-emerald-800">&check; Lolos gerbang Perda KKPRL dan pengecualian</p>
@@ -340,6 +344,21 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         <p class="text-[10px] text-slate-400 mt-1 leading-snug">Penyaringan awal dari peta tata ruang berskala provinsi; bukan pengganti Persetujuan KKPRL.</p>
         ${TOMBOL_ANALISIS}
       </div>`;
+    },
+    saatBuka: (elemen, idFitur) => {
+      const kotak = elemen?.querySelector('[data-nilai-investasi]');
+      if (!kotak || idFitur === undefined || idFitur === null || !getAccessToken()) return;
+      api.get(`/analitik/lokasi-potensial/${idFitur}/nilai/`).then(({ data }) => {
+        const ada = (data?.nilai || []).filter((n) => n.nilai_investasi);
+        if (!ada.length) return;
+        kotak.innerHTML = `<div class="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
+          ${ada.length === 1
+            ? `<p class="flex items-baseline justify-between gap-2 text-[11px] font-semibold text-slate-700"><span>Potensi nilai investasi</span><span class="text-[15px] tabular-nums text-slate-900">Rp ${rupiahRingkas(ada[0].nilai_investasi)}</span></p>`
+            : `<p class="text-[11px] font-semibold text-slate-700">Potensi nilai investasi</p>
+               <ul class="mt-0.5 space-y-px">${ada.map((n) => `<li class="flex items-baseline justify-between gap-2 text-[11px] text-slate-700"><span>${aman(n.sub_jenis)}</span><b class="shrink-0 tabular-nums text-slate-900">Rp ${rupiahRingkas(n.nilai_investasi)}</b></li>`).join('')}</ul>`}
+          <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Perkiraan modal bila lokasi direalisasikan, dari model usaha sub-jenisnya.</p>
+        </div>`;
+      }).catch(() => {});
     },
   },
   kkprl: {

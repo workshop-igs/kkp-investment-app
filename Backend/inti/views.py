@@ -333,10 +333,13 @@ def _komoditas_dashboard():
 @api_view(['GET'])
 @permission_classes([AksesPortofolio])
 def dashboard_stats(request):
+    from collections import defaultdict
+
     from django.core.cache import cache
     from django.db.models import Avg, Count, Sum
 
     from analitik.models import LokasiPotensial
+    from analitik.services.finansial import nilai_investasi_lokasi
     from analitik.services.kriteria import kbli_sub
     from inventarisasi.models import KKPRL, PotensiInvestasi, ZonasiRuangLaut
     from pipeline.models import ProyekInvestasi
@@ -469,6 +472,10 @@ def dashboard_stats(request):
             .order_by('-nilai_investasi_miliar', 'id')
         )
     ]
+    nilai_potensi = defaultdict(int)
+    for prov, kode, sub, luas in LokasiPotensial.objects.filter(tampil=True, sektor__isnull=False).values_list(
+            'provinsi_id', 'sektor__kode', 'rincian__sub_sektor_kode', 'luas_ha'):
+        nilai_potensi[prov, kode] += nilai_investasi_lokasi(sub, luas) or 0
     potensi_wilayah = [
         {
             'provinsi_id': r['provinsi_id'],
@@ -476,6 +483,7 @@ def dashboard_stats(request):
             'kode': r['sektor__kode'],
             'lokasi': r['lokasi'],
             'luas_ha': round(float(r['luas'] or 0), 1),
+            'nilai_investasi': nilai_potensi[r['provinsi_id'], r['sektor__kode']] if r['sektor__kode'] else None,
         }
         for r in LokasiPotensial.objects.filter(tampil=True).values('provinsi_id', 'provinsi__nama', 'sektor__kode')
         .annotate(lokasi=Count('id'), luas=Sum('luas_ha')).order_by()
