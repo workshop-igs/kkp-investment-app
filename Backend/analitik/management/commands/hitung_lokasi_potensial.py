@@ -807,8 +807,8 @@ class Command(BaseCommand):
         lok = LokasiPotensial.objects.select_related('sektor').get(id=i)
         if 'lolos_ruang' not in lok.rincian:
             try:
-                lok.rincian['lolos_ruang'] = screening_ruang(json.loads(lok.geometry.geojson), lok.sektor.kode,
-                                                             lok.rincian.get('sub_sektor_kode'))['lanjut']
+                h = screening_ruang(json.loads(lok.geometry.geojson), lok.sektor.kode, lok.rincian.get('sub_sektor_kode'))
+                lok.rincian['lolos_ruang'] = h['lanjut'] and h['kecocokan_fisik']['label'] != 'Perlu kajian lapangan'
             except ValueError:
                 lok.rincian['lolos_ruang'] = False
             LokasiPotensial.objects.filter(id=i).update(rincian=lok.rincian)

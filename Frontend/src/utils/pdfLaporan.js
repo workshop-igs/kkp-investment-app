@@ -664,7 +664,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
   if (sc) {
     k.tema(
       'Tahap 1 - Screening Kesesuaian Ruang',
-      'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN) dan matriks KKPRL Perda, tumpang tindih dengan KKPRL terbit, pengecualian alur pelayaran yang berlaku di atas RTRW (kecuali jasa maritim dan infrastruktur laut), serta kecocokan fisik (kedalaman, gelombang, dan sejenisnya) dengan jenis investasi. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial; lokasi yang belum terverifikasi tetap dilanjutkan dengan label.'
+      'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN) dan matriks KKPRL Perda, tumpang tindih dengan KKPRL terbit, pengecualian alur pelayaran yang berlaku di atas RTRW (kecuali jasa maritim dan infrastruktur laut), serta wilayah adat. Kecocokan fisik (kedalaman, gelombang, dan sejenisnya) dinilai sesudahnya dan tidak mengubah kesesuaian ruang. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial; lokasi yang belum terverifikasi tetap dilanjutkan dengan label.'
     );
     k.bukaKartu(
       `Hasil: ${sc.status_label}${kelengkapanScreening(sc)?.indikatif ? ' (indikatif)' : ''}`,
@@ -727,16 +727,16 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         + 'yang terukur memenuhi syarat dan sedikitnya separuh kriteria terukur; kriteria tanpa data dilewati. Kolom Unggulan '
         + 'memuat batas lokasi unggulan yang dipakai Peta Sebaran: area unggulan bila semua kriteria yang datanya tersedia '
         + 'terukur dan memenuhinya, dan skor mutunya (kedekatan nilai ke kondisi ideal, 0-100, dikurangi di zona bersyarat) '
-        + 'mencapai batas minimal.', { ukuran: 6.4 });
+        + 'mencapai batas minimal. Hasil ini tidak mengubah kesesuaian ruang.', { ukuran: 6.4 });
       if (!sc.sub_sektor.length) k.teks(fisik?.alasan || '', { ukuran: 7 });
       const STATUS = (l) => (l === true ? 'Terpenuhi' : l === false ? 'Tidak terpenuhi' : 'Dilewati');
       sc.sub_sektor.forEach((h) => {
         const unggul = Object.fromEntries((h.unggulan?.kriteria || []).map((x) => [x.kunci, x]));
         const khusus = (h.unggulan?.kriteria || []).filter((x) => !h.kriteria.some((y) => y.kunci === x.kunci));
-        k.teks(`${h.nama}${h.kbli ? ` (KBLI ${h.kbli.kode})` : ''}: ${h.cocok ? 'cocok' : h.gagal.length ? 'tidak cocok' : 'data belum cukup'} `
+        k.teks(`${h.nama}${h.kbli ? ` (KBLI ${h.kbli.kode})` : ''}: ${h.cocok ? 'cocok' : h.gagal.length ? 'perlu kajian lapangan' : 'data belum cukup'} `
           + `(${h.terukur} dari ${h.total} kriteria terukur${h.unggulan?.skor != null ? `, skor mutu ${h.unggulan.skor}` : ''})`
           + `${h.unggulan?.lolos ? ', lokasi unggulan' : ''}`,
-        { tebal: true, warna: h.cocok ? HIJAU_TEKS : MERAH_TEKS, ukuran: 7 });
+        { tebal: true, warna: h.cocok ? HIJAU_TEKS : AMBER_TEKS, ukuran: 7 });
         k.tabel(
           ['Kriteria', 'Di lokasi', 'Syarat', 'Status', 'Unggulan'],
           [...h.kriteria, ...khusus, ...h.umum, ...(h.informasi || [])].map((x) => {
