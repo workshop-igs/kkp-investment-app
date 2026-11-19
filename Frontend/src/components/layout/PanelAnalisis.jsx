@@ -364,9 +364,9 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                 <h3 className="font-bold text-slate-800 mb-1 text-[15px]">Analisis Kesesuaian Ruang</h3>
                 <p className="text-xs text-slate-500 mb-5">
                   Kesesuaian terhadap RTRW Provinsi, Rencana Zonasi KAW, atau RTRWN (berjenjang) dan matriks KKPRL
-                  Perda, KKPRL yang sudah terbit, alur pelayaran, serta kecocokan fisik (kedalaman, gelombang, dan
-                  sejenisnya) dengan jenis investasi. Lokasi yang tidak sesuai tidak dapat dilanjutkan; lokasi yang belum
-                  terverifikasi tetap dapat dilanjutkan dengan label.
+                  Perda, KKPRL yang sudah terbit, alur pelayaran, dan wilayah adat. Kecocokan fisik (kedalaman,
+                  gelombang, dan sejenisnya) dinilai sesudahnya sebagai catatan kajian lapangan. Lokasi yang tidak sesuai
+                  tidak dapat dilanjutkan; lokasi yang belum terverifikasi tetap dapat dilanjutkan dengan label.
                 </p>
                 {memeriksa && (
                   <div className="flex items-center gap-2 text-sm text-slate-500 py-6">

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { AlertTriangle, CheckCircle2, ChevronRight, CircleHelp, MapPin, Search, XCircle } from 'lucide-react';
 import { keDesimal, keDMS } from '../../utils/koordinat';
 import { gabungZona, persenArea, ringkasKkprlZona } from '../../utils/normalisasiAnalisis';
-import { catatanSkala, kelengkapanScreening, ringkasKelengkapan } from '../../utils/kelengkapanData';
+import { kelengkapanScreening, ringkasKelengkapan } from '../../utils/kelengkapanData';
 import { JENIS_PERINGATAN, fisikScreening, pengecualianScreening, peringatanScreening } from '../../utils/hasilScreening';
 
 const GAYA = {
@@ -123,7 +123,7 @@ const Ringkasan = ({ s }) => {
       'Kecocokan fisik',
       fisik.label,
       `untuk ${(fisik.sub_sektor || s.sektor_nama).toLowerCase()}`,
-      fisik.cocok ? 'text-emerald-700' : fisik.label === 'Belum dapat dinilai' ? 'text-amber-700' : 'text-rose-700',
+      fisik.cocok ? 'text-emerald-700' : 'text-amber-700',
     ],
     Array.isArray(s.sub_sektor) ? kelengkapan && [
       'Kriteria terukur',
@@ -267,8 +267,8 @@ const KarakterLokasi = ({ s }) => {
     <section>
       <Judul>Kecocokan fisik {s.sektor_nama.toLowerCase()}</Judul>
       <p className="-mt-1 mb-2 text-[11px] text-slate-400">
-        Kedalaman, gelombang, dan sejenisnya dari data global beresolusi kasar. Area yang kondisi fisiknya tidak cocok
-        dinyatakan tidak sesuai; pastikan dengan survei lapangan.
+        Kedalaman, gelombang, dan sejenisnya dari data global beresolusi kasar. Hasilnya tidak mengubah kesesuaian
+        ruang; kondisi yang belum cocok perlu kajian lapangan.
       </p>
       <div className="rounded-lg border border-slate-200 bg-white text-xs">
         <div className="grid gap-px overflow-hidden rounded-t-lg bg-slate-100 sm:grid-cols-2">
@@ -279,7 +279,7 @@ const KarakterLokasi = ({ s }) => {
           <div className="bg-white px-3 py-2">
             <div className="flex items-center justify-between gap-2">
               <span className="text-[10.5px] font-semibold text-slate-500">Kondisi area</span>
-              <Pil kode={fisik.cocok ? 'DIIZINKAN' : 'TIDAK_DIIZINKAN'}>{fisik.label}</Pil>
+              <Pil kode={fisik.cocok ? 'DIIZINKAN' : 'BERSYARAT'}>{fisik.label}</Pil>
             </div>
             <p className="mt-0.5 leading-snug text-slate-700">{s.karakter.terukur}</p>
           </div>
@@ -345,7 +345,7 @@ const KarakterLokasi = ({ s }) => {
 
 const statusSub = (h) => {
   if (h.cocok) return ['DIIZINKAN', 'Cocok'];
-  return h.gagal.length ? ['TIDAK_DIIZINKAN', 'Tidak cocok'] : [null, 'Data belum cukup'];
+  return h.gagal.length ? ['BERSYARAT', 'Perlu kajian lapangan'] : [null, 'Data belum cukup'];
 };
 
 const KriteriaSubSektor = ({ s }) => {
@@ -358,7 +358,8 @@ const KriteriaSubSektor = ({ s }) => {
         yang terukur memenuhi syarat dan sedikitnya separuh kriterianya terukur; kriteria tanpa data dilewati. Kolom
         Unggulan memuat batas lokasi unggulan yang dipakai Peta Sebaran: area unggulan bila semua kriteria yang datanya
         tersedia terukur dan memenuhinya, dan skor mutunya (kedekatan nilai ke kondisi ideal, 0–100, dikurangi di zona
-        bersyarat) mencapai batas minimal. Data global beresolusi kasar, pastikan dengan survei lapangan.
+        bersyarat) mencapai batas minimal. Hasil ini tidak mengubah kesesuaian ruang; data global beresolusi kasar, pastikan
+        dengan survei lapangan.
       </p>
       {s.sub_sektor.length === 0 && <p className="text-xs leading-snug text-slate-700">{s.kecocokan_fisik?.alasan}</p>}
       <div className="space-y-3">
@@ -618,49 +619,6 @@ const KetentuanArea = ({ s }) => {
   );
 };
 
-const AsalData = ({ s }) => (
-  <section>
-    <Judul>Asal data &amp; batas ketelitian</Judul>
-    {s.asal_data?.length > 0 && (
-      <div className="overflow-x-auto rounded-lg border border-slate-200 bg-white">
-        <table className="w-full text-left text-xs">
-          <thead className="bg-slate-50 text-slate-500">
-            <tr>
-              <th className="px-3 py-2 font-semibold">Data</th>
-              <th className="px-3 py-2 font-semibold">Sumber</th>
-              <th className="px-3 py-2 font-semibold">Keterangan &amp; tanggal</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {s.asal_data.map((d, i) => (
-              <tr key={i} className="align-top">
-                <td className="px-3 py-1.5 font-medium text-slate-700">{d.data}</td>
-                <td className="px-3 py-1.5 text-slate-600">{d.sumber}</td>
-                <td className="px-3 py-1.5 text-slate-500">
-                  {d.keterangan || '-'}
-                  {d.kedaluwarsa && (
-                    <span className="ml-1.5 inline-block rounded bg-amber-50 px-1.5 py-0.5 text-[10.5px] font-semibold text-amber-800 ring-1 ring-amber-200">
-                      Melewati masa berlaku {d.kedaluwarsa} tahun
-                    </span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-    <ul className="mt-2 space-y-1">
-      {catatanSkala(s).map((c) => (
-        <li key={c} className="flex gap-2 text-[11px] leading-snug text-slate-500">
-          <span className="mt-[6px] h-1 w-1 shrink-0 rounded-full bg-slate-400" />
-          {c}
-        </li>
-      ))}
-    </ul>
-  </section>
-);
-
 const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
   const zona = gabungZona(s.zona);
@@ -736,8 +694,6 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
           </div>
         </section>
       )}
-
-      <AsalData s={s} />
 
       {s.rekomendasi && (
         <div className="space-y-5 border-t border-slate-200 pt-5">

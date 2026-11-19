@@ -315,11 +315,12 @@ ALAT = {
         }),
     ),
     'screening_ruang': (
-        'Pemeriksaan kesesuaian sebuah area untuk satu jenis investasi: lebih dulu matriks KKPRL Perda, KKPRL terbit, '
-        'wilayah adat, dan pengecualian sebagai gerbang, lalu kecocokan fisik per sub-sektor terhadap kriteria '
-        'jenis itu. SATU-SATUNYA sumber status kesesuaian dan izin ruang: jangan menyimpulkan boleh atau tidaknya '
-        'kegiatan di suatu lokasi dari alat lain. Jelaskan hasilnya memakai status_label dan kalimat pada alasan apa '
-        'adanya, lalu sebutkan kriteria fisik yang TIDAK memenuhi beserta nilai dan syaratnya.',
+        'Pemeriksaan kesesuaian sebuah area untuk satu jenis investasi: status ditentukan hanya oleh matriks KKPRL '
+        'Perda, KKPRL terbit, wilayah adat, dan pengecualian; kecocokan fisik per sub-sektor dinilai sesudahnya dan '
+        'tidak mengubah status. SATU-SATUNYA sumber status kesesuaian dan izin ruang: jangan menyimpulkan boleh atau '
+        'tidaknya kegiatan di suatu lokasi dari alat lain. Jelaskan hasilnya memakai status_label dan kalimat pada '
+        'alasan apa adanya, lalu sebutkan kriteria fisik yang TIDAK memenuhi beserta nilai dan syaratnya sebagai hal '
+        'yang perlu kajian lapangan.',
         _skema({'geometri': GEOMETRI, 'jenis_investasi': JENIS}, ['geometri', 'jenis_investasi']),
         lambda r, a: _screening(r, a['geometri'], a['jenis_investasi']),
     ),

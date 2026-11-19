@@ -21,7 +21,7 @@ export const fisikScreening = (s) => {
   if (!s.karakter) return null;
   return {
     ...s.karakter,
-    label: s.karakter.cocok ? 'Cocok' : 'Tidak cocok',
+    label: s.karakter.cocok ? 'Cocok' : 'Perlu kajian lapangan',
     syarat: (s.syarat_dasar || []).filter((d) => LABEL_FISIK.has(d.label)),
   };
 };
