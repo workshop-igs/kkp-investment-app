@@ -360,34 +360,51 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
         const jumlahUnit = (n) => (n.per_hektar
           ? `Luas dimanfaatkan: ${angkaId(n.luas_ha)} ha &times; ${persen(n.porsi)} = <b class="font-semibold text-slate-800">${angkaId(n.unit)} ha</b>${n.unit === 1 && n.luas_ha * n.porsi < 1 ? ' (paling sedikit 1 ha)' : ''}`
           : 'Dihitung <b class="font-semibold text-slate-800">1 unit</b>; model usaha per unit tidak bergantung luas lokasi.');
-        const baris = (judul, nilai, isi) => `<details class="group">
-          <summary class="flex cursor-pointer list-none items-baseline justify-between gap-2 [&::-webkit-details-marker]:hidden" title="Klik untuk melihat hitungan">
-            <span class="flex items-baseline gap-1 text-[11px] text-slate-700"><span class="text-slate-400 transition-transform group-open:rotate-90">&#9656;</span>${judul}</span>
-            <b class="shrink-0 text-[13px] tabular-nums text-slate-900">${rp(nilai)}</b>
-          </summary>
-          <div class="mb-1 mt-1 rounded-md bg-white px-2 py-1.5 text-[10.5px] leading-snug text-slate-600 ring-1 ring-slate-200">${isi}</div>
-        </details>`;
+        const GAYA = {
+          modal: { kartu: 'bg-[#0056A5]/[0.06] ring-[#0056A5]/20 hover:bg-[#0056A5]/10 aria-expanded:ring-2 aria-expanded:ring-[#0056A5]/60', label: 'text-[#0056A5]', total: 'text-[#0056A5]' },
+          untung: { kartu: 'bg-emerald-50 ring-emerald-200 hover:bg-emerald-100/70 aria-expanded:ring-2 aria-expanded:ring-emerald-500/70', label: 'text-emerald-700', total: 'text-emerald-700' },
+        };
+        const kartu = (id, jenis, judul, nilai, ket) => `<button type="button" data-rincian="${id}" aria-expanded="false" class="group flex min-w-0 flex-col rounded-lg px-2.5 py-2 text-left ring-1 ring-inset transition ${GAYA[jenis].kartu}">
+          <span class="text-[10.5px] font-semibold leading-tight ${GAYA[jenis].label}">${judul}</span>
+          <span class="mt-0.5 text-[16px] font-bold leading-tight tabular-nums text-slate-900">${rp(nilai)}</span>
+          <span class="mt-0.5 flex items-center justify-between gap-1 text-[10px] leading-tight text-slate-500">${ket}<span class="shrink-0 transition-transform group-aria-expanded:rotate-180">&#9662;</span></span>
+        </button>`;
+        const panel = (id, jenis, judul, isi, nilai) => `<div data-panel="${id}" hidden class="mt-1.5 rounded-lg bg-white px-2.5 py-2 text-[10.5px] leading-snug text-slate-600 ring-1 ring-slate-200">
+          <p class="mb-1 text-[11px] font-semibold text-slate-800">${judul}</p>
+          ${isi}
+          <p class="mt-1 flex justify-between gap-2 border-t border-slate-200 pt-1 text-[11.5px] font-bold ${GAYA[jenis].total}"><span>Hasil</span><span class="tabular-nums">${rp(nilai)}</span></p>
+        </div>`;
         const hitungModal = (n) => `<p>Model usaha acuan: <b class="font-semibold text-slate-800">${aman(n.satuan_usaha)}</b></p>
           ${daftar(n.komponen)}
           <p class="${garis} text-slate-800"><span>Modal per ${per(n)}</span><span class="tabular-nums">${rp(n.modal_per_unit)}</span></p>
           <p class="mt-1">${jumlahUnit(n)}</p>
-          <p class="${garis} text-slate-900"><span>${rp(n.modal_per_unit)} &times; ${angkaId(n.unit)}</span><span class="tabular-nums">${rp(n.nilai_investasi)}</span></p>`;
+          <p class="mt-1 text-slate-500">${rp(n.modal_per_unit)} &times; ${angkaId(n.unit)}</p>`;
         const hitungUntung = (n, k) => `<p>Produksi per ${per(n)}: <b class="font-semibold text-slate-800">${angkaId(k.volume)} ${aman(k.satuan_produk)}</b> &times; ${rp(k.harga)}</p>
           <p class="${garis} text-slate-800"><span>Pendapatan per tahun</span><span class="tabular-nums">${rp(k.pendapatan)}</span></p>
           ${daftar(k.operasional, '&minus;')}
           <p class="${garis} text-slate-800"><span>Keuntungan per ${per(n)}</span><span class="tabular-nums">${rp(k.laba)}</span></p>
           <p class="mt-1">${jumlahUnit(n)}</p>
-          <p class="${garis} text-slate-900"><span>${rp(k.laba)} &times; ${angkaId(n.unit)}</span><span class="tabular-nums">${rp(k.nilai_per_tahun)}</span></p>
-          <p class="mt-1 text-[10px] text-slate-500">Sebelum pajak dan penyusutan.</p>`;
-        const blok = (n) => `<div>
-          ${ada.length > 1 ? `<p class="text-[11px] font-semibold text-slate-700">${aman(n.sub_jenis)}</p>` : ''}
-          ${baris('Potensi nilai investasi', n.nilai_investasi, hitungModal(n))}
-          ${n.keuntungan ? baris('Potensi keuntungan per tahun', n.keuntungan.nilai_per_tahun, hitungUntung(n, n.keuntungan)) : ''}
+          <p class="mt-1 text-slate-500">${rp(k.laba)} &times; ${angkaId(n.unit)}; sebelum pajak dan penyusutan</p>`;
+        const blok = (n, i) => `<div>
+          ${ada.length > 1 ? `<p class="mb-1 text-[11px] font-semibold text-slate-700">${aman(n.sub_jenis)}</p>` : ''}
+          <div class="grid ${n.keuntungan ? 'grid-cols-2' : 'grid-cols-1'} gap-1.5">
+            ${kartu(`m${i}`, 'modal', 'Nilai investasi', n.nilai_investasi, 'modal awal')}
+            ${n.keuntungan ? kartu(`u${i}`, 'untung', 'Keuntungan per tahun', n.keuntungan.nilai_per_tahun, 'sebelum pajak') : ''}
+          </div>
+          ${panel(`m${i}`, 'modal', 'Hitungan nilai investasi', hitungModal(n), n.nilai_investasi)}
+          ${n.keuntungan ? panel(`u${i}`, 'untung', 'Hitungan keuntungan per tahun', hitungUntung(n, n.keuntungan), n.keuntungan.nilai_per_tahun) : ''}
         </div>`;
-        kotak.innerHTML = `<div class="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
-          <div class="space-y-1.5">${ada.map(blok).join('')}</div>
-          <p class="mt-1 text-[10px] text-slate-500 leading-tight">Perkiraan bila lokasi direalisasikan, dari model usaha sub-jenisnya. Klik angka untuk melihat hitungan.</p>
+        kotak.innerHTML = `<div class="mt-2">
+          <div class="space-y-2">${ada.map(blok).join('')}</div>
+          <p class="mt-1.5 text-[10px] leading-tight text-slate-500">Perkiraan bila lokasi direalisasikan, dari model usaha sub-jenisnya. Klik kartu untuk melihat hitungan.</p>
         </div>`;
+        kotak.querySelectorAll('[data-rincian]').forEach((tombol) => tombol.addEventListener('click', () => {
+          const buka = tombol.getAttribute('aria-expanded') !== 'true';
+          kotak.querySelectorAll('[data-rincian]').forEach((t) => t.setAttribute('aria-expanded', 'false'));
+          kotak.querySelectorAll('[data-panel]').forEach((p) => { p.hidden = true; });
+          tombol.setAttribute('aria-expanded', String(buka));
+          kotak.querySelector(`[data-panel="${tombol.dataset.rincian}"]`).hidden = !buka;
+        }));
       }).catch(() => {});
     },
   },
