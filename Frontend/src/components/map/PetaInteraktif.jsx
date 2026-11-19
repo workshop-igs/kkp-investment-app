@@ -560,6 +560,7 @@ const PetaInteraktif = ({
                   const judul = katalog[id].tooltip?.(p) || p.nama || p.pemohon;
                   if (judul) layer.bindTooltip(judul, { sticky: true, className: 'map-tooltip' });
                   layer.on('popupopen', (e) => {
+                    katalog[id].saatBuka?.(e.popup.getElement(), feature.id);
                     e.popup
                       .getElement()
                       ?.querySelector('[data-analisis-lokasi]')

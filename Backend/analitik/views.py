@@ -29,7 +29,7 @@ from .models import (
     ZonaRisikoBencana,
 )
 from .services.ahp import jalankan_analisis_ahp
-from .services.finansial import jalankan_analisis_finansial
+from .services.finansial import jalankan_analisis_finansial, nilai_investasi_lokasi
 from .services.kriteria import kbli_sub, uraian
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
@@ -421,6 +421,18 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
         sektor = lok.sektor.kode if lok.sektor_id else (lok.jenis[0] if lok.jenis else None)
         return Response({'geometry': json.loads(lok.geometry.geojson), 'sektor_kode': sektor,
                          'sub_sektor_kode': lok.rincian.get('sub_sektor_kode')})
+
+    @action(detail=True, url_path='nilai', permission_classes=[IsAuthenticated])
+    def nilai(self, request, pk=None):
+        lok = self.get_object()
+        anggota = [lok] if lok.sektor_id else LokasiPotensial.objects.filter(
+            tampil=True, sektor__isnull=False, provinsi_id=lok.provinsi_id, geometry__intersects=lok.geometry,
+        ).select_related('sektor').order_by('-persen_sesuai')
+        return Response({'nilai': [
+            {'sub_jenis': a.rincian.get('sub_sektor') or a.sektor.nama,
+             'nilai_investasi': nilai_investasi_lokasi(a.rincian.get('sub_sektor_kode'), a.luas_ha)}
+            for a in anggota
+        ]})
 
     def peta_urutan(self, qs, request, batas):
         return anotasi_wpp(anotasi_alamat(qs.order_by('-persen_sesuai', '-luas_ha', 'id')))

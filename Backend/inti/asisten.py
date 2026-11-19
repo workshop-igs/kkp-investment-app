@@ -2,6 +2,7 @@ import json
 import logging
 import re
 import time
+from collections import Counter
 from pathlib import Path
 
 import httpx
@@ -171,7 +172,18 @@ def _jenis_investasi(request):
 
 def _portofolio(request):
     kode, data = _api(request, 'GET', '/api/v1/inti/dashboard/')
-    return kode, {k: v for k, v in data.items() if k not in ('proyek', 'komoditas')} if kode == 200 else data
+    if kode != 200:
+        return kode, data
+    per_jenis, per_provinsi = Counter(), Counter()
+    for r in data['potensi_wilayah']:
+        if r['kode']:
+            per_jenis[r['kode']] += r['nilai_investasi'] or 0
+            per_provinsi[r['provinsi']] += r['nilai_investasi'] or 0
+    return kode, {
+        **{k: v for k, v in data.items() if k not in ('proyek', 'komoditas')},
+        'potensi_nilai_investasi_per_jenis_nasional': {k: _rupiah(v) for k, v in per_jenis.most_common()},
+        'potensi_nilai_investasi_per_provinsi': {k: _rupiah(v) for k, v in per_provinsi.most_common()},
+    }
 
 
 STATUS_KRITERIA = {True: 'memenuhi', False: 'TIDAK memenuhi', None: 'belum terukur'}
@@ -335,8 +347,11 @@ ALAT = {
         'Ringkasan Dashboard Nasional: jumlah proyek, nilai rencana dan realisasi, tenaga kerja, sebaran per tahap '
         'proyek, per jenis investasi, dan per provinsi; jumlah dan luas lokasi potensial Peta Sebaran Wilayah '
         'Potensial Investasi seluruhnya (summary.potensi) dan per provinsi dan jenis (potensi_wilayah; kode null = '
-        'semua jenis). Pakai untuk jumlah proyek, nilai investasi, atau jumlah lokasi potensial per tahap, per '
-        'provinsi, maupun per jenis investasi. Untuk satu proyek tertentu pakai daftar_proyek.',
+        'semua jenis), serta potensi nilai investasi lokasi Peta Sebaran: perkiraan modal bila lokasi direalisasikan, '
+        'dari model usaha sub-jenis (per hektar dikali luas lokasi yang dimanfaatkan, selain itu satu unit), dijumlah '
+        'per jenis se-Indonesia dan per provinsi. Pakai untuk jumlah proyek, nilai investasi, jumlah lokasi potensial, '
+        'atau potensi nilai investasi per tahap, per provinsi, maupun per jenis investasi. Untuk satu proyek tertentu '
+        'pakai daftar_proyek.',
         _skema(),
         lambda r, a: _portofolio(r),
     ),

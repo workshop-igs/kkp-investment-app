@@ -1,13 +1,24 @@
 import logging
+import re
 from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
-from .pengaturan import atur
+from .pengaturan import BAWAAN, atur
 
 logger = logging.getLogger('analitik')
 
 FRANKFURTER_URL = 'https://api.frankfurter.app/latest'
+SATUAN_PER_HEKTAR = re.compile(r'^\s*1\s*(ha|hektar)\b', re.IGNORECASE)
+
+
+def nilai_investasi_lokasi(sub_kode, luas_ha, model=None):
+    m = (model or atur('MODEL_USAHA')).get(sub_kode) or BAWAAN['MODEL_USAHA'].get(sub_kode) or {}
+    modal = sum(v or 0 for v in m.get('investasi', {}).values())
+    if not modal:
+        return None
+    unit = max(1.0, luas_ha * atur('PORSI_PEMANFAATAN_LUAS')) if SATUAN_PER_HEKTAR.match(m.get('satuan_usaha') or '') else 1
+    return round(modal * unit)
 
 
 def _arus_kas(base_annual_revenue, base_annual_opex, revenue_growth_pct, opex_growth_pct, years):

@@ -23,6 +23,7 @@ const FOKUS = 'focus-visible:outline focus-visible:outline-2 focus-visible:outli
 
 const angka = (n, d = 0) => (n === null || n === undefined || Number.isNaN(n) ? '—' : formatNumber(n, d));
 const rupiah = (miliar) => `Rp ${rupiahRingkas((Number(miliar) || 0) * 1e9)}`;
+const rupiahPenuh = (v) => `Rp ${rupiahRingkas(Number(v) || 0)}`;
 const jumlah = (daftar, kunci) => daftar.reduce((t, x) => t + (Number(x[kunci]) || 0), 0);
 const ikonProyek = buatIkon('koper', NAVY, 0.8);
 const KELOMPOK_KOMODITAS = {
@@ -188,8 +189,11 @@ const PetaDashboard = ({ jenis, provinsi, proyek }) => {
           const p = f.properties || {};
           layer.bindTooltip(POTENSI.tooltip(p), { sticky: true, className: 'map-tooltip' });
           layer.bindPopup(() => POTENSI.popup(p), { maxHeight: 400 });
-          layer.on('popupopen', (e) => e.popup.getElement()?.querySelector('[data-analisis-lokasi]')
-            ?.addEventListener('click', () => navigate(`/peta?lokasi=${f.id}`)));
+          layer.on('popupopen', (e) => {
+            POTENSI.saatBuka(e.popup.getElement(), f.id);
+            e.popup.getElement()?.querySelector('[data-analisis-lokasi]')
+              ?.addEventListener('click', () => navigate(`/peta?lokasi=${f.id}`));
+          });
         }}
       />
       {proyek.map((p) => (
@@ -257,6 +261,12 @@ const DashboardPage = () => {
     lokasi: jumlah(semuaPotensi.filter((r) => r.kode === s.id && diProvinsi(r)), 'lokasi'),
   })).sort((a, b) => b.lokasi - a.lokasi);
   const maksJenis = Math.max(1, ...potensiPerJenis.map((j) => j.lokasi));
+  const nilaiPotensi = jumlah(semuaPotensi.filter((r) => r.kode && diJenis(r.kode) && diProvinsi(r)), 'nilai_investasi');
+  const nilaiPerJenis = SECTORS.map((s) => ({
+    ...s,
+    wilayah: jumlah(semuaPotensi.filter((r) => r.kode === s.id && diProvinsi(r)), 'nilai_investasi'),
+    nasional: jumlah(semuaPotensi.filter((r) => r.kode === s.id), 'nilai_investasi'),
+  })).filter((j) => j.nasional > 0).sort((a, b) => b.nasional - a.nasional);
 
   const potensiPerProvinsi = useMemo(() => {
     const kelompok = new Map();
@@ -392,16 +402,15 @@ const DashboardPage = () => {
 
           {galat && <p className="mt-4 rounded-lg bg-rose-500/20 px-3 py-2 text-sm text-rose-100">{galat}</p>}
 
-          <div className="mt-6 grid gap-4 xl:grid-cols-[3fr_4fr]">
-            <Grup judul="Potensi ruang laut" kolom="sm:grid-cols-3">
-              <div className="col-span-2 sm:col-span-1">
-                <Kpi
-                  label="Lokasi potensial"
-                  nilai={data ? angka(totalLokasi) : '…'}
-                  sub={jenis ? SECTORS.find((s) => s.id === jenis)?.label : 'semua jenis'}
-                  sorot
-                />
-              </div>
+          <div className="mt-6 grid gap-4 xl:grid-cols-[4fr_3fr]">
+            <Grup judul="Potensi ruang laut" kolom="sm:grid-cols-4">
+              <Kpi
+                label="Lokasi potensial"
+                nilai={data ? angka(totalLokasi) : '…'}
+                sub={jenis ? SECTORS.find((s) => s.id === jenis)?.label : 'semua jenis'}
+                sorot
+              />
+              <Kpi label="Potensi nilai investasi" nilai={data ? rupiahPenuh(nilaiPotensi) : '…'} sub={provinsi ? namaProvinsi : 'seluruh Indonesia'} sorot />
               <Kpi label="Provinsi" nilai={angka(provinsiLokasi)} sub={provinsi ? namaProvinsi : `dari ${angka(data?.summary?.total_provinsi)}`} />
               <Kpi label="Luas lokasi" nilai={angka(jumlah(potensi, 'luas_ha'))} sub="hektare" />
             </Grup>
@@ -542,6 +551,39 @@ const DashboardPage = () => {
           </Panel>
         </div>
 
+        <Panel judul="Potensi nilai investasi per jenis" kanan={<span className="text-[11px] text-slate-400">perkiraan modal bila lokasi direalisasikan</span>}>
+          {nilaiPerJenis.length ? (
+            <div className="overflow-x-auto">
+              <table className="w-full text-[13px]">
+                <thead className="text-[11px] text-slate-400">
+                  <tr>
+                    <th className="py-1.5 pr-3 text-left font-medium">Jenis investasi</th>
+                    {provinsi && <th className="py-1.5 pl-3 text-right font-medium">{namaProvinsi}</th>}
+                    <th className="py-1.5 pl-3 text-right font-medium">Seluruh Indonesia</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {nilaiPerJenis.map((j) => (
+                    <tr key={j.id} className={jenis && jenis !== j.id ? 'opacity-40' : ''}>
+                      <td className="py-1.5 pr-3">
+                        <span className="flex items-center gap-2.5 text-slate-700"><Lambang kode={j.id} />{j.label}</span>
+                      </td>
+                      {provinsi && <td className="py-1.5 pl-3 text-right font-semibold tabular-nums text-slate-900">{rupiahPenuh(j.wilayah)}</td>}
+                      <td className="py-1.5 pl-3 text-right font-semibold tabular-nums text-slate-900">{rupiahPenuh(j.nasional)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot className="border-t border-slate-200 font-bold text-slate-900">
+                  <tr>
+                    <td className="py-2 pr-3">Total</td>
+                    {provinsi && <td className="py-2 pl-3 text-right tabular-nums">{rupiahPenuh(jumlah(nilaiPerJenis, 'wilayah'))}</td>}
+                    <td className="py-2 pl-3 text-right tabular-nums">{rupiahPenuh(jumlah(nilaiPerJenis, 'nasional'))}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          ) : <Kosong />}
+        </Panel>
 
         <Panel
           judul="Komoditas perikanan laut & pesisir"

@@ -107,6 +107,10 @@ DAFTAR = [
        'sub-jenis tanpa volume, investasi, atau harga ditulis belum memiliki model usaha.'),
     _d('ASUMSI_MODEL_USAHA', 'profil_keuangan', 'Asumsi keuangan Profil Investasi',
        'Berlaku untuk semua model usaha. CSR dihitung dari laba setelah penyusutan modal tahun sebelumnya, hanya untuk model usaha yang layak (NPV positif).', batas=(0, 100)),
+    _d('PORSI_PEMANFAATAN_LUAS', 'profil_keuangan', 'Bagian lokasi yang dimanfaatkan usaha',
+       'Potensi nilai investasi lokasi Peta Sebaran untuk model usaha per hektar (tambak, rumput laut, kerang, garam) '
+       '= modal per hektar × luas lokasi × bagian ini. Model usaha per unit (pabrik, kapal, resor) dihitung satu unit.',
+       istilah='Porsi pemanfaatan luas', **PERSEN),
     _d('JUMLAH_LOKASI_PRIORITAS', 'profil_susunan', 'Lokasi prioritas per bab',
        'Banyaknya lokasi Peta Sebaran terbaik yang ditampilkan di tiap bab Profil Investasi.', 'lokasi', (), (1, 6),
        bulat=True),
