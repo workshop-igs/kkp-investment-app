@@ -346,11 +346,15 @@ def atur(kunci):
         from analitik.models import PengaturanAnalisis
 
         try:
-            _simpanan['nilai'] = dict(PengaturanAnalisis.objects.values_list('kunci', 'nilai'))
+            _simpanan['nilai'] = {k: rapikan(k, v) for k, v in PengaturanAnalisis.objects.values_list('kunci', 'nilai')}
         except DatabaseError:
             _simpanan['nilai'] = {}
         _simpanan['waktu'] = time.monotonic()
     return _simpanan['nilai'].get(kunci, BAWAAN[kunci])
+
+
+def rapikan(kunci, nilai):
+    return konstanta.urutkan_model_usaha(nilai) if kunci == 'MODEL_USAHA' else nilai
 
 
 def segarkan():

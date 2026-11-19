@@ -384,7 +384,7 @@ class AdminPengaturanAnalisisViewSet(viewsets.ViewSet):
         return {
             **meta,
             'bawaan': pengaturan.BAWAAN[meta['kunci']],
-            'nilai': s.nilai if s else pengaturan.BAWAAN[meta['kunci']],
+            'nilai': pengaturan.rapikan(meta['kunci'], s.nilai) if s else pengaturan.BAWAAN[meta['kunci']],
             'diubah': s is not None,
             'diubah_oleh': s.diubah_oleh.get_username() if s and s.diubah_oleh else '',
             'diubah_pada': s.updated_at if s else None,
