@@ -643,6 +643,23 @@ KOMPONEN_MODEL_USAHA = {
 }
 
 
+def urutkan_model_usaha(model_usaha):
+    def urut(isian, kunci):
+        return {k: isian[k] for k in [*kunci, *(k for k in isian if k not in kunci)] if k in isian}
+
+    def satu(m, investasi, operasional):
+        return {**m, 'investasi': urut(m['investasi'], investasi),
+                'operasional_per_tahun': urut(m['operasional_per_tahun'], operasional)}
+
+    hasil = {}
+    for sub, m in model_usaha.items():
+        komponen = KOMPONEN_MODEL_USAHA.get(sub, (KOMPONEN_INVESTASI, KOMPONEN_OPERASIONAL))
+        hasil[sub] = satu(m, *komponen)
+        if m.get('kelas'):
+            hasil[sub]['kelas'] = [satu(k, *komponen) for k in m['kelas']]
+    return hasil
+
+
 def model_usaha_kosong(jenis, sub=None):
     investasi, operasional = KOMPONEN_MODEL_USAHA.get(sub, (KOMPONEN_INVESTASI, KOMPONEN_OPERASIONAL))
     return {
