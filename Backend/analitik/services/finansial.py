@@ -12,13 +12,25 @@ FRANKFURTER_URL = 'https://api.frankfurter.app/latest'
 SATUAN_PER_HEKTAR = re.compile(r'^\s*1\s*(ha|hektar)\b', re.IGNORECASE)
 
 
-def nilai_investasi_lokasi(sub_kode, luas_ha, model=None):
+def rincian_nilai_investasi(sub_kode, luas_ha, model=None):
     m = (model or atur('MODEL_USAHA')).get(sub_kode) or BAWAAN['MODEL_USAHA'].get(sub_kode) or {}
-    modal = sum(v or 0 for v in m.get('investasi', {}).values())
+    komponen = {k: v for k, v in m.get('investasi', {}).items() if v}
+    modal = sum(komponen.values())
     if not modal:
         return None
-    unit = max(1.0, luas_ha * atur('PORSI_PEMANFAATAN_LUAS')) if SATUAN_PER_HEKTAR.match(m.get('satuan_usaha') or '') else 1
-    return round(modal * unit)
+    per_hektar = bool(SATUAN_PER_HEKTAR.match(m.get('satuan_usaha') or ''))
+    porsi = atur('PORSI_PEMANFAATAN_LUAS')
+    unit = max(1.0, luas_ha * porsi) if per_hektar else 1
+    return {
+        'satuan_usaha': m.get('satuan_usaha'), 'komponen': komponen, 'modal_per_unit': round(modal),
+        'per_hektar': per_hektar, 'luas_ha': round(luas_ha, 1), 'porsi': porsi, 'unit': round(unit, 2),
+        'nilai_investasi': round(modal * unit),
+    }
+
+
+def nilai_investasi_lokasi(sub_kode, luas_ha, model=None):
+    rincian = rincian_nilai_investasi(sub_kode, luas_ha, model)
+    return rincian and rincian['nilai_investasi']
 
 
 def _arus_kas(base_annual_revenue, base_annual_opex, revenue_growth_pct, opex_growth_pct, years):

@@ -351,12 +351,28 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       api.get(`/analitik/lokasi-potensial/${idFitur}/nilai/`).then(({ data }) => {
         const ada = (data?.nilai || []).filter((n) => n.nilai_investasi);
         if (!ada.length) return;
+        const rp = (v) => `Rp ${rupiahRingkas(v)}`;
+        const persen = (v) => `${Math.round(v * 100)}%`;
+        const angkaId = (v) => Number(v).toLocaleString('id-ID', { maximumFractionDigits: 2 });
+        const rincian = (n) => `<details class="group">
+          <summary class="flex cursor-pointer list-none items-baseline justify-between gap-2 [&::-webkit-details-marker]:hidden" title="Klik untuk melihat hitungan">
+            <span class="flex items-baseline gap-1 text-[11px] ${ada.length === 1 ? 'font-semibold' : ''} text-slate-700"><span class="text-slate-400 transition-transform group-open:rotate-90">&#9656;</span>${ada.length === 1 ? 'Potensi nilai investasi' : aman(n.sub_jenis)}</span>
+            <b class="shrink-0 tabular-nums text-slate-900 ${ada.length === 1 ? 'text-[15px]' : 'text-[11px]'}">${rp(n.nilai_investasi)}</b>
+          </summary>
+          <div class="mt-1 rounded-md bg-white px-2 py-1.5 text-[10.5px] leading-snug text-slate-600 ring-1 ring-slate-200">
+            <p>Model usaha acuan: <b class="font-semibold text-slate-800">${aman(n.satuan_usaha)}</b></p>
+            <ul class="mt-1 space-y-px">${Object.entries(n.komponen).map(([k, v]) => `<li class="flex justify-between gap-2"><span>${aman(k)}</span><span class="tabular-nums">${rp(v)}</span></li>`).join('')}</ul>
+            <p class="mt-1 flex justify-between gap-2 border-t border-slate-100 pt-1 font-semibold text-slate-800"><span>Modal per ${n.per_hektar ? 'hektar' : 'unit'}</span><span class="tabular-nums">${rp(n.modal_per_unit)}</span></p>
+            <p class="mt-1">${n.per_hektar
+              ? `Luas dimanfaatkan: ${angkaId(n.luas_ha)} ha &times; ${persen(n.porsi)} = <b class="font-semibold text-slate-800">${angkaId(n.unit)} ha</b>${n.unit === 1 && n.luas_ha * n.porsi < 1 ? ' (paling sedikit 1 ha)' : ''}`
+              : 'Dihitung <b class="font-semibold text-slate-800">1 unit</b>; model usaha per unit tidak bergantung luas lokasi.'}</p>
+            <p class="mt-1 flex justify-between gap-2 border-t border-slate-100 pt-1 font-semibold text-slate-900"><span>${rp(n.modal_per_unit)} &times; ${angkaId(n.unit)}</span><span class="tabular-nums">${rp(n.nilai_investasi)}</span></p>
+          </div>
+        </details>`;
         kotak.innerHTML = `<div class="mt-2 rounded-lg bg-slate-50 px-2.5 py-1.5">
-          ${ada.length === 1
-            ? `<p class="flex items-baseline justify-between gap-2 text-[11px] font-semibold text-slate-700"><span>Potensi nilai investasi</span><span class="text-[15px] tabular-nums text-slate-900">Rp ${rupiahRingkas(ada[0].nilai_investasi)}</span></p>`
-            : `<p class="text-[11px] font-semibold text-slate-700">Potensi nilai investasi</p>
-               <ul class="mt-0.5 space-y-px">${ada.map((n) => `<li class="flex items-baseline justify-between gap-2 text-[11px] text-slate-700"><span>${aman(n.sub_jenis)}</span><b class="shrink-0 tabular-nums text-slate-900">Rp ${rupiahRingkas(n.nilai_investasi)}</b></li>`).join('')}</ul>`}
-          <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Perkiraan modal bila lokasi direalisasikan, dari model usaha sub-jenisnya.</p>
+          ${ada.length > 1 ? '<p class="text-[11px] font-semibold text-slate-700">Potensi nilai investasi</p>' : ''}
+          <div class="${ada.length > 1 ? 'mt-0.5 space-y-0.5' : ''}">${ada.map(rincian).join('')}</div>
+          <p class="mt-0.5 text-[10px] text-slate-500 leading-tight">Perkiraan modal bila lokasi direalisasikan, dari model usaha sub-jenisnya. Klik angka untuk melihat hitungan.</p>
         </div>`;
       }).catch(() => {});
     },

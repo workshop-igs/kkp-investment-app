@@ -29,7 +29,7 @@ from .models import (
     ZonaRisikoBencana,
 )
 from .services.ahp import jalankan_analisis_ahp
-from .services.finansial import jalankan_analisis_finansial, nilai_investasi_lokasi
+from .services.finansial import jalankan_analisis_finansial, rincian_nilai_investasi
 from .services.kriteria import kbli_sub, uraian
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import PALET, gambar_peta, keterangan_peta
@@ -430,7 +430,7 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
         ).select_related('sektor').order_by('-persen_sesuai')
         return Response({'nilai': [
             {'sub_jenis': a.rincian.get('sub_sektor') or a.sektor.nama,
-             'nilai_investasi': nilai_investasi_lokasi(a.rincian.get('sub_sektor_kode'), a.luas_ha)}
+             **(rincian_nilai_investasi(a.rincian.get('sub_sektor_kode'), a.luas_ha) or {'nilai_investasi': None})}
             for a in anggota
         ]})
 
