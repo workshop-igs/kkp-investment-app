@@ -12,7 +12,20 @@ FRANKFURTER_URL = 'https://api.frankfurter.app/latest'
 SATUAN_PER_HEKTAR = re.compile(r'^\s*1\s*(ha|hektar)\b', re.IGNORECASE)
 
 
-def rincian_nilai_investasi(sub_kode, luas_ha, model=None):
+def _laba_per_unit(m):
+    usaha = m.get('investasi') and hitung_model_usaha(m)
+    if not usaha:
+        return None
+    tahun_pertama = usaha['proyeksi'][0]
+    return {
+        'volume': next(s['volume'] for s in usaha['skenario'] if s['kode'] == usaha['dasar']),
+        'satuan_produk': usaha['satuan_produk'], 'harga': usaha['harga'],
+        'pendapatan': tahun_pertama['pendapatan'], 'operasional': usaha['operasional'],
+        'laba': tahun_pertama['bersih'],
+    }
+
+
+def rincian_nilai_investasi(sub_kode, luas_ha, model=None, simpan=None):
     m = (model or atur('MODEL_USAHA')).get(sub_kode) or BAWAAN['MODEL_USAHA'].get(sub_kode) or {}
     komponen = {k: v for k, v in m.get('investasi', {}).items() if v}
     modal = sum(komponen.values())
@@ -21,16 +34,16 @@ def rincian_nilai_investasi(sub_kode, luas_ha, model=None):
     per_hektar = bool(SATUAN_PER_HEKTAR.match(m.get('satuan_usaha') or ''))
     porsi = atur('PORSI_PEMANFAATAN_LUAS')
     unit = max(1.0, luas_ha * porsi) if per_hektar else 1
+    simpan = {} if simpan is None else simpan
+    if sub_kode not in simpan:
+        simpan[sub_kode] = _laba_per_unit(m)
+    laba = simpan[sub_kode]
     return {
         'satuan_usaha': m.get('satuan_usaha'), 'komponen': komponen, 'modal_per_unit': round(modal),
         'per_hektar': per_hektar, 'luas_ha': round(luas_ha, 1), 'porsi': porsi, 'unit': round(unit, 2),
         'nilai_investasi': round(modal * unit),
+        'keuntungan': laba and {**laba, 'nilai_per_tahun': round(laba['laba'] * unit)},
     }
-
-
-def nilai_investasi_lokasi(sub_kode, luas_ha, model=None):
-    rincian = rincian_nilai_investasi(sub_kode, luas_ha, model)
-    return rincian and rincian['nilai_investasi']
 
 
 def _arus_kas(base_annual_revenue, base_annual_opex, revenue_growth_pct, opex_growth_pct, years):
