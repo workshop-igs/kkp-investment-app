@@ -291,13 +291,11 @@ def _metrik_model(volume, harga, opex, capex, a):
 def hitung_model_usaha(model, harga_bawaan=None, asumsi=None):
     a = asumsi or atur('ASUMSI_MODEL_USAHA')
     harga = model.get('harga_per_satuan') or harga_bawaan
-    from .konstanta import KOMPONEN_INVESTASI, KOMPONEN_OPERASIONAL
-
-    def urut(isian, kunci):
+    def urut(isian, kunci=()):
         return {k: isian[k] for k in [*kunci, *(k for k in isian if k not in kunci)] if isian.get(k)}
 
-    investasi = urut(model['investasi'], KOMPONEN_INVESTASI)
-    operasional = urut(model['operasional_per_tahun'], KOMPONEN_OPERASIONAL)
+    investasi = urut(model['investasi'])
+    operasional = urut(model['operasional_per_tahun'])
     volume = urut(model['volume_per_tahun'], list(LABEL_SKENARIO))
     capex, opex = sum(investasi.values()), sum(operasional.values())
     if not (harga and capex and volume):

@@ -1645,16 +1645,7 @@ function rantaiPasar(dek, o, b, i) {
 }
 
 const irrTeks = (irr) => (irr <= -99 ? 'tidak terhitung' : `${angka(irr, 1)}%`);
-const WARNA_KOMPONEN = ['#0056A5', '#40BFDB', '#8CC63F', '#F59E0B', '#94A3B8'];
-const BAHAN = 'Benih, bibit, atau bahan baku';
-const ENERGI = 'Pakan, BBM, atau energi';
-const LABEL_KOMPONEN = {
-  PERIKANAN_TANGKAP: { [BAHAN]: 'Umpan dan bahan baku', [ENERGI]: 'BBM, es, dan energi' },
-  JASA_MARITIM: { [BAHAN]: 'Stok BBM dan bahan baku', [ENERGI]: 'BBM dan energi kapal' },
-  KONSERVASI_PESISIR: { [BAHAN]: 'Bibit dan bahan restorasi', [ENERGI]: 'BBM dan energi' },
-};
-const labelKomponen = (b, label) => (b.sektor === 'PERIKANAN_BUDIDAYA' ? label
-  : (LABEL_KOMPONEN[b.sektor] || { [BAHAN]: 'Bahan baku', [ENERGI]: 'BBM atau energi' })[label] || label);
+const WARNA_KOMPONEN = ['#0056A5', '#40BFDB', '#8CC63F', '#F59E0B', '#94A3B8', '#7C3AED'];
 const WARNA_PROYEKSI = { pendapatan: '#0056A5', pengeluaran: '#EA580C', bersih: '#16A34A', kumulatif: '#7C3AED' };
 
 function finansial(dek, o, b, i, perJenis) {
@@ -1687,7 +1678,7 @@ function finansial(dek, o, b, i, perJenis) {
   [[h.investasi, `Investasi awal ${rp(h.investasi_total)}`], [h.operasional, `Operasional per tahun ${rp(h.operasional_total)}`]].forEach(([komponen, judul], n) => {
     const x = TEPI + 5 + n * ((kiri - 10) / 2);
     const item = Object.entries(komponen).sort((a1, a2) => a2[1] - a1[1])
-      .map(([label, nilai], c) => ({ label: labelKomponen(b, label), nilai, warna: WARNA_KOMPONEN[c % WARNA_KOMPONEN.length] }));
+      .map(([label, nilai], c) => ({ label, nilai, warna: WARNA_KOMPONEN[c % WARNA_KOMPONEN.length] }));
     dek.gaya(6.4, C.navy, true);
     dek.doc.text(bersih(judul), x, yy);
     dek.gambar(donutKanvas(item), x, yy + 2, ukuranDonut, ukuranDonut);
