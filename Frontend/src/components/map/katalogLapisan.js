@@ -50,9 +50,9 @@ export const penanganCitra = (catat) => {
 };
 
 const OSEANOGRAFI = [
-  ['osea_suhu', 'SUHU', 'Suhu Permukaan Laut', 'Rata-rata suhu permukaan laut 12 bulan terakhir (NOAA Coral Reef Watch).'],
+  ['osea_suhu', 'SUHU', 'Suhu Permukaan Laut', 'Rata-rata suhu permukaan laut 12 bulan terakhir (Sidako KKP).', 'Sidako KKP'],
   ['osea_anomali', 'ANOMALI_SUHU', 'Anomali Suhu Permukaan Laut',
-    'Selisih suhu dari rata-rata jangka panjangnya; nilai positif tinggi menandai stres panas bagi karang dan budidaya.'],
+    'Selisih suhu dari rata-rata jangka panjangnya; nilai positif tinggi menandai stres panas bagi karang dan budidaya.', 'Sidako KKP'],
   ['osea_klorofil', 'KLOROFIL', 'Kesuburan Laut (Klorofil)', 'Kadar klorofil-a dari satelit MODIS, petunjuk kesuburan perairan; makin tinggi makin subur.'],
   ['osea_gelombang', 'GELOMBANG', 'Tinggi Gelombang Signifikan', 'Rata-rata tinggi gelombang 12 bulan terakhir (WaveWatch III).'],
   ['osea_kedalaman', 'KEDALAMAN', 'Kedalaman Laut', 'Kedalaman laut dari batimetri SRTM15+.'],

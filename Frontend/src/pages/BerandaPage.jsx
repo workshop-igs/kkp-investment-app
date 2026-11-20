@@ -152,10 +152,10 @@ const KartuKecil = ({ to, judul, isi, ikon: Ikon, tanpaIsi }) => (
 );
 
 const DATA_PETA = [
-  ['Zona tata ruang laut', '/peta?lapisan=polaruang,polaruang_kaw', Map],
-  ['Izin KKPRL terbit', '/peta?lapisan=kkprl', FileCheck2],
+  ['RTR/RZ', '/peta?lapisan=polaruang,polaruang_kaw', Map],
+  ['KKPRL terbit', '/peta?lapisan=kkprl', FileCheck2],
   ['Pelabuhan perikanan', '/peta?lapisan=infra_pelabuhan_perikanan', Anchor],
-  ['Risiko tsunami', '/peta?lapisan=risiko_tsunami', AlertTriangle],
+  ['Risiko bencana', '/peta?lapisan=risiko_tsunami,risiko_abrasi,risiko_banjir', AlertTriangle],
 ];
 
 const KartuDataPeta = () => (
@@ -181,8 +181,8 @@ const KartuDataPeta = () => (
 );
 
 const PEMERIKSAAN = [
-  'Kesesuaian dengan rencana tata ruang laut',
-  'Tumpang tindih dengan izin KKPRL yang sudah terbit',
+  'Kesesuaian dengan RTR/RZ',
+  'Tumpang tindih dengan KKPRL terbit',
   'Risiko bencana dan kelayakan finansial',
 ];
 
@@ -606,10 +606,11 @@ const BerandaPage = () => {
   const maksPeluang = Math.max(1, ...peluang.map((p) => p.lokasi));
 
   const ringkasanNasional = [
-    [angka(ringkas?.kkprl_aktif), 'Izin KKPRL berlaku', '/peta?lapisan=kkprl'],
-    [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin', '/peta?lapisan=kkprl'],
-    [angka(ringkas?.zona_tata_ruang), 'Zona tata ruang laut', '/peta?lapisan=polaruang,polaruang_kaw'],
+    [angka(ringkas?.kkprl_aktif), 'KKPRL berlaku', '/peta?lapisan=kkprl', ringkas?.kkprl_per],
+    [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin', '/peta?lapisan=kkprl', ringkas?.kkprl_per],
+    [angka(ringkas?.produk_tata_ruang), 'Produk RTR/RZ', '/peta?lapisan=polaruang,polaruang_kaw', ringkas?.tata_ruang_per],
   ];
+  const tanggal = (iso, bulan = 'short') => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: bulan, year: 'numeric' });
 
   return (
     <div className="h-full overflow-y-auto bg-white pt-[72px] text-slate-800">
@@ -638,7 +639,7 @@ const BerandaPage = () => {
                 <div className="mt-5 flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-kkp-900">Ringkasan nasional</p>
                   <span className="bg-[#D3F0F8] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-kkp-900">
-                    Data terkini
+                    {tanggal(new Date(), 'long')}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-1 flex-col rounded-xl border border-slate-200 p-3">
@@ -647,7 +648,7 @@ const BerandaPage = () => {
                     Seluruh Indonesia
                   </span>
                   <ul className="mt-3 flex flex-1 flex-col justify-around divide-y divide-slate-200 rounded-lg bg-[#F6F8FB] px-2 text-center">
-                    {ringkasanNasional.map(([nilai, label, ke], i) => (
+                    {ringkasanNasional.map(([nilai, label, ke, per], i) => (
                       <li key={label}>
                         <Link to={ke} className={`group my-1 flex flex-col items-center rounded-md py-1.5 transition-colors hover:bg-white ${FOKUS}`}>
                           <span className="flex items-center gap-2 text-lg font-bold text-kkp-900 tabular-nums transition-colors group-hover:text-kkp-700">
@@ -655,6 +656,7 @@ const BerandaPage = () => {
                             {nilai}
                           </span>
                           <span className="text-xs text-slate-500">{label}</span>
+                          {per && <span className="text-[10px] text-slate-400">data per {tanggal(per)}</span>}
                         </Link>
                       </li>
                     ))}
