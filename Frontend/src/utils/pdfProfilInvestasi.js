@@ -1124,7 +1124,7 @@ function zonaRuang(dek, o, citra) {
   });
   dek.gaya(6.2, C.abu);
   dek.doc.text(`Total ${angka(z.total_ha)} ha | ${z.peta.length} zona terluas di peta`, x + 5, yt + tinggiLuas - 3.4);
-  dek.sumber(`Sumber: pola ruang laut ${z.sumber_label}; dasar hukum: JDIH BPK (peraturan.bpk.go.id); oseanografi perairan ±22 km dari pantai: NOAA Coral Reef Watch (juga ditayangkan Sidako KKP), MODIS-Aqua, WaveWatch III via NOAA ERDDAP; ${ATRIBUSI_CITRA}.`);
+  dek.sumber(`Sumber: pola ruang laut ${z.sumber_label}; dasar hukum: JDIH BPK (peraturan.bpk.go.id); oseanografi perairan ±22 km dari pantai: Sidako KKP (NOAA Coral Reef Watch), MODIS-Aqua, WaveWatch III via NOAA ERDDAP; ${ATRIBUSI_CITRA}.`);
 }
 
 function kebijakan(dek, o) {

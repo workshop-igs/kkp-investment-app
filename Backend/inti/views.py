@@ -552,7 +552,7 @@ def wpp_peta(request):
 @permission_classes([permissions.AllowAny])
 def ringkasan_publik(request):
     from django.core.cache import cache
-    from django.db.models import Count, F, Sum
+    from django.db.models import Count, F, Max, Sum
 
     from analitik.models import LokasiPotensial
     from inventarisasi.models import KKPRL, ZonasiRuangLaut
@@ -562,11 +562,16 @@ def ringkasan_publik(request):
     if tersimpan is not None:
         return Response(tersimpan)
 
-    kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'))
+    kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'), per=Max('updated_at'))
+    zona = ZonasiRuangLaut.objects.filter(ranah='LAUT')
     muatan = {
-        'zona_tata_ruang': ZonasiRuangLaut.objects.filter(ranah='LAUT').count(),
+        'produk_tata_ruang': zona.filter(tingkat_acuan='RTRW_PROVINSI')
+        .values('provinsi', 'sumber_data', 'tahun_penetapan').distinct().count()
+        + zona.exclude(tingkat_acuan='RTRW_PROVINSI').values('nomor_regulasi').distinct().count(),
+        'tata_ruang_per': zona.aggregate(t=Max('updated_at'))['t'],
         'kkprl_aktif': kkprl['jumlah'] or 0,
         'kkprl_luas_ha': round(float(kkprl['luas'] or 0)),
+        'kkprl_per': kkprl['per'],
         'lokasi_potensial': LokasiPotensial.objects.filter(sektor=None).count(),
         'peluang_per_jenis': list(
             LokasiPotensial.objects.filter(tampil=True).exclude(sektor=None)

@@ -45,12 +45,12 @@ PARAMETER = {
     'SUHU': {
         'server': COASTWATCH, 'dataset': 'NOAA_DHW_monthly', 'variabel': 'sea_surface_temperature', 'satuan': '°C',
         'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True, 'bulanan': True,
-        'sumber': 'NOAA Coral Reef Watch bulanan (dataset yang ditayangkan Sidako KKP), 12 bulan terakhir, grid 0,1°',
+        'sumber': 'Sidako KKP (NOAA Coral Reef Watch bulanan), 12 bulan terakhir, grid 0,1°',
     },
     'ANOMALI_SUHU': {
         'server': COASTWATCH, 'dataset': 'NOAA_DHW_monthly', 'variabel': 'sea_surface_temperature_anomaly', 'satuan': '°C',
         'waktu': '[last-11:1:last]', 'resolusi': 0.05, 'langkah': 2, 'lintang_turun': True, 'bulanan': True,
-        'sumber': 'NOAA Coral Reef Watch bulanan (dataset yang ditayangkan Sidako KKP), selisih dari rata-rata jangka panjang, '
+        'sumber': 'Sidako KKP (NOAA Coral Reef Watch bulanan), selisih dari rata-rata jangka panjang, '
                   '12 bulan terakhir, grid 0,1°',
     },
     'KLOROFIL': {
