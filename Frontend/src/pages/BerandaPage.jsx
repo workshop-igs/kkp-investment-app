@@ -610,7 +610,7 @@ const BerandaPage = () => {
     [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin', '/peta?lapisan=kkprl', ringkas?.kkprl_per],
     [angka(ringkas?.produk_tata_ruang), 'Produk RTR/RZ', '/peta?lapisan=polaruang,polaruang_kaw', ringkas?.tata_ruang_per],
   ];
-  const tanggal = (iso, bulan = 'short') => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: bulan, year: 'numeric' });
+  const tanggal = (iso) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
     <div className="h-full overflow-y-auto bg-white pt-[72px] text-slate-800">
@@ -638,8 +638,8 @@ const BerandaPage = () => {
                 <KartuCekLokasi />
                 <div className="mt-5 flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-kkp-900">Ringkasan nasional</p>
-                  <span className="bg-[#D3F0F8] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-kkp-900">
-                    {tanggal(new Date(), 'long')}
+                  <span className="whitespace-nowrap bg-[#D3F0F8] px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-[0.16em] text-kkp-900">
+                    {tanggal(new Date())}
                   </span>
                 </div>
                 <div className="mt-2 flex flex-1 flex-col rounded-xl border border-slate-200 p-3">
