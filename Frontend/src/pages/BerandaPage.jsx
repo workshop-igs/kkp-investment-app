@@ -608,7 +608,7 @@ const BerandaPage = () => {
   const ringkasanNasional = [
     [angka(ringkas?.kkprl_aktif), 'KKPRL berlaku', '/peta?lapisan=kkprl', ringkas?.kkprl_per],
     [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin', '/peta?lapisan=kkprl', ringkas?.kkprl_per],
-    [angka(ringkas?.produk_tata_ruang), 'Produk RTR/RZ', '/peta?lapisan=polaruang,polaruang_kaw', ringkas?.tata_ruang_per],
+    ['RTRWN · RTRWP · RZ KAW', 'Produk hukum RTR/RZ', '/peta?lapisan=polaruang,polaruang_kaw', ringkas?.tata_ruang_per],
   ];
   const tanggal = (iso) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 

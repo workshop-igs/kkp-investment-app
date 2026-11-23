@@ -563,12 +563,8 @@ def ringkasan_publik(request):
         return Response(tersimpan)
 
     kkprl = KKPRL.objects.filter(status='AKTIF').aggregate(jumlah=Count('id'), luas=Sum('luas_ha'), per=Max('updated_at'))
-    zona = ZonasiRuangLaut.objects.filter(ranah='LAUT')
     muatan = {
-        'produk_tata_ruang': zona.filter(tingkat_acuan='RTRW_PROVINSI')
-        .values('provinsi', 'sumber_data', 'tahun_penetapan').distinct().count()
-        + zona.exclude(tingkat_acuan='RTRW_PROVINSI').values('nomor_regulasi').distinct().count(),
-        'tata_ruang_per': zona.aggregate(t=Max('updated_at'))['t'],
+        'tata_ruang_per': ZonasiRuangLaut.objects.filter(ranah='LAUT').aggregate(t=Max('updated_at'))['t'],
         'kkprl_aktif': kkprl['jumlah'] or 0,
         'kkprl_luas_ha': round(float(kkprl['luas'] or 0)),
         'kkprl_per': kkprl['per'],
