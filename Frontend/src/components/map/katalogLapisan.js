@@ -411,7 +411,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
   kkprl: {
     url: '/inventarisasi/kkprl/peta/',
     urlWilayah: '/inventarisasi/kkprl/wilayah/',
-    label: 'Izin Ruang Laut (KKPRL)',
+    label: 'KKPRL Terbit',
     legenda: 'jenis',
     keteranganLegenda: 'Izin pemanfaatan ruang laut (Persetujuan KKPRL) yang sudah terbit, diwarnai menurut jenis investasinya.',
     zoomPin: 8,
@@ -591,7 +591,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
   polaruang: {
     ...POLA_RUANG,
     params: { tingkat: 'RTRW_PROVINSI' },
-    label: 'Zonasi Laut Provinsi',
+    label: 'RTRW Provinsi',
     keteranganLegenda:
       'Zonasi ruang laut provinsi dari Perda RTRW, dilengkapi PKKPRL dan RZWP-3-K untuk perairan yang belum diatur.',
   },
@@ -601,7 +601,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     params: { tingkat: 'RTRW_PROVINSI', ranah: 'DARAT' },
     legenda: 'zona_darat',
     pilihan: { ...POLA_RUANG.pilihan, opsi: URUTAN_KATEGORI_DARAT.map((kode) => [kode, KATEGORI_ZONA[kode].label]) },
-    label: 'Tata Ruang Darat Pesisir',
+    label: 'RTRW Provinsi (Darat Pesisir)',
     keteranganLegenda:
       'Peruntukan lahan pesisir (100 m–4 km dari laut) dari Perda RTRW Provinsi, untuk investasi di darat seperti tambak '
       + 'dan pengolahan.',
@@ -610,7 +610,7 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
   polaruang_kaw: {
     ...POLA_RUANG,
     params: { tingkat: 'KAW' },
-    label: 'Zonasi Laut Lintas Provinsi',
+    label: 'RZ KAW Selat Makassar',
     keteranganLegenda:
       'Rencana zonasi perairan lintas provinsi (Perpres 83/2020: Kaltim, Kalsel, Sulbar, Sulsel, dan Sulteng).',
   },
