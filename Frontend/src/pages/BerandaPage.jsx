@@ -608,7 +608,7 @@ const BerandaPage = () => {
   const ringkasanNasional = [
     [angka(ringkas?.kkprl_aktif), 'KKPRL berlaku', '/peta?lapisan=kkprl', ringkas?.kkprl_per],
     [ringkas?.kkprl_luas_ha === undefined ? '—' : `${angka(ringkas.kkprl_luas_ha)} ha`, 'Ruang laut berizin', '/peta?lapisan=kkprl', ringkas?.kkprl_per],
-    ['RTRWN · RTRWP · RZ KAW', 'Produk hukum RTR/RZ', '/peta?lapisan=polaruang,polaruang_kaw', ringkas?.tata_ruang_per],
+    ['RTRWN · RTRWP · RZ KAW', 'Produk hukum RTR/RZ', '/peta?lapisan=polaruang,polaruang_kaw', ringkas?.tata_ruang_per, 'text-[15px]'],
   ];
   const tanggal = (iso) => new Date(iso).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -648,10 +648,10 @@ const BerandaPage = () => {
                     Seluruh Indonesia
                   </span>
                   <ul className="mt-3 flex flex-1 flex-col justify-around divide-y divide-slate-200 rounded-lg bg-[#F6F8FB] px-2 text-center">
-                    {ringkasanNasional.map(([nilai, label, ke, per], i) => (
+                    {ringkasanNasional.map(([nilai, label, ke, per, ukuran = 'text-lg'], i) => (
                       <li key={label}>
                         <Link to={ke} className={`group my-1 flex flex-col items-center rounded-md py-1.5 transition-colors hover:bg-white ${FOKUS}`}>
-                          <span className="flex items-center gap-2 text-lg font-bold text-kkp-900 tabular-nums transition-colors group-hover:text-kkp-700">
+                          <span className={`flex items-center gap-2 ${ukuran} font-bold text-kkp-900 tabular-nums transition-colors group-hover:text-kkp-700`}>
                             {i === 0 && <span className={`h-2 w-2 rounded-full bg-kkp-hijau ${GERAK} group-hover:scale-150`} aria-hidden="true" />}
                             {nilai}
                           </span>
