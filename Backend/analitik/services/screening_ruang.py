@@ -241,7 +241,7 @@ def _rpz():
     for k in data['kawasan']:
         for z in k['zona']:
             z = {**z, 'kunci': f"{k['nama']}|{z['label']}", 'dasar': k['dasar'], 'ketentuan_umum': k['ketentuan_umum'],
-                 'sektor': k['sektor']}
+                 'sektor': k['sektor'], 'sub_jenis': k.get('sub_jenis', {})}
             per_kunci[z['kunci']] = z
             per_zona.update({(k['nama'], ket): z for ket in z['keterangan']})
     return per_zona, per_kunci
@@ -279,15 +279,20 @@ def label_zona_rpz(nama, keterangan) -> str:
     return f'{label} - {bagian[1]}' if len(bagian) > 1 and bagian[1].lower() != bagian[0].lower() else label
 
 
-def _aturan_rpz(z, kode) -> Dict[str, Any]:
-    rincian = {status: [k for k in z[kolom] if kode in z['sektor'].get(k, []) or '*' in z['sektor'].get(k, [])]
-               for status, kolom in KOLOM_MATRIKS}
+def _aturan_rpz(z, kode, sub=None) -> Dict[str, Any]:
+    sub_jenis = z.get('sub_jenis', {})
+    rincian = {status: [k for k in z[kolom] if sub in sub_jenis.get(k, [])] for status, kolom in KOLOM_MATRIKS}
+    per_sub = any(rincian.values())
+    if not per_sub:
+        rincian = {status: [k for k in z[kolom] if kode in z['sektor'].get(k, []) or '*' in z['sektor'].get(k, [])]
+                   for status, kolom in KOLOM_MATRIKS}
     status = status_rincian(rincian) or z.get('lainnya')
     return {
         'status': status,
         'syarat': syarat_rincian(rincian, z['ketentuan_umum'], 'RPZ') if status == 'BERSYARAT' else '',
         'sumber': z['dasar'],
         'rincian': rincian,
+        'per_sub': per_sub,
     }
 
 
@@ -703,6 +708,10 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         kena = pengecualian.nilai_area(irisan, sektor.kode, luas_aoi)
         zona_efektif, cakupan = _zona_efektif(c, geom, luas_aoi)
         semua_aturan = _aturan_per_sektor({z['matriks_id'] for z in zona_efektif if z['matriks_id']})
+        if sub_kode:
+            semua_aturan[sektor.id] = {**semua_aturan.get(sektor.id, {}), **{
+                ('RPZ', z['rpz']): _aturan_rpz(_rpz()[1][z['rpz']], sektor.kode, sub_kode)
+                for z in zona_efektif if z['rpz']}}
         aturan = semua_aturan.get(sektor.id, {})
         kkprl = _kkprl(c, geom)
         toleransi = atur('AMBANG_IRISAN_TEPI_PERSEN')
@@ -762,6 +771,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         z['sumber_ketentuan'] = ket['sumber']
         z['rincian'] = ket.get('rincian')
         z['acuan_rincian'] = ACUAN_RPZ if z.get('rpz') else 'matriks Perda'
+        z['rincian_sub'] = bool(ket.get('per_sub'))
 
     karakter_ringkas = {'kebutuhan': uraian(sektor.kode, sub_kode), 'terukur': _ringkas(karakter, fisik), 'cocok': cocok}
     parameter = [

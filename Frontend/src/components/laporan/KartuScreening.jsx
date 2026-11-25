@@ -239,6 +239,11 @@ const RincianJenis = ({ s }) => {
   return (
     <section>
       <Judul>Rincian kegiatan {s.sektor_nama.toLowerCase()} menurut {acuan}</Judul>
+      {s.sub_jenis && s.zona.some((z) => z.rincian_sub) && (
+        <p className="-mt-1 mb-2 text-[11px] text-slate-500">
+          Di zona RPZ, rincian dan status hanya memuat kegiatan sub-jenis {s.sub_jenis.nama}.
+        </p>
+      )}
       <div className="space-y-2">
         {kelompok.map((k) => (
           <div key={k.kunci} className="rounded-lg border border-slate-200 bg-white">

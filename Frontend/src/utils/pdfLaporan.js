@@ -695,6 +695,9 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       if (rincianJenis.length) {
         const acuan = [...new Set(sc.zona.filter((z) => z.rincian).map((z) => z.acuan_rincian ?? 'matriks Perda'))].join(' dan ');
         k.teks(`Rincian kegiatan ${sc.sektor_nama.toLowerCase()} menurut ${acuan}`, { tebal: true, warna: GELAP, ukuran: 7.5 });
+        if (sc.sub_jenis && sc.zona.some((z) => z.rincian_sub)) {
+          k.teks(`Di zona RPZ, rincian dan status hanya memuat kegiatan sub-jenis ${sc.sub_jenis.nama}.`, { ukuran: 6.5 });
+        }
         rincianJenis.forEach((r) => {
           k.teks(`${[...r.nama].join(', ')}: ${r.label}`, { tebal: true, warna: GELAP, ukuran: 7 });
           k.tabelDaftar(

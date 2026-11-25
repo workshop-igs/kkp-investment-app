@@ -133,6 +133,35 @@
      "KONSERVASI_PESISIR"
     ]
    },
+   "sub_jenis": {
+    "Wisata menyelam": [
+     "WISATA_SELAM"
+    ],
+    "Berenang dan snorkeling": [
+     "WISATA_SELAM"
+    ],
+    "Wisata olahraga air: jetski": [
+     "WISATA_MARINA"
+    ],
+    "Wisata olahraga air: banana boat": [
+     "WISATA_MARINA"
+    ],
+    "Wisata olahraga air: windsurf": [
+     "WISATA_MARINA"
+    ],
+    "Wisata olahraga air: surfing": [
+     "WISATA_MARINA"
+    ],
+    "Wisata olahraga air lainnya": [
+     "WISATA_MARINA"
+    ],
+    "Wisata perahu kaca (glass bottom boat)": [
+     "WISATA_MARINA"
+    ],
+    "Sarana wisata petualangan: kapal layar cruise dan kapal selam": [
+     "WISATA_KAPAL_PESIAR"
+    ]
+   },
    "zona": [
     {
      "keterangan": [
@@ -674,6 +703,79 @@
     ],
     "Pembuangan air limbah": [],
     "Pembuangan sampah": []
+   },
+   "sub_jenis": {
+    "Wisata selam (diving dan snorkeling)": [
+     "WISATA_SELAM"
+    ],
+    "Rekreasi air (mandi, renang, berkano)": [
+     "WISATA_MARINA"
+    ],
+    "Wisata berselancar": [
+     "WISATA_MARINA"
+    ],
+    "Olahraga air (jetski, banana boat, parasailing, underwater scooter)": [
+     "WISATA_MARINA"
+    ],
+    "Selancar angin": [
+     "WISATA_MARINA"
+    ],
+    "Wisata perahu lambung kaca": [
+     "WISATA_MARINA"
+    ],
+    "Wisata berperahu": [
+     "WISATA_KAPAL_PESIAR"
+    ],
+    "Tambat labuh boat, perahu wisata, dan yacht": [
+     "WISATA_KAPAL_PESIAR"
+    ],
+    "Budidaya rumput laut sistem tancap": [
+     "BUDIDAYA_RUMPUT_LAUT"
+    ],
+    "Budidaya rumput laut metode longline": [
+     "BUDIDAYA_RUMPUT_LAUT"
+    ],
+    "Budidaya kerang mutiara": [
+     "BUDIDAYA_KEKERANGAN"
+    ],
+    "Budidaya abalon": [
+     "BUDIDAYA_KEKERANGAN"
+    ],
+    "Budidaya keramba jaring apung": [
+     "BUDIDAYA_LAUT"
+    ],
+    "Budidaya laut dalam": [
+     "BUDIDAYA_LEPAS_PANTAI"
+    ],
+    "Alur pipa air bersih bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Alur pipa migas bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Alur pipa air limbah bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Alur kabel listrik bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Alur kabel telekomunikasi bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Pembangunan pemecah gelombang, turap, dan dermaga": [
+     "INFRA_PELINDUNG_PANTAI"
+    ],
+    "Penimbunan laut": [
+     "INFRA_REKLAMASI"
+    ],
+    "Pengeringan laut": [
+     "INFRA_REKLAMASI"
+    ],
+    "Instalasi pembangkit energi listrik terbarukan": [
+     "OTEC",
+     "ENERGI_PASUT",
+     "PLTB_OFFSHORE"
+    ]
    },
    "zona": [
     {
