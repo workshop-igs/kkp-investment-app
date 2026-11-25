@@ -33,7 +33,13 @@ export const KATEGORI_ZONA = {
   DARAT_MANGROVE: { label: 'Kawasan Ekosistem Mangrove (darat)', warna: '#4d7c0f' },
   DARAT_LINDUNG: { label: 'Kawasan Lindung (darat)', warna: '#16a34a' },
   DARAT_LAINNYA: { label: 'Kawasan darat lainnya', warna: '#cbd5e1' },
+  RPZ_INTI: { label: 'Zona Inti (tertutup bagi investasi)', warna: '#dc2626' },
+  RPZ_PEMANFAATAN: { label: 'Zona Pemanfaatan', warna: '#f59e0b' },
+  RPZ_PERIKANAN: { label: 'Zona Perikanan Berkelanjutan', warna: '#0284c7' },
+  RPZ_LAINNYA: { label: 'Zona Lainnya (rehabilitasi, pelabuhan, suci, dll.)', warna: '#7c3aed' },
 };
+
+export const URUTAN_ZONA_RPZ = ['RPZ_INTI', 'RPZ_PEMANFAATAN', 'RPZ_PERIKANAN', 'RPZ_LAINNYA'];
 
 export const URUTAN_KATEGORI = [
   'PERIKANAN_TANGKAP',

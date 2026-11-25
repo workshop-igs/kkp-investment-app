@@ -253,6 +253,32 @@ def zona_rpz(nama, keterangan) -> Optional[Dict[str, Any]]:
     return per_zona.get((nama, ket)) or (per_kunci['INTI'] if ZONA_INTI.match(ket) else None)
 
 
+KELAS_ZONA_RPZ = {
+    'RPZ_INTI': 'inti',
+    'RPZ_PEMANFAATAN': 'pemanfaatan',
+    'RPZ_PERIKANAN': 'perikanan berkelanjutan',
+    'RPZ_LAINNYA': 'lain',
+}
+POLA_SQL_ZONA_RPZ = '^(zona )?(inti|pemanfaatan|perikanan berkelanjutan|lain)'
+POLA_SQL_PEMANFAATAN_UMUM = '^(zona )?pemanfaatan umum'
+
+
+def kelas_zona_rpz(keterangan) -> Optional[str]:
+    awal = (keterangan or '').split(' | ')[0].strip().lower().removeprefix('zona ')
+    if awal.startswith('pemanfaatan umum'):
+        return None
+    return next((k for k, pola in KELAS_ZONA_RPZ.items() if awal.startswith(pola)), None)
+
+
+def label_zona_rpz(nama, keterangan) -> str:
+    rpz = zona_rpz(nama, keterangan)
+    if rpz and rpz['kunci'] != 'INTI':
+        return rpz['label']
+    bagian = [b.strip() for b in keterangan.split(' | ') if b.strip()]
+    label = bagian[0] if bagian[0].lower().startswith('zona') else f'Zona {bagian[0]}'
+    return f'{label} - {bagian[1]}' if len(bagian) > 1 and bagian[1].lower() != bagian[0].lower() else label
+
+
 def _aturan_rpz(z, kode) -> Dict[str, Any]:
     rincian = {status: [k for k in z[kolom] if kode in z['sektor'].get(k, []) or '*' in z['sektor'].get(k, [])]
                for status, kolom in KOLOM_MATRIKS}

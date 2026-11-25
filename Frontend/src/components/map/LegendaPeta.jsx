@@ -7,6 +7,7 @@ import {
   URUTAN_KATEGORI,
   URUTAN_KATEGORI_DARAT,
   URUTAN_KELAS_RISIKO,
+  URUTAN_ZONA_RPZ,
 } from '../../utils/simbologiPeta';
 import { GARIS_KAWASAN, KATEGORI_RTRL, WARNA_JENIS_INVESTASI } from '../../utils/simbologiPeta';
 import { SECTORS } from '../../utils/konstanta';
@@ -511,6 +512,8 @@ const LegendaPeta = ({ wmsUrl, daftarLayer, layerAktif, daftarLokal = {}, sektor
                 <LegendaLokal />
               ) : daftarLokal[id].legenda === 'zona_darat' ? (
                 <LegendaLokal urutan={URUTAN_KATEGORI_DARAT} garis={false} />
+              ) : daftarLokal[id].legenda === 'zona_rpz' ? (
+                <LegendaLokal urutan={URUTAN_ZONA_RPZ} garis={false} />
               ) : daftarLokal[id].legenda === 'risiko' ? (
                 <LegendaRisiko />
               ) : daftarLokal[id].legenda === 'rtrl' ? (

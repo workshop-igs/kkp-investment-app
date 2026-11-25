@@ -35,6 +35,8 @@ const KATEGORI = [
         kata: 'tata ruang darat pesisir pola ruang darat rtrwp' },
       { id: 'polaruang_kaw', nama: 'RZ KAW Selat Makassar', warna: '#7c3aed', ikon: Waypoints,
         kata: 'zonasi laut lintas provinsi rencana zonasi kawasan antarwilayah kaw perpres 83/2020' },
+      { id: 'zonasi_konservasi', nama: 'Zonasi Kawasan Konservasi (RPZ)', warna: '#dc2626', ikon: ShieldAlert,
+        kata: 'zona inti rpz rencana pengelolaan dan zonasi kawasan konservasi perairan twp taman pemanfaatan terbatas' },
       { id: 'wilayah_adat', nama: 'Wilayah Kelola Masyarakat Hukum Adat', warna: '#b45309', ikon: Users, kata: 'mha' },
     ],
   },

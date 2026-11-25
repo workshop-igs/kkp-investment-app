@@ -5,6 +5,7 @@ import {
   KATEGORI_ZONA,
   URUTAN_KATEGORI,
   URUTAN_KATEGORI_DARAT,
+  URUTAN_ZONA_RPZ,
   gayaKawasan,
   kategoriZona,
   warnaJenisInvestasi,
@@ -192,6 +193,7 @@ const POLA_RUANG = {
       <div class="text-xs border-t pt-1">
       ${p.jenis === p.sub_zona ? '' : `<b>Kawasan:</b> ${aman(p.jenis || '-')}<br/>`}
       <b>${p.sumber === 'KKP-RTRW-DARAT' ? 'Peruntukan' : 'Sub-zona'}:</b> ${aman(p.sub_zona || '-')}<br/>
+      ${p.zona_rpz_label ? `<b>Zona kawasan konservasi:</b> ${aman(p.zona_rpz_label)}<br/>` : ''}
       <b>Instrumen:</b> ${
         {
           'KKP-RTRW': 'Perda RTRW Provinsi',
@@ -613,6 +615,35 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     label: 'RZ KAW Selat Makassar',
     keteranganLegenda:
       'Rencana zonasi perairan lintas provinsi (Perpres 83/2020: Kaltim, Kalsel, Sulbar, Sulsel, dan Sulteng).',
+  },
+
+  zonasi_konservasi: {
+    ...POLA_RUANG,
+    params: { rpz: 1 },
+    legenda: 'zona_rpz',
+    pilihan: {
+      param: 'kelas',
+      label: 'Tampilkan zona',
+      semua: 'Semua zona',
+      opsi: URUTAN_ZONA_RPZ.map((kode) => [kode, KATEGORI_ZONA[kode].label]),
+    },
+    label: 'Zonasi Kawasan Konservasi (RPZ)',
+    keteranganLegenda: 'Pembagian zona di dalam kawasan konservasi. Zona inti tertutup bagi investasi.',
+    gaya: (f) => {
+      const warna = warnaZona(f?.properties?.zona_rpz);
+      return { color: warna, weight: 1.4, fillColor: warna, fillOpacity: 0.4, opacity: 0.95 };
+    },
+    popup: (p) => `<div class="font-sans">
+      <h3 class="font-bold text-kkp-800 mb-1">${aman(p.nama || 'Kawasan konservasi')}</h3>
+      <p class="text-xs mb-2 flex items-center gap-1.5">
+        <span style="width:10px;height:10px;border-radius:2px;display:inline-block;background:${warnaZona(p.zona_rpz)}"></span>
+        <span class="font-semibold text-slate-700">${aman(p.zona_rpz_label || '-')}</span>
+      </p>
+      <div class="text-xs border-t pt-1">
+      <b>Aturan kegiatan:</b> ${aman(p.dasar_rpz || 'Matriks KKPRL Perda (rincian RPZ kawasan ini belum dimasukkan)')}<br/>
+      <b>Provinsi:</b> ${aman(p.provinsi || '-')}</div>
+      ${TOMBOL_ANALISIS}
+    </div>`,
   },
 };
 

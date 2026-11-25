@@ -1,7 +1,15 @@
-from django.db.models import Q
+from django.db.models import Case, Q, When
 from rest_framework import viewsets
 
 from analitik.services.konstanta import GMW_TAHUN_AKHIR
+from analitik.services.screening_ruang import (
+    KELAS_ZONA_RPZ,
+    POLA_SQL_PEMANFAATAN_UMUM,
+    POLA_SQL_ZONA_RPZ,
+    kelas_zona_rpz,
+    label_zona_rpz,
+    zona_rpz,
+)
 from inti.peta_bbox import PetaBBoxMixin
 
 from .models import (
@@ -71,11 +79,11 @@ class ZonasiRuangLautViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
 
     PETA_KOLOM = (
         'nama_zona', 'jenis_zona', 'sub_zona', 'nomor_regulasi',
-        'provinsi__nama', 'sumber_data',
+        'provinsi__nama', 'sumber_data', 'keterangan',
     )
 
     def properti_peta(self, r):
-        return {
+        properti = {
             'nama': r['nama_zona'],
             'jenis': self.label_peta('jenis_zona', r['jenis_zona']),
             'sub_zona': self.label_peta('sub_zona', r['sub_zona']),
@@ -85,6 +93,12 @@ class ZonasiRuangLautViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
             'provinsi': r['provinsi__nama'],
             'sumber': r['sumber_data'],
         }
+        kelas = kelas_zona_rpz(r['keterangan'])
+        if kelas:
+            rpz = zona_rpz(r['nama_zona'], r['keterangan'])
+            properti.update(zona_rpz=kelas, zona_rpz_label=label_zona_rpz(r['nama_zona'], r['keterangan']),
+                            dasar_rpz=rpz and rpz['dasar'])
+        return properti
 
     def peta_queryset_tambahan(self, qs, request):
         tingkat = request.query_params.get('tingkat')
@@ -93,8 +107,18 @@ class ZonasiRuangLautViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
         ranah = request.query_params.get('ranah') or 'LAUT'
         if ranah != 'SEMUA':
             qs = qs.filter(ranah=ranah)
+        if request.query_params.get('rpz'):
+            qs = qs.filter(keterangan__iregex=POLA_SQL_ZONA_RPZ).exclude(keterangan__iregex=POLA_SQL_PEMANFAATAN_UMUM)
+            kelas = KELAS_ZONA_RPZ.get(request.query_params.get('kelas'))
+            return qs.filter(keterangan__iregex=f'^(zona )?{kelas}') if kelas else qs
         kategori = request.query_params.get('kategori')
         return qs.filter(sub_zona=kategori) if kategori else qs
+
+    def peta_urutan(self, qs, request, batas):
+        if request.query_params.get('rpz'):
+            inti = Case(When(keterangan__iregex='^(zona )?inti', then=0), default=1)
+            return qs.order_by(inti, '-luas_ha', 'id')
+        return super().peta_urutan(qs, request, batas)
 
 
 class KKPRLViewSet(PetaBBoxMixin, viewsets.ReadOnlyModelViewSet):
