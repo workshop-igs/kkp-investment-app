@@ -5523,6 +5523,894 @@
      ]
     }
    ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PERAIRAN GILI BANTA DAN PERAIRAN SEKITARNYA DI PROVINSI NUSA TENGGARA BARAT",
+   "dasar": "Rencana Pengelolaan dan Zonasi TWP Gili Banta 2018-2038 (DKP Provinsi Nusa Tenggara Barat), tabel kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
+   "sektor": {
+    "Berlayar melintas (Kapasitas Kapal <10 GT)": [],
+    "Berlayar melintas (Kapasitas Kapal <10 GT) Rencana Pengelolaan dan Zonasi TWP Gili Banta 31 No Kegiatan Keterangan": [],
+    "Biofarmakologi": [],
+    "Bioteknologi": [],
+    "Bioteknologi Rencana Pengelolaan dan Zonasi TWP Gili Banta 40 No. Kegiatan Keterangan": [],
+    "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Industri garam": [
+     "GARAM"
+    ],
+    "Industri garam/": [
+     "GARAM"
+    ],
+    "Industri garam/industri": [
+     "GARAM"
+    ],
+    "Instalasi pembangkit energi listrik terbarukan": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, Rencana Pengelolaan dan Zonasi TWP Gili Banta 34 No. Kegiatan Keterangan olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "PERIKANAN_TANGKAP",
+     "PARIWISATA_BAHARI"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "PERIKANAN_TANGKAP",
+     "PARIWISATA_BAHARI"
+    ],
+    "Pelestarian adat dan budaya": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pelabuhan khusus": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pelabuhan umum": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembuangan air limbah hasil olahan": [],
+    "Pembuangan sampah": [],
+    "Penambangan atau pengambilan karang": [],
+    "Penambangan atau pengambilan pasir laut": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal < 10 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal >30 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkaran dan pelepasliaran satwa": [],
+    "Pendidikan, penelitian dan pengembangan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penenggelaman kapal": [],
+    "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)": [],
+    "Pengambilan air laut": [],
+    "Pengerukan dasar laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi TWP Gili Banta 37 No. Kegiatan Keterangan": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Penimbunan dan pengeringan laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Perumahan/permukiman": [],
+    "Rehabilitasi habitat dan populasi ikan": [
+     "KONSERVASI_PESISIR"
+    ]
+   },
+   "sub_jenis": {
+    "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
+     "BUDIDAYA_RUMPUT_LAUT",
+     "BUDIDAYA_KEKERANGAN"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, Rencana Pengelolaan dan Zonasi TWP Gili Banta 34 No. Kegiatan Keterangan olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
+     "INFRA_PELINDUNG_PANTAI"
+    ],
+    "Penimbunan dan pengeringan laut": [
+     "INFRA_REKLAMASI"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [
+      "Berlayar melintas (Kapasitas Kapal <10 GT) Rencana Pengelolaan dan Zonasi TWP Gili Banta 31 No Kegiatan Keterangan"
+     ],
+     "bersyarat": [
+      "Pendidikan, penelitian dan pengembangan",
+      "Penangkaran dan pelepasliaran satwa"
+     ],
+     "tidak_diperbolehkan": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Pelestarian adat dan budaya",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Penambangan atau pengambilan pasir laut",
+      "Industri garam/industri",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya"
+     ],
+     "label": "Zona Lainnya",
+     "diperbolehkan": [
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pelestarian adat dan budaya",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Biofarmakologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan",
+      "Bioteknologi Rencana Pengelolaan dan Zonasi TWP Gili Banta 40 No. Kegiatan Keterangan"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Penambangan atau pengambilan pasir laut",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Industri garam"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan"
+     ],
+     "label": "Zona Pemanfaatan",
+     "diperbolehkan": [
+      "Pelestarian adat dan budaya",
+      "Penangkaran dan pelepasliaran satwa",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, Rencana Pengelolaan dan Zonasi TWP Gili Banta 34 No. Kegiatan Keterangan olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Penambangan atau pengambilan karang",
+      "Penambangan atau pengambilan pasir laut",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Industri garam/"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan"
+     ],
+     "label": "Zona Perikanan Berkelanjutan",
+     "diperbolehkan": [
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pelestarian adat dan budaya",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan pelabuhan khusus",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi TWP Gili Banta 37 No. Kegiatan Keterangan"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Pembangunan pelabuhan umum",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Penambangan atau pengambilan pasir laut",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Industri garam/"
+     ]
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PERAIRAN PULAU LIANG, PULAU NGALI, DAN PERAIRAN SEKITARNYA DI PROVINSI NUSA TENGGARA BARAT",
+   "dasar": "Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 2018-2038 (DKP Provinsi Nusa Tenggara Barat), tabel kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
+   "sektor": {
+    "Berlayar melintas (Kapasitas Kapal <10 GT)": [],
+    "Biofarmakologi": [],
+    "Bioteknologi": [],
+    "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Industri garam/industri": [
+     "GARAM"
+    ],
+    "Industri garam/industry": [
+     "GARAM"
+    ],
+    "Instalasi pembangkit energi listrik terbarukan": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Pangkalan nelayan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pangkalan nelayan Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 47": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 36 No Kegiatan Keterangan komersial)": [
+     "PERIKANAN_TANGKAP",
+     "PARIWISATA_BAHARI"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "PERIKANAN_TANGKAP",
+     "PARIWISATA_BAHARI"
+    ],
+    "Pelestarian adat dan budaya": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 40 No Kegiatan Keterangan": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 46 No Kegiatan Keterangan": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pelabuhan khusus": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pelabuhan umum": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembuangan air limbah hasil olahan": [],
+    "Pembuangan sampah": [],
+    "Penambangan atau pengambilan karang": [],
+    "Penambangan atau pengambilan pasir laut": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Penambangan atau pengambilan pasir laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 43 No Kegiatan Keterangan": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal < 10 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal >30 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkaran dan pelepasliaran satwa": [],
+    "Pendidikan, penelitian dan pengembangan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penenggelaman kapal": [],
+    "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)": [],
+    "Pengambilan air laut": [],
+    "Pengerukan dasar laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Penimbunan dan pengeringan laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Perumahan/permukiman": [],
+    "Rehabilitasi habitat dan populasi ikan": [
+     "KONSERVASI_PESISIR"
+    ]
+   },
+   "sub_jenis": {
+    "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
+     "BUDIDAYA_RUMPUT_LAUT",
+     "BUDIDAYA_KEKERANGAN"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 36 No Kegiatan Keterangan komersial)": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 40 No Kegiatan Keterangan": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
+     "INFRA_PELINDUNG_PANTAI"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty": [
+     "INFRA_PELINDUNG_PANTAI"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 46 No Kegiatan Keterangan": [
+     "INFRA_PELINDUNG_PANTAI"
+    ],
+    "Penimbunan dan pengeringan laut": [
+     "INFRA_REKLAMASI"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+     ],
+     "bersyarat": [
+      "Pendidikan, penelitian dan pengembangan",
+      "Penangkaran dan pelepasliaran satwa"
+     ],
+     "tidak_diperbolehkan": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 36 No Kegiatan Keterangan komersial)",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Pelestarian adat dan budaya",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Penambangan atau pengambilan pasir laut",
+      "Industri garam/industry",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Pangkalan nelayan"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya"
+     ],
+     "label": "Subzona Rehabilitasi",
+     "diperbolehkan": [
+      "Pelestarian adat dan budaya",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pangkalan nelayan Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 47"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 46 No Kegiatan Keterangan"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Penambangan atau pengambilan pasir laut",
+      "Industri garam/industry",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan"
+     ],
+     "label": "Zona Pemanfaatan",
+     "diperbolehkan": [
+      "Pelestarian adat dan budaya",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 40 No Kegiatan Keterangan",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Penambangan atau pengambilan karang",
+      "Penambangan atau pengambilan pasir laut",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Pangkalan nelayan",
+      "Industri garam/industri"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan"
+     ],
+     "label": "Zona Perikanan Berkelanjutan",
+     "diperbolehkan": [
+      "Pelestarian adat dan budaya",
+      "Pangkalan nelayan",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan pelabuhan khusus",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Pembangunan pelabuhan umum",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Industri garam/industry",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Penambangan atau pengambilan pasir laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 43 No Kegiatan Keterangan"
+     ]
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PERAIRAN TELUK CEMPI DAN PERAIRAN SEKITARNYA DI PROVINSI NUSA TENGGARA BARAT",
+   "dasar": "Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 2018-2038 (DKP Provinsi Nusa Tenggara Barat), tabel kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
+   "sektor": {
+    "Berlayar melintas (Kapasitas Kapal <10 GT)": [],
+    "Biofarmakologi": [],
+    "Bioteknologi": [],
+    "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Budidaya (Mutiara, rumput laut, ikan dan udang) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 38 No Kegiatan Keterangan": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Industri garam/industri": [
+     "GARAM"
+    ],
+    "Industri garam/industry": [
+     "GARAM"
+    ],
+    "Instalasi pembangkit energi listrik terbarukan": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Pangkalan nelayan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pangkalan nelayan Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 45": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "PERIKANAN_TANGKAP",
+     "PARIWISATA_BAHARI"
+    ],
+    "Pelestarian adat dan budaya": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pelabuhan khusus": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pelabuhan umum": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembuangan air limbah hasil olahan": [],
+    "Pembuangan sampah": [],
+    "Penambangan atau pengambilan karang": [],
+    "Penambangan atau pengambilan pasir laut": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal < 10 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan (Kapasitas Kapal >30 GT)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkaran dan pelepasliaran satwa": [],
+    "Pendidikan, penelitian dan pengembangan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penenggelaman kapal": [],
+    "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)": [],
+    "Pengambilan air laut": [],
+    "Pengerukan dasar laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengusahaan pariwisata alam perairan (Infrastruktur, Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 41 No Kegiatan Keterangan peralatan, jasa transportasi, dan jasa pramuwisata)": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 35 No Kegiatan Keterangan": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Penimbunan dan pengeringan laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Penimbunan dan pengeringan laut Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 44 No Kegiatan Keterangan": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Perumahan/permukiman": [],
+    "Rehabilitasi habitat dan populasi ikan": [
+     "KONSERVASI_PESISIR"
+    ]
+   },
+   "sub_jenis": {
+    "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
+     "BUDIDAYA_RUMPUT_LAUT",
+     "BUDIDAYA_KEKERANGAN"
+    ],
+    "Budidaya (Mutiara, rumput laut, ikan dan udang) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 38 No Kegiatan Keterangan": [
+     "BUDIDAYA_RUMPUT_LAUT",
+     "BUDIDAYA_KEKERANGAN"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ],
+    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
+     "INFRA_PELINDUNG_PANTAI"
+    ],
+    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty": [
+     "INFRA_PELINDUNG_PANTAI"
+    ],
+    "Penimbunan dan pengeringan laut": [
+     "INFRA_REKLAMASI"
+    ],
+    "Penimbunan dan pengeringan laut Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 44 No Kegiatan Keterangan": [
+     "INFRA_REKLAMASI"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+     ],
+     "bersyarat": [
+      "Pendidikan, penelitian dan pengembangan",
+      "Penangkaran dan pelepasliaran satwa"
+     ],
+     "tidak_diperbolehkan": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 35 No Kegiatan Keterangan",
+      "Pelestarian adat dan budaya",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Penambangan atau pengambilan pasir laut",
+      "Industri garam/industry",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Pangkalan nelayan"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya"
+     ],
+     "label": "Subzona Rehabilitasi",
+     "diperbolehkan": [
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pelestarian adat dan budaya",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)",
+      "Pangkalan nelayan Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 45"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pengerukan dasar laut",
+      "Penambangan atau pengambilan pasir laut",
+      "Industri garam/industry",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Penimbunan dan pengeringan laut Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 44 No Kegiatan Keterangan"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan"
+     ],
+     "label": "Zona Pemanfaatan",
+     "diperbolehkan": [
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pelestarian adat dan budaya",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Penambangan atau pengambilan karang",
+      "Penambangan atau pengambilan pasir laut",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah",
+      "Pangkalan nelayan",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 38 No Kegiatan Keterangan",
+      "Industri garam/industri"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan"
+     ],
+     "label": "Zona Perikanan Berkelanjutan",
+     "diperbolehkan": [
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pelestarian adat dan budaya",
+      "Pangkalan nelayan",
+      "Penangkaran dan pelepasliaran satwa",
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+     ],
+     "bersyarat": [
+      "Rehabilitasi habitat dan populasi ikan",
+      "Penangkapan ikan (Kapasitas Kapal < 10 GT)",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
+      "Pembangunan pelabuhan khusus",
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penenggelaman kapal",
+      "Pengambilan air laut",
+      "Penambangan atau pengambilan karang",
+      "Biofarmakologi",
+      "Bioteknologi",
+      "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
+      "Pendidikan, penelitian dan pengembangan",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 41 No Kegiatan Keterangan peralatan, jasa transportasi, dan jasa pramuwisata)"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
+      "Penangkapan ikan (Kapasitas Kapal >30 GT)",
+      "Pembangunan pelabuhan umum",
+      "Pengerukan dasar laut",
+      "Penimbunan dan pengeringan laut",
+      "Penambangan atau pengambilan pasir laut",
+      "Industri garam/industry",
+      "Perumahan/permukiman",
+      "Pembuangan air limbah hasil olahan",
+      "Pembuangan sampah"
+     ]
+    }
+   ]
   }
  ]
 }
