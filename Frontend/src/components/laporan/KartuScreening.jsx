@@ -235,9 +235,10 @@ const RincianJenis = ({ s }) => {
     else kelompok.push({ kunci, rincian: z.rincian, ketentuan: z.ketentuan, label: z.ketentuan_label, nama: new Set([z.nama]) });
   });
   if (!kelompok.length) return null;
+  const acuan = [...new Set(s.zona.filter((z) => z.rincian).map((z) => z.acuan_rincian ?? 'matriks Perda'))].join(' dan ');
   return (
     <section>
-      <Judul>Rincian kegiatan {s.sektor_nama.toLowerCase()} menurut matriks Perda</Judul>
+      <Judul>Rincian kegiatan {s.sektor_nama.toLowerCase()} menurut {acuan}</Judul>
       <div className="space-y-2">
         {kelompok.map((k) => (
           <div key={k.kunci} className="rounded-lg border border-slate-200 bg-white">
@@ -437,7 +438,8 @@ const PengecualianKeras = ({ s }) => {
       <Judul>Pengecualian keras (gerbang kesesuaian ruang)</Judul>
       <p className="-mt-1 mb-2 text-[11px] text-slate-400">
         Alur pelayaran dan ALKI dibaca dari seluruh lapisan zonasi sehingga berlaku di atas peruntukan RTRW, kecuali
-        bagi jasa maritim dan infrastruktur laut. Kawasan konservasi mengikuti matriks KKPRL Perda. Irisan kecil di tepi
+        bagi jasa maritim dan infrastruktur laut. Kawasan konservasi mengikuti RPZ kawasan bila zonanya tersedia, selain
+        itu matriks KKPRL Perda. Irisan kecil di tepi
         area ditandai perlu verifikasi batas, bukan langsung menggugurkan.
       </p>
       <ul className="grid gap-x-5 gap-y-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs sm:grid-cols-2">
@@ -487,7 +489,7 @@ const RincianPerda = ({ perda }) => {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="text-[10.5px] font-semibold uppercase tracking-wide text-slate-500">
-          Rincian kegiatan menurut Perda
+          Rincian kegiatan menurut {perda.acuan ?? 'Perda'}
           {perda.kode_zona.length > 0 && (
             <span className="font-normal normal-case tracking-normal text-slate-400"> · kode zona {perda.kode_zona.join(', ')}</span>
           )}
@@ -511,7 +513,9 @@ const RincianPerda = ({ perda }) => {
       </div>
       {perda.ketentuan_khusus && (
         <details className="mt-2 text-[11px] text-slate-600">
-          <summary className="cursor-pointer text-kkp-700">Ketentuan khusus zona ini</summary>
+          <summary className="cursor-pointer text-kkp-700">
+            {perda.acuan === 'Perda' || !perda.acuan ? 'Ketentuan khusus zona ini' : 'Ketentuan umum kawasan'}
+          </summary>
           <p className="mt-1 leading-relaxed">{perda.ketentuan_khusus}</p>
         </details>
       )}
@@ -563,7 +567,7 @@ const ZonaKetentuan = ({ z, sektor, sama }) => {
         </div>
         {z.perda && (sama ? (
           <p className="text-slate-500">
-            <span className="font-semibold text-slate-700">Rincian kegiatan menurut Perda</span> sama dengan {sama.nama} di atas.
+            <span className="font-semibold text-slate-700">Rincian kegiatan menurut {z.perda.acuan ?? 'Perda'}</span> sama dengan {sama.nama} di atas.
           </p>
         ) : (
           <RincianPerda perda={z.perda} />

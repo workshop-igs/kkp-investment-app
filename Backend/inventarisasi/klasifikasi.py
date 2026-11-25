@@ -210,15 +210,15 @@ def _sebut(daftar, batas=3):
     return '; '.join(daftar[:batas]) + (f'; dan {len(daftar) - batas} lainnya' if len(daftar) > batas else '')
 
 
-def syarat_rincian(rincian, khusus=''):
+def syarat_rincian(rincian, khusus='', acuan='matriks KKPRL'):
     boleh, syarat, larang = (rincian[s] for s, _ in KOLOM_MATRIKS)
     if larang:
-        return (f'Hanya rincian kegiatan tertentu yang diperbolehkan menurut matriks KKPRL: {len(boleh)} diperbolehkan, '
+        return (f'Hanya rincian kegiatan tertentu yang diperbolehkan menurut {acuan}: {len(boleh)} diperbolehkan, '
                 f'{len(syarat)} bersyarat, dan {len(larang)} tidak diperbolehkan ({_sebut(larang, 2)}).')
     if boleh:
-        return (f'{len(boleh)} rincian kegiatan diperbolehkan, sedangkan yang bersyarat menurut matriks KKPRL: '
+        return (f'{len(boleh)} rincian kegiatan diperbolehkan, sedangkan yang bersyarat menurut {acuan}: '
                 f'{_sebut(syarat)}.')
-    return khusus or f'Seluruh {len(syarat)} rincian kegiatan diperbolehkan bersyarat menurut matriks KKPRL.'
+    return khusus or f'Seluruh {len(syarat)} rincian kegiatan diperbolehkan bersyarat menurut {acuan}.'
 
 
 PETA_UNSUR_RTRL = [

@@ -1,0 +1,1430 @@
+{
+ "zona_inti_umum": {
+  "label": "Zona Inti",
+  "dasar": "Permen KP No. 31/PERMEN-KP/2020 tentang Pengelolaan Kawasan Konservasi",
+  "ketentuan_umum": "Zona inti diperuntukkan bagi perlindungan mutlak habitat dan populasi ikan, serta penelitian dan pendidikan. Kegiatan pemanfaatan lainnya tidak diperbolehkan.",
+  "lainnya": "TIDAK_DIIZINKAN",
+  "diperbolehkan": [
+   "Perlindungan mutlak habitat dan populasi ikan"
+  ],
+  "bersyarat": [
+   "Penelitian",
+   "Pendidikan"
+  ],
+  "tidak_diperbolehkan": [
+   "Kegiatan pemanfaatan selain perlindungan, penelitian, dan pendidikan"
+  ],
+  "sektor": {
+   "Perlindungan mutlak habitat dan populasi ikan": [
+    "KONSERVASI_PESISIR"
+   ],
+   "Penelitian": [
+    "KONSERVASI_PESISIR"
+   ],
+   "Pendidikan": [
+    "KONSERVASI_PESISIR"
+   ],
+   "Kegiatan pemanfaatan selain perlindungan, penelitian, dan pendidikan": [
+    "*"
+   ]
+  }
+ },
+ "kawasan": [
+  {
+   "nama": "TAMAN WISATA PERAIRAN (TWP) PULAU GILI AYER, GILI MENO, DAN GILI TRAWANGAN DI PROVINSI NUSA TENGGARA BARAT",
+   "dasar": "Kepmen KP No. 57/KEPMEN-KP/2014 tentang Rencana Pengelolaan dan Zonasi TWP Pulau Gili Ayer, Gili Meno, dan Gili Trawangan 2014-2034",
+   "ketentuan_umum": "Berlaku di setiap zona: tidak boleh membuang jangkar kecuali di zona pelabuhan; izin penelitian dan pendidikan diberikan oleh Pengelola TWP; pipa dan kabel bawah laut mengikuti jalur kabel yang ada dan dikoordinasikan dengan Pengelola TWP; dilarang mengambil atau mengganggu penyu, manta, hiu, dan lumba-lumba; dilarang membuang limbah dan sampah ke laut.",
+   "sektor": {
+    "Wisata menyelam": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Berenang dan snorkeling": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata speargun/memanah ikan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata olahraga air: jetski": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata olahraga air: banana boat": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata olahraga air: windsurf": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata olahraga air: surfing": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata olahraga air lainnya": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata perahu kaca (glass bottom boat)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Sarana wisata petualangan: marine walk": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Sarana wisata petualangan: kapal layar cruise dan kapal selam": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Sarana wisata petualangan: penenggelaman kapal (ship wreck)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Budidaya": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Berlayar melintas": [
+     "JASA_MARITIM"
+    ],
+    "Tambatan kapal (mooring buoy)": [
+     "JASA_MARITIM"
+    ],
+    "Berlabuh kapal di bawah 10 GT": [
+     "JASA_MARITIM"
+    ],
+    "Berlabuh kapal di atas 10 GT": [
+     "JASA_MARITIM"
+    ],
+    "Upacara adat dan ritual keagamaan": [],
+    "Menyelam untuk mengambil biota": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pengambilan karang hidup atau mati": [],
+    "Penangkapan ikan: pancing": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: jaring atas": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: panah/speargun": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: rawai dasar": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: mengambil biota/angsat (gleaning)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: jaring insang (gill net)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: jaring mogong": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan dengan kompresor": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pemasangan rumpon": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pembuatan foto, video, dan film komersial": [],
+    "Pembuatan foto, video, dan film nonkomersial": [],
+    "Penelitian": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya": [
+     "KONSERVASI_PESISIR"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya"
+     ],
+     "tidak_diperbolehkan": [
+      "Wisata menyelam",
+      "Berenang dan snorkeling",
+      "Wisata speargun/memanah ikan",
+      "Wisata olahraga air: jetski",
+      "Wisata olahraga air: banana boat",
+      "Wisata olahraga air: windsurf",
+      "Wisata olahraga air: surfing",
+      "Wisata olahraga air lainnya",
+      "Wisata perahu kaca (glass bottom boat)",
+      "Sarana wisata petualangan: marine walk",
+      "Sarana wisata petualangan: kapal layar cruise dan kapal selam",
+      "Sarana wisata petualangan: penenggelaman kapal (ship wreck)",
+      "Budidaya",
+      "Berlayar melintas",
+      "Tambatan kapal (mooring buoy)",
+      "Berlabuh kapal di bawah 10 GT",
+      "Berlabuh kapal di atas 10 GT",
+      "Upacara adat dan ritual keagamaan",
+      "Menyelam untuk mengambil biota",
+      "Pengambilan karang hidup atau mati",
+      "Penangkapan ikan: pancing",
+      "Penangkapan ikan: jaring atas",
+      "Penangkapan ikan: panah/speargun",
+      "Penangkapan ikan: rawai dasar",
+      "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar",
+      "Penangkapan ikan: mengambil biota/angsat (gleaning)",
+      "Penangkapan ikan: jaring insang (gill net)",
+      "Penangkapan ikan: jaring mogong",
+      "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan kompresor",
+      "Pemasangan rumpon",
+      "Pembuatan foto, video, dan film komersial",
+      "Pembuatan foto, video, dan film nonkomersial"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan | Perikanan Berkelanjutan"
+     ],
+     "label": "Zona Perikanan Berkelanjutan",
+     "diperbolehkan": [
+      "Wisata menyelam",
+      "Wisata speargun/memanah ikan",
+      "Wisata olahraga air: windsurf",
+      "Wisata olahraga air: surfing",
+      "Wisata olahraga air lainnya",
+      "Wisata perahu kaca (glass bottom boat)",
+      "Berlayar melintas",
+      "Tambatan kapal (mooring buoy)",
+      "Upacara adat dan ritual keagamaan",
+      "Menyelam untuk mengambil biota",
+      "Pembuatan foto, video, dan film nonkomersial",
+      "Penangkapan ikan: pancing",
+      "Penangkapan ikan: jaring atas",
+      "Penangkapan ikan: panah/speargun",
+      "Penangkapan ikan: rawai dasar",
+      "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar"
+     ],
+     "bersyarat": [
+      "Pemasangan rumpon",
+      "Pembuatan foto, video, dan film komersial",
+      "Sarana wisata petualangan: kapal layar cruise dan kapal selam",
+      "Sarana wisata petualangan: penenggelaman kapal (ship wreck)",
+      "Penelitian",
+      "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya",
+      "Budidaya"
+     ],
+     "tidak_diperbolehkan": [
+      "Berenang dan snorkeling",
+      "Wisata olahraga air: jetski",
+      "Wisata olahraga air: banana boat",
+      "Sarana wisata petualangan: marine walk",
+      "Berlabuh kapal di bawah 10 GT",
+      "Berlabuh kapal di atas 10 GT",
+      "Pengambilan karang hidup atau mati",
+      "Penangkapan ikan: mengambil biota/angsat (gleaning)",
+      "Penangkapan ikan: jaring insang (gill net)",
+      "Penangkapan ikan: jaring mogong",
+      "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan kompresor"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan | Perikanan Berkelanjutan Karang"
+     ],
+     "label": "Sub Zona Perikanan Berkelanjutan Karang",
+     "diperbolehkan": [
+      "Wisata menyelam",
+      "Berenang dan snorkeling",
+      "Wisata olahraga air: surfing",
+      "Wisata perahu kaca (glass bottom boat)",
+      "Berlayar melintas",
+      "Tambatan kapal (mooring buoy)",
+      "Upacara adat dan ritual keagamaan",
+      "Menyelam untuk mengambil biota",
+      "Penangkapan ikan: pancing",
+      "Penangkapan ikan: panah/speargun",
+      "Penangkapan ikan: rawai dasar",
+      "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar",
+      "Pembuatan foto, video, dan film nonkomersial"
+     ],
+     "bersyarat": [
+      "Pembuatan foto, video, dan film komersial",
+      "Penelitian",
+      "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya",
+      "Budidaya",
+      "Sarana wisata petualangan: marine walk",
+      "Sarana wisata petualangan: penenggelaman kapal (ship wreck)"
+     ],
+     "tidak_diperbolehkan": [
+      "Wisata speargun/memanah ikan",
+      "Wisata olahraga air: jetski",
+      "Wisata olahraga air: banana boat",
+      "Wisata olahraga air: windsurf",
+      "Wisata olahraga air lainnya",
+      "Sarana wisata petualangan: kapal layar cruise dan kapal selam",
+      "Berlabuh kapal di bawah 10 GT",
+      "Berlabuh kapal di atas 10 GT",
+      "Pengambilan karang hidup atau mati",
+      "Penangkapan ikan: jaring atas",
+      "Penangkapan ikan: mengambil biota/angsat (gleaning)",
+      "Penangkapan ikan: jaring insang (gill net)",
+      "Penangkapan ikan: jaring mogong",
+      "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan kompresor",
+      "Pemasangan rumpon"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan"
+     ],
+     "label": "Zona Pemanfaatan",
+     "diperbolehkan": [
+      "Wisata menyelam",
+      "Berenang dan snorkeling",
+      "Wisata olahraga air: surfing",
+      "Wisata perahu kaca (glass bottom boat)",
+      "Berlayar melintas",
+      "Tambatan kapal (mooring buoy)",
+      "Upacara adat dan ritual keagamaan",
+      "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar",
+      "Pembuatan foto, video, dan film nonkomersial"
+     ],
+     "bersyarat": [
+      "Sarana wisata petualangan: marine walk",
+      "Sarana wisata petualangan: penenggelaman kapal (ship wreck)",
+      "Penelitian",
+      "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya",
+      "Pembuatan foto, video, dan film komersial"
+     ],
+     "tidak_diperbolehkan": [
+      "Wisata speargun/memanah ikan",
+      "Wisata olahraga air: jetski",
+      "Wisata olahraga air: banana boat",
+      "Wisata olahraga air: windsurf",
+      "Wisata olahraga air lainnya",
+      "Sarana wisata petualangan: kapal layar cruise dan kapal selam",
+      "Budidaya",
+      "Berlabuh kapal di bawah 10 GT",
+      "Berlabuh kapal di atas 10 GT",
+      "Menyelam untuk mengambil biota",
+      "Pengambilan karang hidup atau mati",
+      "Penangkapan ikan: pancing",
+      "Penangkapan ikan: jaring atas",
+      "Penangkapan ikan: panah/speargun",
+      "Penangkapan ikan: rawai dasar",
+      "Penangkapan ikan: mengambil biota/angsat (gleaning)",
+      "Penangkapan ikan: jaring insang (gill net)",
+      "Penangkapan ikan: jaring mogong",
+      "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan kompresor",
+      "Pemasangan rumpon"
+     ]
+    },
+    {
+     "keterangan": [
+      "Lainnya | Rehabilitasi"
+     ],
+     "label": "Zona Rehabilitasi",
+     "diperbolehkan": [
+      "Wisata menyelam",
+      "Berenang dan snorkeling",
+      "Wisata perahu kaca (glass bottom boat)",
+      "Berlayar melintas",
+      "Tambatan kapal (mooring buoy)",
+      "Upacara adat dan ritual keagamaan",
+      "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar",
+      "Pembuatan foto, video, dan film nonkomersial"
+     ],
+     "bersyarat": [
+      "Sarana wisata petualangan: marine walk",
+      "Sarana wisata petualangan: penenggelaman kapal (ship wreck)",
+      "Penelitian",
+      "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya",
+      "Pembuatan foto, video, dan film komersial"
+     ],
+     "tidak_diperbolehkan": [
+      "Wisata speargun/memanah ikan",
+      "Wisata olahraga air: jetski",
+      "Wisata olahraga air: banana boat",
+      "Wisata olahraga air: windsurf",
+      "Wisata olahraga air: surfing",
+      "Wisata olahraga air lainnya",
+      "Sarana wisata petualangan: kapal layar cruise dan kapal selam",
+      "Budidaya",
+      "Berlabuh kapal di bawah 10 GT",
+      "Berlabuh kapal di atas 10 GT",
+      "Menyelam untuk mengambil biota",
+      "Pengambilan karang hidup atau mati",
+      "Penangkapan ikan: pancing",
+      "Penangkapan ikan: jaring atas",
+      "Penangkapan ikan: panah/speargun",
+      "Penangkapan ikan: rawai dasar",
+      "Penangkapan ikan: mengambil biota/angsat (gleaning)",
+      "Penangkapan ikan: jaring insang (gill net)",
+      "Penangkapan ikan: jaring mogong",
+      "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan kompresor",
+      "Pemasangan rumpon"
+     ]
+    },
+    {
+     "keterangan": [
+      "Lainnya | Perlindungan"
+     ],
+     "label": "Zona Perlindungan",
+     "diperbolehkan": [
+      "Wisata menyelam",
+      "Berenang dan snorkeling",
+      "Wisata perahu kaca (glass bottom boat)",
+      "Berlayar melintas",
+      "Tambatan kapal (mooring buoy)",
+      "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar",
+      "Upacara adat dan ritual keagamaan",
+      "Pembuatan foto, video, dan film nonkomersial"
+     ],
+     "bersyarat": [
+      "Sarana wisata petualangan: marine walk",
+      "Sarana wisata petualangan: penenggelaman kapal (ship wreck)",
+      "Penelitian",
+      "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya",
+      "Pembuatan foto, video, dan film komersial"
+     ],
+     "tidak_diperbolehkan": [
+      "Wisata speargun/memanah ikan",
+      "Wisata olahraga air: jetski",
+      "Wisata olahraga air: banana boat",
+      "Wisata olahraga air: windsurf",
+      "Wisata olahraga air: surfing",
+      "Wisata olahraga air lainnya",
+      "Sarana wisata petualangan: kapal layar cruise dan kapal selam",
+      "Budidaya",
+      "Berlabuh kapal di bawah 10 GT",
+      "Berlabuh kapal di atas 10 GT",
+      "Menyelam untuk mengambil biota",
+      "Pengambilan karang hidup atau mati",
+      "Penangkapan ikan: pancing",
+      "Penangkapan ikan: jaring atas",
+      "Penangkapan ikan: panah/speargun",
+      "Penangkapan ikan: rawai dasar",
+      "Penangkapan ikan: mengambil biota/angsat (gleaning)",
+      "Penangkapan ikan: jaring insang (gill net)",
+      "Penangkapan ikan: jaring mogong",
+      "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan kompresor",
+      "Pemasangan rumpon"
+     ]
+    },
+    {
+     "keterangan": [
+      "Lainnya | Pelabuhan"
+     ],
+     "label": "Zona Pelabuhan",
+     "diperbolehkan": [
+      "Wisata perahu kaca (glass bottom boat)",
+      "Berlayar melintas",
+      "Tambatan kapal (mooring buoy)",
+      "Berlabuh kapal di bawah 10 GT",
+      "Pembuatan foto, video, dan film nonkomersial",
+      "Upacara adat dan ritual keagamaan",
+      "Penangkapan ikan: pancing",
+      "Penangkapan ikan: pancing cumi malam hari tanpa membuang jangkar"
+     ],
+     "bersyarat": [
+      "Pembuatan foto, video, dan film komersial",
+      "Penelitian"
+     ],
+     "tidak_diperbolehkan": [
+      "Wisata menyelam",
+      "Berenang dan snorkeling",
+      "Wisata speargun/memanah ikan",
+      "Wisata olahraga air: jetski",
+      "Wisata olahraga air: banana boat",
+      "Wisata olahraga air: windsurf",
+      "Wisata olahraga air: surfing",
+      "Wisata olahraga air lainnya",
+      "Sarana wisata petualangan: marine walk",
+      "Sarana wisata petualangan: kapal layar cruise dan kapal selam",
+      "Sarana wisata petualangan: penenggelaman kapal (ship wreck)",
+      "Budidaya",
+      "Berlabuh kapal di atas 10 GT",
+      "Menyelam untuk mengambil biota",
+      "Pengambilan karang hidup atau mati",
+      "Penangkapan ikan: jaring atas",
+      "Penangkapan ikan: panah/speargun",
+      "Penangkapan ikan: rawai dasar",
+      "Penangkapan ikan: mengambil biota/angsat (gleaning)",
+      "Penangkapan ikan: jaring insang (gill net)",
+      "Penangkapan ikan: jaring mogong",
+      "Penangkapan ikan: trawl, muroami, huhate, payang, bubu, akar tuba, sianida, bahan peledak, dan alat tangkap tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan kompresor",
+      "Pemasangan rumpon",
+      "Pendidikan, pemeliharaan, pemulihan, rehabilitasi, dan peningkatan sumber daya ikan dan ekosistemnya"
+     ]
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PERAIRAN NUSA PENIDA DI PROVINSI BALI",
+   "dasar": "Rencana Pengelolaan dan Zonasi KKP Nusa Penida 2012-2032 (Pemerintah Provinsi Bali), Tabel 48 Matriks Pengaturan Klasifikasi Pemanfaatan Zona/Sub-Zona",
+   "ketentuan_umum": "Klasifikasi T (bersyarat terbatas) membatasi waktu, ruang, intensitas, atau jumlah pemanfaatan; klasifikasi B (bersyarat tertentu) memerlukan persyaratan seperti kajian lingkungan (Amdal/UKL-UPL). Keduanya ditampilkan sebagai bersyarat.",
+   "sektor": {
+    "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Alur migrasi biota perairan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pemulihan dan rehabilitasi ekosistem": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penelitian dasar dengan metode observasi": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pendidikan tanpa pengambilan material langsung dari alam": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pengelolaan jenis sumber daya ikan beserta habitatnya": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Budidaya rumput laut sistem tancap": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Pemasangan pelampung tanda batas": [],
+    "Alur pelayaran": [
+     "JASA_MARITIM"
+    ],
+    "Peribadatan umat Hindu": [],
+    "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau": [],
+    "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)": [],
+    "Budidaya rumput laut metode longline": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Budidaya kerang mutiara": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Budidaya keramba jaring apung": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Budidaya abalon": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Budidaya laut dalam": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Wisata selam (diving dan snorkeling)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata memberi makan ikan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Pembangunan dermaga dan jetty": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Pembangunan pelampung tambat": [
+     "JASA_MARITIM"
+    ],
+    "Pembangunan fasilitas keselamatan wisata bahari": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Pembangunan fasilitas mitigasi bencana": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Rekreasi air (mandi, renang, berkano)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata berselancar": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Hookah (underwater helmet)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Olahraga air (jetski, banana boat, parasailing, underwater scooter)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Selancar angin": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata berperahu": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata pancing": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata spearfishing": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Pembuatan foto, video, dan film": [],
+    "Wisata perahu lambung kaca": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata lumba-lumba dan paus": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Pembangunan dermaga khusus wisata bahari": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengerukan dasar laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Penimbunan laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pengeringan laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pelabuhan umum": [
+     "INFRASTRUKTUR_LAUT",
+     "JASA_MARITIM"
+    ],
+    "Pembangunan pelabuhan khusus": [
+     "INFRASTRUKTUR_LAUT",
+     "JASA_MARITIM"
+    ],
+    "Tambat labuh boat, perahu wisata, dan yacht": [
+     "JASA_MARITIM"
+    ],
+    "Tempat labuh kapal": [
+     "JASA_MARITIM"
+    ],
+    "Tempat alih muat antarkapal": [
+     "JASA_MARITIM"
+    ],
+    "Kolam pelabuhan untuk sandar dan olah gerak kapal": [
+     "JASA_MARITIM"
+    ],
+    "Pemanduan kapal": [
+     "JASA_MARITIM"
+    ],
+    "Tempat perbaikan kapal": [
+     "JASA_MARITIM"
+    ],
+    "Keperluan keadaan darurat pelabuhan": [
+     "JASA_MARITIM"
+    ],
+    "Penempatan kapal mati": [
+     "JASA_MARITIM"
+    ],
+    "Percobaan berlayar": [
+     "JASA_MARITIM"
+    ],
+    "Fasilitas pembangunan dan pemeliharaan kapal": [
+     "JASA_MARITIM"
+    ],
+    "Pengembangan pelabuhan jangka panjang": [
+     "INFRASTRUKTUR_LAUT",
+     "JASA_MARITIM"
+    ],
+    "Pembangunan alat bantu navigasi pelayaran": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan pemecah gelombang, turap, dan dermaga": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Instalasi pembangkit energi listrik terbarukan": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Penambangan air laut": [],
+    "Penambangan pasir pantai dan laut serta material pantai/laut lainnya": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Eksplorasi pertambangan minyak dan gas": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Alur pipa air bersih bawah laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Alur pipa migas bawah laut": [
+     "INFRASTRUKTUR_LAUT",
+     "ENERGI_KELAUTAN"
+    ],
+    "Alur pipa air limbah bawah laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Alur kabel listrik bawah laut": [
+     "INFRASTRUKTUR_LAUT",
+     "ENERGI_KELAUTAN"
+    ],
+    "Alur kabel telekomunikasi bawah laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Industri garam": [
+     "GARAM"
+    ],
+    "Pembuangan air limbah": [],
+    "Pembuangan sampah": []
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Budidaya rumput laut sistem tancap",
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya rumput laut metode longline",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Budidaya laut dalam",
+      "Wisata selam (diving dan snorkeling)",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tambat labuh boat, perahu wisata, dan yacht",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Tempat perbaikan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Penempatan kapal mati",
+      "Percobaan berlayar",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Pengembangan pelabuhan jangka panjang",
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur pipa air limbah bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan | Perikanan Tradisional"
+     ],
+     "label": "Sub Zona Perikanan Tradisional",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Budidaya rumput laut sistem tancap",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu",
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Budidaya rumput laut metode longline",
+      "Budidaya laut dalam",
+      "Wisata selam (diving dan snorkeling)",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus",
+      "Tambat labuh boat, perahu wisata, dan yacht",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Pemanduan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Percobaan berlayar",
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Penambangan air laut",
+      "Eksplorasi pertambangan minyak dan gas"
+     ],
+     "bersyarat": [
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Pengembangan pelabuhan jangka panjang",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Hookah (underwater helmet)",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Tempat perbaikan kapal",
+      "Penempatan kapal mati",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Alur pipa air limbah bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan | Pariwisata Bahari Khusus A"
+     ],
+     "label": "Sub Zona Pariwisata Bahari Khusus A",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu",
+      "Wisata selam (diving dan snorkeling)",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus"
+     ],
+     "bersyarat": [
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Budidaya rumput laut sistem tancap",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya rumput laut metode longline",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Budidaya laut dalam",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tambat labuh boat, perahu wisata, dan yacht",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Tempat perbaikan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Penempatan kapal mati",
+      "Percobaan berlayar",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Pengembangan pelabuhan jangka panjang",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air limbah bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan | Pariwisata Bahari Khusus B",
+      "Pemanfaatan | Pariwisata Bahari Khusus B"
+     ],
+     "label": "Sub Zona Pariwisata Bahari Khusus B",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu",
+      "Wisata selam (diving dan snorkeling)",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus",
+      "Tambat labuh boat, perahu wisata, dan yacht"
+     ],
+     "bersyarat": [
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Budidaya rumput laut sistem tancap",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya rumput laut metode longline",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Budidaya laut dalam",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Tempat perbaikan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Penempatan kapal mati",
+      "Percobaan berlayar",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Pengembangan pelabuhan jangka panjang",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air limbah bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan | Budidaya Rumput Laut"
+     ],
+     "label": "Sub Zona Budidaya Rumput Laut",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Budidaya rumput laut sistem tancap",
+      "Pemasangan pelampung tanda batas",
+      "Peribadatan umat Hindu",
+      "Budidaya rumput laut metode longline",
+      "Budidaya abalon",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Pembuatan foto, video, dan film"
+     ],
+     "bersyarat": [
+      "Rekreasi air (mandi, renang, berkano)",
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Alur pelayaran",
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya laut dalam",
+      "Wisata selam (diving dan snorkeling)",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Wisata berselancar",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tambat labuh boat, perahu wisata, dan yacht",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Tempat perbaikan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Penempatan kapal mati",
+      "Percobaan berlayar",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Pengembangan pelabuhan jangka panjang",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air limbah bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan | Pariwisata Bahari A"
+     ],
+     "label": "Sub Zona Pariwisata Bahari A",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu",
+      "Wisata selam (diving dan snorkeling)",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus"
+     ],
+     "bersyarat": [
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Budidaya rumput laut sistem tancap",
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya rumput laut metode longline",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Budidaya laut dalam",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tambat labuh boat, perahu wisata, dan yacht",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Tempat perbaikan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Penempatan kapal mati",
+      "Percobaan berlayar",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Pengembangan pelabuhan jangka panjang",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air limbah bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan | Pariwisata Bahari B"
+     ],
+     "label": "Sub Zona Pariwisata Bahari B",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu",
+      "Wisata selam (diving dan snorkeling)",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus",
+      "Tambat labuh boat, perahu wisata, dan yacht"
+     ],
+     "bersyarat": [
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Budidaya rumput laut sistem tancap",
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya rumput laut metode longline",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Budidaya laut dalam",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Tempat perbaikan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Penempatan kapal mati",
+      "Percobaan berlayar",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Pengembangan pelabuhan jangka panjang",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air limbah bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan | Pelabuhan"
+     ],
+     "label": "Sub Zona Pelabuhan",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu",
+      "Pembangunan dermaga dan jetty",
+      "Pembangunan pelampung tambat",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tambat labuh boat, perahu wisata, dan yacht",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Percobaan berlayar",
+      "Pengembangan pelabuhan jangka panjang",
+      "Pembangunan alat bantu navigasi pelayaran"
+     ],
+     "bersyarat": [
+      "Pengerukan dasar laut",
+      "Pembangunan pemecah gelombang, turap, dan dermaga"
+     ],
+     "tidak_diperbolehkan": [
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Budidaya rumput laut sistem tancap",
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya rumput laut metode longline",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Budidaya laut dalam",
+      "Wisata selam (diving dan snorkeling)",
+      "Wisata memberi makan ikan",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Tempat perbaikan kapal",
+      "Penempatan kapal mati",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur pipa air limbah bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    },
+    {
+     "keterangan": [
+      "Lainnya | Suci"
+     ],
+     "label": "Sub Zona Suci",
+     "diperbolehkan": [
+      "Perlindungan proses ekologis yang menunjang kelangsungan hidup sumber daya ikan dan ekosistemnya",
+      "Patroli penjagaan dan pencegahan kegiatan yang mengubah keutuhan potensi dan fungsi kawasan",
+      "Alur migrasi biota perairan",
+      "Pemulihan dan rehabilitasi ekosistem",
+      "Penelitian dasar dengan metode observasi",
+      "Penelitian terapan dan monitoring kondisi biologi dan ekologi untuk kepentingan konservasi",
+      "Pendidikan tanpa pengambilan material langsung dari alam",
+      "Pendidikan biologi, ekologi, sosial ekonomi dan budaya, tata kelola dan pengelolaan",
+      "Pengelolaan jenis sumber daya ikan beserta habitatnya",
+      "Budidaya rumput laut sistem tancap",
+      "Pemasangan pelampung tanda batas",
+      "Alur pelayaran",
+      "Peribadatan umat Hindu"
+     ],
+     "bersyarat": [
+      "Alur pipa air bersih bawah laut",
+      "Alur pipa migas bawah laut",
+      "Alur kabel listrik bawah laut",
+      "Alur kabel telekomunikasi bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan langsung dari alam: pancing dasar, tonda, hiu, rawai, jaring insang, jaring dasar dan permukaan, bagan, jerat, bubu, sero, selam, tombak atau panah ikan",
+      "Penangkapan ikan dengan pancing rawai, bagan puri, bagan tancap, bagan apung, alat jerat, bubu, sero, dan jaring dasar hanyut",
+      "Kegiatan merusak: bom, racun, bius, muroami, kompresor selam, membalik karang, mengambil karang atau pasir, menebang bakau",
+      "Penangkapan biota dilindungi dan biota karismatik (hiu totol, hiu ekor panjang, mola-mola, pari manta)",
+      "Budidaya rumput laut metode longline",
+      "Budidaya kerang mutiara",
+      "Budidaya keramba jaring apung",
+      "Budidaya abalon",
+      "Budidaya laut dalam",
+      "Wisata selam (diving dan snorkeling)",
+      "Wisata memberi makan ikan",
+      "Pembangunan dermaga dan jetty",
+      "Pembangunan bangunan wisata terapung (ponton berjangkar, restoran dan akomodasi terapung)",
+      "Pembangunan pelampung tambat",
+      "Pembangunan fasilitas keselamatan wisata bahari",
+      "Pembangunan fasilitas mitigasi bencana",
+      "Rekreasi air (mandi, renang, berkano)",
+      "Wisata berselancar",
+      "Hookah (underwater helmet)",
+      "Olahraga air (jetski, banana boat, parasailing, underwater scooter)",
+      "Selancar angin",
+      "Wisata berperahu",
+      "Wisata pancing",
+      "Wisata spearfishing",
+      "Pembuatan foto, video, dan film",
+      "Wisata perahu lambung kaca",
+      "Wisata lumba-lumba dan paus",
+      "Pembangunan dermaga khusus wisata bahari",
+      "Pengerukan dasar laut",
+      "Penimbunan laut",
+      "Pengeringan laut",
+      "Pembangunan pelabuhan umum",
+      "Pembangunan pelabuhan khusus",
+      "Tambat labuh boat, perahu wisata, dan yacht",
+      "Tempat labuh kapal",
+      "Tempat alih muat antarkapal",
+      "Kolam pelabuhan untuk sandar dan olah gerak kapal",
+      "Pemanduan kapal",
+      "Tempat perbaikan kapal",
+      "Keperluan keadaan darurat pelabuhan",
+      "Penempatan kapal mati",
+      "Percobaan berlayar",
+      "Fasilitas pembangunan dan pemeliharaan kapal",
+      "Pengembangan pelabuhan jangka panjang",
+      "Pembangunan alat bantu navigasi pelayaran",
+      "Pembangunan pemecah gelombang, turap, dan dermaga",
+      "Instalasi pembangkit energi listrik terbarukan",
+      "Penambangan air laut",
+      "Penambangan pasir pantai dan laut serta material pantai/laut lainnya",
+      "Eksplorasi pertambangan minyak dan gas",
+      "Alur pipa air limbah bawah laut",
+      "Industri garam",
+      "Pembuangan air limbah",
+      "Pembuangan sampah"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,5 +1,7 @@
 import json
 import re
+from functools import lru_cache
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from django.contrib.gis.geos import GeometryCollection, GEOSException, GEOSGeometry
@@ -44,10 +46,20 @@ from analitik.services.parameter_tambahan import nilai_area
 from analitik.services.pengaturan import atur
 from analitik.services.profil_investasi import _saring_sumber_utama
 from inti.models import SektorInvestasi
-from inventarisasi.klasifikasi import KATA_SEKTOR, PENANDA_MATRIKS, rincian_kegiatan, status_rincian, syarat_rincian
+from inventarisasi.klasifikasi import (
+    KATA_SEKTOR,
+    KOLOM_MATRIKS,
+    PENANDA_MATRIKS,
+    rincian_kegiatan,
+    status_rincian,
+    syarat_rincian,
+)
 from inventarisasi.models import MatriksKKPRL, ZonasiRuangLaut
 
 URUTAN_ACUAN = ['RTRW_PROVINSI', 'KAW', 'RTRWN']
+BERKAS_RPZ = Path(__file__).resolve().parents[2] / 'inventarisasi' / 'data' / 'rpz_kawasan_konservasi.json'
+ZONA_INTI = re.compile(r'^(?:zona )?inti\b', re.I)
+ACUAN_RPZ = 'RPZ kawasan konservasi'
 BATAS_SYARAT_RINGKAS = 240
 LABEL_ACUAN = dict(ZonasiRuangLaut.TINGKAT_ACUAN_CHOICES)
 LABEL_SUB_ZONA = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
@@ -220,11 +232,47 @@ def _ringkas(data, hasil):
     return '; '.join([letak, *(f"{k['label'].lower()} {k['nilai_teks']}" for k in hasil[0]['kriteria'] if k['nilai_teks'])])
 
 
+@lru_cache(maxsize=1)
+def _rpz():
+    with open(BERKAS_RPZ, encoding='utf-8') as f:
+        data = json.load(f)
+    umum = {**data['zona_inti_umum'], 'kunci': 'INTI'}
+    per_zona, per_kunci = {}, {'INTI': umum}
+    for k in data['kawasan']:
+        for z in k['zona']:
+            z = {**z, 'kunci': f"{k['nama']}|{z['label']}", 'dasar': k['dasar'], 'ketentuan_umum': k['ketentuan_umum'],
+                 'sektor': k['sektor']}
+            per_kunci[z['kunci']] = z
+            per_zona.update({(k['nama'], ket): z for ket in z['keterangan']})
+    return per_zona, per_kunci
+
+
+def zona_rpz(nama, keterangan) -> Optional[Dict[str, Any]]:
+    per_zona, per_kunci = _rpz()
+    ket = (keterangan or '').strip()
+    return per_zona.get((nama, ket)) or (per_kunci['INTI'] if ZONA_INTI.match(ket) else None)
+
+
+def _aturan_rpz(z, kode) -> Dict[str, Any]:
+    rincian = {status: [k for k in z[kolom] if kode in z['sektor'].get(k, []) or '*' in z['sektor'].get(k, [])]
+               for status, kolom in KOLOM_MATRIKS}
+    status = status_rincian(rincian) or z.get('lainnya')
+    return {
+        'status': status,
+        'syarat': syarat_rincian(rincian, z['ketentuan_umum'], 'RPZ') if status == 'BERSYARAT' else '',
+        'sumber': z['dasar'],
+        'rincian': rincian,
+    }
+
+
 def _aturan_per_sektor(matriks=None) -> Dict[int, Dict[tuple, Any]]:
     hasil: Dict[int, Dict[tuple, Any]] = {}
     for k in KetentuanRuang.objects.all():
         hasil.setdefault(k.sektor_id, {})[(k.sub_zona, k.provinsi_id)] = k
     sektor = dict(SektorInvestasi.objects.filter(kode__in=KATA_SEKTOR).values_list('kode', 'id'))
+    for z in _rpz()[1].values():
+        for kode, sid in sektor.items():
+            hasil.setdefault(sid, {})[('RPZ', z['kunci'])] = _aturan_rpz(z, kode)
     blok = MatriksKKPRL.objects.all() if matriks is None else MatriksKKPRL.objects.filter(id__in=matriks)
     for m in blok:
         for kode, sid in sektor.items():
@@ -252,6 +300,8 @@ def zona_konservasi_pemanfaatan(sub_zona, nama_zona) -> bool:
 def _ketentuan(aturan, zona) -> Dict[str, Any]:
     if zona['jenis_zona'] in JENIS_ZONA_TERLARANG:
         return {'status': 'TIDAK_DIIZINKAN', 'syarat': '', 'sumber': 'UU No. 6/1996 & PP No. 37/2002 (ALKI)'}
+    if zona.get('rpz'):
+        return aturan.get(('RPZ', zona['rpz'])) or {'status': None, 'syarat': '', 'sumber': ''}
     k = aturan.get((zona['sub_zona'], zona['provinsi_id']))
     dari_matriks = aturan.get(('MATRIKS', zona.get('matriks_id')))
     if dari_matriks and (k is None or PENANDA_MATRIKS in k.sumber):
@@ -291,7 +341,8 @@ def _zona_efektif(c, geom, luas_aoi):
         SELECT z.id, z.nama_zona, z.jenis_zona, z.sub_zona, z.tingkat_acuan, z.sumber_data,
                z.nomor_regulasi, z.provinsi_id, p.nama, z.matriks_id, z.kode_perda,
                z.tahun_penetapan, z.updated_at,
-               ST_AsEWKB(ST_Intersection(ST_MakeValid(ST_ClipByBox2D(z.geometry, ST_Expand(a.g, 0.0001))), a.g))
+               ST_AsEWKB(ST_Intersection(ST_MakeValid(ST_ClipByBox2D(z.geometry, ST_Expand(a.g, 0.0001))), a.g)),
+               z.keterangan
         FROM inventarisasi_zonasi_ruang_laut z
         JOIN inti_provinsi p ON p.id = z.provinsi_id,
              (SELECT ST_GeomFromEWKT(%s) AS g) a
@@ -299,20 +350,21 @@ def _zona_efektif(c, geom, luas_aoi):
         """,
         [geom.ewkt],
     )
-    baris = c.fetchall()
+    baris = [(*r[:-1], zona_rpz(r[1], r[-1])) for r in c.fetchall()]
     sisa = geom
     efektif = []
     urutan = sorted(
-        {(r[4], r[5], r[3] in SUB_ZONA_TANPA_RINCIAN) for r in baris},
-        key=lambda t: (URUTAN_ACUAN.index(t[0]), _prioritas_sumber(t[1]), t[2]),
+        {(r[4], r[5], r[3] in SUB_ZONA_TANPA_RINCIAN, r[-1] is not None) for r in baris},
+        key=lambda t: (URUTAN_ACUAN.index(t[0]), not t[3], _prioritas_sumber(t[1]), t[2]),
     )
-    for tingkat, sumber, umum in urutan:
+    for tingkat, sumber, umum, dari_rpz in urutan:
         if sisa.empty:
             break
         potongan = []
         for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, matriks_id, kode_perda,
-             tahun_penetapan, diperbarui, ewkb) in baris:
-            if tk != tingkat or sd != sumber or (sub in SUB_ZONA_TANPA_RINCIAN) != umum or ewkb is None:
+             tahun_penetapan, diperbarui, ewkb, rpz) in baris:
+            if tk != tingkat or sd != sumber or (sub in SUB_ZONA_TANPA_RINCIAN) != umum or (rpz is not None) != dari_rpz \
+                    or ewkb is None:
                 continue
             irisan = _overlay(c, 'Intersection', _geos(ewkb), sisa)
             m2 = _luas(c, irisan)
@@ -320,21 +372,22 @@ def _zona_efektif(c, geom, luas_aoi):
                 continue
             efektif.append({
                 'id': zid,
-                'nama': _nama_zona(nama, sub, prov_nama),
+                'nama': f"{nama} - {rpz['label']}" if rpz else _nama_zona(nama, sub, prov_nama),
                 'nama_zona': nama,
                 'jenis_zona': jenis,
                 'jenis_label': LABEL_JENIS_ZONA.get(jenis, jenis),
                 'sub_zona': sub,
-                'sub_zona_label': LABEL_SUB_ZONA.get(sub, sub),
+                'sub_zona_label': rpz['label'] if rpz else LABEL_SUB_ZONA.get(sub, sub),
                 'tingkat': tingkat,
-                'tingkat_label': LABEL_ACUAN[tingkat],
-                'sumber_label': LABEL_SUMBER_ZONASI.get(sumber, sumber),
-                'regulasi': regulasi,
+                'tingkat_label': ACUAN_RPZ if rpz else LABEL_ACUAN[tingkat],
+                'sumber_label': ACUAN_RPZ if rpz else LABEL_SUMBER_ZONASI.get(sumber, sumber),
+                'regulasi': rpz['dasar'] if rpz else regulasi,
                 'provinsi_id': prov_id,
                 'provinsi': prov_nama,
                 'luas_m2': m2,
                 'persen': round(m2 / luas_aoi * 100, 1) if luas_aoi else 0,
-                'matriks_id': matriks_id,
+                'matriks_id': None if rpz else matriks_id,
+                'rpz': rpz and rpz['kunci'],
                 'kode_perda': kode_perda,
                 'tahun_penetapan': tahun_penetapan,
                 'diperbarui': f'{BULAN[diperbarui.month - 1]} {diperbarui.year}' if diperbarui else None,
@@ -557,7 +610,8 @@ def _informasi_ruang(c, zona_efektif, semua_aturan, sektor_aktif) -> List[Dict[s
         kelompok[kunci] = {'nama': z['nama'], 'jenis_label': z['jenis_label'], 'sub_zona_label': z['sub_zona_label'],
                            'persen': z['persen'], 'dasar_zona': ' - '.join(filter(None, [z['sumber_label'], z['regulasi']])),
                            'sumber_aturan': sumber, 'ketentuan_khusus': khusus, 'kegiatan': kegiatan, 'kkprl_terbit': [],
-                           '_matriks': z['matriks_id'], '_kode': set(filter(None, z['kode_perda'].split(', ')))}
+                           '_matriks': z['matriks_id'], '_rpz': z.get('rpz'),
+                           '_kode': set(filter(None, z['kode_perda'].split(', ')))}
     if not zona_efektif:
         return []
     c.execute(
@@ -578,11 +632,16 @@ def _informasi_ruang(c, zona_efektif, semua_aturan, sektor_aktif) -> List[Dict[s
     matriks = MatriksKKPRL.objects.in_bulk({g['_matriks'] for g in kelompok.values() if g['_matriks']})
     for g in kelompok.values():
         m = matriks.get(g.pop('_matriks'))
+        rpz = _rpz()[1].get(g.pop('_rpz'))
         kode = sorted(g.pop('_kode'))
-        g['perda'] = m and {
+        g['perda'] = {
+            'nama_zona': rpz['label'], 'kode_zona': [], 'sumber': rpz['dasar'], 'diperbolehkan': rpz['diperbolehkan'],
+            'bersyarat': rpz['bersyarat'], 'tidak_diperbolehkan': rpz['tidak_diperbolehkan'],
+            'ketentuan_khusus': rpz['ketentuan_umum'], 'acuan': ACUAN_RPZ,
+        } if rpz else m and {
             'nama_zona': m.nama_zona, 'kode_zona': kode, 'sumber': m.sumber, 'diperbolehkan': m.diperbolehkan,
             'bersyarat': m.bersyarat, 'tidak_diperbolehkan': m.tidak_diperbolehkan,
-            'ketentuan_khusus': m.ketentuan_khusus,
+            'ketentuan_khusus': m.ketentuan_khusus, 'acuan': 'Perda',
         }
     return sorted(kelompok.values(), key=lambda g: -g['persen'])
 
@@ -676,6 +735,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         z['syarat'] = ket['syarat']
         z['sumber_ketentuan'] = ket['sumber']
         z['rincian'] = ket.get('rincian')
+        z['acuan_rincian'] = ACUAN_RPZ if z.get('rpz') else 'matriks Perda'
 
     karakter_ringkas = {'kebutuhan': uraian(sektor.kode, sub_kode), 'terukur': _ringkas(karakter, fisik), 'cocok': cocok}
     parameter = [

@@ -664,7 +664,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
   if (sc) {
     k.tema(
       'Tahap 1 - Screening Kesesuaian Ruang',
-      'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN) dan matriks KKPRL Perda, tumpang tindih dengan KKPRL terbit, pengecualian alur pelayaran yang berlaku di atas RTRW (kecuali jasa maritim dan infrastruktur laut), serta wilayah adat. Kecocokan fisik (kedalaman, gelombang, dan sejenisnya) dinilai sesudahnya dan tidak mengubah kesesuaian ruang. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial; lokasi yang belum terverifikasi tetap dilanjutkan dengan label.'
+      'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN), matriks KKPRL Perda, dan RPZ kawasan konservasi, tumpang tindih dengan KKPRL terbit, pengecualian alur pelayaran yang berlaku di atas RTRW (kecuali jasa maritim dan infrastruktur laut), serta wilayah adat. Kecocokan fisik (kedalaman, gelombang, dan sejenisnya) dinilai sesudahnya dan tidak mengubah kesesuaian ruang. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial; lokasi yang belum terverifikasi tetap dilanjutkan dengan label.'
     );
     k.bukaKartu(
       `Hasil: ${sc.status_label}${kelengkapanScreening(sc)?.indikatif ? ' (indikatif)' : ''}`,
@@ -693,7 +693,8 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         else rincianJenis.push({ kunci, rincian: z.rincian, label: z.ketentuan_label, nama: new Set([z.nama]) });
       });
       if (rincianJenis.length) {
-        k.teks(`Rincian kegiatan ${sc.sektor_nama.toLowerCase()} menurut matriks Perda`, { tebal: true, warna: GELAP, ukuran: 7.5 });
+        const acuan = [...new Set(sc.zona.filter((z) => z.rincian).map((z) => z.acuan_rincian ?? 'matriks Perda'))].join(' dan ');
+        k.teks(`Rincian kegiatan ${sc.sektor_nama.toLowerCase()} menurut ${acuan}`, { tebal: true, warna: GELAP, ukuran: 7.5 });
         rincianJenis.forEach((r) => {
           k.teks(`${[...r.nama].join(', ')}: ${r.label}`, { tebal: true, warna: GELAP, ukuran: 7 });
           k.tabelDaftar(
@@ -826,7 +827,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
             const p = z.perda;
             const kunciPerda = `${p.sumber}|${p.nama_zona}`;
             k.teks(
-              `Rincian kegiatan menurut Perda${p.kode_zona.length ? ` (kode zona ${p.kode_zona.join(', ')})` : ''}`,
+              `Rincian kegiatan menurut ${p.acuan ?? 'Perda'}${p.kode_zona.length ? ` (kode zona ${p.kode_zona.join(', ')})` : ''}`,
               { tebal: true, warna: GELAP, ukuran: 6.8 }
             );
             if (sudahTercetak.has(kunciPerda)) {
@@ -841,7 +842,9 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
                 [p.diperbolehkan, p.bersyarat, p.tidak_diperbolehkan],
                 [HIJAU_TEKS, AMBER_TEKS, MERAH_TEKS]
               );
-              if (p.ketentuan_khusus) k.teks(`Ketentuan khusus Perda: ${p.ketentuan_khusus}`, { ukuran: 6.2 });
+              if (p.ketentuan_khusus) {
+                k.teks(`${p.acuan && p.acuan !== 'Perda' ? 'Ketentuan umum kawasan' : 'Ketentuan khusus Perda'}: ${p.ketentuan_khusus}`, { ukuran: 6.2 });
+              }
               k.teks(`Sumber: ${p.sumber}.`, { ukuran: 6.2 });
               sudahTercetak.add(kunciPerda);
             }
@@ -867,7 +870,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
         [(LEBAR - 8) * 0.3, (LEBAR - 8) * 0.3, (LEBAR - 8) * 0.15, (LEBAR - 8) * 0.25]
       );
     }
-    k.tutupKartu('Ketentuan kegiatan diambil dari matriks KKPRL Perda RTRW Provinsi bila tersedia; selain itu dari ketentuan yang dikelola administrator.');
+    k.tutupKartu('Ketentuan kegiatan diambil dari RPZ kawasan konservasi bila zonanya tersedia, lalu matriks KKPRL Perda RTRW Provinsi; selain itu dari ketentuan yang dikelola administrator.');
   }
 
   const bagianSpasial = spasial?.bagian || [];
