@@ -287,9 +287,13 @@ def _aturan_rpz(z, kode, sub=None) -> Dict[str, Any]:
         rincian = {status: [k for k in z[kolom] if kode in z['sektor'].get(k, []) or '*' in z['sektor'].get(k, [])]
                    for status, kolom in KOLOM_MATRIKS}
     status = status_rincian(rincian) or z.get('lainnya')
+    bagian = [f'{label}: {"; ".join(rincian[s])}' for s, label in (
+        ('DIIZINKAN', 'diperbolehkan'), ('BERSYARAT', 'bersyarat'), ('TIDAK_DIIZINKAN', 'tidak diperbolehkan'))
+        if rincian[s]]
+    syarat = f"Menurut RPZ, {'; '.join(bagian)}." if per_sub else syarat_rincian(rincian, z['ketentuan_umum'], 'RPZ')
     return {
         'status': status,
-        'syarat': syarat_rincian(rincian, z['ketentuan_umum'], 'RPZ') if status == 'BERSYARAT' else '',
+        'syarat': syarat if status == 'BERSYARAT' else '',
         'sumber': z['dasar'],
         'rincian': rincian,
         'per_sub': per_sub,
@@ -518,16 +522,18 @@ def _adat_area(c, geom):
 
 
 def _penyebab_utama(geom, luas_aoi, sektor, status, zona_efektif, aturan, tepi, kkprl, adat_di, kena,
-                    gerbang_gagal) -> List[str]:
+                    gerbang_gagal, nama_sub=None) -> List[str]:
     if status != 'TIDAK_SESUAI':
         return []
     nama_tepi = {t['nama'] for t in tepi}
-    tolak = sum(z['persen'] for z in zona_efektif
-                if z['nama'] not in nama_tepi and _ketentuan(aturan, z)['status'] == 'TIDAK_DIIZINKAN')
+    ditolak = [_ketentuan(aturan, z) | {'persen': z['persen']} for z in zona_efektif if z['nama'] not in nama_tepi]
+    ditolak = [k for k in ditolak if k['status'] == 'TIDAK_DIIZINKAN']
+    tolak = sum(k['persen'] for k in ditolak)
+    nama = nama_sub if nama_sub and ditolak and all(k.get('per_sub') for k in ditolak) else sektor.nama
     penyebab = [
         *(['tumpang tindih dengan KKPRL yang sudah terbit'] if kkprl else []),
         *([f'berada di wilayah kelola masyarakat hukum adat ({adat_di})'] if adat_di else []),
-        *([f'{_persen_area(tolak)} area berada di zona yang tidak mengizinkan {sektor.nama}'] if tolak else []),
+        *([f'{_persen_area(tolak)} area berada di zona yang tidak mengizinkan {nama}'] if tolak else []),
         *(f"{_persen_area(k['persen'])} area berada di {k['keterangan']}" for k in kena if k['gugur']),
         *(f"tidak memenuhi parameter wajib {t['nama']}" for t in gerbang_gagal),
     ]
@@ -580,7 +586,7 @@ def _peringatan_tepi(tepi, kkprl_tepi, sektor_nama) -> List[str]:
     return hasil
 
 
-def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl, tepi=()) -> List[str]:
+def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl, tepi=(), nama_sub=None) -> List[str]:
     alasan = []
     nama_tepi = {t['nama'] for t in tepi}
     if kkprl:
@@ -599,17 +605,18 @@ def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl, tepi=()) -> List[
         if z['nama'] in nama_tepi and ket['status'] in ('TIDAK_DIIZINKAN', None):
             continue
         lokasi = f"{_persen_area(z['persen'])} area berada di {z['nama']} ({z['sub_zona_label']}, {z['tingkat_label']})"
+        nama = nama_sub if nama_sub and ket.get('per_sub') else sektor_nama
         syarat = ket['syarat'] if len(ket['syarat']) <= BATAS_SYARAT_RINGKAS else (
             'Syarat lengkapnya tercantum pada ketentuan khusus zona ini di tabel ketentuan kegiatan.')
         if z['jenis_zona'] in JENIS_ZONA_TERLARANG:
             alasan.append(f'{lokasi}, yaitu Alur Laut Kepulauan Indonesia yang tidak dapat dimanfaatkan untuk investasi.')
         elif ket['status'] == 'TIDAK_DIIZINKAN':
-            alasan.append(f'{lokasi} yang tidak mengizinkan kegiatan {sektor_nama}.')
+            alasan.append(f'{lokasi} yang tidak mengizinkan kegiatan {nama}.')
         elif ket['status'] == 'BERSYARAT':
-            alasan.append(f"{lokasi}: {sektor_nama} diizinkan bersyarat. {syarat or 'Syarat mengikuti ketentuan RTRW yang berlaku.'}")
+            alasan.append(f"{lokasi}: {nama} diizinkan bersyarat. {syarat or 'Syarat mengikuti ketentuan RTRW yang berlaku.'}")
         elif ket['status'] is None:
             alasan.append(
-                f'{lokasi} yang belum memiliki ketentuan pemanfaatan untuk {sektor_nama}; '
+                f'{lokasi} yang belum memiliki ketentuan pemanfaatan untuk {nama}; '
                 f'kesesuaian belum dapat diverifikasi sampai ketentuannya ditetapkan.'
             )
     if cakupan < atur('AMBANG_CAKUPAN_ACUAN'):
@@ -700,6 +707,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
     daftar_sub = {s['kode']: s for s in sub_jenis(sektor.kode)}
     if sub_kode and sub_kode not in daftar_sub:
         raise ValueError(f'Sub-jenis "{sub_kode}" bukan bagian dari {sektor.nama}.')
+    nama_sub = daftar_sub[sub_kode]['nama'] if sub_kode else None
 
     with connection.cursor() as c:
         luas_aoi = _luas(c, geom)
@@ -837,8 +845,8 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         'verifikasi_batas': tepi,
         'parameter_tambahan': tambahan,
         'alasan': _penyebab_utama(geom, luas_aoi, sektor, status, zona_efektif, aturan, tepi, kkprl_gugur, adat_di, kena,
-                                  gerbang_gagal)
-        + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi) + alasan_adat + alasan_gugur + [
+                                  gerbang_gagal, nama_sub)
+        + _alasan(sektor.nama, zona_efektif, aturan, cakupan, kkprl_gugur, tepi, nama_sub) + alasan_adat + alasan_gugur + [
             f"Area tidak memenuhi parameter wajib {t['nama']}: {t['keterangan']}." for t in gerbang_gagal
         ] + [
             'Sebagian kecil area perlu verifikasi batas (lihat peringatan), sehingga kesesuaiannya bersyarat: bagian '
