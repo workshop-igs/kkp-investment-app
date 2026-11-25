@@ -6411,6 +6411,673 @@
      ]
     }
    ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PESISIR DAN PULAU-PULAU KECIL ACEH JAYA DAN PERAIRAN SEKITARNYA DI PROVINSI ACEH",
+   "dasar": "Rencana Pengelolaan dan Zonasi Taman Pesisir Aceh Jaya (DKP Provinsi Aceh, 2019), tabel kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
+   "sektor": {
+    "Berlabuh (Kapasitas Kapal >10 GT)": [
+     "JASA_MARITIM"
+    ],
+    "Berlabuh (Kapasitas kapal <10 GT)": [
+     "JASA_MARITIM"
+    ],
+    "Berlayar melintas (tdk berhenti)": [],
+    "Buang Jangkar": [],
+    "Budidaya": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Jaring Dasar (Set gillnet) Jaring permukaandan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Jaring Dasar Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Jaring Dasar Jaring permukaan, pancing dan alat tangkap lainnya yang ramah lingkungan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Jaring lobster penangkapan Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Jaring tancap Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 23 Di atur waktu": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Jaring udang kelong penangkapan Di atur waktu": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Mengambil Karang Mati": [],
+    "Mengambil karang Mati": [],
+    "Mengambil karang mati": [],
+    "Menyelam untuk mencari biota": [],
+    "Menyelam untuk mencari biota Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 25": [],
+    "Nelayan Panah": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Nelayan Panah Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Nelayan panah": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pancing ulur (hand line)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pemulihan dan Rehabilitasi SDA": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Rawai Hiu": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Rawai hiu": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Tonda": [],
+    "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Upacara adat, ritual keaagamaan": [],
+    "Wisata Menyelam, Snorkeling, Berenang": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Menyelam, Sorkeling, Berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 19": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata menyelam, sorkeling, berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
+     "PARIWISATA_BAHARI"
+    ]
+   },
+   "sub_jenis": {
+    "Menyelam untuk mencari biota": [
+     "WISATA_SELAM"
+    ],
+    "Menyelam untuk mencari biota Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 25": [
+     "WISATA_SELAM"
+    ],
+    "Wisata Menyelam, Snorkeling, Berenang": [
+     "WISATA_SELAM"
+    ],
+    "Wisata Menyelam, Sorkeling, Berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ],
+    "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 19": [
+     "WISATA_MARINA"
+    ],
+    "Wisata menyelam, sorkeling, berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Wisata Menyelam, Snorkeling, Berenang",
+      "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 19",
+      "Budidaya",
+      "Buang Jangkar",
+      "Berlabuh (Kapasitas kapal <10 GT)",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Pemulihan dan Rehabilitasi SDA",
+      "Upacara adat, ritual keaagamaan",
+      "Menyelam untuk mencari biota",
+      "Mengambil Karang Mati",
+      "Nelayan Panah Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
+      "Jaring Dasar Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya | Rehabilitasi"
+     ],
+     "label": "Zona Lainnya",
+     "diperbolehkan": [
+      "Upacara adat, ritual keaagamaan"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Nelayan Panah",
+      "Wisata menyelam, sorkeling, berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X",
+      "Menyelam untuk mencari biota Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 25",
+      "Mengambil karang mati",
+      "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
+      "Jaring Dasar Jaring permukaan, pancing dan alat tangkap lainnya yang ramah lingkungan",
+      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Perikanan Tradisional"
+     ],
+     "label": "Subzona Perikanan Berkelanjutan",
+     "diperbolehkan": [
+      "Berlabuh (Kapasitas kapal <10 GT)",
+      "Upacara adat, ritual keaagamaan",
+      "Tonda",
+      "Berlayar melintas (tdk berhenti)",
+      "Nelayan Panah",
+      "Jaring udang kelong penangkapan Di atur waktu",
+      "Jaring lobster penangkapan Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Buang Jangkar",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Mengambil Karang Mati",
+      "Wisata Menyelam, Sorkeling, Berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X",
+      "Rawai hiu",
+      "Jaring tancap Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 23 Di atur waktu"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Wisata"
+     ],
+     "label": "Subzona Wisata",
+     "diperbolehkan": [
+      "Buang Jangkar",
+      "Berlabuh (Kapasitas kapal <10 GT)",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Upacara adat, ritual keaagamaan",
+      "Berlayar melintas (tdk berhenti)"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Menyelam untuk mencari biota",
+      "Mengambil karang Mati",
+      "Nelayan panah",
+      "Pancing ulur (hand line)",
+      "Tonda",
+      "Rawai Hiu",
+      "Jaring Dasar (Set gillnet) Jaring permukaandan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+     ]
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PERAIRAN GUGUSAN PULAU-PULAU MOMPARANG DAN PERAIRAN SEKITARNYA KABUPATEN BELITUNG TIMUR DI PROVINSI KEPULAUAN BANGKA BELITUNG",
+   "dasar": "Keputusan Bupati Belitung Timur Tahun 2016 tentang RPZ TWP Gugusan Pulau-Pulau Momparang dan Laut Sekitarnya 2016-2036",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
+   "sektor": {
+    "Aktifitas Penangkapan Ikan: - Pancing - Jaring Pari - Jaring Hiu - Jaring Insang (Gill net) - Panah/Speargun - Mengambil biota/angsat (gleaning) - Jaring Trawl, Jaring Muro ami, Huhate (pole & line), Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak ramah lingkungan lainnya": [],
+    "Aktifitas Penangkapan Ikan: - Pancing cumi pada malam hari (tidak buang": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Aktivitas Penangkapan Ikan: - Mengambil biota/angsat (gleaning) - Jaring Pari - Jarimg Hiu - Jaring Trawl, Jaring Muro ami, Huhate (pole& line), Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak ramah lingkungan lainnya": [],
+    "Aktivitas Penangkapan Ikan: - Pancing - Jaring Hiu - Jaring Pari - Panah - Mengambil biota/angsat (gleaning) - Jaring Trawl, Jaring Muro ami, Huhate (pole & line), Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak ramah lingkungan lainnya": [],
+    "Aktivitas Penangkapan Ikan: - Pancing - Jaring Insang (Gill net) - Jaring Atas - Panah/Speargun - Rawai Dasar - Pancing/alat tangkap cumi pada malam hari": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Aktivitas Penangkapan Ikan: - Pancing - Jaring Pari - Jaring Hiu - Jaring Insang (Gill net) - Panah/Speargun - Rawai Dasar - Pancing/alat tangkap cumi pada malam hari (tidak - Mengambil biota - Menangkap atau mengambil penyu dan telur penyu serta cangkang penyu - Jaring Trawl, Jaring Muro ami, Huhate (pole & line), Bagan, Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak": [],
+    "B udida ya": [],
+    "B udidaya": [],
+    "Berenang dan Snorkling": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Berlabuh (Kapasitas Kapal >10 GT)": [
+     "JASA_MARITIM"
+    ],
+    "Berlayar melintas": [],
+    "Budidaya": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Menangkap atau mengambil penyu dan telur penyu serta cangkang penyu": [],
+    "Mengambil Pasir Pulau/Pasir Laut": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Mengambil karang hidup dan/atau mati": [],
+    "Mengambilan Pasir Pulau/Pasir Laut": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Mengambilan karang hidup dan/atau mati": [],
+    "Menyelam untuk mengambil biota": [],
+    "Menyelam untuk mengambil biota Menangkap atau mengambil penyu dan telur penyu serta cangkang penyu": [],
+    "P enelitian": [],
+    "Pe j mbu k ata ) n foto, video, film untuk tujuan non komersial": [],
+    "Pemasangan Rumpon": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pembuatan fo to, video, film untuk tujuan komersial": [],
+    "Pembuatan foto, video, film untuk tujuan komersial": [],
+    "Pembuatan foto, video, film untuk tujuan non k i l": [],
+    "Pembuatan foto, video, film untuk tujuan non komersial": [],
+    "Penangkapan ikan dengan menggunakan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan dengan menggunakan k": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan dengan menggunakan kompressor": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi dan Peningkatan Sumber Daya Ikan dan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi dan Peningkatan Sumber Daya Ikan dan Ek i t": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi dan Peningkatan Sumber Daya Ikan dan Ekosistemnya": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penelitian": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pengambilan Pasir Pulau/Pasir Laut": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Pengambilan karang hidup atau mati": [],
+    "Pengambilan karang hidup dan/atau mati": [],
+    "Sarana dan pelayanan untuk melakukan wisata petualangan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Sarana dan pelayanan untuk melakukan wisata petualangan - kapal layar cruise, kapal selam - penenggelaman kapal (ship wreck)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Sarana dan pelayanan untuk melakukan wisata petualangan - marine walk": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Sarana dan pelayanan untuk melakukan wisata petualangan lk": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Semua Jenis Kegiatan Pertambangan *) diberikan kepada orang perseorangan/kelompok masyarakat/ masyarakat adat yang tinggal di sekitar kawasan konservasi sesuai dengan peraturan perundangan": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Tambatan kapal (Muoring buoy)": [
+     "JASA_MARITIM"
+    ],
+    "Upacara adat, ritual keaagamaan": [],
+    "Upacara adat, ritual keagamaan": [],
+    "Wisata Menyelam diperbolehkan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Perahu Kaca (Glass Bottom Boat)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Perahu Kaca (Glass Bottom Boat) Sarana dan pelayanan untuk melakukan wisata petualangan - marine walk - kapal layar cruise, kapal selam": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Speargun": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Speargun/Memanah Ikan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Speargun/Memanah Ikan diperbolehkan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata alam (camping)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata watersport - Jetsky - Banana Boat - Windsurf - Surfing - Wisata watersport lainnya Perumusan Kegiatan No Jenis Kegiatan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata watersport - Windsurf - Jetsky - Banana Boat - Surfing - Wisata watersport lainnya": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata watersport : - Jetsky - Banana Boat - Wisata watersport lainnya - Windsurf": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata watersport: - Jetsky - Banana Boat - Windsurf - Surfing - Wisata watersport lainnya": [
+     "PARIWISATA_BAHARI"
+    ],
+    "dan Peningkatan Sumber Daya Ikan dan k i": []
+   },
+   "sub_jenis": {
+    "Berenang dan Snorkling": [
+     "WISATA_SELAM"
+    ],
+    "Menyelam untuk mengambil biota": [
+     "WISATA_SELAM"
+    ],
+    "Sarana dan pelayanan untuk melakukan wisata petualangan - kapal layar cruise, kapal selam - penenggelaman kapal (ship wreck)": [
+     "WISATA_KAPAL_PESIAR"
+    ],
+    "Wisata Menyelam diperbolehkan": [
+     "WISATA_SELAM"
+    ],
+    "Wisata Perahu Kaca (Glass Bottom Boat) Sarana dan pelayanan untuk melakukan wisata petualangan - marine walk - kapal layar cruise, kapal selam": [
+     "WISATA_KAPAL_PESIAR"
+    ],
+    "Wisata watersport - Jetsky - Banana Boat - Windsurf - Surfing - Wisata watersport lainnya Perumusan Kegiatan No Jenis Kegiatan": [
+     "WISATA_MARINA"
+    ],
+    "Wisata watersport - Windsurf - Jetsky - Banana Boat - Surfing - Wisata watersport lainnya": [
+     "WISATA_MARINA"
+    ],
+    "Wisata watersport : - Jetsky - Banana Boat - Wisata watersport lainnya - Windsurf": [
+     "WISATA_MARINA"
+    ],
+    "Wisata watersport: - Jetsky - Banana Boat - Windsurf - Surfing - Wisata watersport lainnya": [
+     "WISATA_MARINA"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [
+      "dan Peningkatan Sumber Daya Ikan dan k i"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Wisata Menyelam diperbolehkan",
+      "Berenang dan Snorkling",
+      "Wisata Speargun/Memanah Ikan",
+      "Wisata watersport: - Jetsky - Banana Boat - Windsurf - Surfing - Wisata watersport lainnya",
+      "Wisata Perahu Kaca (Glass Bottom Boat) Sarana dan pelayanan untuk melakukan wisata petualangan - marine walk - kapal layar cruise, kapal selam",
+      "B udidaya",
+      "Berlayar melintas",
+      "Tambatan kapal (Muoring buoy)",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Menyelam untuk mengambil biota",
+      "Mengambil karang hidup dan/atau mati",
+      "Mengambil Pasir Pulau/Pasir Laut",
+      "Aktivitas Penangkapan Ikan: - Pancing - Jaring Pari - Jaring Hiu - Jaring Insang (Gill net) - Panah/Speargun - Rawai Dasar - Pancing/alat tangkap cumi pada malam hari (tidak - Mengambil biota - Menangkap atau mengambil penyu dan telur penyu serta cangkang penyu - Jaring Trawl, Jaring Muro ami, Huhate (pole & line), Bagan, Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak",
+      "Penangkapan ikan dengan menggunakan",
+      "Pemasangan Rumpon",
+      "Pembuatan foto, video, film untuk tujuan komersial",
+      "Pembuatan foto, video, film untuk tujuan non k i l",
+      "Semua Jenis Kegiatan Pertambangan *) diberikan kepada orang perseorangan/kelompok masyarakat/ masyarakat adat yang tinggal di sekitar kawasan konservasi sesuai dengan peraturan perundangan"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya"
+     ],
+     "label": "Zona Rehabilitasi",
+     "diperbolehkan": [
+      "Berenang dan Snorkling",
+      "Berlayar melintas",
+      "Tambatan kapal (Muoring buoy)",
+      "Pembuatan foto, video, film untuk tujuan komersial",
+      "Wisata Perahu Kaca (Glass Bottom Boat)",
+      "Sarana dan pelayanan untuk melakukan wisata petualangan",
+      "Upacara adat, ritual keagamaan",
+      "Aktifitas Penangkapan Ikan: - Pancing cumi pada malam hari (tidak buang",
+      "Pe j mbu k ata ) n foto, video, film untuk tujuan non komersial",
+      "P enelitian",
+      "Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi dan Peningkatan Sumber Daya Ikan dan Ekosistemnya"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Menyelam untuk mengambil biota",
+      "Pemasangan Rumpon",
+      "Semua Jenis Kegiatan Pertambangan *) diberikan kepada orang perseorangan/kelompok masyarakat/ masyarakat adat yang tinggal di sekitar kawasan konservasi sesuai dengan peraturan perundangan",
+      "Budidaya",
+      "Penangkapan ikan dengan menggunakan k",
+      "Wisata Speargun/Memanah Ikan diperbolehkan",
+      "Wisata watersport - Jetsky - Banana Boat - Windsurf - Surfing - Wisata watersport lainnya Perumusan Kegiatan No Jenis Kegiatan",
+      "Pengambilan karang hidup atau mati",
+      "Aktifitas Penangkapan Ikan: - Pancing - Jaring Pari - Jaring Hiu - Jaring Insang (Gill net) - Panah/Speargun - Mengambil biota/angsat (gleaning) - Jaring Trawl, Jaring Muro ami, Huhate (pole & line), Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak ramah lingkungan lainnya"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan | Pemanfaatan"
+     ],
+     "label": "Zona Pemanfaatan",
+     "diperbolehkan": [
+      "Berenang dan Snorkling",
+      "Berlayar melintas",
+      "Tambatan kapal (Muoring buoy)",
+      "Upacara adat, ritual keaagamaan",
+      "Pembuatan foto, video, film untuk tujuan non komersial",
+      "Penelitian",
+      "Wisata alam (camping)",
+      "Sarana dan pelayanan untuk melakukan wisata petualangan lk",
+      "Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi dan Peningkatan Sumber Daya Ikan dan",
+      "Pembuatan fo to, video, film untuk tujuan komersial",
+      "Wisata watersport : - Jetsky - Banana Boat - Wisata watersport lainnya - Windsurf"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Wisata Speargun/Memanah Ikan",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Menyelam untuk mengambil biota",
+      "Pemasangan Rumpon",
+      "Semua Jenis Kegiatan Pertambangan *) diberikan kepada orang perseorangan/kelompok masyarakat/ masyarakat adat yang tinggal di sekitar kawasan konservasi sesuai dengan peraturan perundangan",
+      "Sarana dan pelayanan untuk melakukan wisata petualangan",
+      "B udida ya",
+      "Mengambilan Pasir Pulau/Pasir Laut",
+      "Mengambilan karang hidup dan/atau mati",
+      "Menangkap atau mengambil penyu dan telur penyu serta cangkang penyu",
+      "Aktivitas Penangkapan Ikan: - Pancing - Jaring Hiu - Jaring Pari - Panah - Mengambil biota/angsat (gleaning) - Jaring Trawl, Jaring Muro ami, Huhate (pole & line), Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan menggunakan k"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan | Pemanfaatan"
+     ],
+     "label": "Zona Perikanan Berkelanjutan",
+     "diperbolehkan": [
+      "Berlayar melintas",
+      "Tambatan kapal (Muoring buoy)",
+      "Pemasangan Rumpon",
+      "Pembuatan foto, video, film untuk tujuan komersial",
+      "Wisata Speargun",
+      "Wisata watersport - Windsurf - Jetsky - Banana Boat - Surfing - Wisata watersport lainnya",
+      "Wisata Perahu Kaca (Glass Bottom Boat)",
+      "Upacara adat, ritual keaagamaan",
+      "Pembuatan foto, video, film untuk tujuan non komersial",
+      "Sarana dan pelayanan untuk melakukan wisata petualangan - kapal layar cruise, kapal selam - penenggelaman kapal (ship wreck)",
+      "Penelitian",
+      "Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi dan Peningkatan Sumber Daya Ikan dan Ek i t",
+      "Budidaya",
+      "Aktivitas Penangkapan Ikan: - Pancing - Jaring Insang (Gill net) - Jaring Atas - Panah/Speargun - Rawai Dasar - Pancing/alat tangkap cumi pada malam hari"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Semua Jenis Kegiatan Pertambangan *) diberikan kepada orang perseorangan/kelompok masyarakat/ masyarakat adat yang tinggal di sekitar kawasan konservasi sesuai dengan peraturan perundangan",
+      "Sarana dan pelayanan untuk melakukan wisata petualangan - marine walk",
+      "Pengambilan karang hidup dan/atau mati",
+      "Pengambilan Pasir Pulau/Pasir Laut",
+      "Menyelam untuk mengambil biota Menangkap atau mengambil penyu dan telur penyu serta cangkang penyu",
+      "Aktivitas Penangkapan Ikan: - Mengambil biota/angsat (gleaning) - Jaring Pari - Jarimg Hiu - Jaring Trawl, Jaring Muro ami, Huhate (pole& line), Payang, Bubu, Akar Tuba, Sianida, Bom/Bahan Peledak dan alat tangkap yang tidak ramah lingkungan lainnya",
+      "Penangkapan ikan dengan menggunakan kompressor"
+     ]
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PESISIR DAN PULAU-PULAU KECIL ACEH TAMIANG DAN PERAIRAN SEKITARNYA DI PROVINSI ACEH",
+   "dasar": "Rencana Pengelolaan dan Zonasi KKP3K Aceh Tamiang dan Perairan Sekitarnya (dokumen RPZ Sidako KKP), tabel kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
+   "sektor": {
+    "Berlabuh (Kapasitas Kapal >10 GT)": [
+     "JASA_MARITIM"
+    ],
+    "Berlabuh (Kapasitas kapal <10 GT)": [
+     "JASA_MARITIM"
+    ],
+    "Berlayar melintas": [],
+    "Buang Jangkar": [],
+    "Budidaya": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Jaring Dasar": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Jaring Udang dan Jaring Dasar Lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Monitoring": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Monitoring dan Penelitian": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Patroli Pengawasan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pemanfaatan sumberdaya Alam": [],
+    "Pemanfaatan sumberdaya Alam secara ramah lingkungan": [],
+    "Pemasangan rumpon": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pembangunan Dermaga": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pemberlakukan Musim Tangkap Udang Windu": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pembuangan Limbah dan Sampah": [],
+    "Pembuatan foto, video, film": [],
+    "Pembuatan foto, video, film untuk tujuan non komersial": [],
+    "Pemulihan dan Rehabilitasi SDA": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pendidikan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Upacara adat, ritual keaagamaan": [],
+    "Wisata": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Pantai": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Pantai dan lainnya": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Tuntong": [
+     "PARIWISATA_BAHARI"
+    ]
+   },
+   "sub_jenis": {},
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [
+      "Patroli Pengawasan",
+      "Pembuatan foto, video, film untuk tujuan non komersial"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Wisata Pantai dan lainnya",
+      "Pembuangan Limbah dan Sampah",
+      "Budidaya",
+      "Buang Jangkar",
+      "Berlabuh (Kapasitas kapal <10 GT)",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Upacara adat, ritual keaagamaan",
+      "Pemanfaatan sumberdaya Alam",
+      "Pemasangan rumpon",
+      "Pembangunan Dermaga",
+      "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
+      "Jaring Udang dan Jaring Dasar Lainnya",
+      "Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan",
+      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya | Rehabilitasi"
+     ],
+     "label": "Zona Lainnya",
+     "diperbolehkan": [
+      "Patroli Pengawasan",
+      "Berlayar melintas",
+      "Monitoring"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Pembuangan Limbah dan Sampah",
+      "Pemanfaatan sumberdaya Alam",
+      "Pembangunan Dermaga",
+      "Wisata"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Pariwisata"
+     ],
+     "label": "Subzona Pariwisata",
+     "diperbolehkan": [
+      "Buang Jangkar",
+      "Berlabuh (Kapasitas kapal <10 GT)",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Upacara adat, ritual keaagamaan",
+      "Patroli Pengawasan",
+      "Pembuatan foto, video, film",
+      "Wisata Pantai",
+      "Wisata Tuntong",
+      "Monitoring dan Penelitian",
+      "Pendidikan",
+      "Berlayar melintas",
+      "Pemulihan dan Rehabilitasi SDA"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Pembuangan Limbah dan Sampah",
+      "Pemanfaatan sumberdaya Alam",
+      "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
+      "Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan",
+      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
+      "Jaring Dasar"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Perikanan Tradisional"
+     ],
+     "label": "Subzona Perikanan Tradisional",
+     "diperbolehkan": [
+      "Buang Jangkar",
+      "Berlabuh (Kapasitas kapal <10 GT)",
+      "Upacara adat, ritual keaagamaan",
+      "Pemasangan rumpon",
+      "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
+      "Jaring Udang dan Jaring Dasar Lainnya",
+      "Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan",
+      "Patroli Pengawasan",
+      "Pembuatan foto, video, film",
+      "Monitoring dan Penelitian",
+      "Pendidikan",
+      "Berlayar melintas",
+      "Pemulihan dan Rehabilitasi SDA",
+      "Pemanfaatan sumberdaya Alam secara ramah lingkungan",
+      "Pemberlakukan Musim Tangkap Udang Windu"
+     ],
+     "bersyarat": [],
+     "tidak_diperbolehkan": [
+      "Pembuangan Limbah dan Sampah",
+      "Berlabuh (Kapasitas Kapal >10 GT)",
+      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
+      "Wisata"
+     ]
+    }
+   ]
   }
  ]
 }
