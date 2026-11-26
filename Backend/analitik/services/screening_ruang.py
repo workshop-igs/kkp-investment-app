@@ -21,6 +21,7 @@ from analitik.services.konstanta import (
     KETENTUAN_KONSERVASI_PEMANFAATAN,
     KM_PER_DERAJAT,
     LABEL_SUMBER_ZONASI,
+    PERPRES_BELUM,
     PRIORITAS_SUMBER_ZONASI,
     SEKTOR_SUB_ZONA_COCOK,
     SUB_ZONA_TANPA_RINCIAN,
@@ -335,6 +336,8 @@ def zona_konservasi_pemanfaatan(sub_zona, nama_zona) -> bool:
 def _ketentuan(aturan, zona) -> Dict[str, Any]:
     if zona['jenis_zona'] in JENIS_ZONA_TERLARANG:
         return {'status': 'TIDAK_DIIZINKAN', 'syarat': '', 'sumber': 'UU No. 6/1996 & PP No. 37/2002 (ALKI)'}
+    if zona.get('regulasi') == PERPRES_BELUM:
+        return {'status': None, 'syarat': '', 'sumber': f'Rencana Zonasi KAW ({PERPRES_BELUM})'}
     if zona.get('rpz'):
         return aturan.get(('RPZ', zona['rpz'])) or {'status': None, 'syarat': '', 'sumber': ''}
     k = aturan.get((zona['sub_zona'], zona['provinsi_id']))
@@ -614,6 +617,9 @@ def _alasan(sektor_nama, zona_efektif, aturan, cakupan, kkprl, tepi=(), nama_sub
             alasan.append(f'{lokasi} yang tidak mengizinkan kegiatan {nama}.')
         elif ket['status'] == 'BERSYARAT':
             alasan.append(f"{lokasi}: {nama} diizinkan bersyarat. {syarat or 'Syarat mengikuti ketentuan RTRW yang berlaku.'}")
+        elif ket['status'] is None and z.get('regulasi') == PERPRES_BELUM:
+            alasan.append(f'{lokasi}, yaitu rencana zonasi kawasan antarwilayah yang {PERPRES_BELUM.lower()}; '
+                          f'kesesuaian belum dapat diverifikasi sampai Perpres-nya ditetapkan.')
         elif ket['status'] is None:
             alasan.append(
                 f'{lokasi} yang belum memiliki ketentuan pemanfaatan untuk {nama}; '

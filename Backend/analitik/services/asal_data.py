@@ -76,6 +76,7 @@ SUMBER_SKALA_KASAR = {
     LABEL_SUMBER_ZONASI['KKP-RZWP3K'],
     LABEL_SUMBER_ZONASI['KKP-RTRW'],
     LABEL_SUMBER_ZONASI['KKP-WFS'],
+    LABEL_SUMBER_ZONASI['KKP-RZKAW'],
 }
 
 CATATAN_DASAR = (
@@ -305,6 +306,7 @@ def ringkasan_sumber():
                 'gagal': (g.error_message[:300] or 'gagal') if g and g.result == 'FAILED' else '',
                 'berjalan': bool(g and g.completed_at is None and g.started_at > timezone.now() - timedelta(hours=12)),
                 'satuan': '' if not kode.startswith('UNGGAH-') else 'indeks 0 sampai 1' if kelompok == 'bencana'
+                else 'satu berkas per kawasan, kolom KAW, PERPRES, KAWASAN, ZONA' if kelompok == 'tata_ruang'
                 else _rentang_unggah(kode.removeprefix('UNGGAH-'), satuan),
             })
         baris.append({'kode': kunci, 'label': label, 'sumber': sumber, 'data': data, 'status': status,

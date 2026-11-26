@@ -200,6 +200,7 @@ const POLA_RUANG = {
           'KKP-RTRW-DARAT': 'Pola Ruang darat Perda RTRW Provinsi',
           'KKP-PKKPRL': 'PKKPRL pada RTRW Provinsi',
           'KKP-WFS': 'Rencana Zonasi KAW',
+          'KKP-RZKAW': 'Rencana Zonasi KAW (IGT KKP)',
         }[p.sumber] || 'RZWP-3-K'
       }<br/>
       <b>Dasar hukum:</b> ${aman(p.regulasi || '-')}<br/>
@@ -612,9 +613,9 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
   polaruang_kaw: {
     ...POLA_RUANG,
     params: { tingkat: 'KAW' },
-    label: 'RZ KAW Selat Makassar',
+    label: 'RZ KAW (Kawasan Antarwilayah)',
     keteranganLegenda:
-      'Rencana zonasi perairan lintas provinsi (Perpres 83/2020: Kaltim, Kalsel, Sulbar, Sulsel, dan Sulteng).',
+      'Rencana zonasi perairan lintas provinsi. Kawasan yang Perpres-nya belum tersedia ditandai di popup dan belum dipakai sebagai acuan.',
   },
 
   zonasi_konservasi: {

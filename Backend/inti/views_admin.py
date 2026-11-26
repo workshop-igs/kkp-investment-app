@@ -47,6 +47,7 @@ from inti.models import (
     SektorInvestasi,
 )
 from inventarisasi.klasifikasi import PENANDA_MATRIKS
+from inventarisasi.management.commands.muat_rz_kaw import lapisan as lapisan_rz_kaw
 from inventarisasi.management.commands.tarik_matriks_kkprl import Command as PemuatMatriks
 from inventarisasi.management.commands.tarik_matriks_kkprl import (
     blok_dari_excel,
@@ -769,7 +770,10 @@ class AdminPembaruanDataViewSet(viewsets.ViewSet):
             for potong in berkas.chunks():
                 f.write(potong)
         try:
-            baca_berkas(jalur, data[1] == 'bencana')
+            if data[3] == 'muat_rz_kaw':
+                lapisan_rz_kaw(jalur)
+            else:
+                baca_berkas(jalur, data[1] == 'bencana')
             muat_unggahan.delay(kode, jalur, keterangan)
         except ValueError as e:
             os.remove(jalur)

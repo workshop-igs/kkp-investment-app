@@ -47,6 +47,7 @@ def daftar_unggah():
         *((f'UNGGAH-{k}', 'kondisi_tetap', n, 'muat_berkas_raster', True)
           for k, n in RasterOseanografi.PARAMETER_CHOICES
           if kelompok_raster(k) == 'kondisi_tetap' and k != 'PRODUKSI_KABUPATEN'),
+        ('UNGGAH-RZKAW', 'tata_ruang', 'Rencana Zonasi Kawasan Antarwilayah (IGT KKP)', 'muat_rz_kaw', True),
     ]
 
 
