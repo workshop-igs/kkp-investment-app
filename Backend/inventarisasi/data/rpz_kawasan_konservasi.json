@@ -1559,6 +1559,9 @@
     "Infrastruktur Pengelolaan Kawasan (Pos Jaga, Jetty)": [
      "INFRASTRUKTUR_LAUT"
     ],
+    "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
     "Lalu lintas kapal penampung ikan": [
      "PERIKANAN_TANGKAP",
      "JASA_MARITIM"
@@ -1730,6 +1733,7 @@
       "Pemasangan rumpon",
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap ikan hias dengan cara ramah lingkungan",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Penangkapan Ikan dengan Kapal > 10 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Lalu lintas kapal penampung ikan",
@@ -1800,6 +1804,7 @@
       "Pemasangan rumpon",
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap ikan hias dengan cara ramah lingkungan",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Penangkapan Ikan dengan Kapal > 10 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Lalu lintas kapal penampung ikan",
@@ -1861,6 +1866,7 @@
       "Pemasangan rumpon",
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap ikan hias dengan cara ramah lingkungan",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Penangkapan Ikan dengan Kapal > 10 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Aktifitas Penangkapan Ikan dengan Pancing, Panah, Rawai Dasar, Pancing Cumi, dan Jaring/ alat tangkap yang ramah lingkungan",
@@ -1896,6 +1902,7 @@
       "Monitoring, Penelitian, Pengembangan dan Pendidikan",
       "Rekreasi pantai",
       "Perahu wisata (Hanya Melintas)",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Aktifitas Penangkapan Ikan dengan Pancing, Panah, Rawai Dasar, Pancing Cumi, dan Jaring/ alat tangkap yang ramah lingkungan",
       "Alur kapal untuk perhubungan",
       "Infrastruktur Pengelolaan Kawasan (Pos Jaga, Jetty)"
@@ -1961,6 +1968,7 @@
       "Wisata mancing (catch and release)",
       "Perahu wisata (Hanya Melintas)",
       "Wisata budaya",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Lalu lintas kapal penampung ikan",
       "Aktifitas Penangkapan Ikan dengan Pancing, Panah, Rawai Dasar, Pancing Cumi, dan Jaring/ alat tangkap yang ramah lingkungan",
@@ -2042,6 +2050,9 @@
     ],
     "Infrastruktur Pengelolaan Kawasan (Pos Jaga, Jetty)": [
      "INFRASTRUKTUR_LAUT"
+    ],
+    "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan": [
+     "PERIKANAN_TANGKAP"
     ],
     "Lalu lintas kapal penampung ikan": [
      "PERIKANAN_TANGKAP",
@@ -2211,6 +2222,7 @@
       "Pemasangan rumpon",
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap ikan hias dengan cara ramah lingkungan",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Penangkapan Ikan dengan Kapal > 10 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Lalu lintas kapal penampung ikan",
@@ -2279,6 +2291,7 @@
       "Pemasangan rumpon",
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap ikan hias dengan cara ramah lingkungan",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Penangkapan Ikan dengan Kapal > 10 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Lalu lintas kapal penampung ikan",
@@ -2340,6 +2353,7 @@
       "Pemasangan rumpon",
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap ikan hias dengan cara ramah lingkungan",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Penangkapan Ikan dengan Kapal > 10 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Aktifitas Penangkapan Ikan dengan Pancing, Panah, Rawai Dasar, Pancing Cumi, dan Jaring/ alat tangkap yang ramah lingkungan",
@@ -2377,6 +2391,7 @@
       "Wisata mancing (catch and release)",
       "Perahu wisata (Hanya Melintas)",
       "Wisata budaya",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan kelompok nelayan yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 10 GT dengan alat penangkapan ikan yang Diperbolehkan",
       "Lalu lintas kapal penampung ikan",
       "Aktifitas Penangkapan Ikan dengan Pancing, Panah, Rawai Dasar, Pancing Cumi, dan Jaring/ alat tangkap yang ramah lingkungan",
@@ -3699,6 +3714,7 @@
     "Penangkapan Ikan dengan Kapal dibawah 30 GT dengan alat tangkap yang diperbolehkan": [
      "PERIKANAN_TANGKAP"
     ],
+    "Penangkaran kepiting kenari (dengan izin Menteri)": [],
     "Pendidikan Lingkungan Hidup (ekosistem lamun, manggrove, terumbu dan laut dalam)": [
      "KONSERVASI_PESISIR"
     ],
@@ -3829,6 +3845,7 @@
       "Menangkap ikan Hias",
       "Menangkap ikan dengan jubi/senapan molo",
       "Mencari kepiting (biasa)",
+      "Penangkaran kepiting kenari (dengan izin Menteri)",
       "Mencari Ebi",
       "Mencari Ikan Lema",
       "Penangkapan Ikan dengan Kapal dibawah 30 GT dengan alat tangkap yang diperbolehkan",
@@ -3893,6 +3910,7 @@
       "Menangkap ikan Hias",
       "Menangkap ikan dengan jubi/senapan molo",
       "Mencari kepiting (biasa)",
+      "Penangkaran kepiting kenari (dengan izin Menteri)",
       "Mencari Ebi",
       "Mencari Ikan Lema",
       "Penangkapan Ikan dengan Kapal dibawah 30 GT dengan alat tangkap yang diperbolehkan",
@@ -3945,6 +3963,7 @@
       "Molo tradisional untuk tangkap teripang, lobster, gurita",
       "Menangkap ikan dengan jubi/senapan molo",
       "Mencari kepiting (biasa)",
+      "Penangkaran kepiting kenari (dengan izin Menteri)",
       "Mencari Ebi",
       "Mencari Ikan Lema",
       "Penangkapan Ikan dengan Kapal dibawah 30 GT dengan alat tangkap yang diperbolehkan",
@@ -4030,6 +4049,9 @@
      "PERIKANAN_TANGKAP"
     ],
     "Jermal": [],
+    "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
     "Kegiatan penangkapan ikan yang dilakukan oleh usaha menengah keatas": [
      "PERIKANAN_TANGKAP"
     ],
@@ -4318,6 +4340,7 @@
       "Penangkaran kepiting kenari",
       "Menangkap udang ebi/rebon",
       "Menangkap ikan dengan senapan dan tombak",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Kegiatan penangkapan ikan yang dilakukan oleh usaha menengah keatas",
       "Pukat cincin pelagis besar dengan satu kapal",
       "Lampara dasar/trawl dasar",
@@ -4405,6 +4428,7 @@
       "Penangkaran kepiting kenari",
       "Menangkap udang ebi/rebon",
       "Menangkap ikan dengan senapan dan tombak",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Kegiatan penangkapan ikan yang dilakukan oleh usaha menengah keatas",
       "Pukat cincin pelagis besar dengan satu kapal",
       "Penangkapan ikan dengan Kapal 10 – 30GT dengan alat tangkap yang diperbolehkan",
@@ -4500,6 +4524,7 @@
       "Pemasangan rumpon",
       "Menangkap udang ebi/rebon",
       "Menangkap ikan dengan senapan dan tombak",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Budidaya rumput laut",
       "Budidaya mutiara",
       "Budidaya keramba jaring apung (KJA)",
@@ -4580,6 +4605,15 @@
     "Infrastruktur Pengelolaan Kawasan (kantor) No Kegiatan": [
      "INFRASTRUKTUR_LAUT"
     ],
+    "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki No Kegiatan struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit No Kegiatan usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
     "Kegiatan penangkapan ikan yang dilakukan oleh usaha menengah keatas": [
      "PERIKANAN_TANGKAP"
     ],
@@ -4602,8 +4636,16 @@
     "Monitoring dan Penelitian ekstraktif": [
      "KONSERVASI_PESISIR"
     ],
+    "Monitoring dan Penelitian ekstraktif Perumusan Kegiatan dengan izin 3 Pendidikan pemeliharaan dan peningkatan keanekaragaman hayati (ekosistem lamun, manggrove, terumbu dan laut dalam); perlindungan sumberdaya masyarakat lokal; pembangunan perekonomian berbasis ekowisata bahari; pemeliharaan proses ekologis dan sistem pendukung kehidupan; promosi pemanfaatan sumber daya secara berkelanjutan; promosi upaya tata kelola untuk perlindungan lingkungan": [
+     "KONSERVASI_PESISIR",
+     "PARIWISATA_BAHARI"
+    ],
     "Monitoring dan Penelitian ekstraktif diperbolehk": [
      "KONSERVASI_PESISIR"
+    ],
+    "Monitoring dan Penelitian ekstraktif diperbolehk 3 Pendidikan pemeliharaan dan an tetapi peningkatan keanekaragaman hayati dengan izin (ekosistem lamun, manggrove, terumbu dan laut dalam); perlindungan sumberdaya masyarakat lokal; pembangunan perekonomian berbasis ekowisata bahari; pemeliharaan proses ekologis dan sistem pendukung kehidupan; promosi pemanfaatan sumber daya secara berkelanjutan; promosi upaya tata kelola untuk perlindungan lingkungan": [
+     "KONSERVASI_PESISIR",
+     "PARIWISATA_BAHARI"
     ],
     "Monitoring dan Penelitian non ekstraktif": [
      "KONSERVASI_PESISIR"
@@ -4782,6 +4824,10 @@
     ],
     "Penangkapan ikan dengan Sero": [
      "PERIKANAN_TANGKAP"
+    ],
+    "Pendidikan pemeliharaan dan peningkatan an tetapi keanekaragaman hayati (ekosistem lamun, dengan izin manggrove, terumbu dan laut dalam); perlindungan sumberdaya masyarakat lokal; pembangunan perekonomian berbasis ekowisata bahari; pemeliharaan proses ekologis dan sistem pendukung kehidupan; promosi pemanfaatan sumber daya secara berkelanjutan; promosi upaya tata kelola untuk perlindungan lingkungan": [
+     "KONSERVASI_PESISIR",
+     "PARIWISATA_BAHARI"
     ],
     "Pendidikan pemeliharaan dan peningkatan keanekaragaman hayati (ekosistem lamun, manggrove, terumbu dan laut dalam); perlindungan sumberdaya masyarakat lokal; pembangunan perekonomian berbasis ekowisata bahari; pemeliharaan proses ekologis dan sistem pendukung kehidupan; promosi pemanfaatan sumber daya secara berkelanjutan; promosi upaya tata kelola untuk perlindungan lingkungan": [
      "KONSERVASI_PESISIR",
@@ -4982,6 +5028,7 @@
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap Ikan Hias",
       "Menangkap ikan dengan tombak",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Kegiatan penangkapan ikan yang dilakukan oleh usaha menengah keatas",
       "Pukat cincin pelagis besar dengan satu kapal",
       "Lampara dasar",
@@ -5017,6 +5064,7 @@
       "Pembangunan Rumah Adat",
       "Pembuatan foto, video, film untuk tujuan non komersial",
       "Makameting (dengan alat dan cara yang tidak merusak terumbu karang)",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 5 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Alur Kapal untuk perhubungan",
       "Pelayaran selain di alur kapal untuk perhubungan",
@@ -5131,7 +5179,8 @@
       "Pelayaran selain di alur kapal untuk perhubungan",
       "Monitoring dan Penelitian non ekstraktif",
       "Patroli pengawasan",
-      "Infrastruktur Pengelolaan Kawasan (Pos Jaga, Jetty)"
+      "Infrastruktur Pengelolaan Kawasan (Pos Jaga, Jetty)",
+      "Monitoring dan Penelitian ekstraktif Perumusan Kegiatan dengan izin 3 Pendidikan pemeliharaan dan peningkatan keanekaragaman hayati (ekosistem lamun, manggrove, terumbu dan laut dalam); perlindungan sumberdaya masyarakat lokal; pembangunan perekonomian berbasis ekowisata bahari; pemeliharaan proses ekologis dan sistem pendukung kehidupan; promosi pemanfaatan sumber daya secara berkelanjutan; promosi upaya tata kelola untuk perlindungan lingkungan"
      ],
      "bersyarat": [],
      "tidak_diperbolehkan": [
@@ -5158,6 +5207,7 @@
       "Menggunakan bahan beracun, kompresor dan bom",
       "Menangkap Ikan Hias",
       "Menangkap ikan dengan tombak",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Kegiatan penangkapan ikan yang dilakukan oleh usaha menengah keatas",
       "Penangkapan Ikan dengan Kapal 5 - 30 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Penangkapan Ikan dengan Kapal < 5 GT dengan alat penangkapan ikan yang diperbolehkan",
@@ -5263,7 +5313,8 @@
       "Penangkapan ikan dengan Huhate",
       "Penangkapan ikan dengan Pukat cincin pelagis besar dengan satu kapal",
       "Penangkapan ikan dengan Lampara dasar",
-      "Penangkapan ikan dengan Pancing layang-layang"
+      "Penangkapan ikan dengan Pancing layang-layang",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit No Kegiatan usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan"
      ]
     },
     {
@@ -5276,6 +5327,7 @@
       "Pembangunan Rumah Adat",
       "Pembuatan foto, video, film untuk tujuan non komersial",
       "Makameting (dengan alat dan cara yang tidak merusak terumbu karang)",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Penangkapan Ikan dengan Kapal < 5 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Budidaya Rumput Laut",
       "Alur Kapal untuk perhubungan",
@@ -5383,6 +5435,7 @@
       "Pembuatan foto, video, film untuk tujuan non komersial",
       "Pemasangan Rumpon",
       "Menangkap ikan dengan tombak",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
       "Kegiatan penangkapan ikan yang dilakukan oleh usaha menengah keatas",
       "Penangkapan Ikan dengan Kapal 5 - 30 GT dengan alat penangkapan ikan yang diperbolehkan",
       "Penangkapan Ikan dengan Kapal < 5 GT dengan alat penangkapan ikan yang diperbolehkan",
@@ -5398,6 +5451,7 @@
       "Patroli pengawasan",
       "Infrastruktur Pengelolaan Kawasan (Pos Jaga, Jetty)",
       "Monitoring dan Penelitian ekstraktif diperbolehk",
+      "Pendidikan pemeliharaan dan peningkatan an tetapi keanekaragaman hayati (ekosistem lamun, dengan izin manggrove, terumbu dan laut dalam); perlindungan sumberdaya masyarakat lokal; pembangunan perekonomian berbasis ekowisata bahari; pemeliharaan proses ekologis dan sistem pendukung kehidupan; promosi pemanfaatan sumber daya secara berkelanjutan; promosi upaya tata kelola untuk perlindungan lingkungan",
       "Sarana dan pelayanan untuk melakukan wisata petualangan (kapal layar (cruise), No Kegiatan kapal selam, sea walker, penenggelaman kapal (ship wreck)",
       "Penangkapan ikan dengan Jaring insang tetap (Set gill nets (anchored))",
       "Penangkapan ikan dengan Jaring angkat (Lift Net)",
@@ -5484,6 +5538,8 @@
       "Monitoring dan Penelitian non ekstraktif",
       "Patroli pengawasan",
       "Infrastruktur Pengelolaan Kawasan (Pos Jaga, Jetty)",
+      "Kegiatan penangkapan ikan oleh nelayan kecil dan artisanal serta kelompok nelayan yang secara ekonomis memiliki No Kegiatan struktur dan unit usaha kecil yang tidak diwajibkan memiliki izin usaha penangkapan ikan",
+      "Monitoring dan Penelitian ekstraktif diperbolehk 3 Pendidikan pemeliharaan dan an tetapi peningkatan keanekaragaman hayati dengan izin (ekosistem lamun, manggrove, terumbu dan laut dalam); perlindungan sumberdaya masyarakat lokal; pembangunan perekonomian berbasis ekowisata bahari; pemeliharaan proses ekologis dan sistem pendukung kehidupan; promosi pemanfaatan sumber daya secara berkelanjutan; promosi upaya tata kelola untuk perlindungan lingkungan",
       "Penangkapan Ikan dengan Jaring serok (scoop net) No Kegiatan",
       "Penangkapan Ikan dengan Pancing layang-layang",
       "Penangkapan Ikan dengan Lampara dasar"
@@ -5530,10 +5586,8 @@
    "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
    "sektor": {
     "Berlayar melintas (Kapasitas Kapal <10 GT)": [],
-    "Berlayar melintas (Kapasitas Kapal <10 GT) Rencana Pengelolaan dan Zonasi TWP Gili Banta 31 No Kegiatan Keterangan": [],
     "Biofarmakologi": [],
     "Bioteknologi": [],
-    "Bioteknologi Rencana Pengelolaan dan Zonasi TWP Gili Banta 40 No. Kegiatan Keterangan": [],
     "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
      "PERIKANAN_BUDIDAYA"
     ],
@@ -5549,7 +5603,10 @@
     "Instalasi pembangkit energi listrik terbarukan": [
      "ENERGI_KELAUTAN"
     ],
-    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, Rencana Pengelolaan dan Zonasi TWP Gili Banta 34 No. Kegiatan Keterangan olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+    "Pangkalan nelayan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan,": [
      "PERIKANAN_TANGKAP",
      "PARIWISATA_BAHARI"
     ],
@@ -5603,10 +5660,6 @@
      "PARIWISATA_BAHARI",
      "INFRASTRUKTUR_LAUT"
     ],
-    "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi TWP Gili Banta 37 No. Kegiatan Keterangan": [
-     "PARIWISATA_BAHARI",
-     "INFRASTRUKTUR_LAUT"
-    ],
     "Penimbunan dan pengeringan laut": [
      "INFRASTRUKTUR_LAUT"
     ],
@@ -5620,7 +5673,7 @@
      "BUDIDAYA_RUMPUT_LAUT",
      "BUDIDAYA_KEKERANGAN"
     ],
-    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, Rencana Pengelolaan dan Zonasi TWP Gili Banta 34 No. Kegiatan Keterangan olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan,": [
      "WISATA_SELAM",
      "WISATA_MARINA"
     ],
@@ -5645,7 +5698,7 @@
      ],
      "label": "Zona Inti",
      "diperbolehkan": [
-      "Berlayar melintas (Kapasitas Kapal <10 GT) Rencana Pengelolaan dan Zonasi TWP Gili Banta 31 No Kegiatan Keterangan"
+      "Berlayar melintas (Kapasitas Kapal <10 GT)"
      ],
      "bersyarat": [
       "Pendidikan, penelitian dan pengembangan",
@@ -5677,7 +5730,8 @@
       "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
       "Perumahan/permukiman",
       "Pembuangan air limbah hasil olahan",
-      "Pembuangan sampah"
+      "Pembuangan sampah",
+      "Pangkalan nelayan"
      ],
      "lainnya": "TIDAK_DIIZINKAN"
     },
@@ -5690,7 +5744,8 @@
       "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
       "Pelestarian adat dan budaya",
       "Penangkaran dan pelepasliaran satwa",
-      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+      "Berlayar melintas (Kapasitas Kapal <10 GT)",
+      "Pangkalan nelayan"
      ],
      "bersyarat": [
       "Rehabilitasi habitat dan populasi ikan",
@@ -5706,7 +5761,7 @@
       "Biofarmakologi",
       "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
       "Pendidikan, penelitian dan pengembangan",
-      "Bioteknologi Rencana Pengelolaan dan Zonasi TWP Gili Banta 40 No. Kegiatan Keterangan"
+      "Bioteknologi"
      ],
      "tidak_diperbolehkan": [
       "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
@@ -5730,7 +5785,7 @@
      "diperbolehkan": [
       "Pelestarian adat dan budaya",
       "Penangkaran dan pelepasliaran satwa",
-      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, Rencana Pengelolaan dan Zonasi TWP Gili Banta 34 No. Kegiatan Keterangan olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan,",
       "Berlayar melintas (Kapasitas Kapal <10 GT)"
      ],
      "bersyarat": [
@@ -5760,7 +5815,8 @@
       "Perumahan/permukiman",
       "Pembuangan air limbah hasil olahan",
       "Pembuangan sampah",
-      "Industri garam/"
+      "Industri garam/",
+      "Pangkalan nelayan"
      ]
     },
     {
@@ -5772,7 +5828,8 @@
       "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
       "Pelestarian adat dan budaya",
       "Penangkaran dan pelepasliaran satwa",
-      "Berlayar melintas (Kapasitas Kapal <10 GT)"
+      "Berlayar melintas (Kapasitas Kapal <10 GT)",
+      "Pangkalan nelayan"
      ],
      "bersyarat": [
       "Rehabilitasi habitat dan populasi ikan",
@@ -5789,7 +5846,7 @@
       "Bioteknologi",
       "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
       "Pendidikan, penelitian dan pengembangan",
-      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi TWP Gili Banta 37 No. Kegiatan Keterangan"
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)"
      ],
      "tidak_diperbolehkan": [
       "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
@@ -5829,10 +5886,7 @@
     "Pangkalan nelayan": [
      "PERIKANAN_TANGKAP"
     ],
-    "Pangkalan nelayan Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 47": [
-     "PERIKANAN_TANGKAP"
-    ],
-    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 36 No Kegiatan Keterangan komersial)": [
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film": [
      "PERIKANAN_TANGKAP",
      "PARIWISATA_BAHARI"
     ],
@@ -5846,16 +5900,10 @@
     "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
      "INFRASTRUKTUR_LAUT"
     ],
-    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 40 No Kegiatan Keterangan": [
-     "INFRASTRUKTUR_LAUT"
-    ],
     "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
      "INFRASTRUKTUR_LAUT"
     ],
     "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty": [
-     "INFRASTRUKTUR_LAUT"
-    ],
-    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 46 No Kegiatan Keterangan": [
      "INFRASTRUKTUR_LAUT"
     ],
     "Pembangunan pelabuhan khusus": [
@@ -5870,9 +5918,6 @@
     "Pembuangan sampah": [],
     "Penambangan atau pengambilan karang": [],
     "Penambangan atau pengambilan pasir laut": [
-     "ENERGI_KELAUTAN"
-    ],
-    "Penambangan atau pengambilan pasir laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 43 No Kegiatan Keterangan": [
      "ENERGI_KELAUTAN"
     ],
     "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)": [
@@ -5911,7 +5956,7 @@
      "BUDIDAYA_RUMPUT_LAUT",
      "BUDIDAYA_KEKERANGAN"
     ],
-    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 36 No Kegiatan Keterangan komersial)": [
+    "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film": [
      "WISATA_SELAM",
      "WISATA_MARINA"
     ],
@@ -5922,16 +5967,10 @@
     "Pemasangan atau pemeliharaan pipa dan kabel bawah laut": [
      "INFRA_KABEL_PIPA"
     ],
-    "Pemasangan atau pemeliharaan pipa dan kabel bawah laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 40 No Kegiatan Keterangan": [
-     "INFRA_KABEL_PIPA"
-    ],
     "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty": [
      "INFRA_PELINDUNG_PANTAI"
     ],
     "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty": [
-     "INFRA_PELINDUNG_PANTAI"
-    ],
-    "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 46 No Kegiatan Keterangan": [
      "INFRA_PELINDUNG_PANTAI"
     ],
     "Penimbunan dan pengeringan laut": [
@@ -5957,7 +5996,7 @@
       "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
       "Penangkapan ikan (Kapasitas Kapal >30 GT)",
       "Budidaya (Mutiara, rumput laut, ikan dan udang)",
-      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 36 No Kegiatan Keterangan komersial)",
+      "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film",
       "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
       "Pelestarian adat dan budaya",
       "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
@@ -5992,7 +6031,7 @@
       "Penangkaran dan pelepasliaran satwa",
       "Berlayar melintas (Kapasitas Kapal <10 GT)",
       "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
-      "Pangkalan nelayan Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 47"
+      "Pangkalan nelayan"
      ],
      "bersyarat": [
       "Rehabilitasi habitat dan populasi ikan",
@@ -6008,7 +6047,7 @@
       "Bioteknologi",
       "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
       "Pendidikan, penelitian dan pengembangan",
-      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 46 No Kegiatan Keterangan"
+      "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermagadan jetty"
      ],
      "tidak_diperbolehkan": [
       "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
@@ -6045,7 +6084,7 @@
       "Bioteknologi",
       "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
       "Pendidikan, penelitian dan pengembangan",
-      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 40 No Kegiatan Keterangan",
+      "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
       "Pembangunan breakwater (pemecah gelombang), revetment (turap), groin, dermaga dan jetty"
      ],
      "tidak_diperbolehkan": [
@@ -6105,7 +6144,7 @@
       "Perumahan/permukiman",
       "Pembuangan air limbah hasil olahan",
       "Pembuangan sampah",
-      "Penambangan atau pengambilan pasir laut Rencana Pengelolaan dan Zonasi TWP Pulau Liang dan Pulau Ngali 43 No Kegiatan Keterangan"
+      "Penambangan atau pengambilan pasir laut"
      ]
     }
    ]
@@ -6121,9 +6160,6 @@
     "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
      "PERIKANAN_BUDIDAYA"
     ],
-    "Budidaya (Mutiara, rumput laut, ikan dan udang) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 38 No Kegiatan Keterangan": [
-     "PERIKANAN_BUDIDAYA"
-    ],
     "Industri garam/industri": [
      "GARAM"
     ],
@@ -6134,9 +6170,6 @@
      "ENERGI_KELAUTAN"
     ],
     "Pangkalan nelayan": [
-     "PERIKANAN_TANGKAP"
-    ],
-    "Pangkalan nelayan Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 45": [
      "PERIKANAN_TANGKAP"
     ],
     "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)": [
@@ -6188,7 +6221,7 @@
     "Pengerukan dasar laut": [
      "INFRASTRUKTUR_LAUT"
     ],
-    "Pengusahaan pariwisata alam perairan (Infrastruktur, Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 41 No Kegiatan Keterangan peralatan, jasa transportasi, dan jasa pramuwisata)": [
+    "Pengusahaan pariwisata alam perairan (Infrastruktur,": [
      "PARIWISATA_BAHARI",
      "INFRASTRUKTUR_LAUT"
     ],
@@ -6196,14 +6229,7 @@
      "PARIWISATA_BAHARI",
      "INFRASTRUKTUR_LAUT"
     ],
-    "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 35 No Kegiatan Keterangan": [
-     "PARIWISATA_BAHARI",
-     "INFRASTRUKTUR_LAUT"
-    ],
     "Penimbunan dan pengeringan laut": [
-     "INFRASTRUKTUR_LAUT"
-    ],
-    "Penimbunan dan pengeringan laut Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 44 No Kegiatan Keterangan": [
      "INFRASTRUKTUR_LAUT"
     ],
     "Perumahan/permukiman": [],
@@ -6213,10 +6239,6 @@
    },
    "sub_jenis": {
     "Budidaya (Mutiara, rumput laut, ikan dan udang)": [
-     "BUDIDAYA_RUMPUT_LAUT",
-     "BUDIDAYA_KEKERANGAN"
-    ],
-    "Budidaya (Mutiara, rumput laut, ikan dan udang) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 38 No Kegiatan Keterangan": [
      "BUDIDAYA_RUMPUT_LAUT",
      "BUDIDAYA_KEKERANGAN"
     ],
@@ -6234,9 +6256,6 @@
      "INFRA_PELINDUNG_PANTAI"
     ],
     "Penimbunan dan pengeringan laut": [
-     "INFRA_REKLAMASI"
-    ],
-    "Penimbunan dan pengeringan laut Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 44 No Kegiatan Keterangan": [
      "INFRA_REKLAMASI"
     ]
    },
@@ -6260,7 +6279,7 @@
       "Penangkapan ikan (Kapasitas Kapal >30 GT)",
       "Budidaya (Mutiara, rumput laut, ikan dan udang)",
       "Pariwisata alam perairan (Rekreasi pantai, Wisata berenang, selam, snorkeling, pancing, perahu layar, selancar, tontonan, olahraga permukaan air lainnya, pembuatan foto, video dan film komersial)",
-      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 35 No Kegiatan Keterangan",
+      "Pengusahaan pariwisata alam perairan (Infrastruktur, peralatan, jasa transportasi, dan jasa pramuwisata)",
       "Pelestarian adat dan budaya",
       "Pemasangan atau pemeliharaan pipa dan kabel bawah laut",
       "Pembangunan pelabuhan umum",
@@ -6294,7 +6313,7 @@
       "Pelestarian adat dan budaya",
       "Penangkaran dan pelepasliaran satwa",
       "Berlayar melintas (Kapasitas Kapal <10 GT)",
-      "Pangkalan nelayan Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 45"
+      "Pangkalan nelayan"
      ],
      "bersyarat": [
       "Rehabilitasi habitat dan populasi ikan",
@@ -6323,7 +6342,7 @@
       "Perumahan/permukiman",
       "Pembuangan air limbah hasil olahan",
       "Pembuangan sampah",
-      "Penimbunan dan pengeringan laut Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 44 No Kegiatan Keterangan"
+      "Penimbunan dan pengeringan laut"
      ]
     },
     {
@@ -6364,7 +6383,7 @@
       "Pembuangan air limbah hasil olahan",
       "Pembuangan sampah",
       "Pangkalan nelayan",
-      "Budidaya (Mutiara, rumput laut, ikan dan udang) Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 38 No Kegiatan Keterangan",
+      "Budidaya (Mutiara, rumput laut, ikan dan udang)",
       "Industri garam/industri"
      ]
     },
@@ -6395,7 +6414,7 @@
       "Bioteknologi",
       "Pengambilan Benda Muatan Kapal Tenggelam (BMKT)",
       "Pendidikan, penelitian dan pengembangan",
-      "Pengusahaan pariwisata alam perairan (Infrastruktur, Rencana Pengelolaan dan Zonasi SAP Teluk Cempi 41 No Kegiatan Keterangan peralatan, jasa transportasi, dan jasa pramuwisata)"
+      "Pengusahaan pariwisata alam perairan (Infrastruktur,"
      ],
      "tidak_diperbolehkan": [
       "Penangkapan ikan (Kapasitas Kapal 10 - 30 GT)",
@@ -6440,7 +6459,7 @@
     "Jaring lobster penangkapan Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya": [
      "PERIKANAN_TANGKAP"
     ],
-    "Jaring tancap Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 23 Di atur waktu": [
+    "Jaring tancap": [
      "PERIKANAN_TANGKAP"
     ],
     "Jaring udang kelong penangkapan Di atur waktu": [
@@ -6450,7 +6469,6 @@
     "Mengambil karang Mati": [],
     "Mengambil karang mati": [],
     "Menyelam untuk mencari biota": [],
-    "Menyelam untuk mencari biota Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 25": [],
     "Nelayan Panah": [
      "PERIKANAN_TANGKAP"
     ],
@@ -6458,6 +6476,10 @@
      "PERIKANAN_TANGKAP"
     ],
     "Nelayan panah": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Nelayan yang menggunakan Kompresor": [],
+    "Nelayan yang menggunakan Kompressor": [
      "PERIKANAN_TANGKAP"
     ],
     "Pancing ulur (hand line)": [
@@ -6486,7 +6508,7 @@
     "Wisata Menyelam, Sorkeling, Berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
      "PARIWISATA_BAHARI"
     ],
-    "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 19": [
+    "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
      "PARIWISATA_BAHARI"
     ],
     "Wisata menyelam, sorkeling, berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
@@ -6497,9 +6519,6 @@
     "Menyelam untuk mencari biota": [
      "WISATA_SELAM"
     ],
-    "Menyelam untuk mencari biota Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 25": [
-     "WISATA_SELAM"
-    ],
     "Wisata Menyelam, Snorkeling, Berenang": [
      "WISATA_SELAM"
     ],
@@ -6507,7 +6526,7 @@
      "WISATA_SELAM",
      "WISATA_MARINA"
     ],
-    "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 19": [
+    "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
      "WISATA_MARINA"
     ],
     "Wisata menyelam, sorkeling, berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X": [
@@ -6525,7 +6544,7 @@
      "bersyarat": [],
      "tidak_diperbolehkan": [
       "Wisata Menyelam, Snorkeling, Berenang",
-      "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 19",
+      "Wisata memancing - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X",
       "Budidaya",
       "Buang Jangkar",
       "Berlabuh (Kapasitas kapal <10 GT)",
@@ -6535,7 +6554,8 @@
       "Menyelam untuk mencari biota",
       "Mengambil Karang Mati",
       "Nelayan Panah Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
-      "Jaring Dasar Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+      "Jaring Dasar Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
+      "Nelayan yang menggunakan Kompressor"
      ],
      "lainnya": "TIDAK_DIIZINKAN"
     },
@@ -6551,11 +6571,12 @@
      "tidak_diperbolehkan": [
       "Nelayan Panah",
       "Wisata menyelam, sorkeling, berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X",
-      "Menyelam untuk mencari biota Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 25",
+      "Menyelam untuk mencari biota",
       "Mengambil karang mati",
       "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
       "Jaring Dasar Jaring permukaan, pancing dan alat tangkap lainnya yang ramah lingkungan",
-      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
+      "Nelayan yang menggunakan Kompressor"
      ]
     },
     {
@@ -6579,7 +6600,8 @@
       "Mengambil Karang Mati",
       "Wisata Menyelam, Sorkeling, Berenang - Jetsky X - Banana Boat X - Windsurf X - Surfing X - Wisata watersport lainnya X",
       "Rawai hiu",
-      "Jaring tancap Rencana Pengelolaan dan Zonasi - Taman Pesisir Aceh Jaya 23 Di atur waktu"
+      "Jaring tancap",
+      "Nelayan yang menggunakan Kompresor"
      ]
     },
     {
@@ -6602,7 +6624,8 @@
       "Pancing ulur (hand line)",
       "Tonda",
       "Rawai Hiu",
-      "Jaring Dasar (Set gillnet) Jaring permukaandan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+      "Jaring Dasar (Set gillnet) Jaring permukaandan Alat Tangkap lainnya yang ramah lingkungan Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
+      "Nelayan yang menggunakan Kompressor"
      ]
     }
    ]
@@ -6675,6 +6698,9 @@
     "Penelitian": [
      "KONSERVASI_PESISIR"
     ],
+    "Penelitian dengan regristasi*)/ijin Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi": [
+     "KONSERVASI_PESISIR"
+    ],
     "Pengambilan Pasir Pulau/Pasir Laut": [
      "ENERGI_KELAUTAN"
     ],
@@ -6701,6 +6727,9 @@
     "Upacara adat, ritual keaagamaan": [],
     "Upacara adat, ritual keagamaan": [],
     "Wisata Menyelam diperbolehkan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata Menyelam regristasi*)/ijin 2 Berenang dan Snorkling": [
      "PARIWISATA_BAHARI"
     ],
     "Wisata Perahu Kaca (Glass Bottom Boat)": [
@@ -6748,6 +6777,9 @@
     "Wisata Menyelam diperbolehkan": [
      "WISATA_SELAM"
     ],
+    "Wisata Menyelam regristasi*)/ijin 2 Berenang dan Snorkling": [
+     "WISATA_SELAM"
+    ],
     "Wisata Perahu Kaca (Glass Bottom Boat) Sarana dan pelayanan untuk melakukan wisata petualangan - marine walk - kapal layar cruise, kapal selam": [
      "WISATA_KAPAL_PESIAR"
     ],
@@ -6771,6 +6803,7 @@
      ],
      "label": "Zona Inti",
      "diperbolehkan": [
+      "Penelitian dengan regristasi*)/ijin Pendidikan, Pemeliharaan, Pemulihan, Rehabilitasi",
       "dan Peningkatan Sumber Daya Ikan dan k i"
      ],
      "bersyarat": [],
@@ -6872,6 +6905,7 @@
       "Tambatan kapal (Muoring buoy)",
       "Pemasangan Rumpon",
       "Pembuatan foto, video, film untuk tujuan komersial",
+      "Wisata Menyelam regristasi*)/ijin 2 Berenang dan Snorkling",
       "Wisata Speargun",
       "Wisata watersport - Windsurf - Jetsky - Banana Boat - Surfing - Wisata watersport lainnya",
       "Wisata Perahu Kaca (Glass Bottom Boat)",
@@ -6901,6 +6935,15 @@
    "dasar": "Rencana Pengelolaan dan Zonasi KKP3K Aceh Tamiang dan Perairan Sekitarnya (dokumen RPZ Sidako KKP), tabel kegiatan per zona",
    "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
    "sektor": {
+    "Aktivitas Penangkapan Ikan dan Biota Lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Aktivitas Penangkapan lainnya": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Aktivitas Penangkapan lainnya yang ramah lingkungan": [
+     "PERIKANAN_TANGKAP"
+    ],
     "Berlabuh (Kapasitas Kapal >10 GT)": [
      "JASA_MARITIM"
     ],
@@ -6996,7 +7039,8 @@
       "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
       "Jaring Udang dan Jaring Dasar Lainnya",
       "Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan",
-      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya"
+      "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
+      "Aktivitas Penangkapan lainnya"
      ],
      "lainnya": "TIDAK_DIIZINKAN"
     },
@@ -7015,7 +7059,8 @@
       "Pembuangan Limbah dan Sampah",
       "Pemanfaatan sumberdaya Alam",
       "Pembangunan Dermaga",
-      "Wisata"
+      "Wisata",
+      "Aktivitas Penangkapan Ikan dan Biota Lainnya"
      ]
     },
     {
@@ -7044,6 +7089,7 @@
       "Pancing ulur (hand line), tonda, rawai dasar, dan pancing lainnya",
       "Jaring Permukaan, Pancing dan Alat Tangkap lainnya yang ramah lingkungan",
       "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
+      "Aktivitas Penangkapan lainnya",
       "Jaring Dasar"
      ]
     },
@@ -7067,7 +7113,8 @@
       "Berlayar melintas",
       "Pemulihan dan Rehabilitasi SDA",
       "Pemanfaatan sumberdaya Alam secara ramah lingkungan",
-      "Pemberlakukan Musim Tangkap Udang Windu"
+      "Pemberlakukan Musim Tangkap Udang Windu",
+      "Aktivitas Penangkapan lainnya yang ramah lingkungan"
      ],
      "bersyarat": [],
      "tidak_diperbolehkan": [
@@ -7075,6 +7122,844 @@
       "Berlabuh (Kapasitas Kapal >10 GT)",
       "Trawl, dan alat tangkap yang tidak ramah lingkungan dan lainnya",
       "Wisata"
+     ]
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI DI PERAIRAN GILI BALU DI PROVINSI NUSA TENGGARA BARAT",
+   "dasar": "Rencana Pengelolaan Kawasan Konservasi TWP Gili Balu 2021-2041 (COREMAP-CTI), matriks kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin atau persetujuan pengelola kawasan konservasi.",
+   "sektor": {
+    "Kegiatan pariwisata alam peraian": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Lalu lintas kapal penangkap ikan ukuran >10GT": [
+     "JASA_MARITIM"
+    ],
+    "Landing, take off, dan taxiing seaplane": [],
+    "Pelayaran Kapal penumpang wisata/kapal pesiar": [
+     "PARIWISATA_BAHARI",
+     "JASA_MARITIM"
+    ],
+    "Pelayaran kapal penumpang reguler domestik": [
+     "JASA_MARITIM"
+    ],
+    "Pelayaran rakyat dan nelayan kecil": [
+     "PERIKANAN_TANGKAP",
+     "JASA_MARITIM"
+    ],
+    "Pemanfaatan air laut selain energi": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Pembuatan foto, film, dan video komersial": [],
+    "Pembudidayaan ikan": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Pembudidayaan ikan oleh pembudi daya ikan kecil": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Penangkapan Ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan Ikan oleh nelayan yang bermukim di sekitar kawasan konservasi": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pendidikan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pendirian dan/atau penempatan bangunan laut": [],
+    "Penelitian": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penempatan instalasi di laut": [],
+    "Penyediaan infrastruktur Pariwisata Alam Perairan": [
+     "PARIWISATA_BAHARI",
+     "INFRASTRUKTUR_LAUT"
+    ]
+   },
+   "sub_jenis": {
+    "Pelayaran Kapal penumpang wisata/kapal pesiar": [
+     "WISATA_KAPAL_PESIAR"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian"
+     ],
+     "tidak_diperbolehkan": [
+      "Pelayaran rakyat dan nelayan kecil",
+      "Pelayaran kapal penumpang reguler domestik",
+      "Pelayaran Kapal penumpang wisata/kapal pesiar",
+      "Lalu lintas kapal penangkap ikan ukuran >10GT",
+      "Pendidikan",
+      "Penangkapan Ikan",
+      "Penangkapan Ikan oleh nelayan yang bermukim di sekitar kawasan konservasi",
+      "Pembudidayaan ikan",
+      "Pembudidayaan ikan oleh pembudi daya ikan kecil",
+      "Kegiatan pariwisata alam peraian",
+      "Penyediaan infrastruktur Pariwisata Alam Perairan",
+      "Pendirian dan/atau penempatan bangunan laut",
+      "Penempatan instalasi di laut",
+      "Pemanfaatan air laut selain energi",
+      "Pembuatan foto, film, dan video komersial",
+      "Landing, take off, dan taxiing seaplane"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lain (Zona Jalur Lalu Lintas Kapal)"
+     ],
+     "label": "Zona Jalur Lalu Lintas Kapal",
+     "diperbolehkan": [
+      "Pelayaran rakyat dan nelayan kecil",
+      "Pelayaran kapal penumpang reguler domestik"
+     ],
+     "bersyarat": [
+      "Pelayaran Kapal penumpang wisata/kapal pesiar",
+      "Lalu lintas kapal penangkap ikan ukuran >10GT",
+      "Penelitian",
+      "Pendirian dan/atau penempatan bangunan laut",
+      "Penempatan instalasi di laut",
+      "Pembuatan foto, film, dan video komersial"
+     ],
+     "tidak_diperbolehkan": [
+      "Pendidikan",
+      "Penangkapan Ikan",
+      "Penangkapan Ikan oleh nelayan yang bermukim di sekitar kawasan konservasi",
+      "Pembudidayaan ikan",
+      "Pembudidayaan ikan oleh pembudi daya ikan kecil",
+      "Kegiatan pariwisata alam peraian",
+      "Penyediaan infrastruktur Pariwisata Alam Perairan",
+      "Pemanfaatan air laut selain energi",
+      "Landing, take off, dan taxiing seaplane"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas"
+     ],
+     "label": "Zona Pemanfaatan Terbatas",
+     "diperbolehkan": [
+      "Pelayaran rakyat dan nelayan kecil",
+      "Pelayaran kapal penumpang reguler domestik"
+     ],
+     "bersyarat": [
+      "Pelayaran Kapal penumpang wisata/kapal pesiar",
+      "Lalu lintas kapal penangkap ikan ukuran >10GT",
+      "Penelitian",
+      "Pendidikan",
+      "Penangkapan Ikan",
+      "Penangkapan Ikan oleh nelayan yang bermukim di sekitar kawasan konservasi",
+      "Pembudidayaan ikan",
+      "Pembudidayaan ikan oleh pembudi daya ikan kecil",
+      "Kegiatan pariwisata alam peraian",
+      "Penyediaan infrastruktur Pariwisata Alam Perairan",
+      "Pendirian dan/atau penempatan bangunan laut",
+      "Penempatan instalasi di laut",
+      "Pemanfaatan air laut selain energi",
+      "Pembuatan foto, film, dan video komersial",
+      "Landing, take off, dan taxiing seaplane"
+     ],
+     "tidak_diperbolehkan": []
+    }
+   ]
+  },
+  {
+   "nama": "KKP3K UJUNGNEGORO-ROBAN KABUPATEN BATANG DI PROVINSI JAWA TENGAH",
+   "dasar": "Rencana Pengelolaan Kawasan Taman Pesisir Ujungnegoro-Roban dan Sekitarnya 2012 (DKP Kabupaten Batang), Tabel 3.3 kategori dan status kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin pengelola kawasan. Zona lainnya (perikanan tangkap tradisional dan pertanian) tidak diatur dalam tabel kegiatan dokumen ini.",
+   "sektor": {
+    "Budidaya ikan ramah lingkungan": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Kegiatan penunjang konservasi": [],
+    "Pariwisata dan rekreasi": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Penangkapan ikan ramah lingkungan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pendidikan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penelitian": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Rehabilitasi habitat": [
+     "KONSERVASI_PESISIR"
+    ]
+   },
+   "sub_jenis": {
+    "Pariwisata dan rekreasi": [
+     "WISATA_MARINA"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti | Inti Karang Maeso"
+     ],
+     "label": "Zona Inti Karang Maeso",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan",
+      "Rehabilitasi habitat"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan ramah lingkungan",
+      "Budidaya ikan ramah lingkungan",
+      "Pariwisata dan rekreasi",
+      "Kegiatan penunjang konservasi"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Karang Kretek"
+     ],
+     "label": "Subzona Karang Kretek",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan",
+      "Penangkapan ikan ramah lingkungan",
+      "Budidaya ikan ramah lingkungan",
+      "Pariwisata dan rekreasi",
+      "Kegiatan penunjang konservasi",
+      "Rehabilitasi habitat"
+     ],
+     "tidak_diperbolehkan": []
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Penyangga Zona Inti"
+     ],
+     "label": "Subzona Penyangga Zona Inti",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan",
+      "Penangkapan ikan ramah lingkungan",
+      "Budidaya ikan ramah lingkungan",
+      "Pariwisata dan rekreasi",
+      "Kegiatan penunjang konservasi",
+      "Rehabilitasi habitat"
+     ],
+     "tidak_diperbolehkan": []
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Rehabilitasi Hutan Pantai"
+     ],
+     "label": "Subzona Rehabilitasi Hutan Pantai",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan",
+      "Penangkapan ikan ramah lingkungan",
+      "Budidaya ikan ramah lingkungan",
+      "Pariwisata dan rekreasi",
+      "Kegiatan penunjang konservasi",
+      "Rehabilitasi habitat"
+     ],
+     "tidak_diperbolehkan": []
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Rehabilitasi Mangrove"
+     ],
+     "label": "Subzona Rehabilitasi Mangrove",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan",
+      "Penangkapan ikan ramah lingkungan",
+      "Budidaya ikan ramah lingkungan",
+      "Pariwisata dan rekreasi",
+      "Kegiatan penunjang konservasi",
+      "Rehabilitasi habitat"
+     ],
+     "tidak_diperbolehkan": []
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Situs Budaya"
+     ],
+     "label": "Subzona Situs Budaya",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan",
+      "Penangkapan ikan ramah lingkungan",
+      "Budidaya ikan ramah lingkungan",
+      "Pariwisata dan rekreasi",
+      "Kegiatan penunjang konservasi",
+      "Rehabilitasi habitat"
+     ],
+     "tidak_diperbolehkan": []
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas | Wisata Bahari"
+     ],
+     "label": "Subzona Wisata Bahari",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penelitian",
+      "Pendidikan",
+      "Penangkapan ikan ramah lingkungan",
+      "Budidaya ikan ramah lingkungan",
+      "Pariwisata dan rekreasi",
+      "Kegiatan penunjang konservasi",
+      "Rehabilitasi habitat"
+     ],
+     "tidak_diperbolehkan": []
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI DI PERAIRAN PULAU MAKIAN DAN PULAU MOTI DI PROVINSI MALUKU UTARA",
+   "dasar": "Rencana Pengelolaan dan Zonasi Taman Pulau Kecil Pulau Makian-Moti 2020-2040 (DKP Provinsi Maluku Utara), Tabel 3-2 kegiatan per zona",
+   "ketentuan_umum": "Kegiatan bersyarat memerlukan izin pengelola kawasan. Bila satu zona di peta mencakup beberapa subzona yang aturannya berbeda, kegiatan itu ditampilkan bersyarat (tergantung subzona).",
+   "sektor": {
+    "Aktivitas kapal wisata (glass bottom boat; transportasi)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Berlayar melintas untuk kapal berukuran dibawah atau sama dengan 10 GT": [],
+    "Berlayar untuk kapal kapasitas diatas 10 GT": [],
+    "Budidaya ikan kerapu": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Budidaya keramba jaring apung": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Budidaya rumput laut": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Jalur kapal ukuran >10-30 GT": [
+     "JASA_MARITIM"
+    ],
+    "Membuang jangkar": [],
+    "Membuang limbah ke perairan langsung": [],
+    "Menangkap, mengambil, dan melukai biota yang dilindungi (penyu)": [],
+    "Menyelam menggunakan kompresor": [],
+    "Patroli pengawasan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pemasangan pipa dan kabel bawah laut": [
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Pembangunan sarana atau pos wisata": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Pembangunan sarana wisata (resort, home stay)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Pembangunan tracking mangrove": [],
+    "Pembuatan foto, video, film untuk tujuan komersil": [],
+    "Penambangan karang": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Penambangan pasir": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Penangkapan ikan dengan kapal maksimum 10 GT": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: Bagan tancap dan perahu": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: Bom, bius": [],
+    "Penangkapan ikan: Panah": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: Pancing dasar": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: Pancing ulur": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: Rawai": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Penangkapan ikan: Rumpon tradisional": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pendidikan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penebangan bakau": [],
+    "Penelitian ekstraktif": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penelitian non ekstraktif": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Rehabilitasi bakau": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Rehabilitasi lamun": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Rehabilitasi terumbu karang": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Rekreasi pantai": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Tambatan perahu (mooring buoy)": [
+     "JASA_MARITIM"
+    ],
+    "Wisata bakau": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata jet ski": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata melihat spesies terntentu (Penyu, Hiu, dll)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata selam": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata selancar": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Wisata snorkeling": [
+     "PARIWISATA_BAHARI"
+    ]
+   },
+   "sub_jenis": {
+    "Budidaya keramba jaring apung": [
+     "BUDIDAYA_LAUT"
+    ],
+    "Budidaya rumput laut": [
+     "BUDIDAYA_RUMPUT_LAUT"
+    ],
+    "Pemasangan pipa dan kabel bawah laut": [
+     "INFRA_KABEL_PIPA"
+    ],
+    "Pembangunan sarana wisata (resort, home stay)": [
+     "WISATA_RESOR"
+    ],
+    "Rekreasi pantai": [
+     "WISATA_MARINA"
+    ],
+    "Wisata jet ski": [
+     "WISATA_MARINA"
+    ],
+    "Wisata selam": [
+     "WISATA_SELAM"
+    ],
+    "Wisata selancar": [
+     "WISATA_MARINA"
+    ],
+    "Wisata snorkeling": [
+     "WISATA_SELAM"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [
+      "Berlayar melintas untuk kapal berukuran dibawah atau sama dengan 10 GT"
+     ],
+     "bersyarat": [
+      "Penelitian non ekstraktif",
+      "Pendidikan",
+      "Patroli pengawasan"
+     ],
+     "tidak_diperbolehkan": [
+      "Penelitian ekstraktif",
+      "Rehabilitasi terumbu karang",
+      "Rehabilitasi lamun",
+      "Rehabilitasi bakau",
+      "Penangkapan ikan: Pancing dasar",
+      "Penangkapan ikan: Pancing ulur",
+      "Penangkapan ikan: Rawai",
+      "Penangkapan ikan: Panah",
+      "Penangkapan ikan: Bagan tancap dan perahu",
+      "Penangkapan ikan: Bom, bius",
+      "Penangkapan ikan: Rumpon tradisional",
+      "Penangkapan ikan dengan kapal maksimum 10 GT",
+      "Penambangan karang",
+      "Penebangan bakau",
+      "Penambangan pasir",
+      "Menangkap, mengambil, dan melukai biota yang dilindungi (penyu)",
+      "Budidaya rumput laut",
+      "Budidaya keramba jaring apung",
+      "Budidaya ikan kerapu",
+      "Wisata melihat spesies terntentu (Penyu, Hiu, dll)",
+      "Aktivitas kapal wisata (glass bottom boat; transportasi)",
+      "Menyelam menggunakan kompresor",
+      "Rekreasi pantai",
+      "Wisata selam",
+      "Wisata snorkeling",
+      "Wisata jet ski",
+      "Wisata bakau",
+      "Wisata selancar",
+      "Pembuatan foto, video, film untuk tujuan komersil",
+      "Pembangunan sarana wisata (resort, home stay)",
+      "Pembangunan tracking mangrove",
+      "Pembangunan sarana atau pos wisata",
+      "Berlayar untuk kapal kapasitas diatas 10 GT",
+      "Membuang jangkar",
+      "Jalur kapal ukuran >10-30 GT",
+      "Tambatan perahu (mooring buoy)",
+      "Membuang limbah ke perairan langsung",
+      "Pemasangan pipa dan kabel bawah laut"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya"
+     ],
+     "label": "Zona Lainnya (Alur Kapal dan Rehabilitasi)",
+     "diperbolehkan": [
+      "Penelitian non ekstraktif",
+      "Penelitian ekstraktif",
+      "Pendidikan",
+      "Patroli pengawasan"
+     ],
+     "bersyarat": [
+      "Rehabilitasi terumbu karang",
+      "Rehabilitasi lamun",
+      "Rehabilitasi bakau",
+      "Pembuatan foto, video, film untuk tujuan komersil",
+      "Berlayar untuk kapal kapasitas diatas 10 GT",
+      "Berlayar melintas untuk kapal berukuran dibawah atau sama dengan 10 GT",
+      "Jalur kapal ukuran >10-30 GT",
+      "Tambatan perahu (mooring buoy)",
+      "Pemasangan pipa dan kabel bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan: Pancing dasar",
+      "Penangkapan ikan: Pancing ulur",
+      "Penangkapan ikan: Rawai",
+      "Penangkapan ikan: Panah",
+      "Penangkapan ikan: Bagan tancap dan perahu",
+      "Penangkapan ikan: Bom, bius",
+      "Penangkapan ikan: Rumpon tradisional",
+      "Penangkapan ikan dengan kapal maksimum 10 GT",
+      "Penambangan karang",
+      "Penebangan bakau",
+      "Penambangan pasir",
+      "Menangkap, mengambil, dan melukai biota yang dilindungi (penyu)",
+      "Budidaya rumput laut",
+      "Budidaya keramba jaring apung",
+      "Budidaya ikan kerapu",
+      "Wisata melihat spesies terntentu (Penyu, Hiu, dll)",
+      "Aktivitas kapal wisata (glass bottom boat; transportasi)",
+      "Menyelam menggunakan kompresor",
+      "Rekreasi pantai",
+      "Wisata selam",
+      "Wisata snorkeling",
+      "Wisata jet ski",
+      "Wisata bakau",
+      "Wisata selancar",
+      "Pembangunan sarana wisata (resort, home stay)",
+      "Pembangunan tracking mangrove",
+      "Pembangunan sarana atau pos wisata",
+      "Membuang jangkar",
+      "Membuang limbah ke perairan langsung"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas"
+     ],
+     "label": "Zona Pemanfaatan Terbatas",
+     "diperbolehkan": [
+      "Penelitian non ekstraktif",
+      "Pendidikan",
+      "Rehabilitasi terumbu karang",
+      "Rehabilitasi lamun",
+      "Rehabilitasi bakau",
+      "Wisata melihat spesies terntentu (Penyu, Hiu, dll)",
+      "Aktivitas kapal wisata (glass bottom boat; transportasi)",
+      "Rekreasi pantai",
+      "Wisata selam",
+      "Wisata snorkeling",
+      "Wisata jet ski",
+      "Wisata bakau",
+      "Pembuatan foto, video, film untuk tujuan komersil",
+      "Berlayar melintas untuk kapal berukuran dibawah atau sama dengan 10 GT",
+      "Tambatan perahu (mooring buoy)",
+      "Patroli pengawasan"
+     ],
+     "bersyarat": [
+      "Penelitian ekstraktif",
+      "Penangkapan ikan: Pancing dasar",
+      "Penangkapan ikan: Pancing ulur",
+      "Penangkapan ikan: Panah",
+      "Penangkapan ikan: Bagan tancap dan perahu",
+      "Penangkapan ikan: Rumpon tradisional",
+      "Penangkapan ikan dengan kapal maksimum 10 GT",
+      "Budidaya rumput laut",
+      "Budidaya keramba jaring apung",
+      "Budidaya ikan kerapu",
+      "Wisata selancar",
+      "Pembangunan sarana wisata (resort, home stay)",
+      "Pembangunan tracking mangrove",
+      "Pembangunan sarana atau pos wisata",
+      "Berlayar untuk kapal kapasitas diatas 10 GT",
+      "Jalur kapal ukuran >10-30 GT",
+      "Pemasangan pipa dan kabel bawah laut"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan: Rawai",
+      "Penangkapan ikan: Bom, bius",
+      "Penambangan karang",
+      "Penebangan bakau",
+      "Penambangan pasir",
+      "Menangkap, mengambil, dan melukai biota yang dilindungi (penyu)",
+      "Menyelam menggunakan kompresor",
+      "Membuang jangkar",
+      "Membuang limbah ke perairan langsung"
+     ]
+    },
+    {
+     "keterangan": [
+      "Perikanan Berkelanjutan"
+     ],
+     "label": "Subzona Penangkapan Ikan",
+     "diperbolehkan": [
+      "Penelitian non ekstraktif",
+      "Penelitian ekstraktif",
+      "Pendidikan",
+      "Rehabilitasi terumbu karang",
+      "Rehabilitasi lamun",
+      "Rehabilitasi bakau",
+      "Penangkapan ikan: Pancing dasar",
+      "Penangkapan ikan: Pancing ulur",
+      "Penangkapan ikan: Panah",
+      "Penangkapan ikan: Bagan tancap dan perahu",
+      "Penangkapan ikan: Rumpon tradisional",
+      "Penangkapan ikan dengan kapal maksimum 10 GT",
+      "Budidaya rumput laut",
+      "Budidaya keramba jaring apung",
+      "Budidaya ikan kerapu",
+      "Wisata melihat spesies terntentu (Penyu, Hiu, dll)",
+      "Aktivitas kapal wisata (glass bottom boat; transportasi)",
+      "Rekreasi pantai",
+      "Wisata selam",
+      "Wisata snorkeling",
+      "Wisata jet ski",
+      "Wisata bakau",
+      "Pembuatan foto, video, film untuk tujuan komersil",
+      "Berlayar untuk kapal kapasitas diatas 10 GT",
+      "Berlayar melintas untuk kapal berukuran dibawah atau sama dengan 10 GT",
+      "Jalur kapal ukuran >10-30 GT",
+      "Tambatan perahu (mooring buoy)",
+      "Patroli pengawasan",
+      "Pemasangan pipa dan kabel bawah laut"
+     ],
+     "bersyarat": [
+      "Pembangunan sarana wisata (resort, home stay)",
+      "Pembangunan tracking mangrove",
+      "Pembangunan sarana atau pos wisata"
+     ],
+     "tidak_diperbolehkan": [
+      "Penangkapan ikan: Rawai",
+      "Penangkapan ikan: Bom, bius",
+      "Penambangan karang",
+      "Penebangan bakau",
+      "Penambangan pasir",
+      "Menangkap, mengambil, dan melukai biota yang dilindungi (penyu)",
+      "Menyelam menggunakan kompresor",
+      "Wisata selancar",
+      "Membuang jangkar",
+      "Membuang limbah ke perairan langsung"
+     ]
+    }
+   ]
+  },
+  {
+   "nama": "KAWASAN KONSERVASI PESISIR DAN PULAU-PULAU KECIL PALOH DAN PERAIRAN SEKITARNYA DI PROVINSI KALIMANTAN BARAT",
+   "dasar": "Laporan Akhir Rencana Pengelolaan dan Zonasi KKP3K Paloh Kabupaten Sambas, Tabel 3.5 kegiatan per zona (mengacu Perda Provinsi Kalimantan Barat No. 1 Tahun 2019)",
+   "ketentuan_umum": "Dokumen membedakan 'boleh' dan 'boleh dengan izin' dengan simbol yang tidak dapat dibedakan pada berkas digital, sehingga keduanya ditampilkan bersyarat. Kegiatan yang belum diatur dalam dokumen tidak dicantumkan. Pemanfaatan yang belum tertuang dapat dilakukan di luar zona inti bila dilengkapi kajian teknis lingkungan.",
+   "sektor": {
+    "Budidaya dengan metode, alat dan teknologi yang tidak merusak ekosistem di wilayah pesisir dan pulau-pulau kecil": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Identifikasi dan pengangkatan BMKT": [],
+    "Kegiatan budidaya yang menggunakan metode, alat dan teknologi yang dapat merusak ekosistem di wilayah pesisir dan pulau-pulau kecil": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Kegiatan kepelabuhan yang dikelola olah pemerintah": [
+     "JASA_MARITIM",
+     "INFRASTRUKTUR_LAUT"
+    ],
+    "Kegiatan mitigasi bencana": [],
+    "Kegiatan penangkapan ikan dengan alat tangkap bergerak, menggunakan bahan peledak, beracun, alat tangkap yang merusak ekosistem, serta kegiatan penangkapan ikan yang dilarang oleh peraturan yang berlaku": [],
+    "Kegiatan penangkapan ikan dengan cara yang ramah lingkungan, dan mempertimbangkan habitat serta populasi ikan": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Kegiatan perikanan budidaya ramah lingkungan": [
+     "PERIKANAN_BUDIDAYA"
+    ],
+    "Kegiatan perkemahan dengan api unggun": [],
+    "Kegiatan pertahanan dan keamanan yang bersifat dinamis": [],
+    "Kegiatan yang berhubungan dengan rekreasi keindahan alam (seperti berenang, menyelam, pariwisata tontonan, pariwisata minat khusus, perahu wisata, olahraga permukaan air, pembuatan foto video dan film)": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Kegiatan yang menggunakan cara dan metode untuk melakukan perusakan, alih fungsi, serta menebang vegetasi di wilayah pesisir": [],
+    "Pemasangan alat bantu penangkapan ikan (seperti rumpon)": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pembangunan bangunan pelindung pantai": [],
+    "Pembangunan fasilitas umum": [],
+    "Pemulihan dan rehabilitasi ekosistem serta perlindungan alur migrasi biota laut": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penangkapan ikan dengan alat tangkap menetap": [
+     "PERIKANAN_TANGKAP"
+    ],
+    "Pendidikan tanpa melakukan pengambilan material langsung dari alam": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penelitian dengan metode survei dan observasi dengan tujuan pengumpulan data dasar, dan monitoring kondisi ekologi dengan tujuan rehabilitasi": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Pengambilan air laut untuk kegiatan budidaya dan tambak garam": [
+     "PERIKANAN_BUDIDAYA",
+     "GARAM"
+    ],
+    "Pengembangan untuk kepentingan konservasi": [],
+    "Penjagaan, pengawasan dan pencegahan kegiatan yang mengakibatkan perubahan keutuhan potensi dan fungsi kawasan": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Penyediaan atraksi wisata sesuai dengan rencana induk pariwisata": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Penyediaan prasarana dan sarana pariwisata yang tidak berdampak pada kerusakan lingkungan": [
+     "PARIWISATA_BAHARI"
+    ],
+    "Perlindungan proses-proses ekologis yang menunjang kelangsungan hidup dari suatu jenis atau sumberdaya alam hayati dan ekosistemnya": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Perlindungan situs/budaya dan adat tradisional": [
+     "KONSERVASI_PESISIR"
+    ],
+    "Segala aktivitas pengembangan di lokasi cadangan mineral logam, non logam, dan batuan, yang telah ditetapkan sebagai wilayah izin usaha pertambangan sesuai dengan perundangan, diutamakan di luar 2 mil laut. Yang apabila secara teknis, ekologis, sosial, budaya, tidak menimbulkan kerusakan lingkungan dan atau pencemaran lingkungan, dan atau merugikan masyarakat sekitar": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Seluruh kegiatan industri": [],
+    "Seluruh kegiatan penambangan mineral logam, bukan logam, dan batuan": [
+     "ENERGI_KELAUTAN"
+    ],
+    "Ukuran kapal penangkap ikan dan penggunaan alat bantu penangkap ikan (seperti rumpon), yang digunakan dalam kegiatan penangkapan ikan harus sesuai dengan peraturan yang berlaku": [
+     "PERIKANAN_TANGKAP"
+    ]
+   },
+   "sub_jenis": {
+    "Kegiatan yang berhubungan dengan rekreasi keindahan alam (seperti berenang, menyelam, pariwisata tontonan, pariwisata minat khusus, perahu wisata, olahraga permukaan air, pembuatan foto video dan film)": [
+     "WISATA_SELAM",
+     "WISATA_MARINA"
+    ],
+    "Pengambilan air laut untuk kegiatan budidaya dan tambak garam": [
+     "BUDIDAYA_TAMBAK"
+    ]
+   },
+   "zona": [
+    {
+     "keterangan": [
+      "Inti"
+     ],
+     "label": "Zona Inti",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Perlindungan proses-proses ekologis yang menunjang kelangsungan hidup dari suatu jenis atau sumberdaya alam hayati dan ekosistemnya",
+      "Penjagaan, pengawasan dan pencegahan kegiatan yang mengakibatkan perubahan keutuhan potensi dan fungsi kawasan",
+      "Pemulihan dan rehabilitasi ekosistem serta perlindungan alur migrasi biota laut",
+      "Perlindungan situs/budaya dan adat tradisional",
+      "Penelitian dengan metode survei dan observasi dengan tujuan pengumpulan data dasar, dan monitoring kondisi ekologi dengan tujuan rehabilitasi",
+      "Pendidikan tanpa melakukan pengambilan material langsung dari alam"
+     ],
+     "tidak_diperbolehkan": [
+      "Pengembangan untuk kepentingan konservasi",
+      "Kegiatan penangkapan ikan dengan cara yang ramah lingkungan, dan mempertimbangkan habitat serta populasi ikan",
+      "Kegiatan perikanan budidaya ramah lingkungan",
+      "Kegiatan kepelabuhan yang dikelola olah pemerintah",
+      "Kegiatan penangkapan ikan dengan alat tangkap bergerak, menggunakan bahan peledak, beracun, alat tangkap yang merusak ekosistem, serta kegiatan penangkapan ikan yang dilarang oleh peraturan yang berlaku",
+      "Kegiatan yang menggunakan cara dan metode untuk melakukan perusakan, alih fungsi, serta menebang vegetasi di wilayah pesisir",
+      "Seluruh kegiatan industri",
+      "Seluruh kegiatan penambangan mineral logam, bukan logam, dan batuan",
+      "Penangkapan ikan dengan alat tangkap menetap",
+      "Pemasangan alat bantu penangkapan ikan (seperti rumpon)",
+      "Budidaya dengan metode, alat dan teknologi yang tidak merusak ekosistem di wilayah pesisir dan pulau-pulau kecil",
+      "Kegiatan budidaya yang menggunakan metode, alat dan teknologi yang dapat merusak ekosistem di wilayah pesisir dan pulau-pulau kecil"
+     ],
+     "lainnya": "TIDAK_DIIZINKAN"
+    },
+    {
+     "keterangan": [
+      "Lainnya"
+     ],
+     "label": "Zona Lainnya (Rehabilitasi Karang dan Mangrove)",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Penyediaan prasarana dan sarana pariwisata yang tidak berdampak pada kerusakan lingkungan",
+      "Pembangunan fasilitas umum",
+      "Pembangunan bangunan pelindung pantai"
+     ],
+     "tidak_diperbolehkan": [
+      "Kegiatan penangkapan ikan dengan alat tangkap bergerak, menggunakan bahan peledak, beracun, alat tangkap yang merusak ekosistem, serta kegiatan penangkapan ikan yang dilarang oleh peraturan yang berlaku",
+      "Kegiatan yang menggunakan cara dan metode untuk melakukan perusakan, alih fungsi, serta menebang vegetasi di wilayah pesisir",
+      "Seluruh kegiatan penambangan mineral logam, bukan logam, dan batuan",
+      "Penangkapan ikan dengan alat tangkap menetap",
+      "Pemasangan alat bantu penangkapan ikan (seperti rumpon)",
+      "Kegiatan perkemahan dengan api unggun"
+     ]
+    },
+    {
+     "keterangan": [
+      "Pemanfaatan Terbatas"
+     ],
+     "label": "Zona Pemanfaatan Terbatas (Pariwisata dan Perikanan Berkelanjutan)",
+     "diperbolehkan": [],
+     "bersyarat": [
+      "Perlindungan proses-proses ekologis yang menunjang kelangsungan hidup dari suatu jenis atau sumberdaya alam hayati dan ekosistemnya",
+      "Penjagaan, pengawasan dan pencegahan kegiatan yang mengakibatkan perubahan keutuhan potensi dan fungsi kawasan",
+      "Pemulihan dan rehabilitasi ekosistem serta perlindungan alur migrasi biota laut",
+      "Perlindungan situs/budaya dan adat tradisional",
+      "Penelitian dengan metode survei dan observasi dengan tujuan pengumpulan data dasar, dan monitoring kondisi ekologi dengan tujuan rehabilitasi",
+      "Pendidikan tanpa melakukan pengambilan material langsung dari alam",
+      "Pengembangan untuk kepentingan konservasi",
+      "Kegiatan penangkapan ikan dengan cara yang ramah lingkungan, dan mempertimbangkan habitat serta populasi ikan",
+      "Kegiatan perikanan budidaya ramah lingkungan",
+      "Penangkapan ikan dengan alat tangkap menetap",
+      "Penyediaan atraksi wisata sesuai dengan rencana induk pariwisata",
+      "Penyediaan prasarana dan sarana pariwisata yang tidak berdampak pada kerusakan lingkungan",
+      "Kegiatan mitigasi bencana",
+      "Kegiatan yang berhubungan dengan rekreasi keindahan alam (seperti berenang, menyelam, pariwisata tontonan, pariwisata minat khusus, perahu wisata, olahraga permukaan air, pembuatan foto video dan film)",
+      "Pembangunan fasilitas umum",
+      "Pembangunan bangunan pelindung pantai",
+      "Identifikasi dan pengangkatan BMKT",
+      "Pengambilan air laut untuk kegiatan budidaya dan tambak garam",
+      "Kegiatan pertahanan dan keamanan yang bersifat dinamis",
+      "Ukuran kapal penangkap ikan dan penggunaan alat bantu penangkap ikan (seperti rumpon), yang digunakan dalam kegiatan penangkapan ikan harus sesuai dengan peraturan yang berlaku",
+      "Segala aktivitas pengembangan di lokasi cadangan mineral logam, non logam, dan batuan, yang telah ditetapkan sebagai wilayah izin usaha pertambangan sesuai dengan perundangan, diutamakan di luar 2 mil laut. Yang apabila secara teknis, ekologis, sosial, budaya, tidak menimbulkan kerusakan lingkungan dan atau pencemaran lingkungan, dan atau merugikan masyarakat sekitar",
+      "Budidaya dengan metode, alat dan teknologi yang tidak merusak ekosistem di wilayah pesisir dan pulau-pulau kecil"
+     ],
+     "tidak_diperbolehkan": [
+      "Kegiatan penangkapan ikan dengan alat tangkap bergerak, menggunakan bahan peledak, beracun, alat tangkap yang merusak ekosistem, serta kegiatan penangkapan ikan yang dilarang oleh peraturan yang berlaku",
+      "Seluruh kegiatan penambangan mineral logam, bukan logam, dan batuan",
+      "Pemasangan alat bantu penangkapan ikan (seperti rumpon)",
+      "Kegiatan budidaya yang menggunakan metode, alat dan teknologi yang dapat merusak ekosistem di wilayah pesisir dan pulau-pulau kecil"
      ]
     }
    ]
