@@ -11,6 +11,7 @@ const CAKUPAN_MIN = 0.004;
 const KELIPATAN_AOI = 3;
 
 const LAUT = '#eef6fb';
+const BATAS_TUNGGU_CITRA_MS = 10000;
 const CITRA_URL = 'https://services.arcgisonline.com/arcgis/rest/services/World_Imagery/MapServer/export';
 export const ATRIBUSI_CITRA = 'Citra dasar: Esri World Imagery';
 const ALAS_ISI = 'rgba(147, 183, 211, 0.30)';
@@ -85,6 +86,7 @@ export function muatCitra(ext, lebar = LEBAR_PX, tinggi = TINGGI_PX) {
   const url = `${CITRA_URL}?bbox=${ext.join(',')}&bboxSR=4326&size=${lebar},${tinggi}`
     + '&imageSR=4326&format=jpg&f=image';
   return new Promise((selesai) => {
+    setTimeout(() => selesai(null), BATAS_TUNGGU_CITRA_MS);
     const g = new Image();
     g.crossOrigin = 'anonymous';
     g.onload = () => selesai(g);
@@ -270,9 +272,15 @@ export const WARNA_KETENTUAN = { DIIZINKAN: '#10b981', BERSYARAT: '#f59e0b', TID
 export const WARNA_KETENTUAN_KOSONG = '#94a3b8';
 const URUT_KETENTUAN = ['TIDAK_DIIZINKAN', 'BERSYARAT', 'DIIZINKAN'];
 
+export const WARNA_PENYEBAB = { gugur: '#7f1d1d', tepi: '#ea580c' };
+
 const PANEL_ZONA = {
-  warna: (p) => WARNA_KETENTUAN[p.ketentuan] || WARNA_KETENTUAN_KOSONG,
-  label: (p) => `${p.ketentuan_label || 'Belum diatur'}: ${String(p.nama || 'Zona').split(' - ').pop()}`,
+  warna: (p) => (p.penyebab
+    ? WARNA_PENYEBAB[p.gugur ? 'gugur' : 'tepi']
+    : WARNA_KETENTUAN[p.ketentuan] || WARNA_KETENTUAN_KOSONG),
+  label: (p) => (p.penyebab
+    ? `${p.gugur ? 'Menggugurkan' : 'Perlu verifikasi batas'}: ${p.nama}`
+    : `${p.ketentuan_label || 'Belum diatur'}: ${String(p.nama || 'Zona').split(' - ').pop()}`),
   isi: 0.5,
   area: { garis: '#0f172a', isi: null, tebal: 3 },
   warnaArea: '#0f172a',
@@ -281,9 +289,12 @@ const PANEL_ZONA = {
 export async function petaZonaScreening(sc) {
   const area = sc?.geometri_area;
   const zona = (sc?.zona || []).filter((z) => z.geometri);
-  if (!area?.coordinates || !zona.length || typeof document === 'undefined') return null;
+  if (!area?.coordinates || !(zona.length || sc.geometri_penyebab?.length) || typeof document === 'undefined') return null;
   const urutan = (z) => (URUT_KETENTUAN.indexOf(z.ketentuan) + 4) % 4;
-  const fitur = [...zona].sort((a, b) => urutan(a) - urutan(b)).map((z) => ({ geometry: z.geometri, properties: z }));
+  const fitur = [
+    ...[...zona].sort((a, b) => urutan(a) - urutan(b)).map((z) => ({ geometry: z.geometri, properties: z })),
+    ...(sc.geometri_penyebab || []).map((p) => ({ geometry: p.geometri, properties: { ...p, penyebab: true } })),
+  ];
   const ext = cakupan(kotak(area.coordinates));
   return { ...susunPanel(fitur, PANEL_ZONA, area, ext, null, await muatCitra(ext)), warnaArea: PANEL_ZONA.warnaArea };
 }

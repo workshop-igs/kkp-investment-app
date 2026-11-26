@@ -187,15 +187,24 @@ const Ringkasan = ({ s }) => {
   );
 };
 
-const PetaZona = ({ s }) => {
-  const [panel, setPanel] = useState(null);
+const PetaZona = ({ s, panel: siap }) => {
+  const [dibuat, setDibuat] = useState(null);
   useEffect(() => {
+    if (siap) return undefined;
     let aktif = true;
-    petaZonaScreening(s).then((p) => aktif && setPanel(p));
+    petaZonaScreening(s).then((p) => aktif && setDibuat(p));
     return () => { aktif = false; };
-  }, [s]);
-  if (!panel) return null;
-  const penyebab = s.zona.some((z) => z.ketentuan === 'TIDAK_DIIZINKAN');
+  }, [s, siap]);
+  const panel = siap || dibuat;
+  if (!panel) {
+    return (
+      <div className="flex items-center gap-2 text-xs text-slate-500">
+        <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-kkp-700 border-t-transparent" />
+        Menyiapkan peta…
+      </div>
+    );
+  }
+  const penyebab = s.zona.some((z) => z.ketentuan === 'TIDAK_DIIZINKAN') || s.geometri_penyebab?.some((p) => p.gugur);
   return (
     <section>
       <Judul>Sebaran ketentuan di dalam area</Judul>
@@ -209,7 +218,7 @@ const PetaZona = ({ s }) => {
         ))}
       </div>
       <p className="mt-1 text-[10px] text-slate-400">
-        {penyebab ? 'Warna merah menandai bagian area yang membuat hasil tidak sesuai. ' : ''}{ATRIBUSI_CITRA}.
+        {penyebab ? 'Merah dan merah tua menandai bagian area yang membuat hasil tidak sesuai. ' : ''}{ATRIBUSI_CITRA}.
       </p>
     </section>
   );
@@ -649,7 +658,7 @@ const KetentuanArea = ({ s }) => {
   );
 };
 
-const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
+const KartuScreening = ({ screening: s, panelPeta, onPilihSektor, onLihatLokasi }) => {
   const gaya = GAYA[s.status] || GAYA.BELUM_TERVERIFIKASI;
   const zona = gabungZona(s.zona);
   const peringatan = peringatanScreening(s);
@@ -688,7 +697,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
         </section>
       )}
 
-      {zona.length > 0 && <PetaZona s={s} />}
+      {(zona.length > 0 || s.geometri_penyebab?.length > 0) && <PetaZona s={s} panel={panelPeta} />}
       {zona.length > 0 && <KomposisiZona zona={zona} />}
       <RincianJenis s={s} />
       <PengecualianKeras s={s} />

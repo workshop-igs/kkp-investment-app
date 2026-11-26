@@ -4,6 +4,7 @@ import { formatRupiah, formatNumber, formatRibuan, hanyaDigit } from '../../util
 import { api, useSektorAktif } from '../../api/klien';
 import { useAutentikasi } from '../../context/KonteksAutentikasi';
 import KartuScreening from '../laporan/KartuScreening';
+import { petaZonaScreening } from '../../utils/petaLaporan';
 import { mulaiMemuat } from '../OverlayMemuat';
 
 const InputAngka = ({ nilai, onUbah, className, ...sisa }) => {
@@ -93,6 +94,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
 
   const [langkah, setLangkah] = useState(1);
   const [screening, setScreening] = useState(null);
+  const [panelPeta, setPanelPeta] = useState(null);
   const [memeriksa, setMemeriksa] = useState(false);
   const sektorRef = useRef(sektor);
 
@@ -108,7 +110,11 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
     const selesai = mulaiMemuat('Memeriksa kesesuaian ruang');
     try {
       const { data } = await api.post('/analitik/screening/', { geometry, sektor: kode, sub_sektor: sub || undefined });
-      if (data.sektor === sektorRef.current) setScreening(data);
+      const panel = await petaZonaScreening(data).catch(() => null);
+      if (data.sektor === sektorRef.current) {
+        setPanelPeta(panel);
+        setScreening(data);
+      }
     } catch (err) {
       alert(err.response?.data?.detail || 'Screening kesesuaian ruang gagal dijalankan.');
     } finally {
@@ -375,6 +381,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                 {!memeriksa && screening && (
                   <KartuScreening
                     screening={screening}
+                    panelPeta={panelPeta}
                     onPilihSektor={pilihSektorAlternatif}
                     onLihatLokasi={onLihatLokasi}
                   />

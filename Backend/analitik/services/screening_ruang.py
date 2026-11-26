@@ -748,6 +748,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
             k['persen'] = round(k['luas_m2'] / luas_aoi * 100, 2) if luas_aoi else 0.0
             k['gugur'] = k['persen'] >= toleransi
         kkprl_gugur = [k for k in kkprl if k['gugur']]
+        penyebab = pengecualian.geometri_penyebab(c, geom, sektor.kode, kena, kkprl)
         status, tepi = _nilai(zona_efektif, aturan, cakupan, luas_aoi, bool(kkprl_gugur))
         informasi_ruang = _informasi_ruang(
             c, zona_efektif, semua_aturan,
@@ -846,6 +847,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         'luas_m2': luas_aoi,
         'cakupan_persen': round(cakupan * 100, 1),
         'geometri_area': json.loads(geom.json),
+        'geometri_penyebab': penyebab,
         'acuan': tingkat_dipakai,
         'zona': zona_efektif,
         'informasi_ruang': informasi_ruang,

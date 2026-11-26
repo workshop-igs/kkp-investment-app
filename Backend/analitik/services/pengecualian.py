@@ -1,3 +1,5 @@
+import json
+
 from analitik.services.konstanta import (
     EKOSISTEM_TERLARANG_SEKTOR,
     GMW_TAHUN_AKHIR,
@@ -146,6 +148,53 @@ def irisan_area(c, geom):
         UNSUR: {True: semua, False: semua if len(tanpa_alur) == len(unsur) else unsur_kena(tanpa_alur)},
         BANGUNAN: float(baris[0]) if baris else 0.0,
     }
+
+
+NAMA_PENYEBAB = {
+    ALUR: 'Alur pelayaran/ALKI',
+    EKOSISTEM: 'Ekosistem sensitif',
+    UNSUR: 'Jarak aman kabel, pipa, dan alur',
+    KKPRL: 'KKPRL terbit',
+    BANGUNAN: 'Bangunan eksisting',
+}
+SQL_PENYEBAB = {
+    ALUR: f"""SELECT ST_Union(ST_MakeValid(z.geometry)) FROM inventarisasi_zonasi_ruang_laut z, a
+              WHERE z.geometry && a.g AND ST_Intersects(z.geometry, a.g) AND {ZONA_ALUR}""",
+    EKOSISTEM: f"""SELECT ST_Union(ST_MakeValid(e.geometry)) FROM inventarisasi_sumber_daya_alam e, a
+                   WHERE e.geometry && a.g AND ST_Intersects(e.geometry, a.g) AND {SUMBER_EKOSISTEM}
+                     AND e.jenis = ANY(%s)""",
+    UNSUR: """SELECT ST_Union(ST_Buffer(u.geometry::geography, b.m)::geometry)
+              FROM unnest(%s::int[], %s::float8[]) AS b(id, m) JOIN inventarisasi_unsur_ruang_laut u ON u.id = b.id, a
+              WHERE ST_DWithin(u.geometry::geography, a.g::geography, b.m)""",
+    KKPRL: """SELECT ST_Union(ST_MakeValid(k.geometry)) FROM inventarisasi_kkprl k, a
+              WHERE k.status = 'AKTIF' AND k.geometry && a.g AND ST_Intersects(k.geometry, a.g)""",
+    BANGUNAN: """SELECT ST_Union(b.geometry) FROM inventarisasi_bangunan_eksisting b, a
+                 WHERE b.geometry && a.g AND ST_Intersects(b.geometry, a.g)""",
+}
+
+
+def geometri_penyebab(c, geom, sektor_kode, kena, kkprl):
+    penyebab = [(k['kode'], k['gugur']) for k in kena]
+    if kkprl:
+        penyebab.append((KKPRL, any(k['gugur'] for k in kkprl)))
+    hasil = []
+    for kode, gugur in penyebab:
+        param = []
+        if kode == EKOSISTEM:
+            param = [sorted(ekosistem_terlarang(sektor_kode))]
+        elif kode == UNSUR:
+            unsur = [u for u in unsur_terlarang(c, geom.ewkt) if alur_terlarang(sektor_kode) or u[1] != 'ALUR_PELAYARAN']
+            param = [[u[0] for u in unsur], [u[2] for u in unsur]]
+        c.execute(
+            f"""WITH a AS (SELECT ST_GeomFromEWKT(%s) AS g)
+                SELECT ST_AsGeoJSON(ST_CollectionExtract(ST_MakeValid(ST_Intersection(({SQL_PENYEBAB[kode]}), a.g)), 3), 6)
+                FROM a""",
+            [geom.ewkt, *param],
+        )
+        teks = c.fetchone()[0]
+        if teks:
+            hasil.append({'kode': kode, 'nama': NAMA_PENYEBAB[kode], 'gugur': gugur, 'geometri': json.loads(teks)})
+    return hasil
 
 
 def _persen(luas, luas_aoi):
