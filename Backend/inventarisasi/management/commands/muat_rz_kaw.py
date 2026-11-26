@@ -1,10 +1,9 @@
 import json
 import re
 
-from django.contrib.gis.db.models.functions import Distance
 from django.contrib.gis.gdal import DataSource, GDALException
 from django.core.management.base import BaseCommand
-from django.db import transaction
+from django.db import connection, transaction
 
 from analitik.management.commands.muat_berkas_raster import jalur_gdal
 from analitik.services.konstanta import PERPRES_BELUM
@@ -59,9 +58,10 @@ def lapisan(berkas):
 
 
 def _provinsi(geom):
-    titik = geom.point_on_surface
-    return (Provinsi.objects.filter(geometry__contains=titik).first()
-            or Provinsi.objects.exclude(geometry=None).order_by(Distance('geometry', titik)).first())
+    with connection.cursor() as c:
+        c.execute('SELECT id FROM inti_provinsi WHERE geometry IS NOT NULL ORDER BY geometry <-> ST_GeomFromEWKT(%s) LIMIT 1',
+                  [geom.point_on_surface.ewkt])
+        return Provinsi.objects.get(id=c.fetchone()[0])
 
 
 class Command(BaseCommand):
