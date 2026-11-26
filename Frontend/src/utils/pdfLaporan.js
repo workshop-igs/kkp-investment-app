@@ -664,7 +664,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
   if (sc) {
     k.tema(
       'Tahap 1 - Screening Kesesuaian Ruang',
-      'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, RTRWN), matriks KKPRL Perda, dan RPZ kawasan konservasi, tumpang tindih dengan KKPRL terbit, pengecualian alur pelayaran yang berlaku di atas RTRW (kecuali jasa maritim dan infrastruktur laut), serta wilayah adat. Kecocokan fisik (kedalaman, gelombang, dan sejenisnya) dinilai sesudahnya dan tidak mengubah kesesuaian ruang. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial; lokasi yang belum terverifikasi tetap dilanjutkan dengan label.'
+      'Kesesuaian lokasi terhadap acuan tata ruang berjenjang (RTRW Provinsi, Rencana Zonasi KAW, KSNT), matriks KKPRL Perda, dan RPZ kawasan konservasi, tumpang tindih dengan KKPRL terbit, pengecualian alur pelayaran yang berlaku di atas RTRW (kecuali jasa maritim dan infrastruktur laut), serta wilayah adat. Kecocokan fisik (kedalaman, gelombang, dan sejenisnya) dinilai sesudahnya dan tidak mengubah kesesuaian ruang. Lokasi yang tidak sesuai tidak dilanjutkan ke analisis finansial; lokasi yang belum terverifikasi tetap dilanjutkan dengan label.'
     );
     k.bukaKartu(
       `Hasil: ${sc.status_label}${kelengkapanScreening(sc)?.indikatif ? ' (indikatif)' : ''}`,

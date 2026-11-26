@@ -48,7 +48,7 @@ import BannerIndikatif from '../components/laporan/BannerIndikatif';
 import { statusIndikatif } from '../utils/kelengkapanData';
 
 const CATATAN_SCREENING =
-  'Acuan berjenjang: RTRW Provinsi, lalu Rencana Zonasi KAW, lalu RTRWN. Ketentuan pemanfaatan per jenis investasi dikelola administrator.';
+  'Acuan berjenjang: RTRW Provinsi, lalu Rencana Zonasi KAW, lalu KSNT. Ketentuan pemanfaatan per jenis investasi dikelola administrator.';
 
 const PALET = ['#0056A5', '#3d81c0', '#7aa9d6', '#a9c6e5', '#cfdff0', '#8fa3b8'];
 

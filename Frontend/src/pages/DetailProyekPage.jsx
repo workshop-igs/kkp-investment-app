@@ -653,7 +653,7 @@ const DetailProyekPage = () => {
               {screening && (
                 <KartuLaporan
                   judul="Screening Kesesuaian Ruang (Tahap 1)"
-                  catatan="Dihitung ulang dari geometri proyek dengan ketentuan ruang yang berlaku saat ini. Acuan berjenjang: RTRW Provinsi, lalu Rencana Zonasi KAW, lalu RTRWN."
+                  catatan="Dihitung ulang dari geometri proyek dengan ketentuan ruang yang berlaku saat ini. Acuan berjenjang: RTRW Provinsi, lalu Rencana Zonasi KAW, lalu KSNT."
                 >
                   <KartuScreening screening={screening} />
                 </KartuLaporan>
