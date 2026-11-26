@@ -891,7 +891,7 @@ LABEL_SUMBER_ZONASI = {
     'KKP-RZWP3K': 'RZWP-3-K',
     'KKP-WFS': 'Rencana Zonasi KAW (Perpres 83/2020)',
     'KKP-RZKAW': 'Rencana Zonasi KAW (IGT KKP)',
-    'KKP-RTRL': 'RTRL Nasional (PP 32/2019, IGT KKP)',
+    'KKP-RTRL': 'KSNT Rencana Tata Ruang Laut (PP 32/2019)',
     SUMBER_ZONASI_DARAT: 'Pola Ruang darat RTRW Provinsi (KKP)',
 }
 

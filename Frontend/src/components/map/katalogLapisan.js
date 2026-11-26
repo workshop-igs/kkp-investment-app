@@ -201,6 +201,7 @@ const POLA_RUANG = {
           'KKP-PKKPRL': 'PKKPRL pada RTRW Provinsi',
           'KKP-WFS': 'Rencana Zonasi KAW',
           'KKP-RZKAW': 'Rencana Zonasi KAW (IGT KKP)',
+          'KKP-RTRL': 'KSNT Rencana Tata Ruang Laut',
         }[p.sumber] || 'RZWP-3-K'
       }<br/>
       <b>Dasar hukum:</b> ${aman(p.regulasi || '-')}<br/>
@@ -618,12 +619,16 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
       'Rencana zonasi perairan lintas provinsi. Kawasan yang Perpres-nya belum tersedia ditandai di popup dan belum dipakai sebagai acuan.',
   },
 
-  polaruang_rtrwn: {
+  polaruang_ksnt: {
     ...POLA_RUANG,
     params: { tingkat: 'RTRWN' },
-    label: 'RTRWN (KSNT RTRL Nasional)',
+    legenda: undefined,
+    pilihan: undefined,
+    label: 'KSNT (Kawasan Strategis Nasional Tertentu)',
+    warnaContoh: '#0f766e',
     keteranganLegenda:
-      'Kawasan strategis nasional tertentu dari Rencana Tata Ruang Laut (PP 32/2019); pemanfaatannya memerlukan Persetujuan KKPRL dari Menteri KP.',
+      'Kawasan penting secara ekologis dari Rencana Tata Ruang Laut (PP 32/2019); pemanfaatannya memerlukan Persetujuan KKPRL dari Menteri KP.',
+    gaya: () => ({ color: '#0f766e', weight: 1.5, dashArray: '6 4', fillColor: '#0f766e', fillOpacity: 0.12, opacity: 0.9 }),
   },
 
   zonasi_konservasi: {

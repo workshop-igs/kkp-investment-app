@@ -63,6 +63,7 @@ URUTAN_ACUAN = ['RTRW_PROVINSI', 'KAW', 'RTRWN']
 BERKAS_RPZ = Path(__file__).resolve().parents[2] / 'inventarisasi' / 'data' / 'rpz_kawasan_konservasi.json'
 ZONA_INTI = re.compile(r'^(?:zona )?inti\b', re.I)
 ACUAN_RPZ = 'RPZ kawasan konservasi'
+ACUAN_KSNT = 'KSNT (Kawasan Strategis Nasional Tertentu)'
 BATAS_SYARAT_RINGKAS = 240
 LABEL_ACUAN = dict(ZonasiRuangLaut.TINGKAT_ACUAN_CHOICES)
 LABEL_SUB_ZONA = dict(ZonasiRuangLaut.SUB_ZONA_CHOICES)
@@ -421,7 +422,7 @@ def _zona_efektif(c, geom, luas_aoi):
                 'sub_zona': sub,
                 'sub_zona_label': rpz['label'] if rpz else LABEL_SUB_ZONA.get(sub, sub),
                 'tingkat': tingkat,
-                'tingkat_label': ACUAN_RPZ if rpz else LABEL_ACUAN[tingkat],
+                'tingkat_label': ACUAN_RPZ if rpz else ACUAN_KSNT if sumber == 'KKP-RTRL' else LABEL_ACUAN[tingkat],
                 'sumber_label': ACUAN_RPZ if rpz else LABEL_SUMBER_ZONASI.get(sumber, sumber),
                 'regulasi': rpz['dasar'] if rpz else regulasi,
                 'provinsi_id': prov_id,
