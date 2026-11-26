@@ -625,10 +625,10 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     legenda: undefined,
     pilihan: undefined,
     label: 'KSNT (Kawasan Strategis Nasional Tertentu)',
-    warnaContoh: '#0f766e',
+    warnaContoh: '#e879f9',
     keteranganLegenda:
       'Kawasan penting secara ekologis dari Rencana Tata Ruang Laut (PP 32/2019); pemanfaatannya memerlukan Persetujuan KKPRL dari Menteri KP.',
-    gaya: () => ({ color: '#0f766e', weight: 1.5, dashArray: '6 4', fillColor: '#0f766e', fillOpacity: 0.12, opacity: 0.9 }),
+    gaya: () => ({ color: '#e879f9', weight: 2.5, dashArray: '8 4', fillColor: '#d946ef', fillOpacity: 0.22, opacity: 1 }),
   },
 
   zonasi_konservasi: {

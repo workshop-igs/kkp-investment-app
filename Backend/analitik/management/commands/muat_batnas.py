@@ -8,9 +8,10 @@ import rasterio
 from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
 from django.db import connection, transaction
-from rasterio.warp import transform_bounds
+from rasterio.transform import from_origin
+from rasterio.warp import Resampling, reproject, transform_bounds
 
-from analitik.management.commands.muat_berkas_raster import baca_petak, gdal_raster, poligon
+from analitik.management.commands.muat_berkas_raster import gdal_raster, poligon
 from analitik.management.commands.muat_raster import BATAS
 from analitik.models import RasterOseanografi
 
@@ -43,19 +44,33 @@ def sel_lama(batas):
 
 def baca_kotak(sumber, kotak):
     dalam = np.full((round(PETAK / RESOLUSI),) * 2, np.nan)
-    for berkas, (x0, y0, x1, y1) in sumber:
+    for berkas, crs, (x0, y0, x1, y1) in sumber:
         if x0 < kotak[2] and x1 > kotak[0] and y0 < kotak[3] and y1 > kotak[1]:
-            dalam = np.where(np.isnan(dalam), baca_petak('raster', berkas, kotak, RESOLUSI), dalam)
+            baru = np.full(dalam.shape, np.nan, dtype='float32')
+            with rasterio.open(berkas) as r:
+                reproject(rasterio.band(r, 1), baru, src_crs=crs, dst_crs='EPSG:4326', dst_nodata=np.nan,
+                          dst_transform=from_origin(kotak[0], kotak[3], RESOLUSI, RESOLUSI), resampling=Resampling.average)
+            dalam = np.where(np.isnan(dalam), baru, dalam)
     return np.where(dalam < 0, np.round(dalam), np.nan)
+
+
+def sistem_koordinat(r):
+    if r.crs is not None:
+        return r.crs
+    b = r.bounds
+    if -180 <= b.left < b.right <= 180 and -90 <= b.bottom < b.top <= 90 and abs(r.res[0] - RESOLUSI) < 1e-9:
+        return 'EPSG:4326'
+    return None
 
 
 def muat(berkas, batas=BATAS):
     sumber = []
     for b in berkas:
         with rasterio.open(b) as r:
-            if r.crs is None:
+            crs = sistem_koordinat(r)
+            if crs is None:
                 raise CommandError(f'{os.path.basename(b)} tidak memiliki sistem koordinat.')
-            sumber.append((b, transform_bounds(r.crs, 'EPSG:4326', *r.bounds)))
+            sumber.append((b, crs, transform_bounds(crs, 'EPSG:4326', *r.bounds)))
     harapan = sel_lama(batas)
     petak = terbaca = 0
     with transaction.atomic():
