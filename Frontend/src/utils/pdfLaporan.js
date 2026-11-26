@@ -12,7 +12,7 @@ import {
   warnaStatus,
 } from './normalisasiAnalisis';
 import { angkaRingkas as angkaRingkasUmum, rupiahRingkas as rupiahRingkasUmum } from './pemformat';
-import { ATRIBUSI_CITRA, RASIO_PANEL, siapkanPetaLaporan } from './petaLaporan';
+import { ATRIBUSI_CITRA, RASIO_PANEL, petaZonaScreening, siapkanPetaLaporan } from './petaLaporan';
 import { barisTitikSudut, keDMS } from './koordinat';
 import { CATATAN_DASAR, catatanSkala, kelengkapanScreening, ringkasKelengkapan, statusIndikatif } from './kelengkapanData';
 import { JENIS_PERINGATAN, fisikScreening, pengecualianScreening, peringatanScreening, teksLanjut } from './hasilScreening';
@@ -474,7 +474,7 @@ export class Kanvas {
     d.addImage(panel.gambar, panel.format || 'PNG', TEPI + 4, this.y - 3, w, h, undefined, 'FAST');
     this.y += h + 2;
 
-    const butir = [{ label: 'Area analisis', warna: '#b91c1c' }, ...(panel.legenda || [])];
+    const butir = [{ label: 'Area analisis', warna: panel.warnaArea || '#b91c1c' }, ...(panel.legenda || [])];
     d.setFont(FONT, 'normal');
     d.setFontSize(6.2);
     let x = TEPI + 4;
@@ -679,6 +679,7 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
       k.daftar(peringatan.map((p) => `${JENIS_PERINGATAN[p.jenis] || 'Peringatan'}: ${p.teks}`));
     }
     if (sc.zona.length) {
+      k.peta(peta?.zona_screening);
       k.tabel(
         ['Zona', 'Sub-zona', 'Acuan', 'Porsi', 'Ketentuan'],
         gabungZona(sc.zona).map((z) => [z.nama, z.sub_zona_label, z.tingkat_label, persenArea(z.persen), z.ketentuan_label]),
@@ -1286,11 +1287,12 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
 }
 
 export async function unduhPdfLaporan(opsi) {
-  const [, peta] = await Promise.all([
+  const [, peta, zonaScreening] = await Promise.all([
     siapkanAsetPdf(),
     siapkanPetaLaporan(opsi.analisis?.geometry),
+    petaZonaScreening(opsi.analisis?.screening),
   ]);
-  const doc = buatPdfLaporan({ ...opsi, peta });
+  const doc = buatPdfLaporan({ ...opsi, peta: { ...peta, zona_screening: zonaScreening } });
   const nama = (opsi.namaProyek || 'laporan-analisis')
     .replace(/[^\w\s-]/g, '')
     .trim()

@@ -115,6 +115,14 @@ def _bagian(geom) -> List[GEOSGeometry]:
     return [geom]
 
 
+def _multipoligon(bagian):
+    koordinat = []
+    for b in bagian:
+        g = json.loads(b.json)
+        koordinat.extend([g['coordinates']] if g['type'] == 'Polygon' else g['coordinates'])
+    return {'type': 'MultiPolygon', 'coordinates': koordinat} if koordinat else None
+
+
 def _luas(c, geom) -> float:
     if geom is None or geom.empty:
         return 0.0
@@ -413,6 +421,7 @@ def _zona_efektif(c, geom, luas_aoi):
             m2 = _luas(c, irisan)
             if m2 < 1.0:
                 continue
+            bagian = [b for b in _bagian(irisan) if b.geom_type in ('Polygon', 'MultiPolygon')]
             efektif.append({
                 'id': zid,
                 'nama': f"{nama} - {rpz['label']}" if rpz else _nama_zona(nama, sub, prov_nama),
@@ -434,8 +443,9 @@ def _zona_efektif(c, geom, luas_aoi):
                 'kode_perda': kode_perda,
                 'tahun_penetapan': tahun_penetapan,
                 'diperbarui': f'{BULAN[diperbarui.month - 1]} {diperbarui.year}' if diperbarui else None,
+                'geometri': _multipoligon(bagian),
             })
-            potongan.extend(b for b in _bagian(irisan) if b.geom_type in ('Polygon', 'MultiPolygon'))
+            potongan.extend(bagian)
         if potongan:
             sisa = _overlay(c, 'Difference', sisa, _overlay(c, 'UnaryUnion', GeometryCollection(*potongan, srid=4326)))
     luas_sisa = _luas(c, sisa)
@@ -835,6 +845,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         'sub_jenis': {k: daftar_sub[sub_kode][k] for k in ('kode', 'nama', 'kbli')} if sub_kode else None,
         'luas_m2': luas_aoi,
         'cakupan_persen': round(cakupan * 100, 1),
+        'geometri_area': json.loads(geom.json),
         'acuan': tingkat_dipakai,
         'zona': zona_efektif,
         'informasi_ruang': informasi_ruang,

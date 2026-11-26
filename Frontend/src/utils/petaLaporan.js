@@ -241,7 +241,7 @@ function susunPanel(fitur, panel, geomAoi, ext, fiturAlas, citra) {
   if (citra) {
     gambarGeometri(ctx, geomAoi, proyeksi, { garis: AOI_HALO, isi: null, tebal: 8 });
   }
-  gambarGeometri(ctx, geomAoi, proyeksi, { garis: AOI_GARIS, isi: AOI_ISI, tebal: 3.5 });
+  gambarGeometri(ctx, geomAoi, proyeksi, { garis: AOI_GARIS, isi: AOI_ISI, tebal: 3.5, ...panel.area });
 
   gambarSkala(ctx, (y1 - y0) / TINGGI_PX, (y0 + y1) / 2);
   gambarUtara(ctx);
@@ -264,6 +264,28 @@ function warnaTransparan(hex, alfa) {
   if (!m) return `rgba(100, 116, 139, ${alfa})`;
   const n = parseInt(m[1], 16);
   return `rgba(${(n >> 16) & 255}, ${(n >> 8) & 255}, ${n & 255}, ${alfa})`;
+}
+
+export const WARNA_KETENTUAN = { DIIZINKAN: '#10b981', BERSYARAT: '#f59e0b', TIDAK_DIIZINKAN: '#ef4444' };
+export const WARNA_KETENTUAN_KOSONG = '#94a3b8';
+const URUT_KETENTUAN = ['TIDAK_DIIZINKAN', 'BERSYARAT', 'DIIZINKAN'];
+
+const PANEL_ZONA = {
+  warna: (p) => WARNA_KETENTUAN[p.ketentuan] || WARNA_KETENTUAN_KOSONG,
+  label: (p) => `${p.ketentuan_label || 'Belum diatur'}: ${String(p.nama || 'Zona').split(' - ').pop()}`,
+  isi: 0.5,
+  area: { garis: '#0f172a', isi: null, tebal: 3 },
+  warnaArea: '#0f172a',
+};
+
+export async function petaZonaScreening(sc) {
+  const area = sc?.geometri_area;
+  const zona = (sc?.zona || []).filter((z) => z.geometri);
+  if (!area?.coordinates || !zona.length || typeof document === 'undefined') return null;
+  const urutan = (z) => (URUT_KETENTUAN.indexOf(z.ketentuan) + 4) % 4;
+  const fitur = [...zona].sort((a, b) => urutan(a) - urutan(b)).map((z) => ({ geometry: z.geometri, properties: z }));
+  const ext = cakupan(kotak(area.coordinates));
+  return { ...susunPanel(fitur, PANEL_ZONA, area, ext, null, await muatCitra(ext)), warnaArea: PANEL_ZONA.warnaArea };
 }
 
 export async function siapkanPetaLaporan(geometry) {

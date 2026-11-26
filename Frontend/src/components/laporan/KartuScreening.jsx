@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AlertTriangle, CheckCircle2, ChevronRight, CircleHelp, MapPin, Search, XCircle } from 'lucide-react';
 import { keDesimal, keDMS } from '../../utils/koordinat';
 import { gabungZona, persenArea, ringkasKkprlZona } from '../../utils/normalisasiAnalisis';
+import { ATRIBUSI_CITRA, petaZonaScreening } from '../../utils/petaLaporan';
 import { kelengkapanScreening, ringkasKelengkapan } from '../../utils/kelengkapanData';
 import { JENIS_PERINGATAN, fisikScreening, pengecualianScreening, peringatanScreening } from '../../utils/hasilScreening';
 
@@ -183,6 +184,34 @@ const Ringkasan = ({ s }) => {
         ))}
       </dl>
     </div>
+  );
+};
+
+const PetaZona = ({ s }) => {
+  const [panel, setPanel] = useState(null);
+  useEffect(() => {
+    let aktif = true;
+    petaZonaScreening(s).then((p) => aktif && setPanel(p));
+    return () => { aktif = false; };
+  }, [s]);
+  if (!panel) return null;
+  const penyebab = s.zona.some((z) => z.ketentuan === 'TIDAK_DIIZINKAN');
+  return (
+    <section>
+      <Judul>Sebaran ketentuan di dalam area</Judul>
+      <img src={panel.gambar} alt="Peta ketentuan zona di dalam area analisis" className="w-full rounded-lg border border-slate-200" />
+      <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+        {[{ label: 'Batas area analisis', warna: panel.warnaArea }, ...panel.legenda].map((it) => (
+          <span key={it.label} className="flex items-center gap-1.5 text-[11px] text-slate-700">
+            <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: it.warna }} />
+            {it.label}
+          </span>
+        ))}
+      </div>
+      <p className="mt-1 text-[10px] text-slate-400">
+        {penyebab ? 'Warna merah menandai bagian area yang membuat hasil tidak sesuai. ' : ''}{ATRIBUSI_CITRA}.
+      </p>
+    </section>
   );
 };
 
@@ -667,6 +696,7 @@ const KartuScreening = ({ screening: s, onPilihSektor, onLihatLokasi }) => {
         </section>
       )}
 
+      {zona.length > 0 && <PetaZona s={s} />}
       {zona.length > 0 && <KomposisiZona zona={zona} />}
       <RincianJenis s={s} />
       <PengecualianKeras s={s} />
