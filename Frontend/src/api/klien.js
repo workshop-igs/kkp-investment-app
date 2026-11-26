@@ -8,9 +8,6 @@ import { WARNA_JENIS_INVESTASI } from '../utils/simbologiPeta';
 export const api = axios.create({
   baseURL: API_V1_URL,
   timeout: 90000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
 });
 
 api.interceptors.request.use(
