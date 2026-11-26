@@ -76,6 +76,7 @@ export function normalkanAnalisis(mentah) {
   const f = aj.finansial || {};
   const finansial = Object.keys(f).length
     ? {
+        nirlaba: !!f.nirlaba,
         npv: angka(f.npv_idr),
         irr: angka(f.irr_pct),
         payback: angka(f.payback_period_tahun),
@@ -268,6 +269,9 @@ const SKOR_BAGIAN = {
 export const KETERANGAN_SKOR_BAGIAN =
   'Skor bagian ini yang dipakai penilaian AHP pada bagian Kelayakan Investasi. Untuk risiko, '
   + 'skor adalah kebalikan nilai risikonya: makin tinggi skor, makin aman.';
+
+export const TEKS_NIRLABA =
+  'Jenis investasi ini tidak berorientasi laba; pendapatan, NPV, IRR, dan payback tidak dihitung.';
 
 export const skorBagian = (perAspek, sumber, tema) =>
   (SKOR_BAGIAN[tema] || [])

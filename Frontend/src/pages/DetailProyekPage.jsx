@@ -39,6 +39,7 @@ import {
   itemSerapan,
   skorBagian,
   warnaStatus,
+  TEKS_NIRLABA,
 } from '../utils/normalisasiAnalisis';
 import { keLatLng } from '../utils/koordinat';
 import { angkaRingkas as nf, labelKbli, rupiahRingkas } from '../utils/pemformat';
@@ -682,7 +683,12 @@ const DetailProyekPage = () => {
 
           {tema === 'kelayakan' && (
             <>
-              {analisis.finansial && (
+              {analisis.finansial?.nirlaba && (
+                <KartuLaporan judul="Nilai Investasi" catatan={TEKS_NIRLABA}>
+                  <AngkaBesar item={[{ nilai: rupiahRingkas(analisis.finansial.capex), satuan: 'Nilai investasi (Rp)' }]} />
+                </KartuLaporan>
+              )}
+              {analisis.finansial && !analisis.finansial.nirlaba && (
                 <KartuLaporan
                   judul="Proyeksi Arus Kas (DCF)"
                   pengantar={

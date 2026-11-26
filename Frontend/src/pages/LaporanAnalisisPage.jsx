@@ -39,6 +39,7 @@ import {
   itemSerapan,
   skorBagian,
   warnaStatus,
+  TEKS_NIRLABA,
 } from '../utils/normalisasiAnalisis';
 import { angkaRingkas as nf, rupiahRingkas } from '../utils/pemformat';
 import { unduhPdfLaporan } from '../utils/pdfLaporan';
@@ -627,7 +628,12 @@ const LaporanAnalisisPage = () => {
 
           {tema === 'kelayakan' && (
             <>
-              {finansial && (
+              {finansial?.nirlaba && (
+                <KartuLaporan judul="Nilai Investasi" catatan={TEKS_NIRLABA}>
+                  <AngkaBesar item={[{ nilai: rupiahRingkas(finansial.capex_idr), satuan: 'Nilai investasi (Rp)' }]} />
+                </KartuLaporan>
+              )}
+              {finansial && !finansial.nirlaba && (
                 <KartuLaporan
                   judul="Proyeksi Arus Kas (DCF)"
                   pengantar={`Discount rate ${nf(finansial.wacc_pct, 1)}% selama ${finansial.project_lifetime_yr} tahun.`}

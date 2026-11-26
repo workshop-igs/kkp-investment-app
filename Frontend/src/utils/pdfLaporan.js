@@ -10,6 +10,7 @@ import {
   ringkasKkprlZona,
   skorBagian,
   warnaStatus,
+  TEKS_NIRLABA,
 } from './normalisasiAnalisis';
 import { angkaRingkas as angkaRingkasUmum, rupiahRingkas as rupiahRingkasUmum } from './pemformat';
 import { ATRIBUSI_CITRA, RASIO_PANEL, petaZonaScreening, siapkanPetaLaporan } from './petaLaporan';
@@ -1134,7 +1135,12 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
   k.daftar(catatanSkala(a.screening));
   k.tutupKartu();
 
-  if (a.finansial) {
+  if (a.finansial?.nirlaba) {
+    k.tema('Nilai Investasi', TEKS_NIRLABA);
+    k.bukaKartu('Nilai Investasi', '');
+    k.angkaBesar([{ nilai: `Rp ${rupiahRingkas(a.finansial.capex)}`, satuan: 'Nilai investasi' }]);
+    k.tutupKartu(TEKS_NIRLABA);
+  } else if (a.finansial) {
     k.tema(
       'Analisis Finansial',
       'Proyeksi arus kas terdiskonto beserta kepekaannya terhadap pergeseran asumsi.'
