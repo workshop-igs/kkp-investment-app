@@ -64,8 +64,6 @@ TAHUN_IKLIM = (1991, 2020)
 RESOLUSI_IKLIM = 0.05
 PENDARATAN_TON_HARI = (('Samudera', 60), ('Nusantara', 30), ('Pangkalan Pendaratan', 2))
 PENDARATAN_LAIN_TON_HARI = 5
-SRTM = 'https://upwell.pfeg.noaa.gov/erddap/griddap/srtm15plus.nc'
-RESOLUSI_BATIMETRI = 1 / 120
 COPERNICUS = 'https://copernicus-dem-90m.s3.amazonaws.com'
 GEM = ('/vsizip/vsicurl/https://zenodo.org/records/8409647/files/GEM-GSHM_PGA-475y-rock_v2023.zip/'
        'v2023_1_pga_475_rock_3min.tif')
@@ -180,12 +178,12 @@ def grid_dari(data, acuan, resolusi, metode='average', isi_kosong=0, hanya_laut=
 
 
 class Command(BaseCommand):
-    help = ('Tarik data publik untuk kriteria kesesuaian per jenis: batimetri dan kemiringan dasar laut (SRTM15+), '
+    help = ('Tarik data publik untuk kriteria kesesuaian per jenis (kedalaman dan kemiringan dasar laut: muat_batnas): '
             'kemiringan lahan (Copernicus DEM), PGA gempa (GEM), iradiasi surya (NASA POWER), angin 100 m (Global Wind '
             'Atlas), tanah liat (SoilGrids), beda suhu permukaan dan 1.000 m (WOA23), arus permukaan dan salinitas '
             '(HYCOM GOFS 3.1), serta curah hujan dan bulan kering normal 1991-2020 (CHIRPS).')
 
-    SUMBER = ('BATIMETRI', 'KEMIRINGAN', 'PGA', 'GHI', 'ANGIN_100M', 'TANAH_LIAT', 'BEDA_SUHU_1000M', 'ARUS_SALINITAS',
+    SUMBER = ('KEMIRINGAN', 'PGA', 'GHI', 'ANGIN_100M', 'TANAH_LIAT', 'BEDA_SUHU_1000M', 'ARUS_SALINITAS',
               'ARUS_DASAR', 'GELOMBANG_EKSTREM', 'PASUT', 'MUARA', 'ABRASI', 'SHANNON', 'MANGROVE', 'PRODUKSI', 'IKLIM')
 
     def add_arguments(self, parser):
@@ -196,25 +194,6 @@ class Command(BaseCommand):
             mulai = time.time()
             for kode, jumlah in getattr(self, f'_{nama.lower()}')():
                 self.stdout.write(self.style.SUCCESS(f'{kode}: {jumlah} petak ({time.time() - mulai:.0f} dtk)'))
-
-    def _batimetri(self):
-        petak = paralel([
-            (f'{SRTM}?z[({y}):({y + 6})][({x}):({x + 6})]', os.path.join(SIMPANAN, 'srtm15', f'{x}_{y}.nc'))
-            for x in range(int(BATAS[0]), int(BATAS[2]), 6) for y in range(int(BATAS[1]), int(BATAS[3]), 6)
-        ])
-        with tempfile.TemporaryDirectory() as d:
-            vrt, lereng = os.path.join(d, 'srtm.vrt'), os.path.join(d, 'lereng.tif')
-            subprocess.run(['gdalbuildvrt', '-q', vrt, *petak], check=True)
-            subprocess.run(['gdaldem', 'slope', '-q', '-s', '111120', '-compute_edges', vrt, lereng], check=True)
-            tinggi = warp_baca(vrt, RESOLUSI_BATIMETRI)
-            miring = warp_baca(lereng, RESOLUSI_BATIMETRI)
-        laut = np.nan_to_num(tinggi, nan=0) < 0
-        yield 'KEDALAMAN', simpan_grid('KEDALAMAN', np.where(laut, np.round(tinggi), np.nan), RESOLUSI_BATIMETRI, 'm',
-                                       'SRTM15+ v2.6 (Scripps, 15 detik busur) via NOAA ERDDAP, dirata-rata ke 30 detik '
-                                       'busur (±0,9 km)')
-        yield 'KEMIRINGAN_DASAR', simpan_grid('KEMIRINGAN_DASAR', np.where(laut, miring, np.nan), RESOLUSI_BATIMETRI, '°',
-                                              'Dihitung dari batimetri SRTM15+ v2.6 (15 detik busur), dirata-rata ke 30 '
-                                              'detik busur')
 
     def _kemiringan(self):
         folder = os.path.join(SIMPANAN, 'lereng')

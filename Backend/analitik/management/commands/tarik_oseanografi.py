@@ -142,7 +142,7 @@ def _raster(sel, resolusi, pita, isi_kosong=0):
 
 class Command(BaseCommand):
     help = ('Tarik kondisi oseanografi (suhu permukaan dan anomalinya, klorofil-a, kekeruhan Kd490, tinggi dan periode '
-            'gelombang) dari NOAA ERDDAP ke raster lokal. Kedalaman dan curah hujan: tarik_data_publik.')
+            'gelombang) dari NOAA ERDDAP ke raster lokal. Kedalaman: muat_batnas; curah hujan: tarik_data_publik.')
 
     def add_arguments(self, parser):
         parser.add_argument('--parameter', choices=list(PARAMETER), action='append',

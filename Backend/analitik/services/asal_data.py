@@ -64,7 +64,7 @@ KELOMPOK_DATA = {
     'infrastruktur': ('Infrastruktur pendukung', 'Portal Satu Data KKP dan OpenStreetMap'),
     'oseanografi': ('Oseanografi (suhu, klorofil, gelombang, arus, salinitas)', 'NOAA, NASA, HYCOM'),
     'aktivitas_tangkap': ('Aktivitas penangkapan ikan kapal berpelacak AIS', 'Global Fishing Watch'),
-    'kondisi_tetap': ('Kondisi fisik dan iklim jangka panjang', 'SRTM15+, EOT20, CHIRPS, GEM, Global Wind Atlas, dan lainnya'),
+    'kondisi_tetap': ('Kondisi fisik dan iklim jangka panjang', 'BATNAS BIG, EOT20, CHIRPS, GEM, Global Wind Atlas, dan lainnya'),
     'ekosistem': ('Ekosistem pesisir', 'Sidako KKP dan Global Mangrove Watch'),
     'bencana': ('Risiko bencana', 'BNPB InaRISK'),
     'adat': ('Wilayah kelola masyarakat hukum adat', 'Portal Satu Data KKP dan Sidako KKP'),

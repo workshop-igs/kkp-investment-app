@@ -59,7 +59,7 @@ def perairan(acuan, bentuk):
         di = (i >= 0) & (i < bentuk[0]) & (j >= 0) & (j < bentuk[1])
         laut[i[di], j[di]] = True
     if not laut.any():
-        raise CommandError('Raster KEDALAMAN belum dimuat; jalankan tarik_data_publik --sumber BATIMETRI lebih dulu.')
+        raise CommandError('Raster KEDALAMAN belum dimuat; jalankan muat_batnas lebih dulu.')
     return laut
 
 
