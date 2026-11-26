@@ -106,6 +106,9 @@ class Command(BaseCommand):
             for kaw in kawasan_kaw:
                 ZonasiRuangLaut.objects.filter(sumber_data=TANDA, keterangan__startswith=f'RZ KAW {kaw} |').delete()
             ZonasiRuangLaut.objects.bulk_create(antre, batch_size=200)
+            with connection.cursor() as c:
+                c.execute(f'UPDATE {ZonasiRuangLaut._meta.db_table} SET luas_ha = ST_Area(geometry::geography) / 10000 '
+                          'WHERE sumber_data = %s AND luas_ha = 0', [TANDA])
         self.stdout.write(self.style.SUCCESS(
             f"RZ KAW dimuat: {len(antre)} zona dari {', '.join(sorted(kawasan_kaw))}" + (f'; {dilewati} dilewati' if dilewati else '')))
         return json.dumps({'dimuat': sorted({z.provinsi.kode_bps for z in antre}) or True})
