@@ -105,16 +105,15 @@ const angkaTitik = (kode, v) =>
   Number(kode === 'KEDALAMAN' ? Math.abs(v) : v).toLocaleString('id-ID', { maximumFractionDigits: DIGIT_TITIK[kode] ?? 1 });
 
 const isiInfoTitik = (parameter, aktif, latlng) => {
-  const urut = [...parameter].sort((a, b) => (aktif.indexOf(b.kode) > -1) - (aktif.indexOf(a.kode) > -1));
+  const urut = aktif.map((kode) => parameter.find((p) => p.kode === kode)).filter(Boolean);
   const baris = urut.map((p) => {
-    const sorot = aktif.includes(p.kode);
     const rentang = p.min != null && p.max != null
       ? ` <span class="text-slate-400">(${angkaTitik(p.kode, p.min)}–${angkaTitik(p.kode, p.max)})</span>` : '';
-    return `<tr class="${sorot ? 'font-semibold text-kkp-800' : 'text-slate-700'}">
+    return `<tr class="text-slate-700">
       <td class="py-0.5 pr-3">${aman(p.label)}</td>
-      <td class="py-0.5 text-right whitespace-nowrap">${angkaTitik(p.kode, p.nilai)} ${aman(p.satuan)}${rentang}</td></tr>`;
+      <td class="py-0.5 text-right font-semibold text-kkp-800 whitespace-nowrap">${angkaTitik(p.kode, p.nilai)} ${aman(p.satuan)}${rentang}</td></tr>`;
   }).join('');
-  const sumber = urut.filter((p) => aktif.includes(p.kode))
+  const sumber = urut
     .map((p) => `<div>${aman(p.label)}: ${aman(p.sumber)}${p.periode ? ` (${aman(p.periode)})` : ''}</div>`).join('');
   return `<div class="font-sans" style="min-width:230px">
     <h3 class="font-bold text-kkp-800 mb-0.5">Kondisi di titik ini</h3>
