@@ -32,7 +32,8 @@ from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial, rincian_nilai_investasi
 from .services.kriteria import kbli_sub, uraian
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
-from .services.oseanografi import PALET, gambar_peta, keterangan_peta
+from .services.oseanografi import BATAS as BATAS_OSEANOGRAFI
+from .services.oseanografi import PALET, gambar_peta, keterangan_peta, nilai_di_titik
 from .services.parameter_tambahan import geojson_area
 from .services.screening_ruang import screening_ruang
 from .services.skor_spasial import ambil_skor_spasial
@@ -467,6 +468,16 @@ class LokasiPotensialViewSet(PetaBBoxMixin, viewsets.GenericViewSet):
 
 def oseanografi_keterangan(request):
     return JsonResponse(keterangan_peta())
+
+
+def oseanografi_titik(request):
+    try:
+        x, y = float(request.GET['x']), float(request.GET['y'])
+    except (KeyError, ValueError):
+        return JsonResponse({'detail': 'Parameter x dan y wajib berupa angka.'}, status=400)
+    if not (BATAS_OSEANOGRAFI[0] <= x <= BATAS_OSEANOGRAFI[2] and BATAS_OSEANOGRAFI[1] <= y <= BATAS_OSEANOGRAFI[3]):
+        return JsonResponse({'parameter': []})
+    return JsonResponse({'parameter': nilai_di_titik(x, y)})
 
 
 def oseanografi_peta(request, kode):

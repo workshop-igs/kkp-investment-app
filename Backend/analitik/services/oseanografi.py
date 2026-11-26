@@ -13,6 +13,7 @@ from analitik.services.asal_data import kelompok_raster, lewat_masa, tahun_teks
 
 BATAS = (94.0, -11.0, 142.0, 7.0)
 LEBAR_MAKS_PNG = 1200
+RESOLUSI_TAMPIL = 1 / 120
 CACHE_PNG_DETIK = 24 * 3600
 
 PALET = {
@@ -85,6 +86,26 @@ def nilai_titik(kode, x, y):
     return hasil
 
 
+def nilai_di_titik(x, y):
+    with connection.cursor() as c:
+        c.execute(
+            """
+            SELECT o.parameter, o.satuan, o.periode, o.sumber, ST_NumBands(o.rast), ST_Value(o.rast, 1, t.p),
+                   ST_Value(o.rast, LEAST(2, ST_NumBands(o.rast)), t.p), ST_Value(o.rast, ST_NumBands(o.rast), t.p)
+            FROM analitik_raster_oseanografi o, (SELECT ST_SetSRID(ST_MakePoint(%s, %s), 4326) AS p) t
+            WHERE o.cakupan && t.p AND ST_Intersects(o.cakupan, t.p)
+            """,
+            [x, y],
+        )
+        baris = c.fetchall()
+    hasil = {}
+    for kode, satuan, periode, sumber, pita, rata, kecil, besar in baris:
+        if rata is not None and kode not in hasil:
+            hasil[kode] = {'kode': kode, 'nilai': rata, 'min': kecil if pita > 1 else None,
+                           'max': besar if pita > 1 else None, 'satuan': satuan, 'periode': periode, 'sumber': sumber}
+    return [{**hasil[k], 'label': label} for k, label in RasterOseanografi.PARAMETER_CHOICES if k in hasil]
+
+
 def statistik(geom, parameter):
     hasil = _statistik(geom, parameter, False)
     kosong = [k for k in parameter if (hasil.get(k) or {}).get('rata2') is None]
@@ -145,13 +166,14 @@ def _mosaik(kode):
     baris = list(RasterOseanografi.objects.filter(parameter=kode).only('rast'))
     if not baris:
         return None, None
-    res = abs(baris[0].rast.scale.x)
+    langkah = max(1, round(RESOLUSI_TAMPIL / abs(baris[0].rast.scale.x)))
+    res = abs(baris[0].rast.scale.x) * langkah
     nx = round((BATAS[2] - BATAS[0]) / res)
     ny = round((BATAS[3] - BATAS[1]) / res)
     grid = np.full((ny, nx), np.nan, dtype='float32')
     for b in baris:
         pita = b.rast.bands[0]
-        data = pita.data().astype('float32').reshape(b.rast.height, b.rast.width)
+        data = pita.data().astype('float32').reshape(b.rast.height, b.rast.width)[::langkah, ::langkah]
         if pita.nodata_value is not None:
             data[data == pita.nodata_value] = np.nan
         x0 = round((b.rast.origin.x - BATAS[0]) / res)

@@ -35,6 +35,8 @@ const KATEGORI = [
         kata: 'tata ruang darat pesisir pola ruang darat rtrwp' },
       { id: 'polaruang_kaw', nama: 'RZ KAW (Kawasan Antarwilayah)', warna: '#7c3aed', ikon: Waypoints,
         kata: 'zonasi laut lintas provinsi rencana zonasi kawasan antarwilayah kaw perpres selat makassar laut jawa sulawesi teluk tomini selat malaka laut sawu natuna banda aru seram' },
+      { id: 'polaruang_rtrwn', nama: 'RTRWN (KSNT RTRL Nasional)', warna: '#0f766e', ikon: Waypoints,
+        kata: 'rtrwn rtrl rencana tata ruang laut nasional pp 32 2019 ksnt kawasan strategis nasional tertentu upwelling ekologis biologis laut lepas' },
       { id: 'zonasi_konservasi', nama: 'Zonasi Kawasan Konservasi (RPZ)', warna: '#dc2626', ikon: ShieldAlert,
         kata: 'zona inti rpz rencana pengelolaan dan zonasi kawasan konservasi perairan twp taman pemanfaatan terbatas' },
       { id: 'wilayah_adat', nama: 'Wilayah Kelola Masyarakat Hukum Adat', warna: '#b45309', ikon: Users, kata: 'mha' },

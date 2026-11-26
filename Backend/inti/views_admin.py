@@ -47,6 +47,7 @@ from inti.models import (
     SektorInvestasi,
 )
 from inventarisasi.klasifikasi import PENANDA_MATRIKS
+from inventarisasi.management.commands.muat_ksnt import lapisan as lapisan_ksnt
 from inventarisasi.management.commands.muat_rz_kaw import lapisan as lapisan_rz_kaw
 from inventarisasi.management.commands.tarik_matriks_kkprl import Command as PemuatMatriks
 from inventarisasi.management.commands.tarik_matriks_kkprl import (
@@ -623,6 +624,7 @@ class AdminParameterTambahanViewSet(viewsets.ModelViewSet):
 KOLOM_KODE = {'kode', 'kodebps', 'kodewilayah', 'kdkab', 'kdprov', 'idkab', 'idprov'}
 KOLOM_NAMA = {'nama', 'wilayah', 'namawilayah', 'kabupaten', 'kabupatenkota', 'kabkota', 'kota', 'provinsi'}
 KOLOM_NILAI = {'nilai', 'value', 'angka'}
+VALIDASI_VEKTOR = {'muat_rz_kaw': lapisan_rz_kaw, 'muat_ksnt': lapisan_ksnt}
 
 
 def _simpan_tabel(p, df):
@@ -770,8 +772,8 @@ class AdminPembaruanDataViewSet(viewsets.ViewSet):
             for potong in berkas.chunks():
                 f.write(potong)
         try:
-            if data[3] == 'muat_rz_kaw':
-                lapisan_rz_kaw(jalur)
+            if data[3] in VALIDASI_VEKTOR:
+                VALIDASI_VEKTOR[data[3]](jalur)
             else:
                 baca_berkas(jalur, data[1] == 'bencana')
             muat_unggahan.delay(kode, jalur, keterangan)

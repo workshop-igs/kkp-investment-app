@@ -52,9 +52,10 @@ def perairan(acuan, bentuk):
     laut = np.zeros(bentuk, dtype=bool)
     for r in RasterOseanografi.objects.filter(parameter='KEDALAMAN').only('rast'):
         g, pita = r.rast, r.rast.bands[0]
-        baris, kolom = np.nonzero(pita.data().reshape(g.height, g.width) != pita.nodata_value)
-        i = np.floor((g.origin.y + (baris + 0.5) * g.scale.y - acuan.origin[1]) / acuan.scale[1]).astype(int)
-        j = np.floor((g.origin.x + (kolom + 0.5) * g.scale.x - acuan.origin[0]) / acuan.scale[0]).astype(int)
+        k = max(1, int(abs(acuan.scale[0]) / abs(g.scale.x)))
+        baris, kolom = np.nonzero(pita.data().reshape(g.height, g.width)[::k, ::k] != pita.nodata_value)
+        i = np.floor((g.origin.y + (baris * k + 0.5) * g.scale.y - acuan.origin[1]) / acuan.scale[1]).astype(int)
+        j = np.floor((g.origin.x + (kolom * k + 0.5) * g.scale.x - acuan.origin[0]) / acuan.scale[0]).astype(int)
         di = (i >= 0) & (i < bentuk[0]) & (j >= 0) & (j < bentuk[1])
         laut[i[di], j[di]] = True
     if not laut.any():

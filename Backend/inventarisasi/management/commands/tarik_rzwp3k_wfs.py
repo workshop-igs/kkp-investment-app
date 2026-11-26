@@ -27,7 +27,6 @@ def tanda_untuk(layer: str) -> str:
 
 LAPISAN = [
     'demo:ZonasiKawasanKonservasi_AR_50K_2021_Rev2022',
-    'demo:KSNT_LH_AR',
     'demo:RZWP3K_AR_ACEH_KPU',
     'demo:RZWP3K_AR_ACEH_KONSERVASI',
     'demo:RZWP3K_AR_ACEH_KSN',

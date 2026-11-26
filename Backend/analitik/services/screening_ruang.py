@@ -23,8 +23,10 @@ from analitik.services.konstanta import (
     LABEL_SUMBER_ZONASI,
     PERPRES_BELUM,
     PRIORITAS_SUMBER_ZONASI,
+    REGULASI_RTRL,
     SEKTOR_SUB_ZONA_COCOK,
     SUB_ZONA_TANPA_RINCIAN,
+    SYARAT_KSNT,
     ZONA_KONSERVASI_PEMANFAATAN,
 )
 from analitik.services.kriteria import (
@@ -338,6 +340,8 @@ def _ketentuan(aturan, zona) -> Dict[str, Any]:
         return {'status': 'TIDAK_DIIZINKAN', 'syarat': '', 'sumber': 'UU No. 6/1996 & PP No. 37/2002 (ALKI)'}
     if zona.get('regulasi') == PERPRES_BELUM:
         return {'status': None, 'syarat': '', 'sumber': f'Rencana Zonasi KAW ({PERPRES_BELUM})'}
+    if zona.get('regulasi') == REGULASI_RTRL:
+        return {'status': 'BERSYARAT', 'syarat': SYARAT_KSNT, 'sumber': f'{REGULASI_RTRL}, Pasal 40 dan 100'}
     if zona.get('rpz'):
         return aturan.get(('RPZ', zona['rpz'])) or {'status': None, 'syarat': '', 'sumber': ''}
     k = aturan.get((zona['sub_zona'], zona['provinsi_id']))
@@ -392,17 +396,17 @@ def _zona_efektif(c, geom, luas_aoi):
     sisa = geom
     efektif = []
     urutan = sorted(
-        {(r[4], r[5], r[3] in SUB_ZONA_TANPA_RINCIAN, r[-1] is not None) for r in baris},
-        key=lambda t: (URUTAN_ACUAN.index(t[0]), not t[3], _prioritas_sumber(t[1]), t[2]),
+        {(r[4], r[5], r[3] in SUB_ZONA_TANPA_RINCIAN, r[-1] is not None, r[6] == PERPRES_BELUM) for r in baris},
+        key=lambda t: (t[4], URUTAN_ACUAN.index(t[0]), not t[3], _prioritas_sumber(t[1]), t[2]),
     )
-    for tingkat, sumber, umum, dari_rpz in urutan:
+    for tingkat, sumber, umum, dari_rpz, belum in urutan:
         if sisa.empty:
             break
         potongan = []
         for (zid, nama, jenis, sub, tk, sd, regulasi, prov_id, prov_nama, matriks_id, kode_perda,
              tahun_penetapan, diperbarui, ewkb, rpz) in baris:
             if tk != tingkat or sd != sumber or (sub in SUB_ZONA_TANPA_RINCIAN) != umum or (rpz is not None) != dari_rpz \
-                    or ewkb is None:
+                    or (regulasi == PERPRES_BELUM) != belum or ewkb is None:
                 continue
             irisan = _overlay(c, 'Intersection', _geos(ewkb), sisa)
             m2 = _luas(c, irisan)

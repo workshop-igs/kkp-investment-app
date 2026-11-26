@@ -14,7 +14,8 @@ import LapisanVektorBBox from './LapisanVektorBBox';
 import TurPeta from './TurPeta';
 import { PitaStatusLapisan } from './PanelDaftarLapisan';
 import {
-  BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, lapisanParameter, penanganCitra, urlCitraOseanografi,
+  BATAS_OSEANOGRAFI, CITRA_KOSONG, LAYER_LOKAL, LAYER_WMS, WMS_KKP, aman, lapisanParameter, penanganCitra,
+  urlCitraOseanografi,
 } from './katalogLapisan';
 import { useAutentikasi } from '../../context/KonteksAutentikasi';
 
@@ -96,6 +97,57 @@ const gayaBatasProvinsi = (feature, terpilih, profil) => {
     fillColor: profil.isi,
     fillOpacity: aktif ? profil.isiAktif : 0,
   };
+};
+
+const DIGIT_TITIK = { PH: 2, KLOROFIL: 2, KD490: 3, ANOMALI_SUHU: 2, PGA: 2, SHANNON: 2, KEDALAMAN: 0 };
+
+const angkaTitik = (kode, v) =>
+  Number(kode === 'KEDALAMAN' ? Math.abs(v) : v).toLocaleString('id-ID', { maximumFractionDigits: DIGIT_TITIK[kode] ?? 1 });
+
+const isiInfoTitik = (parameter, aktif, latlng) => {
+  const urut = [...parameter].sort((a, b) => (aktif.indexOf(b.kode) > -1) - (aktif.indexOf(a.kode) > -1));
+  const baris = urut.map((p) => {
+    const sorot = aktif.includes(p.kode);
+    const rentang = p.min != null && p.max != null
+      ? ` <span class="text-slate-400">(${angkaTitik(p.kode, p.min)}–${angkaTitik(p.kode, p.max)})</span>` : '';
+    return `<tr class="${sorot ? 'font-semibold text-kkp-800' : 'text-slate-700'}">
+      <td class="py-0.5 pr-3">${aman(p.label)}</td>
+      <td class="py-0.5 text-right whitespace-nowrap">${angkaTitik(p.kode, p.nilai)} ${aman(p.satuan)}${rentang}</td></tr>`;
+  }).join('');
+  const sumber = urut.filter((p) => aktif.includes(p.kode))
+    .map((p) => `<div>${aman(p.label)}: ${aman(p.sumber)}${p.periode ? ` (${aman(p.periode)})` : ''}</div>`).join('');
+  return `<div class="font-sans" style="min-width:230px">
+    <h3 class="font-bold text-kkp-800 mb-0.5">Kondisi di titik ini</h3>
+    <p class="text-[10px] text-slate-500 border-b pb-1 mb-1">${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)}</p>
+    ${baris ? `<table class="w-full text-xs">${baris}</table>` : '<p class="text-xs text-slate-600">Tidak ada data di titik ini.</p>'}
+    ${sumber ? `<div class="mt-1.5 pt-1 border-t text-[10px] text-slate-500">${sumber}</div>` : ''}
+  </div>`;
+};
+
+const InfoTitikRaster = ({ kodeAktif }) => {
+  const map = useMap();
+  useEffect(() => {
+    if (!kodeAktif) return undefined;
+    const aktif = kodeAktif.split(',');
+    const klik = async (e) => {
+      const wadah = map.getContainer().classList;
+      if (wadah.contains('mode-gambar') || wadah.contains('mode-ukur')
+        || e.originalEvent?.target?.classList?.contains('leaflet-interactive')) return;
+      const popup = L.popup({ maxWidth: 320 }).setLatLng(e.latlng)
+        .setContent('<div class="font-sans text-xs text-slate-500">Membaca data di titik ini…</div>').openOn(map);
+      try {
+        const { data } = await api.get('/analitik/oseanografi/titik/', {
+          params: { x: e.latlng.lng.toFixed(5), y: e.latlng.lat.toFixed(5) },
+        });
+        popup.setContent(isiInfoTitik(data.parameter, aktif, e.latlng));
+      } catch {
+        popup.setContent('<div class="font-sans text-xs text-red-600">Data di titik ini gagal dibaca.</div>');
+      }
+    };
+    map.on('click', klik);
+    return () => map.off('click', klik);
+  }, [map, kodeAktif]);
+  return null;
 };
 
 const KunciLapisanSaatMenggambar = ({ menggambar }) => {
@@ -517,6 +569,9 @@ const PetaInteraktif = ({
           <PaneBatas onSiap={setKanvasBatas} />
           <PasPopup />
           <KunciLapisanSaatMenggambar menggambar={isDrawing || modeUbah} />
+          <InfoTitikRaster
+            kodeAktif={activeDataLayers.map((id) => katalog[id]?.citra).filter(Boolean).join(',')}
+          />
 
           {activeDataLayers
             .filter((id) => katalog[id]?.citra)

@@ -22,7 +22,7 @@ const TOMBOL_ANALISIS = `<button type="button" data-analisis-lokasi class="mt-2 
   Analisis lokasi ini
 </button>`;
 
-const aman = (nilai) =>
+export const aman = (nilai) =>
   nilai === null || nilai === undefined
     ? ''
     : String(nilai)
@@ -616,6 +616,14 @@ ${aman((p.jenis_nama?.length ? p.jenis_nama : [p.sektor]).join(', '))}`,
     label: 'RZ KAW (Kawasan Antarwilayah)',
     keteranganLegenda:
       'Rencana zonasi perairan lintas provinsi. Kawasan yang Perpres-nya belum tersedia ditandai di popup dan belum dipakai sebagai acuan.',
+  },
+
+  polaruang_rtrwn: {
+    ...POLA_RUANG,
+    params: { tingkat: 'RTRWN' },
+    label: 'RTRWN (KSNT RTRL Nasional)',
+    keteranganLegenda:
+      'Kawasan strategis nasional tertentu dari Rencana Tata Ruang Laut (PP 32/2019); pemanfaatannya memerlukan Persetujuan KKPRL dari Menteri KP.',
   },
 
   zonasi_konservasi: {

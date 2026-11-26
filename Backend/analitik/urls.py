@@ -14,6 +14,7 @@ from .views import (
     ZonaRisikoBencanaViewSet,
     oseanografi_keterangan,
     oseanografi_peta,
+    oseanografi_titik,
 )
 
 router = DefaultRouter()
@@ -30,6 +31,7 @@ urlpatterns = [
     path('statistik-bps/', StatistikBPSView.as_view(), name='statistik-bps'),
     path('bahaya-bencana/', BahayaBencanaView.as_view(), name='bahaya-bencana'),
     path('oseanografi/', oseanografi_keterangan, name='oseanografi'),
+    path('oseanografi/titik/', oseanografi_titik, name='oseanografi-titik'),
     path('oseanografi/<str:kode>.png', oseanografi_peta, name='oseanografi-peta'),
     path('', include(router.urls)),
 ]

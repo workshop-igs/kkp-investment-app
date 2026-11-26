@@ -20,7 +20,6 @@ from inti.models import Provinsi
 from penarikan_data.inarisk import AMBANG_KELAS, VARIAN_JENIS
 
 ASAL = (94.0, -11.0, 142.0, 7.0)
-PETAK_OSEANOGRAFI = 6.0
 NILAI_KELAS = {'RENDAH': 0.2, 'SEDANG': 0.5, 'TINGGI': 0.85}
 RENTANG_KONDISI = {
     'KEDALAMAN': (-11000, 0),
@@ -189,10 +188,11 @@ def muat_bencana(berkas, jenis, keterangan):
 
 
 def muat_kondisi(berkas, kode, keterangan):
-    contoh = RasterOseanografi.objects.filter(parameter=kode).only('rast', 'satuan').first()
+    contoh = RasterOseanografi.objects.filter(parameter=kode).only('rast', 'satuan', 'cakupan').first()
     if contoh is None:
         raise ValueError(f'Parameter {kode} belum pernah dimuat.')
     resolusi = round(contoh.rast.scale.x, 6)
+    petak = round(contoh.cakupan.extent[2] - contoh.cakupan.extent[0], 6)
     bawah, atas = RENTANG_KONDISI[kode]
 
     def sah(kecil, besar):
@@ -211,7 +211,7 @@ def muat_kondisi(berkas, kode, keterangan):
         RasterOseanografi.objects.create(parameter=kode, rast=gdal_raster(kotak, data, resolusi), cakupan=batas,
                                          satuan=contoh.satuan, sumber=keterangan[:400])
 
-    return timpa(berkas, False, resolusi, PETAK_OSEANOGRAFI, lama, simpan, sah)
+    return timpa(berkas, False, resolusi, petak, lama, simpan, sah)
 
 
 class Command(BaseCommand):

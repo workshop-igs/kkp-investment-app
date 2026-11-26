@@ -876,14 +876,22 @@ JENIS_ZONA_TERLARANG = ['ALKI']
 SUB_ZONA_TANPA_RINCIAN = ['LAINNYA', 'BELUM_DIATUR', 'TIDAK_DIBAGI', 'DARAT_LAINNYA']
 
 SUMBER_ZONASI_DARAT = 'KKP-RTRW-DARAT'
-PRIORITAS_SUMBER_ZONASI = ['KKP-RTRW', 'KKP-PKKPRL', 'KKP-RZWP3K', 'KKP-WFS', 'KKP-RZKAW']
+PRIORITAS_SUMBER_ZONASI = ['KKP-RTRW', 'KKP-PKKPRL', 'KKP-RZWP3K', 'KKP-WFS', 'KKP-RZKAW', 'KKP-RTRL']
 PERPRES_BELUM = 'Perpres belum tersedia'
+REGULASI_RTRL = 'PP No. 32 Tahun 2019 tentang Rencana Tata Ruang Laut'
+SYARAT_KSNT = (
+    'Berada di KSNT pengendalian lingkungan hidup (kawasan yang signifikan secara ekologis dan biologis, PP 32/2019 '
+    'Pasal 40 dan Lampiran VII). Pemanfaatan ruang laut di kawasan ini mengikuti peraturan perundang-undangan dan '
+    'hukum internasional (Pasal 100), sehingga memerlukan Persetujuan KKPRL dari Menteri Kelautan dan Perikanan '
+    'dengan kajian dampak terhadap fungsi ekologis kawasan.'
+)
 LABEL_SUMBER_ZONASI = {
     'KKP-RTRW': 'RTRW Provinsi (KKP)',
     'KKP-PKKPRL': 'Peta arahan PKKPRL 1:50.000',
     'KKP-RZWP3K': 'RZWP-3-K',
     'KKP-WFS': 'Rencana Zonasi KAW (Perpres 83/2020)',
     'KKP-RZKAW': 'Rencana Zonasi KAW (IGT KKP)',
+    'KKP-RTRL': 'RTRL Nasional (PP 32/2019, IGT KKP)',
     SUMBER_ZONASI_DARAT: 'Pola Ruang darat RTRW Provinsi (KKP)',
 }
 
