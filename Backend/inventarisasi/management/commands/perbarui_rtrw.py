@@ -63,6 +63,7 @@ class Command(BaseCommand):
             shutil.rmtree(os.path.join(opsi['simpan_di'], f'{kode}00'), ignore_errors=True)
             call_command('tarik_rtrw_provinsi', provinsi=[kode], simpan_di=opsi['simpan_di'])
             call_command('tarik_matriks_kkprl', provinsi=[kode], simpan_di=opsi['simpan_di'])
+            call_command('hitung_skor_zona', provinsi=kode)
             call_command('tarik_bangunan_eksisting', provinsi=kode)
         self.stdout.write(self.style.SUCCESS(f"Diperiksa {len(sidik)} provinsi; dimuat ulang: {', '.join(berubah) or 'tidak ada'}."))
         return json.dumps({'sidik': sidik, 'dimuat': berubah})
