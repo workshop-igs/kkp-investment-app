@@ -9,7 +9,6 @@ from analitik.services.konstanta import (
     KM_PER_DERAJAT,
     KRITERIA_PELENGKAP,
     KRITERIA_TANPA_SKOR,
-    SUB_JENIS_NIRLABA,
 )
 from analitik.services.oseanografi import raster_tersedia
 from analitik.services.pengaturan import atur
@@ -372,8 +371,7 @@ def ranah_jenis(sektor_kode, sub_kode=None):
 
 
 def sub_jenis(sektor_kode):
-    return [{'kode': kode, 'nama': sub['nama'], 'ranah': sub['ranah'], 'kbli': ringkas(sub.get('kbli')),
-             'nirlaba': kode in SUB_JENIS_NIRLABA}
+    return [{'kode': kode, 'nama': sub['nama'], 'ranah': sub['ranah'], 'kbli': ringkas(sub.get('kbli'))}
             for kode, sub in atur('KRITERIA_JENIS').get(sektor_kode, {}).items()]
 
 

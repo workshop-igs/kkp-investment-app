@@ -4,6 +4,7 @@ from typing import Any, Dict, Optional, Tuple
 
 import numpy as np
 
+from .konstanta import SUB_JENIS_NIRLABA
 from .pengaturan import BAWAAN, atur
 
 logger = logging.getLogger('analitik')
@@ -36,7 +37,7 @@ def rincian_nilai_investasi(sub_kode, luas_ha, model=None, simpan=None):
     unit = max(1.0, luas_ha * porsi) if per_hektar else 1
     simpan = {} if simpan is None else simpan
     if sub_kode not in simpan:
-        simpan[sub_kode] = _laba_per_unit(m)
+        simpan[sub_kode] = None if sub_kode in SUB_JENIS_NIRLABA else _laba_per_unit(m)
     laba = simpan[sub_kode]
     return {
         'satuan_usaha': m.get('satuan_usaha'), 'komponen': komponen, 'modal_per_unit': round(modal),

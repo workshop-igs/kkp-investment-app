@@ -14,7 +14,6 @@ from analitik.services.konstanta import (
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
     SEKTOR_SUB_ZONA_COCOK,
-    SUB_JENIS_NIRLABA,
 )
 from analitik.services.kriteria import kbli_sub, ranah_jenis, uraian
 from analitik.services.laporan_spasial import daya_dukung, pulau_kecil
@@ -323,11 +322,6 @@ def _finansial(subs, nama_sub, harga_kg=None):
         def hitung(isi):
             return hitung_model_usaha(isi, harga_kg if isi['satuan_produk'] == 'kg' else None)
 
-        if sub in SUB_JENIS_NIRLABA:
-            hasil.append({'kode': sub, 'nama': nama_sub.get(sub, sub), 'hasil': None, 'nirlaba': True, 'kelas': [],
-                          'investasi_total': sum(v or 0 for v in (m or {}).get('investasi', {}).values()) or None,
-                          'sumber': (m or {}).get('sumber') or ''})
-            continue
         hasil.append({
             'kode': sub,
             'nama': nama_sub.get(sub, sub),

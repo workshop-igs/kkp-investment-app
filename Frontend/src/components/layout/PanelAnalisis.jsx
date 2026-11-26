@@ -95,7 +95,6 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
   const [langkah, setLangkah] = useState(1);
   const [screening, setScreening] = useState(null);
   const [panelPeta, setPanelPeta] = useState(null);
-  const nirlaba = !!screening?.sub_jenis?.nirlaba;
   const [memeriksa, setMemeriksa] = useState(false);
   const sektorRef = useRef(sektor);
 
@@ -189,7 +188,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const wajib = nirlaba ? [[capex, "Nilai Investasi"]] : [
+    const wajib = [
       [capex, "CapEx (Capital Expenditure) / Investasi Awal"],
       [revenue, "Estimasi Pendapatan Tahun Pertama"],
       [opex, "Estimasi OpEx (Operational Expenditure) Tahun Pertama"],
@@ -205,8 +204,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
     const angkaAtauNol = (v) => (String(v).trim() === "" ? 0 : parseFloat(v));
 
     if (
-      !nirlaba
-      && parseFloat(opex) >= parseFloat(revenue)
+      parseFloat(opex) >= parseFloat(revenue)
       && !window.confirm(
         `OpEx tahun pertama (${formatRupiah(parseFloat(opex))}) tidak lebih kecil dari pendapatan tahun pertama `
         + `(${formatRupiah(parseFloat(revenue))}), sehingga arus kas tahun pertama sudah negatif.\n\n`
@@ -216,10 +214,7 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
       return;
     }
 
-    const hasil = await onAnalyze(sektor, subSektor, nirlaba ? {
-      capex_idr: parseFloat(capex),
-      tenaga_kerja_estimasi: String(serapanTK).trim() === '' ? null : parseFloat(serapanTK),
-    } : {
+    const hasil = await onAnalyze(sektor, subSektor, {
       capex_idr: parseFloat(capex),
       annual_revenue_idr: parseFloat(revenue),
       annual_opex_idr: parseFloat(opex),
@@ -411,16 +406,15 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
 
             {langkah === 3 && screening?.lanjut && (
               <div className="bg-slate-50/50 border border-slate-200 rounded-xl p-6">
-                <h3 className="font-bold text-slate-800 mb-1 text-[15px]">{nirlaba ? 'Nilai Investasi' : 'Parameter Finansial'}</h3>
+                <h3 className="font-bold text-slate-800 mb-1 text-[15px]">Parameter Finansial</h3>
                 <p className="text-xs text-slate-500 mb-5">
                   Lokasi dinyatakan {screening.status_label.toLowerCase()} secara ruang untuk {screening.sub_jenis?.nama || screening.sektor_nama}{screening.sub_jenis?.kbli ? ` (KBLI ${screening.sub_jenis.kbli.kode})` : ''}
                   {screening.status === 'BELUM_TERVERIFIKASI' && '; analisis dilanjutkan dengan label belum terverifikasi'}.
-                  {nirlaba && ' Jenis ini tidak berorientasi laba, cukup isi nilai investasi.'}
                 </p>
                 <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm text-slate-700 mb-1.5">{nirlaba ? 'Nilai Investasi' : 'CapEx (Capital Expenditure) / Investasi Awal'} <span className="text-red-500">*</span></label>
+                    <label className="block text-sm text-slate-700 mb-1.5">CapEx (Capital Expenditure) / Investasi Awal <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">Rp</span>
                       <InputAngka
@@ -431,7 +425,6 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                       />
                     </div>
                   </div>
-                  {!nirlaba && (
                   <div>
                     <label className="block text-sm text-slate-700 mb-1.5">Estimasi Pendapatan Tahun Pertama <span className="text-red-500">*</span></label>
                     <div className="relative">
@@ -445,11 +438,8 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                     </div>
                     <p className="text-xs text-slate-500 mt-1.5">Tahun berikutnya naik sesuai Pertumbuhan Pendapatan.</p>
                   </div>
-                  )}
                 </div>
 
-                {!nirlaba && (
-                <>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm text-slate-700 mb-1.5">
@@ -532,8 +522,6 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                     Pertumbuhan pendapatan dan OpEx berlaku setiap tahun, mulai dari tahun kedua. Kosongkan bila nilainya tetap.
                   </p>
                 </div>
-                </>
-                )}
 
                 <div className="mt-4 pt-4 border-t border-slate-200">
                   <label className="block text-xs text-slate-600 mb-1.5">
@@ -611,33 +599,22 @@ const PanelAnalisis = ({ result, loading, onAnalyze, hasGeometry, geometry, sekt
                   <div className="text-slate-500 mb-1">Total Area Luasan</div>
                   <div className="font-bold text-slate-800 text-lg">{formatNumber(result.area_ha, 2)} Ha</div>
                 </div>
-                {result.finansial?.nirlaba ? (
-                  <div className="col-span-2">
-                    <div className="text-slate-500 mb-1">Nilai Investasi</div>
-                    <div className="font-bold text-slate-800 text-lg">{formatRupiah(result.finansial.capex_idr)}</div>
-                  </div>
-                ) : (
-                  <>
-                    <div>
-                      <div className="text-slate-500 mb-1">Estimasi ROI</div>
-                      <div className="font-bold text-emerald-600 text-lg">{formatNumber(result.finansial?.roi_pct, 1)}%</div>
-                    </div>
-                    <div>
-                      <div className="text-slate-500 mb-1">Estimasi IRR ({result.finansial?.project_lifetime_yr} Thn)</div>
-                      <div className="font-bold text-emerald-600 text-lg">{formatNumber(result.finansial?.irr_pct, 1)}%</div>
-                    </div>
-                  </>
-                )}
+                <div>
+                  <div className="text-slate-500 mb-1">Estimasi ROI</div>
+                  <div className="font-bold text-emerald-600 text-lg">{formatNumber(result.finansial?.roi_pct, 1)}%</div>
+                </div>
+                <div>
+                  <div className="text-slate-500 mb-1">Estimasi IRR ({result.finansial?.project_lifetime_yr} Thn)</div>
+                  <div className="font-bold text-emerald-600 text-lg">{formatNumber(result.finansial?.irr_pct, 1)}%</div>
+                </div>
                 <div>
                   <div className="text-slate-500 mb-1">Penyerapan Naker Lokal</div>
                   <div className="font-bold text-amber-600 text-lg">{result.ketenagakerjaan?.total_tenaga_kerja || 0} Org</div>
                 </div>
-                {!result.finansial?.nirlaba && (
-                  <div className="col-span-2">
-                    <div className="text-slate-500 mb-1">Net Present Value (NPV)</div>
-                    <div className="font-bold text-emerald-600 text-lg">{formatRupiah(result.finansial?.npv_idr)}</div>
-                  </div>
-                )}
+                <div className="col-span-2">
+                  <div className="text-slate-500 mb-1">Net Present Value (NPV)</div>
+                  <div className="font-bold text-emerald-600 text-lg">{formatRupiah(result.finansial?.npv_idr)}</div>
+                </div>
                 <div className="col-span-2">
                   <div className="text-slate-500 mb-1">Tingkat Risiko Spasial Bencana</div>
                   <div className={`font-bold text-lg ${result.kelayakan?.kelas_risiko === 'Rendah' ? 'text-teal-600' : result.kelayakan?.kelas_risiko === 'Tinggi' ? 'text-red-600' : 'text-amber-600'}`}>

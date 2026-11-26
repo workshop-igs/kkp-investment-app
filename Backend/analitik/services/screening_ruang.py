@@ -843,7 +843,7 @@ def screening_ruang(geometry: Dict[str, Any], sektor_kode: str, sub_kode: Option
         'lanjut': lanjut,
         'sektor': sektor.kode,
         'sektor_nama': sektor.nama,
-        'sub_jenis': {k: daftar_sub[sub_kode][k] for k in ('kode', 'nama', 'kbli', 'nirlaba')} if sub_kode else None,
+        'sub_jenis': {k: daftar_sub[sub_kode][k] for k in ('kode', 'nama', 'kbli')} if sub_kode else None,
         'luas_m2': luas_aoi,
         'cakupan_persen': round(cakupan * 100, 1),
         'geometri_area': json.loads(geom.json),

@@ -30,7 +30,6 @@ from .models import (
 )
 from .services.ahp import jalankan_analisis_ahp
 from .services.finansial import jalankan_analisis_finansial, rincian_nilai_investasi
-from .services.konstanta import SUB_JENIS_NIRLABA
 from .services.kriteria import kbli_sub, uraian
 from .services.laporan_spasial import bagian_bencana, bangun_laporan
 from .services.oseanografi import BATAS as BATAS_OSEANOGRAFI
@@ -226,73 +225,6 @@ class ScreeningRuangView(APIView):
         return galat or Response(hasil)
 
 
-def _finansial_dari_isian(data, area_ha, sektor_kode):
-    required_fields = {
-        'capex_idr': 'CapEx / Investasi Awal',
-        'annual_revenue_idr': 'Estimasi Pendapatan Tahun Pertama',
-        'annual_opex_idr': 'Estimasi OpEx Tahun Pertama',
-        'wacc_pct': 'Discount Rate (%)',
-        'lifetime_yr': 'Umur Proyek (Tahun)',
-    }
-    missing = []
-    for field, label in required_fields.items():
-        val = data.get(field)
-        if val is None or str(val).strip() == '':
-            missing.append(label)
-    if missing:
-        return None, Response(
-            {'detail': f'Field berikut wajib diisi untuk analisis finansial yang valid: {", ".join(missing)}'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    try:
-        capex_idr = float(data.get('capex_idr'))
-        annual_revenue_idr = float(data.get('annual_revenue_idr'))
-        annual_opex_idr = float(data.get('annual_opex_idr'))
-        wacc_pct = float(data.get('wacc_pct'))
-        lifetime_yr = int(data.get('lifetime_yr'))
-        revenue_growth_pct = float(data.get('revenue_growth_pct', 0.0))
-        opex_growth_pct = float(data.get('opex_growth_pct', 0.0))
-    except (TypeError, ValueError):
-        return None, Response({'detail': 'Isian finansial harus berupa angka.'}, status=status.HTTP_400_BAD_REQUEST)
-    if not all(map(math.isfinite, (capex_idr, annual_revenue_idr, annual_opex_idr, wacc_pct, revenue_growth_pct,
-                                   opex_growth_pct))):
-        return None, Response({'detail': 'Isian finansial harus berupa angka.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    if capex_idr <= 0:
-        return None, Response({'detail': 'CapEx harus lebih dari 0.'}, status=status.HTTP_400_BAD_REQUEST)
-    if annual_revenue_idr <= 0:
-        return None, Response({'detail': 'Pendapatan per tahun harus lebih dari 0.'}, status=status.HTTP_400_BAD_REQUEST)
-    if annual_opex_idr < 0:
-        return None, Response({'detail': 'OpEx per tahun tidak boleh negatif.'}, status=status.HTTP_400_BAD_REQUEST)
-    if wacc_pct <= 0 or wacc_pct > 100:
-        return None, Response({'detail': 'Discount rate harus antara 0.01% dan 100%.'}, status=status.HTTP_400_BAD_REQUEST)
-    if lifetime_yr < 1 or lifetime_yr > 100:
-        return None, Response({'detail': 'Umur proyek harus antara 1 dan 100 tahun.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    return jalankan_analisis_finansial(
-        area_ha=area_ha,
-        sektor_kode=sektor_kode,
-        capex_idr=capex_idr,
-        annual_revenue_idr=annual_revenue_idr,
-        annual_opex_idr=annual_opex_idr,
-        revenue_growth_pct=revenue_growth_pct,
-        opex_growth_pct=opex_growth_pct,
-        wacc_pct=wacc_pct,
-        lifetime_yr=lifetime_yr,
-    ), None
-
-
-def _investasi_nirlaba(data):
-    try:
-        capex_idr = float(data.get('capex_idr'))
-    except (TypeError, ValueError):
-        return None, Response({'detail': 'Nilai investasi wajib diisi angka.'}, status=status.HTTP_400_BAD_REQUEST)
-    if not math.isfinite(capex_idr) or capex_idr <= 0:
-        return None, Response({'detail': 'Nilai investasi harus lebih dari 0.'}, status=status.HTTP_400_BAD_REQUEST)
-    return {'nirlaba': True, 'capex_idr': capex_idr}, None
-
-
 class RunAnalysisView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -322,10 +254,60 @@ class RunAnalysisView(APIView):
                 {'detail': f'Gagal menghitung luas area dari geometry: {e}'}, status=status.HTTP_400_BAD_REQUEST
             )
 
-        nirlaba = data.get('sub_sektor') in SUB_JENIS_NIRLABA
-        fin, galat = _investasi_nirlaba(data) if nirlaba else _finansial_dari_isian(data, area_ha, sektor_kode)
-        if galat:
-            return galat
+        required_fields = {
+            'capex_idr': 'CapEx / Investasi Awal',
+            'annual_revenue_idr': 'Estimasi Pendapatan Tahun Pertama',
+            'annual_opex_idr': 'Estimasi OpEx Tahun Pertama',
+            'wacc_pct': 'Discount Rate (%)',
+            'lifetime_yr': 'Umur Proyek (Tahun)',
+        }
+        missing = []
+        for field, label in required_fields.items():
+            val = data.get(field)
+            if val is None or str(val).strip() == '':
+                missing.append(label)
+        if missing:
+            return Response(
+                {'detail': f'Field berikut wajib diisi untuk analisis finansial yang valid: {", ".join(missing)}'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        try:
+            capex_idr = float(data.get('capex_idr'))
+            annual_revenue_idr = float(data.get('annual_revenue_idr'))
+            annual_opex_idr = float(data.get('annual_opex_idr'))
+            wacc_pct = float(data.get('wacc_pct'))
+            lifetime_yr = int(data.get('lifetime_yr'))
+            revenue_growth_pct = float(data.get('revenue_growth_pct', 0.0))
+            opex_growth_pct = float(data.get('opex_growth_pct', 0.0))
+        except (TypeError, ValueError):
+            return Response({'detail': 'Isian finansial harus berupa angka.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not all(map(math.isfinite, (capex_idr, annual_revenue_idr, annual_opex_idr, wacc_pct, revenue_growth_pct,
+                                       opex_growth_pct))):
+            return Response({'detail': 'Isian finansial harus berupa angka.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if capex_idr <= 0:
+            return Response({'detail': 'CapEx harus lebih dari 0.'}, status=status.HTTP_400_BAD_REQUEST)
+        if annual_revenue_idr <= 0:
+            return Response({'detail': 'Pendapatan per tahun harus lebih dari 0.'}, status=status.HTTP_400_BAD_REQUEST)
+        if annual_opex_idr < 0:
+            return Response({'detail': 'OpEx per tahun tidak boleh negatif.'}, status=status.HTTP_400_BAD_REQUEST)
+        if wacc_pct <= 0 or wacc_pct > 100:
+            return Response({'detail': 'Discount rate harus antara 0.01% dan 100%.'}, status=status.HTTP_400_BAD_REQUEST)
+        if lifetime_yr < 1 or lifetime_yr > 100:
+            return Response({'detail': 'Umur proyek harus antara 1 dan 100 tahun.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        fin = jalankan_analisis_finansial(
+            area_ha=area_ha,
+            sektor_kode=sektor_kode,
+            capex_idr=capex_idr,
+            annual_revenue_idr=annual_revenue_idr,
+            annual_opex_idr=annual_opex_idr,
+            revenue_growth_pct=revenue_growth_pct,
+            opex_growth_pct=opex_growth_pct,
+            wacc_pct=wacc_pct,
+            lifetime_yr=lifetime_yr,
+        )
 
         eff_investasi = fin['capex_idr'] / 1e9
 
@@ -334,10 +316,10 @@ class RunAnalysisView(APIView):
         lokasi = spasial['lokasi']
 
         ahp = jalankan_analisis_ahp(
-            npv=fin.get('npv_idr'),
-            irr=fin.get('irr_pct'),
-            payback=fin.get('payback_period_tahun'),
-            roi=fin.get('roi_pct'),
+            npv=fin['npv_idr'],
+            irr=fin['irr_pct'],
+            payback=fin['payback_period_tahun'],
+            roi=fin['roi_pct'],
             investasi_miliar=eff_investasi,
             risiko_pasar=risiko['pasar'],
             risiko_operasional=risiko['operasional'],
@@ -348,13 +330,12 @@ class RunAnalysisView(APIView):
             potensi_sda=lokasi['potensi_sda'],
             aksesibilitas=lokasi['aksesibilitas'],
             kondisi_sosek=lokasi['kondisi_sosek'],
-            prediksi_keuntungan=(fin.get('npv_idr') or 0) * 1.2,
+            prediksi_keuntungan=fin['npv_idr'] * 1.2,
             sektor_kode=sektor_kode,
-            wacc_pct=fin.get('wacc_pct'),
-            umur_proyek=fin.get('project_lifetime_yr'),
+            wacc_pct=fin['wacc_pct'],
+            umur_proyek=fin['project_lifetime_yr'],
             payback_tercapai=fin.get('payback_tercapai'),
             catatan_spasial=spasial['catatan'],
-            nirlaba=nirlaba,
         )
 
         from ketenagakerjaan.proyeksi import hitung_proyeksi_tk

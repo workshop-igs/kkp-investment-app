@@ -211,9 +211,9 @@ def skor_prediksi(prediksi_keuntungan: float, investasi_miliar: float) -> Tuple[
 def _syarat_terpenuhi(syarat: Dict, kesesuaian_tr: bool, npv: float) -> bool:
     if syarat.get('require_tata_ruang') and not kesesuaian_tr:
         return False
-    if syarat.get('require_npv_positive') and npv is not None and not npv > 0:
+    if syarat.get('require_npv_positive') and not npv > 0:
         return False
-    return not syarat.get('require_tata_ruang_or_npv') or kesesuaian_tr or (npv or 0) > 0
+    return not syarat.get('require_tata_ruang_or_npv') or kesesuaian_tr or npv > 0
 
 
 def _determine_decision(total_score: float, kesesuaian_tr: bool, npv: float) -> Tuple[str, str]:
@@ -271,7 +271,7 @@ def _temuan_keputusan(keputusan: str, skor: float, kesesuaian_tr: bool, npv: flo
         syarat = [f'melewati ambang {_angka_id(batas_layak, 2)}']
         if layak.get('require_tata_ruang'):
             syarat.append('lokasi sesuai rencana tata ruang')
-        if layak.get('require_npv_positive') and npv is not None:
+        if layak.get('require_npv_positive'):
             syarat.append('NPV positif')
         if len(syarat) > 1:
             syarat[-1] = ('dan ' if len(syarat) > 2 else '') + syarat[-1]
@@ -439,41 +439,6 @@ def _susun_temuan(
     return temuan
 
 
-def _ahp_nirlaba(weights, cr, risiko_pasar, risiko_operasional, risiko_regulasi, risiko_lingkungan, risiko_sosial,
-                 kesesuaian_tr, potensi_sda, aksesibilitas, kondisi_sosek, catatan_spasial) -> Dict:
-    skor_risk, detail_risk = skor_risiko_investasi(
-        risiko_pasar, risiko_operasional, risiko_regulasi, risiko_lingkungan, risiko_sosial
-    )
-    skor_lok, detail_lok = skor_lokasi(kesesuaian_tr, potensi_sda, aksesibilitas, kondisi_sosek)
-    bobot = {'RISIKO': weights.get('RISIKO', 0.2), 'LOKASI': weights.get('LOKASI', 0.2)}
-    total_score = (skor_risk * bobot['RISIKO'] + skor_lok * bobot['LOKASI']) / sum(bobot.values())
-    keputusan, prioritas = _determine_decision(total_score, kesesuaian_tr, None)
-    temuan = [
-        _temuan_keputusan(keputusan, total_score, kesesuaian_tr, None),
-        'Proyek nirlaba: kelayakan dinilai dari aspek lokasi dan risiko, tanpa perhitungan pendapatan dan laba.',
-        *(catatan_spasial or []),
-        *_temuan_risiko(risiko_pasar, risiko_operasional, risiko_regulasi, risiko_lingkungan, risiko_sosial),
-        *_temuan_lokasi(kesesuaian_tr, potensi_sda, aksesibilitas, kondisi_sosek, risiko_regulasi),
-    ]
-    return {
-        'skor_ahp_total': round(total_score, 4),
-        'consistency_ratio': round(cr, 4),
-        'is_consistent': cr < atur('AMBANG_KONSISTENSI_AHP'),
-        'keputusan': keputusan,
-        'prioritas': prioritas,
-        'kelas_risiko': _determine_risk_class(
-            risiko_pasar, risiko_operasional, risiko_regulasi, risiko_lingkungan, risiko_sosial
-        ),
-        'bobot_kriteria': bobot,
-        'skor_per_aspek': {
-            'risiko': {'skor': skor_risk, 'bobot': bobot['RISIKO'], 'detail': detail_risk},
-            'lokasi': {'skor': skor_lok, 'bobot': bobot['LOKASI'], 'detail': detail_lok},
-        },
-        'strategi_mitigasi': temuan,
-        'nirlaba': True,
-    }
-
-
 def jalankan_analisis_ahp(
     npv: float,
     irr: float,
@@ -495,12 +460,8 @@ def jalankan_analisis_ahp(
     umur_proyek: int | None = None,
     payback_tercapai: bool | None = None,
     catatan_spasial: list | None = None,
-    nirlaba: bool = False,
 ) -> Dict:
     weights, cr = ambil_bobot_sektor(sektor_kode)
-    if nirlaba:
-        return _ahp_nirlaba(weights, cr, risiko_pasar, risiko_operasional, risiko_regulasi, risiko_lingkungan,
-                            risiko_sosial, kesesuaian_tr, potensi_sda, aksesibilitas, kondisi_sosek, catatan_spasial)
 
     skor_fin, detail_fin = skor_finansial(npv, irr, payback, roi, investasi_miliar, payback_tercapai)
     skor_risk, detail_risk = skor_risiko_investasi(
