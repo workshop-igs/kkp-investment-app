@@ -389,12 +389,7 @@ const KriteriaSubSektor = ({ s }) => {
     <section>
       <Judul>Kecocokan fisik {s.sektor_nama.toLowerCase()}</Judul>
       <p className="-mt-1 mb-2 text-[11px] text-slate-400">
-        Setelah lolos matriks Perda, tiap sub-sektor dinilai dengan kriterianya sendiri. Area cocok bila semua kriteria
-        yang terukur memenuhi syarat dan sedikitnya separuh kriterianya terukur; kriteria tanpa data dilewati. Kolom
-        Unggulan memuat batas lokasi unggulan yang dipakai Peta Sebaran: area unggulan bila semua kriteria yang datanya
-        tersedia terukur dan memenuhinya, dan skor mutunya (kedekatan nilai ke kondisi ideal, 0–100, dikurangi di zona
-        bersyarat) mencapai batas minimal. Hasil ini tidak mengubah kesesuaian ruang; data global beresolusi kasar, pastikan
-        dengan survei lapangan.
+        Penilaian kondisi fisik per sub-sektor; tidak mengubah kesesuaian ruang. Pastikan dengan survei lapangan.
       </p>
       {s.sub_sektor.length === 0 && <p className="text-xs leading-snug text-slate-700">{s.kecocokan_fisik?.alasan}</p>}
       <div className="space-y-3">
@@ -471,10 +466,7 @@ const PengecualianKeras = ({ s }) => {
     <section>
       <Judul>Pengecualian keras (gerbang kesesuaian ruang)</Judul>
       <p className="-mt-1 mb-2 text-[11px] text-slate-400">
-        Alur pelayaran dan ALKI dibaca dari seluruh lapisan zonasi sehingga berlaku di atas peruntukan RTRW, kecuali
-        bagi jasa maritim dan infrastruktur laut. Kawasan konservasi mengikuti RPZ kawasan bila zonanya tersedia, selain
-        itu matriks KKPRL Perda. Irisan kecil di tepi
-        area ditandai perlu verifikasi batas, bukan langsung menggugurkan.
+        Pembatas yang menggugurkan lokasi; irisan kecil di tepi area cukup diverifikasi.
       </p>
       <ul className="grid gap-x-5 gap-y-1 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs sm:grid-cols-2">
         {daftar.map((d) => {

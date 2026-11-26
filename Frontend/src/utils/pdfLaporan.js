@@ -728,11 +728,8 @@ function buatPdfLaporan({ namaProyek, subjudul, analisis, spasial, bps, bencana,
     const fisik = fisikScreening(sc);
     if (Array.isArray(sc.sub_sektor)) {
       k.teks(`Kecocokan fisik ${sc.sektor_nama.toLowerCase()} per sub-sektor`, { tebal: true, warna: GELAP, ukuran: 7.5 });
-      k.teks('Setelah lolos matriks Perda, tiap sub-sektor dinilai dengan kriterianya sendiri: cocok bila semua kriteria '
-        + 'yang terukur memenuhi syarat dan sedikitnya separuh kriteria terukur; kriteria tanpa data dilewati. Kolom Unggulan '
-        + 'memuat batas lokasi unggulan yang dipakai Peta Sebaran: area unggulan bila semua kriteria yang datanya tersedia '
-        + 'terukur dan memenuhinya, dan skor mutunya (kedekatan nilai ke kondisi ideal, 0-100, dikurangi di zona bersyarat) '
-        + 'mencapai batas minimal. Hasil ini tidak mengubah kesesuaian ruang.', { ukuran: 6.4 });
+      k.teks('Penilaian kondisi fisik per sub-sektor; tidak mengubah kesesuaian ruang. Pastikan dengan survei lapangan.',
+        { ukuran: 6.4 });
       if (!sc.sub_sektor.length) k.teks(fisik?.alasan || '', { ukuran: 7 });
       const STATUS = (l) => (l === true ? 'Terpenuhi' : l === false ? 'Tidak terpenuhi' : 'Dilewati');
       sc.sub_sektor.forEach((h) => {
