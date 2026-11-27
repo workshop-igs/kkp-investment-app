@@ -14,7 +14,7 @@ from penarikan_data.models import LogPenarikan
 
 
 def tanggal_ubah(teks, hari_ini):
-    for pola, isi in (('%b %d, %Y', teks), ('%b %d %Y', f'{teks} {hari_ini.year}')):
+    for pola, isi in (('%b %d, %Y', teks), ('%m/%d/%y', teks), ('%b %d %Y', f'{teks} {hari_ini.year}')):
         try:
             return datetime.strptime(isi, pola).date().isoformat()
         except ValueError:
