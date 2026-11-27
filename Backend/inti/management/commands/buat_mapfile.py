@@ -4,9 +4,11 @@ from pathlib import Path
 from django.conf import settings
 from django.core.cache import cache
 from django.core.management.base import BaseCommand
+from django.db import connection
 
 from inti.layanan_peta import TABEL, daftar_lapisan
 
+INDONESIA = (94, -12, 142, 7)
 WARNA = ['0 86 165', '140 198 63', '64 191 219', '27 106 138', '230 126 34', '155 89 182', '192 57 43', '22 160 133']
 
 
@@ -20,6 +22,13 @@ def metadata(judul, abstrak='', tambahan=''):
             f'      "wfs_enable_request" "*"\n{tambahan}    END\n')
 
 
+def cakupan(sql):
+    with connection.cursor() as c:
+        c.execute(f'SELECT ST_XMin(e), ST_YMin(e), ST_XMax(e), ST_YMax(e) FROM (SELECT ST_Extent(geometry) AS e FROM ({sql}) t) s')
+        e = c.fetchone()
+    return e if e[0] is not None else INDONESIA
+
+
 def vektor(lp, koneksi, warna):
     jenis = lp['jenis']
     gaya = (f'STYLE COLOR {warna} OUTLINECOLOR 255 255 255 SIZE 7 SYMBOL "titik" END' if jenis == 'POINT' else
@@ -28,7 +37,8 @@ def vektor(lp, koneksi, warna):
     data = 'geometry FROM (' + lp['sql'] + ') AS t USING UNIQUE id USING SRID=4326'
     return (f'  LAYER\n    NAME "{lp["nama"]}"\n    TYPE {jenis}\n    STATUS ON\n    CONNECTIONTYPE POSTGIS\n'
             f'    CONNECTION {teks(koneksi)}\n    DATA {teks(data)}\n'
-            f'    PROJECTION "init=epsg:4326" END\n    TEMPLATE "kosong"\n'
+            f'    PROJECTION "init=epsg:4326" END\n    EXTENT {" ".join(f"{v:.6f}" for v in cakupan(lp["sql"]))}\n'
+            '    TEMPLATE "kosong"\n'
             + (f'    MAXSCALEDENOM {lp["skala"]}\n' if lp['skala'] else '')
             + metadata(lp['judul']) + kelas(lp, gaya) + '  END\n')
 
@@ -79,7 +89,8 @@ class Command(BaseCommand):
         lapisan = [lp for lp in semua if lp['jenis'] != 'RASTER']
         rasters = [lp for lp in semua if lp['jenis'] == 'RASTER']
         alamat = os.getenv('PETA_URL', '')
-        isi = ('MAP\n  NAME "kkp"\n  STATUS ON\n  EXTENT 94 -12 142 7\n  SIZE 800 600\n  UNITS DD\n  IMAGECOLOR 255 255 255\n'
+        isi = (f'MAP\n  NAME "kkp"\n  STATUS ON\n  EXTENT {" ".join(map(str, INDONESIA))}\n  SIZE 800 600\n  UNITS DD\n'
+               '  IMAGECOLOR 255 255 255\n'
                '  PROJECTION "init=epsg:4326" END\n  SYMBOL NAME "titik" TYPE ELLIPSE FILLED TRUE POINTS 1 1 END END\n'
                '  OUTPUTFORMAT NAME "geojson" DRIVER "OGR/GEOJSON" MIMETYPE "application/json; subtype=geojson" '
                'FORMATOPTION "STORAGE=stream" FORMATOPTION "FORM=SIMPLE" END\n'
