@@ -266,10 +266,9 @@ const PanelDetailProvinsi = ({ fitur, onTutup }) => {
 
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         <RingkasanProvinsi p={p} atas={<PotensiProvinsi id={p.id} />} />
-      </div>
-
-      <div className="px-4 py-3 border-t border-slate-100 shrink-0">
-        <UnduhProfilProvinsi p={p} />
+        <div className="pt-3 border-t border-slate-100">
+          <UnduhProfilProvinsi p={p} />
+        </div>
       </div>
     </div>
   );
