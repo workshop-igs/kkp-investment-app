@@ -45,7 +45,7 @@ def kelas(lp, gaya):
 def raster(r, koneksi):
     c = r['cakupan']
     pg = (f"PG:{koneksi} schema=public table=analitik_raster_oseanografi column=rast "
-          f"where='id IN ({','.join(map(str, r['id']))})' mode=2")
+          f"where='parameter=$${r['parameter']}$$' mode=2")
     return (f'  LAYER\n    NAME "{r["nama"]}"\n    TYPE RASTER\n    STATUS ON\n'
             f'    DATA {teks(pg)}\n    PROJECTION "init=epsg:4326" END\n    EXTENT {c[0]} {c[1]} {c[2]} {c[3]}\n'
             '    PROCESSING "SCALE=AUTO"\n'

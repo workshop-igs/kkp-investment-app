@@ -115,13 +115,12 @@ def daftar_lapisan():
                               'sql': f"SELECT {isi}, geometry FROM {tabel} WHERE {kolom} = '{aman}' AND ST_Dimension(geometry) = {dimensi}"})
     judul = dict(RasterOseanografi.PARAMETER_CHOICES)
     raster = {}
-    for r in RasterOseanografi.objects.order_by('parameter', 'id').values('id', 'parameter', 'cakupan', 'satuan', 'periode', 'sumber'):
+    for r in RasterOseanografi.objects.order_by('parameter', 'id').values('parameter', 'cakupan', 'satuan', 'periode', 'sumber'):
         e = r['cakupan'].extent
         g = raster.setdefault(r['parameter'], {
             'layanan': 'Oseanografi', 'nama': f'oseanografi_{r["parameter"].lower()}', 'jenis': 'RASTER',
-            'judul': judul.get(r['parameter'], r['parameter']), 'id': [], 'cakupan': list(e),
+            'judul': judul.get(r['parameter'], r['parameter']), 'parameter': r['parameter'], 'cakupan': list(e),
             'satuan': r['satuan'], 'periode': r['periode'], 'sumber': r['sumber']})
-        g['id'].append(r['id'])
         g['cakupan'] = [min(g['cakupan'][0], e[0]), min(g['cakupan'][1], e[1]), max(g['cakupan'][2], e[2]), max(g['cakupan'][3], e[3])]
     hasil += list(raster.values())
     cache.set('layanan_peta:lapisan', hasil, 600)
