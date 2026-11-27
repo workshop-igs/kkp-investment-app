@@ -70,12 +70,12 @@ const AppLayout = () => {
           <Route path="/" element={<BerandaPage />} />
           <Route path="/peta" element={<AnalisisPage />} />
           <Route path="/profil-investasi" element={<ProfilInvestasiPage />} />
-          <Route path="/unduh-data" element={<UnduhDataPage />} />
+          <Route path="/unduh-data" element={<RuteTerlindung admin><UnduhDataPage /></RuteTerlindung>} />
           <Route path="/kebijakan-privasi" element={<KebijakanPrivasiPage />} />
-          <Route path="/rest/services" element={<LayananPetaPage />} />
-          <Route path="/rest/services/:kode/MapServer" element={<LayananPetaPage />} />
-          <Route path="/rest/services/:kode/MapServer/:nomor" element={<LayananPetaPage />} />
-          <Route path="/rest/services/:kode/MapServer/:nomor/:aksi" element={<LayananPetaPage />} />
+          <Route path="/rest/services" element={<RuteTerlindung admin><LayananPetaPage /></RuteTerlindung>} />
+          <Route path="/rest/services/:kode/MapServer" element={<RuteTerlindung admin><LayananPetaPage /></RuteTerlindung>} />
+          <Route path="/rest/services/:kode/MapServer/:nomor" element={<RuteTerlindung admin><LayananPetaPage /></RuteTerlindung>} />
+          <Route path="/rest/services/:kode/MapServer/:nomor/:aksi" element={<RuteTerlindung admin><LayananPetaPage /></RuteTerlindung>} />
           <Route path="/dashboard" element={<RuteTerlindung portofolio><DashboardPage /></RuteTerlindung>} />
           <Route path="/pipeline" element={<RuteTerlindung portofolio><ProyekInvestasiPage /></RuteTerlindung>} />
           <Route path="/pipeline/:id" element={<RuteTerlindung portofolio><DetailProyekPage /></RuteTerlindung>} />

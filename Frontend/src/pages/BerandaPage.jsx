@@ -552,7 +552,7 @@ const DataTerbuka = () => {
             Unduh data atau sambungkan ke aplikasi GIS
           </h2>
           <p className="mt-5 max-w-md leading-relaxed text-slate-600">
-            Data rujukan ruang laut dapat diambil tanpa masuk akun. Data proyek dan data pribadi tidak ikut diterbitkan.
+            Khusus administrator. Data proyek dan data pribadi tidak ikut diterbitkan.
           </p>
         </div>
 
@@ -595,7 +595,7 @@ const DataTerbuka = () => {
 };
 
 const BerandaPage = () => {
-  const { isAuthenticated } = useAutentikasi();
+  const { isAuthenticated, user } = useAutentikasi();
   const [ringkas, setRingkas] = useState(null);
 
   useEffect(() => {
@@ -828,7 +828,7 @@ const BerandaPage = () => {
         </div>
       </section>
 
-      <DataTerbuka />
+      {user?.is_staff && <DataTerbuka />}
 
       <PusatInformasi />
 
