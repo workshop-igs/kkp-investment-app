@@ -851,13 +851,13 @@ class DekProfil extends Dek {
 
 function rencanaHalaman(o, perJenis) {
   const komoditas = komoditasDokumen(o);
-  let n = 4 + (komoditas.length ? 1 : 0) + (perJenis ? 1 : 0);
+  let n = 5 + (komoditas.length ? 1 : 0) + (perJenis ? 1 : 0);
   const bab = o.bab.map((b) => {
     const mulai = n + 1;
     n += 6 + (perJenis && b.lokasi.length ? 1 : 0);
     return mulai;
   });
-  return { komoditas: komoditas.length ? 5 : null, bab, penutup: n + 1 };
+  return { komoditas: komoditas.length ? 6 : null, bab, penutup: n + 1 };
 }
 
 function komoditasDokumen(o) {
@@ -1013,8 +1013,9 @@ function ringkasan(dek, o, rencana) {
 
   yy = dek.kartu(x, yk + tinggiPilar + 4, lebar, BAWAH - yk - tinggiPilar - 4, { judul: 'Isi dokumen', ikon: 'isi' });
   const pembuka = [
-    ['Tata ruang laut', 3, '#0056A5'],
-    ['Kebijakan', 4, '#0056A5'],
+    ['Potensi investasi', 3, '#0056A5'],
+    ['Tata ruang laut', 4, '#0056A5'],
+    ['Kebijakan', 5, '#0056A5'],
     rencana.komoditas && ['Komoditas', rencana.komoditas, '#0056A5'],
     ['Penutup', rencana.penutup, '#1B6A8A'],
   ].filter(Boolean);
@@ -1031,7 +1032,7 @@ function ringkasan(dek, o, rencana) {
       dek.satuBaris(xc + 3.2, yb, lebarIsi - 3.2 - dek.doc.getTextWidth(String(hal)) - 2, namaRapi(nama), { ukuran: 6 });
     });
   });
-  dek.sumber('Sumber: infrastruktur Satu Data KKP dan OpenStreetMap; ekosistem Sidako KKP dan Global Mangrove Watch; produksi BPS; ketenagakerjaan BPS; rincian di halaman berikutnya.');
+  dek.sumber('Sumber: infrastruktur Satu Data KKP dan OpenStreetMap; ekosistem Sidako KKP dan Global Mangrove Watch; produksi BPS; ketenagakerjaan BPS; rincian di halaman-halaman berikutnya.');
 }
 
 const OSEANOGRAFI_PDF = [
@@ -1059,6 +1060,53 @@ function kartuOseanografi(dek, os, x, y, lebar, tinggi) {
     dek.gaya(5.8, C.abu);
     dek.doc.text(label, xx, y0 + 2.9);
   });
+}
+
+function potensiInvestasi(dek, o) {
+  const p = o.potensi_investasi || { jenis: [] };
+  const jenis = o.jenis_dipilih;
+  const y = dek.slide({
+    alis: 'Potensi investasi',
+    judul: jenis ? `Rekap potensi ${jenis.nama}` : 'Rekap potensi investasi provinsi',
+    sub: `Dihitung dari lokasi Peta Sebaran Wilayah Potensial Investasi di Provinsi ${o.wilayah.nama} dan model usaha setiap sub-jenis; nilai bersifat indikatif dan keuntungan dihitung sebelum pajak.`,
+  });
+  const sumber = 'Sumber: Peta Sebaran Wilayah Potensial Investasi aplikasi; nilai investasi = modal model usaha x luas lokasi yang dimanfaatkan (model per hektar) atau satu unit usaha (model per unit); model usaha dari Pengaturan Profil Investasi.';
+  if (!p.jenis.length) {
+    dek.kosong(TEPI, y, W - TEPI * 2, BAWAH - y, {
+      ikon: 'finansial',
+      aksen: '#0056A5',
+      judul: `Belum ada lokasi potensial ${jenis ? namaRapi(jenis.nama).toLowerCase() : 'investasi'} di provinsi ini`,
+      isi: 'Rekap nilai investasi dan keuntungan tersusun otomatis setelah Peta Sebaran Wilayah Potensial memuat lokasi di provinsi ini.',
+    });
+    dek.sumber(sumber);
+    return;
+  }
+  const untung = (v) => (v ? rp(v) : '-');
+  const tinggiPita = 22;
+  dek.pitaAngka(TEPI, y, W - TEPI * 2, tinggiPita, [
+    [angka(p.lokasi), jenis ? `lokasi potensial ${namaRapi(jenis.nama).toLowerCase()}` : 'lokasi potensial di peta'],
+    !jenis && [angka(p.jenis.length), 'jenis investasi'],
+    [angka(p.sub_jenis), 'sub-jenis investasi'],
+    [rp(p.nilai_investasi), 'total nilai investasi'],
+    [untung(p.keuntungan_per_tahun), 'keuntungan per tahun'],
+  ]);
+  const [kolom, baris, bagian, total] = jenis
+    ? [['Sub-jenis', 'Lokasi', 'Nilai investasi', 'Keuntungan per tahun'],
+      p.jenis.flatMap((j) => j.sub_jenis.map((s) => [s.nama, angka(s.lokasi), rp(s.nilai_investasi), untung(s.keuntungan_per_tahun)])),
+      [0.46, 0.14, 0.2, 0.2],
+      ['Total', angka(p.lokasi), rp(p.nilai_investasi), untung(p.keuntungan_per_tahun)]]
+    : [['Jenis investasi', 'Sub-jenis (jumlah lokasi)', 'Lokasi', 'Nilai investasi', 'Keuntungan per tahun'],
+      p.jenis.map((j) => [namaRapi(j.nama), j.sub_jenis.map((s) => `${s.nama} (${s.lokasi})`).join(', '), angka(j.lokasi),
+        rp(j.nilai_investasi), untung(j.keuntungan_per_tahun)]),
+      [0.2, 0.42, 0.08, 0.15, 0.15],
+      ['Total', `${angka(p.sub_jenis)} sub-jenis`, '', rp(p.nilai_investasi), untung(p.keuntungan_per_tahun)]];
+  const yTabel = dek.tabel(TEPI, y + tinggiPita + 5, W - TEPI * 2, kolom, [...baris, total], {
+    bagian, rataKanan: jenis ? [1, 2, 3] : [2, 3, 4], sorot: [baris.length], ukuran: 6.5,
+  });
+  if (!jenis) {
+    dek.teks(TEPI, yTabel + 2, W - TEPI * 2, 'Satu lokasi di peta dapat sesuai untuk beberapa jenis investasi sekaligus, sehingga jumlah lokasi per jenis dapat melebihi jumlah lokasi di peta.', { ukuran: 6, warna: C.abu });
+  }
+  dek.sumber(sumber);
 }
 
 function zonaRuang(dek, o, citra) {
@@ -1961,6 +2009,7 @@ function buatProfil(o, citra = {}) {
   const rencana = rencanaHalaman(o, perJenis);
   sampul(dek, o, citra.sampul);
   ringkasan(dek, o, rencana);
+  potensiInvestasi(dek, o);
   zonaRuang(dek, o, citra.peta);
   kebijakan(dek, o);
   if (rencana.komoditas) komoditasUnggulan(dek, o);

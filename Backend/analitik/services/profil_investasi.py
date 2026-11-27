@@ -9,7 +9,7 @@ from django.utils import timezone
 from rest_framework.renderers import JSONRenderer
 
 from analitik.models import KetentuanRuang, LokasiPotensial, PengaturanAnalisis, RasterOseanografi, RuangSesuai
-from analitik.services.finansial import hitung_model_usaha
+from analitik.services.finansial import hitung_model_usaha, rincian_nilai_investasi
 from analitik.services.konstanta import (
     LABEL_SUMBER_ZONASI,
     PRIORITAS_SUMBER_ZONASI,
@@ -468,6 +468,34 @@ def _ketenagakerjaan(provinsi):
         return None
 
 
+def rekap_potensi(provinsi_id, sektor_kode=None, rupiah=True):
+    qs = LokasiPotensial.objects.filter(provinsi_id=provinsi_id, tampil=True, sektor__isnull=False)
+    if sektor_kode:
+        qs = qs.filter(sektor__kode=sektor_kode)
+    jenis, simpan = {}, {}
+    for kode, nama, sub_kode, sub, luas in qs.order_by('sektor__urutan', 'sektor__nama').values_list(
+            'sektor__kode', 'sektor__nama', 'rincian__sub_sektor_kode', 'rincian__sub_sektor', 'luas_ha'):
+        j = jenis.setdefault(kode, {'kode': kode, 'nama': nama, 'lokasi': 0, 'nilai_investasi': 0, 'keuntungan_per_tahun': 0,
+                                    'sub_jenis': {}})
+        s = j['sub_jenis'].setdefault(sub or nama, {'nama': sub or nama, 'lokasi': 0, 'nilai_investasi': 0,
+                                                    'keuntungan_per_tahun': 0})
+        r = (rincian_nilai_investasi(sub_kode, luas, simpan=simpan) or {}) if rupiah else {}
+        for x in (j, s):
+            x['lokasi'] += 1
+            x['nilai_investasi'] += r.get('nilai_investasi') or 0
+            x['keuntungan_per_tahun'] += (r.get('keuntungan') or {}).get('nilai_per_tahun') or 0
+    tanpa = {} if rupiah else {'nilai_investasi': None, 'keuntungan_per_tahun': None}
+    daftar = [{**j, **tanpa, 'sub_jenis': [{**s, **tanpa} for s in j['sub_jenis'].values()]} for j in jenis.values()]
+    return {
+        'jenis': daftar,
+        'lokasi': sum(j['lokasi'] for j in daftar) if sektor_kode else LokasiPotensial.objects.filter(
+            provinsi_id=provinsi_id, tampil=True, sektor__isnull=True).count(),
+        'sub_jenis': sum(len(j['sub_jenis']) for j in daftar),
+        'nilai_investasi': sum(j['nilai_investasi'] for j in daftar) if rupiah else None,
+        'keuntungan_per_tahun': sum(j['keuntungan_per_tahun'] for j in daftar) if rupiah else None,
+    }
+
+
 def profil_provinsi(provinsi, sektor=None):
     komoditas = peringkat_unggulan(_produksi_komoditas(provinsi), _luas_sub(provinsi))
     berkomoditas = {k['sektor'] for k in komoditas}
@@ -501,6 +529,7 @@ def profil_provinsi(provinsi, sektor=None):
     return {
         'wilayah': wilayah,
         'jenis_dipilih': sektor and {'kode': sektor.kode, 'nama': sektor.nama},
+        'potensi_investasi': rekap_potensi(provinsi.pk, sektor and sektor.kode),
         'zona': zona,
         'oseanografi': _oseanografi_provinsi(provinsi),
         'komoditas': komoditas,
@@ -554,7 +583,7 @@ def versi_profil(segar=False):
 
 
 def profil_siap_kirim(provinsi, sektor=None, versi=None):
-    kunci = f'profil-provinsi:v15:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
+    kunci = f'profil-provinsi:v16:{provinsi.pk}:{sektor.kode if sektor else "semua"}:{versi or versi_profil()}'
     isi = cache.get(kunci)
     if isi is None:
         isi = JSONRenderer().render(profil_provinsi(provinsi, sektor))
