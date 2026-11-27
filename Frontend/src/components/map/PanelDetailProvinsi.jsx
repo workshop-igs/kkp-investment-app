@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   X, Fish, Users, Ruler, Ship, MapPin, Anchor, Factory, Zap,
-  FileCheck, Map, TrendingUp, Leaf, Waves, Download, Loader2,
+  FileCheck, Map, TrendingUp, Leaf, Waves, Download, Loader2, Layers, Wallet,
 } from 'lucide-react';
-import { useSektorAktif } from '../../api/klien';
+import { api, useSektorAktif } from '../../api/klien';
+import { useAutentikasi } from '../../context/KonteksAutentikasi';
 import { SECTORS } from '../../utils/konstanta';
-import { formatNumber } from '../../utils/pemformat';
+import { formatNumber, rupiahRingkas } from '../../utils/pemformat';
 import { unduhProfil } from '../../utils/pdfProfilInvestasi';
 import { mulaiMemuat } from '../OverlayMemuat';
 
@@ -56,7 +57,66 @@ const useUnduhProfil = () => {
 };
 
 
-export const RingkasanProvinsi = ({ p }) => {
+const rp = (v) => `Rp ${rupiahRingkas(v)}`;
+
+const PotensiProvinsi = ({ id }) => {
+  const { isAuthenticated } = useAutentikasi();
+  const [d, setD] = useState(null);
+
+  useEffect(() => {
+    setD(null);
+    api.get(`/inti/provinsi/${id}/potensi-investasi/`).then(({ data }) => setD(data)).catch(() => setD({ jenis: [] }));
+  }, [id, isAuthenticated]);
+
+  const rupiah = d?.nilai_investasi != null;
+  return (
+    <Bagian
+      judul="Potensi Investasi"
+      catatan="Dihitung dari titik Peta Sebaran di provinsi ini dan model usaha setiap sub-jenis; bersifat indikatif. Keuntungan sebelum pajak."
+    >
+      {!d ? (
+        <p className="flex items-center gap-2 text-sm text-slate-500 py-2"><Loader2 className="w-4 h-4 animate-spin" />Menghitung…</p>
+      ) : !d.jenis.length ? (
+        <p className="text-sm text-slate-500 py-2">Belum ada lokasi potensial di provinsi ini.</p>
+      ) : (
+        <>
+          <Baris icon={Layers} label="Jenis investasi" keterangan={`${d.sub_jenis} sub-jenis`} nilai={d.jenis.length} satuan="jenis" />
+          <Baris icon={MapPin} label="Lokasi potensial" nilai={formatNumber(d.lokasi, 0)} satuan="lokasi" />
+          {rupiah && (
+            <>
+              <Baris icon={Wallet} label="Total nilai investasi" nilai={rp(d.nilai_investasi)} warna="text-kkp-700" />
+              <Baris icon={TrendingUp} label="Keuntungan per tahun" nilai={rp(d.keuntungan_per_tahun)} warna="text-emerald-700" />
+            </>
+          )}
+          <div className="mt-2 space-y-2">
+            {d.jenis.map((j) => (
+              <div key={j.kode} className="rounded-lg border border-slate-100 bg-slate-50 px-2.5 py-2">
+                <div className="flex items-baseline justify-between gap-2">
+                  <span className="text-xs font-bold text-slate-800">{j.nama}</span>
+                  <span className="text-[11px] text-slate-500 whitespace-nowrap">{j.lokasi} lokasi</span>
+                </div>
+                <p className="mt-0.5 text-[11px] leading-snug text-slate-600">
+                  {j.sub_jenis.map((s) => `${s.nama} (${s.lokasi})`).join(' · ')}
+                </p>
+                {rupiah && (
+                  <p className="mt-1 text-[11px] text-slate-700 tabular-nums">
+                    Nilai <b>{rp(j.nilai_investasi)}</b>
+                    {j.keuntungan_per_tahun > 0 && <> · untung <b>{rp(j.keuntungan_per_tahun)}</b>/tahun</>}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+          {!rupiah && (
+            <p className="text-[11px] text-slate-500 mt-2">Masuk akun untuk melihat total nilai investasi dan keuntungan.</p>
+          )}
+        </>
+      )}
+    </Bagian>
+  );
+};
+
+export const RingkasanProvinsi = ({ p, atas }) => {
   const komoditas = p.komoditas_unggulan || [];
   const rl = p.ruang_laut || {};
   const eko = p.ekosistem || {};
@@ -65,26 +125,28 @@ export const RingkasanProvinsi = ({ p }) => {
 
   return (
     <>
-      <Bagian
-        judul="Komoditas Unggulan"
-        tahun={komoditas[0]?.tahun}
-        catatan="Produksi menurut BPS. Urutan menggabungkan nilai produksi dan luas zona yang sesuai, sama dengan profil investasi provinsi."
-      >
-        {komoditas.length ? (
-          komoditas.map((k) => (
-            <Baris
-              key={`${k.kelompok_label}-${k.nama}`}
-              icon={Fish}
-              label={`${k.nama} (${k.kelompok_label.split(' ')[1]})`}
-              keterangan={`peringkat ${k.peringkat_nasional} nasional`}
-              nilai={formatNumber(k.produksi_ton, 0)}
-              satuan="ton"
-            />
-          ))
-        ) : (
-          <p className="text-sm text-slate-500 py-2">Belum ada data produksi komoditas laut dari BPS.</p>
-        )}
-      </Bagian>
+      {atas || (
+        <Bagian
+          judul="Komoditas Unggulan"
+          tahun={komoditas[0]?.tahun}
+          catatan="Produksi menurut BPS. Urutan menggabungkan nilai produksi dan luas zona yang sesuai, sama dengan profil investasi provinsi."
+        >
+          {komoditas.length ? (
+            komoditas.map((k) => (
+              <Baris
+                key={`${k.kelompok_label}-${k.nama}`}
+                icon={Fish}
+                label={`${k.nama} (${k.kelompok_label.split(' ')[1]})`}
+                keterangan={`peringkat ${k.peringkat_nasional} nasional`}
+                nilai={formatNumber(k.produksi_ton, 0)}
+                satuan="ton"
+              />
+            ))
+          ) : (
+            <p className="text-sm text-slate-500 py-2">Belum ada data produksi komoditas laut dari BPS.</p>
+          )}
+        </Bagian>
+      )}
 
       <Bagian
         judul="Perizinan & Rencana Ruang Laut"
@@ -203,7 +265,7 @@ const PanelDetailProvinsi = ({ fitur, onTutup }) => {
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-        <RingkasanProvinsi p={p} />
+        <RingkasanProvinsi p={p} atas={<PotensiProvinsi id={p.id} />} />
       </div>
 
       <div className="px-4 py-3 border-t border-slate-100 shrink-0">

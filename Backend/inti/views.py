@@ -77,6 +77,37 @@ class ProvinsiViewSet(viewsets.ReadOnlyModelViewSet):
             CACHE_PROVINSI_DETIK,
         )
 
+    @action(detail=True, methods=['get'], url_path='potensi-investasi', permission_classes=[permissions.AllowAny])
+    def potensi_investasi(self, request, pk=None):
+        from analitik.models import LokasiPotensial
+        from analitik.services.finansial import rincian_nilai_investasi
+
+        rupiah = request.user.is_authenticated
+        jenis, simpan = {}, {}
+        for kode, nama, sub_kode, sub, luas in (
+            LokasiPotensial.objects.filter(provinsi_id=pk, tampil=True, sektor__isnull=False)
+            .order_by('sektor__urutan', 'sektor__nama')
+            .values_list('sektor__kode', 'sektor__nama', 'rincian__sub_sektor_kode', 'rincian__sub_sektor', 'luas_ha')
+        ):
+            j = jenis.setdefault(kode, {'kode': kode, 'nama': nama, 'lokasi': 0, 'sub_jenis': {},
+                                        'nilai_investasi': 0, 'keuntungan_per_tahun': 0})
+            j['lokasi'] += 1
+            j['sub_jenis'][sub or nama] = j['sub_jenis'].get(sub or nama, 0) + 1
+            if rupiah:
+                r = rincian_nilai_investasi(sub_kode, luas, simpan=simpan) or {}
+                j['nilai_investasi'] += r.get('nilai_investasi') or 0
+                j['keuntungan_per_tahun'] += (r.get('keuntungan') or {}).get('nilai_per_tahun') or 0
+        daftar = [{**j, 'sub_jenis': [{'nama': n, 'lokasi': k} for n, k in j['sub_jenis'].items()],
+                   **({} if rupiah else {'nilai_investasi': None, 'keuntungan_per_tahun': None})}
+                  for j in jenis.values()]
+        return Response({
+            'jenis': daftar,
+            'lokasi': LokasiPotensial.objects.filter(provinsi_id=pk, tampil=True, sektor__isnull=True).count(),
+            'sub_jenis': sum(len(j['sub_jenis']) for j in daftar),
+            'nilai_investasi': sum(j['nilai_investasi'] for j in daftar) if rupiah else None,
+            'keuntungan_per_tahun': sum(j['keuntungan_per_tahun'] for j in daftar) if rupiah else None,
+        })
+
     @action(detail=True, methods=['get'], url_path='profil-investasi', permission_classes=[permissions.AllowAny])
     def profil_investasi(self, request, pk=None):
         from analitik.services.profil_investasi import profil_siap_kirim
